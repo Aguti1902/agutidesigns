@@ -376,10 +376,40 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
 
 // ===== ENDPOINTS DE CLIENTES =====
 
+// Debug: Verificar si un cliente existe por email
+app.get('/api/client/check/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const client = db.getClientByEmail(email);
+        
+        if (!client) {
+            return res.json({ 
+                exists: false,
+                message: 'No se encontró cliente con ese email'
+            });
+        }
+
+        res.json({ 
+            exists: true,
+            clientId: client.id,
+            email: client.email,
+            full_name: client.full_name,
+            plan: client.plan,
+            created_at: client.created_at
+        });
+
+    } catch (error) {
+        console.error('Error verificando cliente:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
 // Login de cliente
 app.post('/api/client/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        console.log('Intento de login:', { email, passwordLength: password?.length });
 
         if (!email || !password) {
             return res.status(400).json({ error: 'Email y contraseña son requeridos' });
@@ -388,13 +418,17 @@ app.post('/api/client/login', async (req, res) => {
         // Buscar cliente
         const client = db.getClientByEmail(email);
         if (!client) {
-            return res.status(401).json({ error: 'Credenciales inválidas' });
+            console.log('Cliente no encontrado:', email);
+            return res.status(401).json({ error: 'No existe una cuenta con este email. Por favor, verifica que hayas completado el pago.' });
         }
+
+        console.log('Cliente encontrado:', { id: client.id, email: client.email });
 
         // Verificar contraseña
         const isValidPassword = await bcrypt.compare(password, client.password);
         if (!isValidPassword) {
-            return res.status(401).json({ error: 'Credenciales inválidas' });
+            console.log('Contraseña incorrecta para:', email);
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
         }
 
         // No enviar la contraseña al cliente
