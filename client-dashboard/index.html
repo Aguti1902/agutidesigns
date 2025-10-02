@@ -1313,14 +1313,23 @@
     <div class="plan-modal" id="planModal" onclick="closePlanModal(event)">
         <div class="plan-modal-content" onclick="event.stopPropagation()">
             <h2 style="color: #0046FE; margin-bottom: 10px; font-size: 2rem; text-align: center;">Elige tu Plan</h2>
-            <p style="color: #666; text-align: center; margin-bottom: 30px;">Selecciona el plan que mejor se adapte a tus necesidades</p>
+            <p style="color: #666; text-align: center; margin-bottom: 20px;">Selecciona el plan que mejor se adapte a tus necesidades</p>
+            
+            <!-- Toggle Mensual/Anual -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 10px; background: #1B1B1B; padding: 6px; border-radius: 50px;">
+                    <button id="modalToggleMonthly" onclick="toggleModalBilling('monthly')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: #FEFAF5; color: #1B1B1B; border: none;">Mensual</button>
+                    <button id="modalToggleAnnual" onclick="toggleModalBilling('annual')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: transparent; border: none;">Anual</button>
+                </div>
+                <span style="background: #EC6746; color: #FEFAF5; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.85rem;">Ahorra hasta 20%</span>
+            </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                 <!-- Plan Básico -->
                 <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="selectPlanAndCheckout('basico')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
                     <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Básico</h3>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">35€</p>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <p id="modalPriceBasico" style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">35€</p>
+                    <p id="modalPeriodBasico" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
                     <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
                         <li style="margin: 10px 0; color: #666;">✓ Hasta 5 páginas</li>
                         <li style="margin: 10px 0; color: #666;">✓ Dominio incluido</li>
@@ -1335,8 +1344,8 @@
                 <div style="padding: 30px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 15px; border: 2px solid #0046FE; text-align: center; position: relative; color: white; transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,70,254,0.3);" onclick="selectPlanAndCheckout('avanzado')">
                     <div style="position: absolute; top: -12px; right: 20px; background: #E5FC63; color: #1B1B1B; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Recomendado</div>
                     <h3 style="margin-bottom: 15px; font-size: 1.4rem;">Avanzado</h3>
-                    <p style="font-size: 2.5rem; font-weight: 700; margin-bottom: 5px;">49€</p>
-                    <p style="opacity: 0.9; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <p id="modalPriceAvanzado" style="font-size: 2.5rem; font-weight: 700; margin-bottom: 5px;">49€</p>
+                    <p id="modalPeriodAvanzado" style="opacity: 0.9; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
                     <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
                         <li style="margin: 10px 0; opacity: 0.95;">✓ Hasta 10 páginas</li>
                         <li style="margin: 10px 0; opacity: 0.95;">✓ Todo del plan Básico</li>
@@ -1350,8 +1359,8 @@
                 <!-- Plan Premium -->
                 <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="selectPlanAndCheckout('premium')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
                     <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Premium</h3>
-                    <p style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">65€</p>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <p id="modalPricePremium" style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">65€</p>
+                    <p id="modalPeriodPremium" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
                     <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
                         <li style="margin: 10px 0; color: #666;">✓ Hasta 20 páginas</li>
                         <li style="margin: 10px 0; color: #666;">✓ Todo del plan Avanzado</li>
@@ -1767,8 +1776,53 @@
         }
 
         // Seleccionar plan y ir al checkout
+        // Variable global para billing_cycle en el modal
+        let modalBillingCycle = 'monthly';
+
+        // Toggle de billing en el modal
+        function toggleModalBilling(cycle) {
+            modalBillingCycle = cycle;
+            
+            const monthlyBtn = document.getElementById('modalToggleMonthly');
+            const annualBtn = document.getElementById('modalToggleAnnual');
+            
+            // Actualizar estilos de los botones
+            if (cycle === 'monthly') {
+                monthlyBtn.style.background = '#FEFAF5';
+                monthlyBtn.style.color = '#1B1B1B';
+                annualBtn.style.background = 'transparent';
+                annualBtn.style.color = '#FEFAF5';
+            } else {
+                monthlyBtn.style.background = 'transparent';
+                monthlyBtn.style.color = '#FEFAF5';
+                annualBtn.style.background = '#FEFAF5';
+                annualBtn.style.color = '#1B1B1B';
+            }
+            
+            // Actualizar precios
+            const prices = {
+                monthly: {
+                    basico: { price: '35€', period: 'por mes + IVA' },
+                    avanzado: { price: '49€', period: 'por mes + IVA' },
+                    premium: { price: '65€', period: 'por mes + IVA' }
+                },
+                annual: {
+                    basico: { price: '28€', period: 'por mes (336€/año) + IVA' },
+                    avanzado: { price: '39€', period: 'por mes (468€/año) + IVA' },
+                    premium: { price: '52€', period: 'por mes (624€/año) + IVA' }
+                }
+            };
+            
+            document.getElementById('modalPriceBasico').textContent = prices[cycle].basico.price;
+            document.getElementById('modalPeriodBasico').textContent = prices[cycle].basico.period;
+            document.getElementById('modalPriceAvanzado').textContent = prices[cycle].avanzado.price;
+            document.getElementById('modalPeriodAvanzado').textContent = prices[cycle].avanzado.period;
+            document.getElementById('modalPricePremium').textContent = prices[cycle].premium.price;
+            document.getElementById('modalPeriodPremium').textContent = prices[cycle].premium.period;
+        }
+
         async function selectPlanAndCheckout(plan) {
-            console.log('💳 Seleccionando plan:', plan);
+            console.log('💳 Seleccionando plan:', plan, 'Billing:', modalBillingCycle);
             
             // Mostrar loading
             const loadingMsg = document.createElement('div');
@@ -1790,6 +1844,7 @@
                 
                 const checkoutData = {
                     plan: plan,
+                    billing_cycle: modalBillingCycle, // Añadir billing_cycle
                     formData: {
                         business_name: submission.business_name || client.business_name || 'Mi Empresa',
                         business_description: submission.business_description || '',
