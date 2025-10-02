@@ -10,10 +10,30 @@ const emailService = require('./email-service');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware - Configuración CORS mejorada
+const allowedOrigins = [
+    'http://localhost:5500',
+    'https://agutidesigns.vercel.app',
+    'https://agutidesigns.vercel.app/',
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5500',
-    credentials: true
+    origin: function (origin, callback) {
+        // Permitir requests sin origin (como Postman o apps móviles)
+        if (!origin) return callback(null, true);
+        
+        // Verificar si el origin está en la lista de permitidos
+        if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace(/\/$/, '')))) {
+            callback(null, true);
+        } else {
+            console.log('Origen bloqueado por CORS:', origin);
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Para el webhook de Stripe, necesitamos el body sin procesar
