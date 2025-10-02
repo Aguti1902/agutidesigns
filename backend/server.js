@@ -588,44 +588,57 @@ app.post('/api/client/change-password', async (req, res) => {
     }
 });
 
-// Actualizar información del negocio del cliente
-app.patch('/api/client/update-business/:clientId', async (req, res) => {
+// Actualizar información del cliente (general)
+app.patch('/api/client/update-info/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { business_name, industry, business_description } = req.body;
+        const { section, data } = req.body;
 
-        console.log('Actualizando negocio del cliente:', clientId, req.body);
+        console.log('Actualizando información del cliente:', clientId, section, data);
 
         const client = db.getClientById(parseInt(clientId));
         if (!client) {
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
 
-        // Actualizar datos del cliente
-        if (business_name) {
-            const stmtClient = db.db.prepare(
-                'UPDATE clients SET business_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-            );
-            stmtClient.run(business_name, clientId);
-        }
-
-        // Si tiene submission asociada, actualizar también ahí
+        // Si tiene submission asociada, actualizar ahí
         if (client.submission_id) {
-            const stmtSubmission = db.db.prepare(
-                'UPDATE submissions SET business_name = ?, industry = ?, business_description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-            );
-            stmtSubmission.run(
-                business_name || null,
-                industry || null,
-                business_description || null,
-                client.submission_id
-            );
+            let updateQuery = '';
+            let updateParams = [];
+            
+            if (section === 'negocio') {
+                updateQuery = 'UPDATE submissions SET business_name = ?, industry = ?, business_description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateParams = [data.business_name, data.industry, data.business_description, client.submission_id];
+                
+                // También actualizar en clients
+                if (data.business_name) {
+                    const stmtClient = db.db.prepare('UPDATE clients SET business_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+                    stmtClient.run(data.business_name, clientId);
+                }
+            } else if (section === 'contacto') {
+                updateQuery = 'UPDATE submissions SET email_contact = ?, phone_number = ?, whatsapp_number = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateParams = [data.email_contact, data.phone_number, data.whatsapp_number, client.submission_id];
+            } else if (section === 'paginas') {
+                updateQuery = 'UPDATE submissions SET pages = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateParams = [JSON.stringify(data.pages), client.submission_id];
+            } else if (section === 'dominio') {
+                updateQuery = 'UPDATE submissions SET domain_name = ?, keywords = ?, design_style = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateParams = [data.domain_name, data.keywords, data.design_style, client.submission_id];
+            } else if (section === 'fiscal') {
+                updateQuery = 'UPDATE submissions SET cif_nif = ?, razon_social = ?, direccion_fiscal = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateParams = [data.cif_nif, data.razon_social, data.direccion_fiscal, client.submission_id];
+            }
+            
+            if (updateQuery) {
+                const stmt = db.db.prepare(updateQuery);
+                stmt.run(...updateParams);
+            }
         }
 
         res.json({ success: true, message: 'Información actualizada' });
 
     } catch (error) {
-        console.error('Error actualizando información del negocio:', error);
+        console.error('Error actualizando información:', error);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });

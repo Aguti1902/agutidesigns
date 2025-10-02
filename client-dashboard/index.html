@@ -769,63 +769,113 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📞 Datos de Contacto</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 class="card-title" style="margin: 0;">📞 Datos de Contacto</h3>
+                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('contacto')">✏️ Editar</button>
+                        </div>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email de Contacto</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailContacto">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Email de Contacto</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailContacto" class="field-contacto">-</p>
+                                <input type="email" id="negocioEmailContactoInput" class="form-input input-contacto" style="display: none; margin-top: 5px;" placeholder="email@ejemplo.com">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Teléfono</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioTelefono">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Teléfono</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioTelefono" class="field-contacto">-</p>
+                                <input type="tel" id="negocioTelefonoInput" class="form-input input-contacto" style="display: none; margin-top: 5px;" placeholder="+34 XXX XXX XXX">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">WhatsApp</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioWhatsapp">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">WhatsApp</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioWhatsapp" class="field-contacto">-</p>
+                                <input type="tel" id="negocioWhatsappInput" class="form-input input-contacto" style="display: none; margin-top: 5px;" placeholder="+34 XXX XXX XXX">
                             </div>
+                        </div>
+                        <div id="contactoButtons" style="display: none; margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-action secondary" onclick="cancelEditSection('contacto')">Cancelar</button>
+                            <button class="btn-action" onclick="saveEditSection('contacto')">💾 Guardar Cambios</button>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📄 Páginas Solicitadas</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 class="card-title" style="margin: 0;">📄 Páginas de tu Web</h3>
+                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('paginas')">✏️ Editar</button>
+                        </div>
+                        <p style="color: #666; margin-bottom: 10px; font-size: 0.9rem;">Límite: <span id="paginasLimit">5 páginas</span></p>
                         <div id="negocioPaginas" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                             <span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Cargando...</span>
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <h3 class="card-title">🔍 Dominio y SEO</h3>
-                        <div style="display: grid; gap: 15px;">
-                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dominio Deseado</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominio">-</p>
-                            </div>
-                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Palabras Clave (SEO)</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioKeywords">-</p>
-                            </div>
-                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estilo de Diseño</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEstilo">-</p>
-                            </div>
+                        <div id="paginasEditor" style="display: none; margin-top: 15px;">
+                            <div id="paginasList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                            <button class="btn-action secondary" style="margin-top: 15px; width: 100%;" onclick="addPageField()">+ Añadir Página</button>
+                        </div>
+                        <div id="paginasButtons" style="display: none; margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-action secondary" onclick="cancelEditSection('paginas')">Cancelar</button>
+                            <button class="btn-action" onclick="saveEditSection('paginas')">💾 Guardar Cambios</button>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🏛️ Datos Fiscales</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 class="card-title" style="margin: 0;">🔍 Dominio y SEO</h3>
+                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('dominio')">✏️ Editar</button>
+                        </div>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">CIF/NIF</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioCIF">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Deseado</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominio" class="field-dominio">-</p>
+                                <input type="text" id="negocioDominioInput" class="form-input input-dominio" style="display: none; margin-top: 5px;" placeholder="miempresa.com">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Razón Social</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioRazonSocial">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Palabras Clave (SEO)</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioKeywords" class="field-dominio">-</p>
+                                <input type="text" id="negocioKeywordsInput" class="form-input input-dominio" style="display: none; margin-top: 5px;" placeholder="palabra1, palabra2, palabra3">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dirección Fiscal</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDireccion">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Estilo de Diseño</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEstilo" class="field-dominio">-</p>
+                                <select id="negocioEstiloInput" class="form-input input-dominio" style="display: none; margin-top: 5px;">
+                                    <option value="">Selecciona un estilo</option>
+                                    <option value="minimalista">Minimalista</option>
+                                    <option value="moderno">Moderno</option>
+                                    <option value="elegante">Elegante</option>
+                                    <option value="corporativo">Corporativo</option>
+                                    <option value="creativo">Creativo</option>
+                                    <option value="clasico">Clásico</option>
+                                </select>
                             </div>
+                        </div>
+                        <div id="dominioButtons" style="display: none; margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-action secondary" onclick="cancelEditSection('dominio')">Cancelar</button>
+                            <button class="btn-action" onclick="saveEditSection('dominio')">💾 Guardar Cambios</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 class="card-title" style="margin: 0;">🏛️ Datos Fiscales</h3>
+                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('fiscal')">✏️ Editar</button>
+                        </div>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">CIF/NIF</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioCIF" class="field-fiscal">-</p>
+                                <input type="text" id="negocioCIFInput" class="form-input input-fiscal" style="display: none; margin-top: 5px;" placeholder="12345678A">
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Razón Social</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioRazonSocial" class="field-fiscal">-</p>
+                                <input type="text" id="negocioRazonSocialInput" class="form-input input-fiscal" style="display: none; margin-top: 5px;" placeholder="Empresa SL">
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dirección Fiscal</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDireccion" class="field-fiscal">-</p>
+                                <input type="text" id="negocioDireccionInput" class="form-input input-fiscal" style="display: none; margin-top: 5px;" placeholder="Calle, Número, Ciudad, CP">
+                            </div>
+                        </div>
+                        <div id="fiscalButtons" style="display: none; margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-action secondary" onclick="cancelEditSection('fiscal')">Cancelar</button>
+                            <button class="btn-action" onclick="saveEditSection('fiscal')">💾 Guardar Cambios</button>
                         </div>
                     </div>
                 </div>
@@ -1284,6 +1334,15 @@
                         document.getElementById('planPrice').textContent = 'Contratar un plan para activar tu web';
                     }
 
+                    // Establecer límite de páginas según plan
+                    const pageLimits = {
+                        'basico': 5,
+                        'avanzado': 10,
+                        'premium': 20
+                    };
+                    pageLimit = pageLimits[data.client.plan] || 5;
+                    document.getElementById('paginasLimit').textContent = `${pageLimit} páginas`;
+
                     // Llenar datos de la sección "Mi Negocio"
                     if (submission) {
                         document.getElementById('negocioEmpresa').textContent = submission.business_name || '-';
@@ -1302,6 +1361,7 @@
                         // Páginas solicitadas
                         if (submission.pages) {
                             const pages = Array.isArray(submission.pages) ? submission.pages : [];
+                            currentPages = [...pages];
                             const pagesHTML = pages.map(page => 
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
                             ).join('');
@@ -1527,75 +1587,197 @@
             openPlanModal();
         }
 
-        // Edición de campos
-        function toggleEdit(section) {
-            // Ocultar textos y mostrar inputs
-            document.querySelectorAll('.editable-field').forEach(field => field.style.display = 'none');
-            document.querySelectorAll('.edit-input').forEach(input => {
+        // Edición de secciones
+        let currentPages = [];
+        let pageLimit = 5;
+        
+        function toggleEditSection(section) {
+            // Ocultar campos y mostrar inputs de esa sección
+            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'none');
+            document.querySelectorAll(`.input-${section}`).forEach(input => {
                 input.style.display = 'block';
                 // Copiar valor actual al input
                 const fieldId = input.id.replace('Input', '');
-                const currentValue = document.getElementById(fieldId).textContent;
-                if (currentValue !== '-') {
+                const currentValue = document.getElementById(fieldId)?.textContent;
+                if (currentValue && currentValue !== '-') {
                     input.value = currentValue;
                 }
             });
             
-            // Mostrar botones de guardar/cancelar
-            document.getElementById('negocioButtons').style.display = 'flex';
+            // Manejo especial para páginas
+            if (section === 'paginas') {
+                document.getElementById('negocioPaginas').style.display = 'none';
+                document.getElementById('paginasEditor').style.display = 'block';
+                loadPagesForEdit();
+            }
+            
+            // Mostrar botones de esa sección
+            document.getElementById(`${section}Buttons`).style.display = 'flex';
+        }
+
+        function cancelEditSection(section) {
+            // Mostrar campos y ocultar inputs
+            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
+            document.querySelectorAll(`.input-${section}`).forEach(input => input.style.display = 'none');
+            
+            // Manejo especial para páginas
+            if (section === 'paginas') {
+                document.getElementById('negocioPaginas').style.display = 'flex';
+                document.getElementById('paginasEditor').style.display = 'none';
+            }
+            
+            // Ocultar botones
+            document.getElementById(`${section}Buttons`).style.display = 'none';
+        }
+
+        // Edición de campos (compatibilidad con código anterior)
+        function toggleEdit(section) {
+            toggleEditSection(section);
         }
 
         function cancelEdit(section) {
-            // Mostrar textos y ocultar inputs
-            document.querySelectorAll('.editable-field').forEach(field => field.style.display = 'block');
-            document.querySelectorAll('.edit-input').forEach(input => input.style.display = 'none');
-            
-            // Ocultar botones
-            document.getElementById('negocioButtons').style.display = 'none';
+            cancelEditSection(section);
         }
 
-        async function saveEdit(section) {
+        // Cargar páginas para editar
+        function loadPagesForEdit() {
+            const pagesList = document.getElementById('paginasList');
+            pagesList.innerHTML = '';
+            
+            currentPages.forEach((page, index) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.style.cssText = 'display: flex; gap: 10px; align-items: center;';
+                pageDiv.innerHTML = `
+                    <input type="text" value="${page}" class="form-input" style="flex: 1;" data-page-index="${index}">
+                    <button class="btn-action secondary" style="padding: 10px 15px;" onclick="removePage(${index})">🗑️</button>
+                `;
+                pagesList.appendChild(pageDiv);
+            });
+        }
+
+        function addPageField() {
+            if (currentPages.length >= pageLimit) {
+                alert(`Has alcanzado el límite de ${pageLimit} páginas para tu plan`);
+                return;
+            }
+            
+            currentPages.push('Nueva Página');
+            loadPagesForEdit();
+        }
+
+        function removePage(index) {
+            currentPages.splice(index, 1);
+            loadPagesForEdit();
+        }
+
+        async function saveEditSection(section) {
             const loading = document.createElement('div');
+            loading.id = 'saveLoading';
             loading.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; text-align: center;';
             loading.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">💾</div><p>Guardando cambios...</p>';
             document.body.appendChild(loading);
             
             try {
-                // Obtener valores de los inputs
-                const updatedData = {
-                    business_name: document.getElementById('negocioEmpresaInput').value,
-                    industry: document.getElementById('negocioIndustriaInput').value,
-                    business_description: document.getElementById('negocioDescripcionInput').value
-                };
+                let updatedData = {};
+                
+                // Recopilar datos según la sección
+                if (section === 'negocio') {
+                    updatedData = {
+                        business_name: document.getElementById('negocioEmpresaInput').value,
+                        industry: document.getElementById('negocioIndustriaInput').value,
+                        business_description: document.getElementById('negocioDescripcionInput').value
+                    };
+                } else if (section === 'contacto') {
+                    updatedData = {
+                        email_contact: document.getElementById('negocioEmailContactoInput').value,
+                        phone_number: document.getElementById('negocioTelefonoInput').value,
+                        whatsapp_number: document.getElementById('negocioWhatsappInput').value
+                    };
+                } else if (section === 'paginas') {
+                    // Obtener páginas de los inputs
+                    const pageInputs = document.querySelectorAll('#paginasList input[type="text"]');
+                    const pages = Array.from(pageInputs).map(input => input.value).filter(v => v.trim());
+                    updatedData = { pages: pages };
+                } else if (section === 'dominio') {
+                    updatedData = {
+                        domain_name: document.getElementById('negocioDominioInput').value,
+                        keywords: document.getElementById('negocioKeywordsInput').value,
+                        design_style: document.getElementById('negocioEstiloInput').value
+                    };
+                } else if (section === 'fiscal') {
+                    updatedData = {
+                        cif_nif: document.getElementById('negocioCIFInput').value,
+                        razon_social: document.getElementById('negocioRazonSocialInput').value,
+                        direccion_fiscal: document.getElementById('negocioDireccionInput').value
+                    };
+                }
                 
                 // Actualizar en el backend
-                const response = await fetch(`${API_URL}/api/client/update-business/${currentClient.id}`, {
+                const response = await fetch(`${API_URL}/api/client/update-info/${currentClient.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData)
+                    body: JSON.stringify({ section, data: updatedData })
                 });
                 
                 if (response.ok) {
-                    // Actualizar visualización
-                    document.getElementById('negocioEmpresa').textContent = updatedData.business_name || '-';
-                    document.getElementById('negocioIndustria').textContent = updatedData.industry || '-';
-                    document.getElementById('negocioDescripcion').textContent = updatedData.business_description || '-';
-                    document.getElementById('businessName').textContent = updatedData.business_name || 'No especificado';
+                    // Actualizar visualización según sección
+                    updateDisplayAfterSave(section, updatedData);
                     
                     // Cancelar modo edición
-                    cancelEdit(section);
+                    cancelEditSection(section);
                     
-                    document.body.removeChild(loading);
+                    const loadingEl = document.getElementById('saveLoading');
+                    if (loadingEl) document.body.removeChild(loadingEl);
                     alert('✅ Cambios guardados correctamente');
                 } else {
-                    document.body.removeChild(loading);
+                    const loadingEl = document.getElementById('saveLoading');
+                    if (loadingEl) document.body.removeChild(loadingEl);
                     alert('❌ Error al guardar. Por favor, intenta de nuevo.');
                 }
             } catch (error) {
                 console.error('Error guardando:', error);
-                document.body.removeChild(loading);
+                const loadingEl = document.getElementById('saveLoading');
+                if (loadingEl) document.body.removeChild(loadingEl);
                 alert('❌ Error al guardar. Por favor, intenta de nuevo.');
             }
+        }
+
+        function updateDisplayAfterSave(section, data) {
+            if (section === 'negocio') {
+                if (data.business_name) {
+                    document.getElementById('negocioEmpresa').textContent = data.business_name;
+                    document.getElementById('businessName').textContent = data.business_name;
+                }
+                if (data.industry) document.getElementById('negocioIndustria').textContent = data.industry;
+                if (data.business_description) document.getElementById('negocioDescripcion').textContent = data.business_description;
+            } else if (section === 'contacto') {
+                if (data.email_contact) document.getElementById('negocioEmailContacto').textContent = data.email_contact;
+                if (data.phone_number) document.getElementById('negocioTelefono').textContent = data.phone_number;
+                if (data.whatsapp_number) document.getElementById('negocioWhatsapp').textContent = data.whatsapp_number;
+            } else if (section === 'paginas') {
+                currentPages = data.pages;
+                const pagesHTML = data.pages.map(page => 
+                    `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
+                ).join('');
+                document.getElementById('negocioPaginas').innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
+            } else if (section === 'dominio') {
+                if (data.domain_name) {
+                    document.getElementById('negocioDominio').textContent = data.domain_name;
+                    document.getElementById('domainName').textContent = data.domain_name;
+                    document.getElementById('domainInfo').textContent = data.domain_name;
+                }
+                if (data.keywords) document.getElementById('negocioKeywords').textContent = data.keywords;
+                if (data.design_style) document.getElementById('negocioEstilo').textContent = data.design_style;
+            } else if (section === 'fiscal') {
+                if (data.cif_nif) document.getElementById('negocioCIF').textContent = data.cif_nif;
+                if (data.razon_social) document.getElementById('negocioRazonSocial').textContent = data.razon_social;
+                if (data.direccion_fiscal) document.getElementById('negocioDireccion').textContent = data.direccion_fiscal;
+            }
+        }
+
+        // Compatibilidad con función anterior
+        async function saveEdit(section) {
+            await saveEditSection(section);
         }
 
         // Capitalizar
