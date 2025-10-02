@@ -632,7 +632,7 @@
                             </div>
                             
                             <div>
-                                <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.15rem; padding: 18px 50px; font-weight: 700; box-shadow: 0 8px 25px rgba(0,0,0,0.2);" onclick="showPricingModal()">Activar Mi Web Ahora</button>
+                                <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.15rem; padding: 18px 50px; font-weight: 700; box-shadow: 0 8px 25px rgba(0,0,0,0.2);" onclick="selectPlanAndCheckout('avanzado')">Activar Mi Web Ahora</button>
                             </div>
                         </div>
                     </div>
@@ -673,7 +673,7 @@
                                     <li style="margin: 5px 0;">✓ Dominio incluido</li>
                                     <li style="margin: 5px 0;">✓ Soporte básico</li>
                                 </ul>
-                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="selectPlanAndCheckout('basico')">Seleccionar</button>
                             </div>
                             <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 10px; color: white; position: relative;">
                                 <div style="position: absolute; top: -10px; right: 10px; background: #E5FC63; color: #1B1B1B; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Recomendado</div>
@@ -684,7 +684,7 @@
                                     <li style="margin: 5px 0;">✓ Todo del Básico +</li>
                                     <li style="margin: 5px 0;">✓ SEO avanzado</li>
                                 </ul>
-                                <button class="btn-action" style="width: 100%; margin-top: 15px; background: #E5FC63; color: #1B1B1B; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; background: #E5FC63; color: #1B1B1B; font-size: 0.9rem;" onclick="selectPlanAndCheckout('avanzado')">Seleccionar</button>
                             </div>
                             <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
                                 <h4 style="color: #0046FE; margin-bottom: 10px;">Premium</h4>
@@ -694,7 +694,7 @@
                                     <li style="margin: 5px 0;">✓ Todo del Avanzado +</li>
                                     <li style="margin: 5px 0;">✓ Soporte premium</li>
                                 </ul>
-                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="selectPlanAndCheckout('premium')">Seleccionar</button>
                             </div>
                         </div>
                     </div>
@@ -1344,7 +1344,7 @@
                     <h2 style="color: #0046FE; margin-bottom: 12px; font-size: 1.8rem; font-weight: 700;">${msg.title}</h2>
                     <p style="color: #666; margin-bottom: 8px; font-size: 1.05rem; line-height: 1.6;">${msg.desc}</p>
                     <p style="color: #009A62; font-weight: 700; font-size: 1.1rem; margin-bottom: 25px;">${msg.cta}</p>
-                    <button class="btn-action" style="padding: 16px 45px; font-size: 1.05rem;" onclick="showPricingModal()">Contratar Ahora</button>
+                    <button class="btn-action" style="padding: 16px 45px; font-size: 1.05rem;" onclick="selectPlanAndCheckout('avanzado')">Contratar Ahora</button>
                     <p style="margin-top: 15px; font-size: 0.85rem; color: #999;">✓ Sin permanencia • ✓ Cancela cuando quieras</p>
                 </div>
             `;
@@ -1353,10 +1353,76 @@
             section.appendChild(overlay);
         }
 
-        // Mostrar modal de precios
+        // Seleccionar plan y ir al checkout
+        async function selectPlanAndCheckout(plan) {
+            console.log('💳 Seleccionando plan:', plan);
+            
+            // Mostrar loading
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; text-align: center;';
+            loadingMsg.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">⏳</div><p>Preparando tu checkout...</p>';
+            document.body.appendChild(loadingMsg);
+            
+            try {
+                // Obtener datos del cliente desde el backend
+                const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
+                const dashboardData = await response.json();
+                
+                if (dashboardData.submission) {
+                    // Guardar datos en sessionStorage para el checkout
+                    sessionStorage.setItem('orderData', JSON.stringify({
+                        plan: plan,
+                        formData: {
+                            business_name: dashboardData.submission.business_name || dashboardData.client.business_name,
+                            business_description: dashboardData.submission.business_description || '',
+                            industry: dashboardData.submission.industry || '',
+                            cif_nif: dashboardData.submission.cif_nif || '',
+                            razon_social: dashboardData.submission.razon_social || '',
+                            direccion_fiscal: dashboardData.submission.direccion_fiscal || '',
+                            email: dashboardData.submission.email || currentClient.email,
+                            first_name: dashboardData.client.full_name?.split(' ')[0] || '',
+                            last_name: dashboardData.client.full_name?.split(' ').slice(1).join(' ') || '',
+                            phone_number: dashboardData.submission.phone_number || '',
+                            email_contact: dashboardData.submission.email_contact || currentClient.email,
+                            whatsapp_number: dashboardData.submission.whatsapp_number || '',
+                            domain_name: dashboardData.submission.domain_name || '',
+                            keywords: dashboardData.submission.keywords || '',
+                            design_style: dashboardData.submission.design_style || '',
+                            pages: dashboardData.submission.pages || [],
+                            password: 'temp123' // Password temporal para backend
+                        }
+                    }));
+                    
+                    // Redirigir al checkout
+                    window.location.href = '/checkout.html';
+                } else {
+                    // Si no tiene submission, usar datos básicos del cliente
+                    sessionStorage.setItem('orderData', JSON.stringify({
+                        plan: plan,
+                        formData: {
+                            business_name: dashboardData.client.business_name || 'Mi Empresa',
+                            email: currentClient.email,
+                            first_name: dashboardData.client.full_name?.split(' ')[0] || 'Cliente',
+                            last_name: dashboardData.client.full_name?.split(' ').slice(1).join(' ') || '',
+                            email_contact: currentClient.email,
+                            password: 'temp123'
+                        }
+                    }));
+                    
+                    // Redirigir al checkout de todas formas
+                    window.location.href = '/checkout.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.body.removeChild(loadingMsg);
+                alert('Hubo un error. Por favor, intenta de nuevo.');
+            }
+        }
+        
+        // Mostrar modal de precios (para overlays)
         function showPricingModal() {
-            alert('Redirigiendo a la página de precios...');
-            window.open('/formulario-membresia.html', '_blank');
+            // Redirigir al checkout con plan básico por defecto
+            selectPlanAndCheckout('basico');
         }
 
         // Capitalizar
