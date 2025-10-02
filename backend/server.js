@@ -114,6 +114,95 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
+// 2B. CREAR SUSCRIPCIÓN CON STRIPE ELEMENTS (checkout personalizado)
+app.post('/api/create-subscription', async (req, res) => {
+    try {
+        const { paymentMethodId, plan, formData, billingDetails } = req.body;
+
+        // Mapear plan a Price ID de Stripe
+        const priceIds = {
+            'basico': process.env.STRIPE_PRICE_BASICO,
+            'avanzado': process.env.STRIPE_PRICE_AVANZADO,
+            'premium': process.env.STRIPE_PRICE_PREMIUM
+        };
+
+        const priceId = priceIds[plan];
+        if (!priceId) {
+            return res.status(400).json({ error: 'Plan inválido' });
+        }
+
+        // Guardar datos del formulario temporalmente (pending)
+        const submissionId = db.createSubmission({
+            ...formData,
+            plan,
+            status: 'pending',
+            amount: plan === 'basico' ? 35 : plan === 'avanzado' ? 49 : 65
+        });
+
+        // Crear o obtener cliente en Stripe
+        const customer = await stripe.customers.create({
+            payment_method: paymentMethodId,
+            email: billingDetails.email,
+            name: billingDetails.name,
+            invoice_settings: {
+                default_payment_method: paymentMethodId,
+            },
+            metadata: {
+                submission_id: String(submissionId),
+                business_name: formData.business_name || ''
+            }
+        });
+
+        // Crear suscripción
+        const subscription = await stripe.subscriptions.create({
+            customer: customer.id,
+            items: [{ price: priceId }],
+            expand: ['latest_invoice.payment_intent'],
+            metadata: {
+                submission_id: String(submissionId),
+                plan: plan,
+                business_name: formData.business_name || ''
+            }
+        });
+
+        const invoice = subscription.latest_invoice;
+        const paymentIntent = invoice.payment_intent;
+
+        // Verificar si requiere acción (3D Secure)
+        if (paymentIntent.status === 'requires_action') {
+            return res.json({
+                requiresAction: true,
+                clientSecret: paymentIntent.client_secret,
+                subscriptionId: subscription.id
+            });
+        }
+
+        // Pago exitoso
+        if (paymentIntent.status === 'succeeded') {
+            // Actualizar estado a "paid"
+            db.updateSubmissionStatus(submissionId, 'paid', subscription.id);
+
+            // Obtener datos completos
+            const submission = db.getSubmission(submissionId);
+
+            // Enviar emails
+            await emailService.sendAdminNotification(submission);
+            await emailService.sendClientConfirmation(submission);
+
+            return res.json({
+                success: true,
+                subscriptionId: subscription.id
+            });
+        }
+
+        res.json({ success: true, subscriptionId: subscription.id });
+
+    } catch (error) {
+        console.error('Error creando suscripción:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 3. WEBHOOK DE STRIPE (recibir eventos de pago)
 app.post('/webhook', async (req, res) => {
     const sig = req.headers['stripe-signature'];
