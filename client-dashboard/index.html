@@ -1543,7 +1543,7 @@
             document.getElementById('planComparisonCard').style.display = 'block';
             
             // Desactivar secciones restringidas
-            const restrictedSections = ['sitio', 'estadisticas', 'dominio', 'seo'];
+            const restrictedSections = ['sitio', 'estadisticas', 'tutoriales', 'dominio', 'seo'];
             restrictedSections.forEach(sectionId => {
                 const section = document.getElementById(sectionId);
                 if (section) {
@@ -1594,6 +1594,12 @@
                     title: 'Analiza tu Tráfico',
                     desc: 'Conoce a tus visitantes y optimiza tu web',
                     cta: 'Activa tu plan'
+                },
+                'tutoriales': {
+                    icon: '🎥',
+                    title: 'Aprende a Gestionar tu Web',
+                    desc: 'Accede a tutoriales en video paso a paso',
+                    cta: 'Disponible con cualquier plan'
                 },
                 'dominio': {
                     icon: '🔗',
