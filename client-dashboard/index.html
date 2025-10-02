@@ -1105,11 +1105,11 @@
 
                     <div class="card">
                         <h3 class="card-title">📋 Tu Plan</h3>
-                        <p><strong>Plan Actual:</strong> <span id="currentPlan" style="color: #0046FE; font-weight: 600;">Plan Básico</span></p>
-                        <p><strong>Precio:</strong> <span id="planPrice">35€/mes + IVA</span></p>
-                        <p><strong>Renovación:</strong> Automática cada mes</p>
-                        <p><strong>Próximo cobro:</strong> <span id="nextBilling">Calculando...</span></p>
-                        <button class="btn-action" style="margin-top: 15px;" onclick="openPlanModal()">Cambiar Plan</button>
+                        <p><strong>Plan Actual:</strong> <span id="currentPlan" style="color: #0046FE; font-weight: 600;">Cargando...</span></p>
+                        <p><strong>Precio:</strong> <span id="planPrice">Cargando...</span></p>
+                        <p id="renovacionInfo"><strong>Renovación:</strong> Automática cada mes</p>
+                        <p id="nextBillingInfo" style="display: none;"><strong>Próximo cobro:</strong> <span id="nextBilling">Calculando...</span></p>
+                        <button class="btn-action" id="btnChangePlan" style="margin-top: 15px;" onclick="openPlanModal()">Cambiar Plan</button>
                     </div>
 
                     <div class="card">
@@ -1410,9 +1410,22 @@
                         const plan = planInfo[data.client.plan];
                         document.getElementById('currentPlan').textContent = plan.name;
                         document.getElementById('planPrice').textContent = plan.price;
+                        document.getElementById('renovacionInfo').style.display = 'block';
+                        document.getElementById('nextBillingInfo').style.display = 'block';
+                        
+                        // Calcular próximo cobro (30 días desde payment_date)
+                        if (data.client.payment_date) {
+                            const nextBilling = new Date(new Date(data.client.payment_date).getTime() + (30 * 24 * 60 * 60 * 1000));
+                            document.getElementById('nextBilling').textContent = nextBilling.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+                        }
+                        
+                        document.getElementById('btnChangePlan').textContent = 'Cambiar Plan';
                     } else {
                         document.getElementById('currentPlan').textContent = 'Sin plan activo';
-                        document.getElementById('planPrice').textContent = 'Contratar un plan para activar tu web';
+                        document.getElementById('planPrice').textContent = '-';
+                        document.getElementById('renovacionInfo').style.display = 'none';
+                        document.getElementById('nextBillingInfo').style.display = 'none';
+                        document.getElementById('btnChangePlan').textContent = 'Contratar Plan';
                     }
 
                     // Establecer límite de páginas según plan
@@ -1632,28 +1645,28 @@
                 console.log('📊 Dashboard data recibida:', dashboardData);
                 
                 // Preparar datos para el checkout
-                const submission = dashboardData.submission;
-                const client = dashboardData.client;
+                const submission = dashboardData.submission || {};
+                const client = dashboardData.client || {};
                 
                 const checkoutData = {
                     plan: plan,
                     formData: {
-                        business_name: submission?.business_name || client.business_name || 'Mi Empresa',
-                        business_description: submission?.business_description || '',
-                        industry: submission?.industry || '',
-                        cif_nif: submission?.cif_nif || '',
-                        razon_social: submission?.razon_social || '',
-                        direccion_fiscal: submission?.direccion_fiscal || '',
-                        email: submission?.email || currentClient.email,
+                        business_name: submission.business_name || client.business_name || 'Mi Empresa',
+                        business_description: submission.business_description || '',
+                        industry: submission.industry || '',
+                        cif_nif: submission.cif_nif || '',
+                        razon_social: submission.razon_social || '',
+                        direccion_fiscal: submission.direccion_fiscal || '',
+                        email: submission.email || currentClient.email || '',
                         first_name: currentClient.full_name?.split(' ')[0] || 'Cliente',
                         last_name: currentClient.full_name?.split(' ').slice(1).join(' ') || '',
-                        phone_number: submission?.phone_number || '',
-                        email_contact: submission?.email_contact || currentClient.email,
-                        whatsapp_number: submission?.whatsapp_number || '',
-                        domain_name: submission?.domain_name || '',
-                        keywords: submission?.keywords || '',
-                        design_style: submission?.design_style || '',
-                        pages: submission?.pages || [],
+                        phone_number: submission.phone_number || '',
+                        email_contact: submission.email_contact || currentClient.email || '',
+                        whatsapp_number: submission.whatsapp_number || '',
+                        domain_name: submission.domain_name || '',
+                        keywords: submission.keywords || '',
+                        design_style: submission.design_style || '',
+                        pages: submission.pages || [],
                         password: 'existing_user' // Indicar que es usuario existente
                     }
                 };
