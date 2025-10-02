@@ -1,0 +1,79 @@
+🔧 SOLUCIÓN PARA PROBLEMA CON FUENTE SOULCRAFT
+===============================================
+
+He añadido BEBAS NEUE como fuente de respaldo automática.
+Bebas Neue es una fuente similar a Soulcraft (alta, condensada, bold).
+
+✅ LO QUE HE HECHO:
+-------------------
+1. Añadí Bebas Neue desde Google Fonts (se carga automáticamente)
+2. La cadena de fuentes ahora es:
+   'Soulcraft' → 'Bebas Neue' → 'Impact' → 'Arial Black'
+
+Esto significa que:
+- Si Soulcraft carga desde WordPress: ✅ Perfecto, usará Soulcraft
+- Si Soulcraft NO carga: ✅ Usará Bebas Neue (muy similar)
+- Si ninguna carga: ✅ Usará Impact o Arial Black del sistema
+
+
+🎯 ¿QUÉ HACER AHORA?
+--------------------
+1. Pega el código actualizado en Elementor
+2. Recarga la página
+3. Debería verse bien con Bebas Neue si Soulcraft no funciona
+
+
+⚡ SI AÚN NO SE VE BIEN:
+------------------------
+Opción 1: Usar SOLO Bebas Neue (sin Soulcraft)
+
+Busca estas líneas en el código (líneas 54-61):
+
+/* Soulcraft */
+@font-face {
+    font-family: 'Soulcraft';
+    src: url('TU_URL_AQUI/Soulcraft.woff2') format('woff2'),
+         url('TU_URL_AQUI/Soulcraft.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+Y BÓRRALAS completamente. Bebas Neue se hará cargo automáticamente.
+
+
+Opción 2: Cambiar todas las referencias de Soulcraft a Bebas Neue
+
+Busca y reemplaza en TODO el código:
+BUSCAR: 'Soulcraft', 
+REEMPLAZAR: (nada, bórralo)
+
+Así quedará: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif
+
+
+🔍 VERIFICAR SI SOULCRAFT ESTÁ CARGANDO:
+-----------------------------------------
+1. Abre la página en el navegador
+2. Presiona F12 para abrir DevTools
+3. Ve a la pestaña "Console" (Consola)
+4. Si hay errores de fuentes, aparecerán en rojo
+5. Si dice "Failed to load font Soulcraft" → confirma que hay un problema
+
+
+📊 COMPARACIÓN VISUAL:
+----------------------
+Soulcraft:     AGUTIDESIGNS  (muy condensada, geométrica)
+Bebas Neue:    AGUTIDESIGNS  (condensada, similar, más disponible)
+Impact:        AGUTIDESIGNS  (más ancha, menos elegante)
+
+
+💡 RECOMENDACIÓN:
+-----------------
+Bebas Neue es una excelente alternativa a Soulcraft:
+✅ Gratuita
+✅ Muy similar en estilo
+✅ Se carga desde Google Fonts (muy confiable)
+✅ Compatible con todos los navegadores
+
+Si no necesitas EXACTAMENTE Soulcraft, déjalo así y Bebas Neue 
+funcionará perfecto. 

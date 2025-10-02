@@ -1,0 +1,115 @@
+🎨 SECCIÓN DE PORTFOLIO - PROYECTOS REALIZADOS
+===============================================
+
+He creado una sección BRUTAL para mostrar tus 4 webs realizadas.
+
+✨ CARACTERÍSTICAS DEL DISEÑO:
+------------------------------
+✅ Grid de 2x2 (4 proyectos en total)
+✅ Cards interactivas con efecto hover espectacular
+✅ Gradientes de color únicos para cada proyecto
+✅ Badge identificativo del sector
+✅ URL que aparece al hacer hover
+✅ Tags descriptivos en cada proyecto
+✅ Efecto zoom en las imágenes
+✅ Overlay oscuro en hover
+✅ Cards clicables - Abren la web en nueva pestaña
+✅ 100% responsive
+
+📂 LOS 4 PROYECTOS INCLUIDOS:
+-----------------------------
+
+1. GHSL ARQUITECTOS (ghslarquitectos.com)
+   - Sector: Arquitectura
+   - Descripción: Estudio de arquitectura especializado en viviendas minimalistas
+   - Tags: Portfolio, Responsive, SEO
+   - Color: Gris oscuro elegante
+
+2. MONTEPEGO LIFE (montepegolife.com)
+   - Sector: Inmobiliaria
+   - Descripción: Plataforma inmobiliaria con búsqueda de propiedades
+   - Tags: Inmobiliaria, Multiidioma, Buscador
+   - Color: Verde esmeralda
+
+3. WONDER PHOTOSHOP (wonderphotoshop.es)
+   - Sector: Fotografía
+   - Descripción: Servicios de edición fotográfica profesional
+   - Tags: Portfolio, Galería, Contacto
+   - Color: Morado vibrante
+
+4. NOVA CUINA (nova-cuina.com)
+   - Sector: Restauración
+   - Descripción: Web para restaurante con menú y reservas
+   - Tags: Restaurante, Reservas, Menú Digital
+   - Color: Rojo elegante
+
+🎯 EFECTOS INTERACTIVOS:
+------------------------
+1. Hover en card:
+   - Se eleva 15px
+   - Escala 1.02
+   - Sombra crece dramáticamente
+   
+2. Hover en imagen:
+   - Zoom 1.1x
+   - Overlay oscuro aparece
+   - URL se desliza desde abajo
+   
+3. Todo es clicable:
+   - Hacer clic abre la web en nueva pestaña
+
+🎨 COLORES:
+-----------
+- Fondo: Azul degradado (#0051ff → #0066ff)
+- Cards: Blanco
+- Títulos: Negro (#1B1B1B)
+- Tags: Azul suave con texto azul
+- Cada proyecto tiene su degradado único en la imagen
+
+📱 RESPONSIVE:
+--------------
+- Desktop: 2 columnas (2x2)
+- Tablet: 2 columnas
+- Móvil: 1 columna (apiladas)
+
+🔧 PERSONALIZACIÓN FÁCIL:
+-------------------------
+Si quieres cambiar algo:
+
+AÑADIR IMÁGENES REALES:
+En lugar de los degradados de colores, puedes poner screenshots:
+
+1. Toma captura de pantalla de cada web
+2. Sube las imágenes a WordPress
+3. Reemplaza la línea del degradado por:
+   
+   <img src="URL_DE_TU_IMAGEN" class="project-screenshot" alt="Nombre del proyecto">
+
+CAMBIAR TEXTOS:
+- Títulos: Entre <h3 class="project-title">
+- Descripciones: Entre <p class="project-description">
+- Tags: Entre <span class="tag">
+- URLs: En onclick="window.open('URL', '_blank')"
+
+AÑADIR MÁS PROYECTOS:
+- Copia una card completa
+- Pégala dentro de <div class="projects-grid">
+- Cambia el contenido
+- El grid se adaptará automáticamente
+
+💡 RECOMENDACIÓN:
+-----------------
+Para que se vea AÚN MEJOR, te recomiendo:
+1. Hacer screenshots de las 4 webs
+2. Subirlas a WordPress
+3. Reemplazar los degradados por las imágenes reales
+4. Así se verán las webs reales en miniatura
+
+🚀 CÓMO USARLO:
+---------------
+1. Abre portfolio-section.html
+2. Copia TODO el código
+3. Pega en widget HTML de Elementor
+4. ¡Listo!
+
+✅ TODO CONFIGURADO Y LISTO PARA USAR 

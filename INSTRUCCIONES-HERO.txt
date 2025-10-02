@@ -1,0 +1,82 @@
+🎯 TÍTULO HERO ANIMADO CON BOTÓN
+==================================
+
+He creado un título espectacular para tu Hero principal.
+
+✨ CARACTERÍSTICAS:
+------------------
+✅ Título GIGANTE adaptativo (hasta 6rem en desktop)
+✅ Animación fadeInUp al cargar
+✅ Gradiente animado en "Membresía Web:"
+✅ Botón con múltiples efectos hover
+✅ Emoji que se desliza en hover (👉)
+✅ Efecto de brillo al pasar el mouse
+✅ Fondo transparente
+✅ 100% responsive
+
+📝 TEXTO DEL TÍTULO:
+--------------------
+Línea 1: "MEMBRESÍA WEB:" (gradiente azul animado)
+Línea 2: "TU PRESENCIA ONLINE" (azul sólido)
+Línea 3: "SIN LÍMITES" (azul sólido)
+
+🎨 ANIMACIONES INCLUIDAS:
+-------------------------
+1. TÍTULO:
+   - fadeInUp (aparece desde abajo)
+   - Gradiente que se mueve constantemente
+   - Duración: 1 segundo
+
+2. BOTÓN:
+   - fadeInUp con delay (aparece después del título)
+   - Hover: se eleva y crece
+   - Emoji se desliza a la derecha
+   - Efecto de brillo cruzando el botón
+   - Sombra que crece
+
+🔘 BOTÓN "VER PLANES":
+----------------------
+- Texto: "VER PLANES 👉"
+- Color: Azul #0046FE
+- Texto: Blanco/Crema
+- Tipografía: Soulcraft
+- Efecto hover espectacular
+- Enlace a #planes (ancla)
+
+🎨 COLORES:
+-----------
+- Gradiente título: #0046FE → #0066ff (animado)
+- Resto título: #0046FE
+- Botón: #0046FE
+- Hover botón: #0056ff
+
+📱 RESPONSIVE:
+--------------
+- Desktop: Título hasta 6rem
+- Tablet: Se adapta automáticamente
+- Móvil: Título mínimo 2.5rem
+- Botón se ajusta en tamaño
+
+🚀 CÓMO USARLO:
+---------------
+1. Abre hero-title-section.html
+2. Copia TODO el código
+3. Pega en widget HTML de Elementor
+4. Colócalo en la parte superior de tu página (Hero)
+5. ¡Listo!
+
+💡 PERSONALIZACIÓN:
+-------------------
+CAMBIAR TEXTO:
+- Edita las líneas dentro de <h1 class="hero-title">
+- Puedes cambiar los <span> por el texto que quieras
+
+CAMBIAR ENLACE DEL BOTÓN:
+- En href="#planes" cambia #planes por tu URL
+- Ejemplo: href="#precios" o href="/contacto"
+
+CAMBIAR EMOJI:
+- 👉 puedes usar: 🚀 ⚡ 💎 ✨ 🎯 🔥
+
+✅ LISTO PARA USAR EN ELEMENTOR
+Título animado espectacular con efectos profesionales 

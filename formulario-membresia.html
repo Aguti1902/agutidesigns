@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Membresía - agutidesigns</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header del formulario */
+        .form-header {
+            background: #0046FE;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .form-title {
+            color: #FEFAF5 !important;
+            font-size: clamp(2.5rem, 6vw, 4rem) !important;
+            font-weight: 800 !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .form-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Barra de progreso */
+        .progress-bar-container {
+            background: #f0f0f0;
+            height: 6px;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #0046FE, #009A62, #E5FC63);
+            height: 100%;
+            width: 11%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 35px 40px 25px;
+            background: #fafafa;
+            flex-wrap: wrap;
+        }
+
+        .progress-step {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            color: #0046FE;
+            font-weight: 700;
+            transform: scale(1.1);
+        }
+
+        /* Contenido del formulario */
+        .form-body {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 80px 60px;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            color: #1B1B1B !important;
+            font-size: clamp(2.2rem, 4vw, 3rem) !important;
+            font-weight: 800 !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .step-description {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+            line-height: 1.6;
+        }
+
+        /* Form groups */
+        .form-group {
+            margin-bottom: 40px;
+        }
+
+        .form-label {
+            display: block;
+            color: #1B1B1B;
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .form-label .required {
+            color: #F1250E;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #0046FE;
+            box-shadow: 0 0 0 3px rgba(0, 70, 254, 0.1);
+        }
+
+        /* Estilos de error */
+        .form-input.error,
+        .form-textarea.error,
+        .form-select.error {
+            border-color: #F1250E !important;
+            background: rgba(241, 37, 14, 0.05) !important;
+        }
+
+        .form-input.error:focus,
+        .form-textarea.error:focus,
+        .form-select.error:focus {
+            box-shadow: 0 0 0 3px rgba(241, 37, 14, 0.1) !important;
+        }
+
+        .error-message {
+            display: block;
+            color: #F1250E;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .file-upload.error {
+            border-color: #F1250E !important;
+            background: rgba(241, 37, 14, 0.05) !important;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Checkboxes y radios */
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover,
+        .radio-item:hover {
+            border-color: #0046FE;
+            background: rgba(0, 70, 254, 0.03);
+        }
+
+        .checkbox-item input[type="checkbox"],
+        .radio-item input[type="radio"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label,
+        .radio-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        /* Botón añadir página */
+        .btn-add-page {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-add-page:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.3);
+        }
+
+        .btn-add-page:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Páginas personalizadas */
+        .custom-page-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-page-item input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .custom-page-item input[type="text"]:focus {
+            outline: none;
+            border-color: #0046FE;
+            box-shadow: 0 0 0 4px rgba(0, 70, 254, 0.1);
+        }
+
+        .btn-remove-page {
+            padding: 8px 12px;
+            background: #F1250E;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-remove-page:hover {
+            background: #d11f0b;
+            transform: scale(1.05);
+        }
+
+        /* Upload de archivos */
+        .file-upload {
+            border: 3px dashed #e0e0e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #0046FE;
+            background: rgba(0, 70, 254, 0.03);
+        }
+
+        .file-upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        /* Cards de estilo visual */
+        .style-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .style-card {
+            border: 3px solid #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .style-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border-color: #0046FE;
+        }
+
+        .style-card.selected {
+            border-color: #0046FE;
+            border-width: 4px;
+            box-shadow: 0 15px 40px rgba(0, 70, 254, 0.3);
+        }
+
+        .style-card.selected::before {
+            content: '✓';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            background: #009A62;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 154, 98, 0.5);
+        }
+
+        .style-preview {
+            height: 180px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .style-card:hover .style-preview {
+            background: #f0f0f0;
+        }
+
+        .style-info {
+            padding: 20px;
+            background: white;
+        }
+
+        .style-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1B1B1B;
+            margin-bottom: 8px;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .style-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .style-card input[type="radio"] {
+            display: none;
+        }
+
+
+
+        .btn {
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-prev {
+            background: transparent;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-prev:hover {
+            border-color: #1B1B1B;
+            color: #1B1B1B;
+            transform: translateX(-5px);
+        }
+
+        .btn-next {
+            background: #0046FE;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 70, 254, 0.4);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 70, 254, 0.6);
+            background: #0056ff;
+        }
+
+        .btn-submit {
+            background: #009A62;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 154, 98, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 154, 98, 0.6);
+            background: #00b870;
+        }
+
+        /* Helper text */
+        .helper-text {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Botón IA */
+        .btn-ai {
+            margin-top: 12px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #EC6746, #F1250E);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(236, 103, 70, 0.3);
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(236, 103, 70, 0.5);
+            background: linear-gradient(135deg, #F1250E, #EC6746);
+        }
+
+        /* Navegación fija */
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            border-top: 2px solid #f0f0f0;
+            padding: 25px 40px;
+            z-index: 100;
+            max-width: 1200px;
+            margin: 60px auto 0;
+        }
+
+        .form-navigation .btn-submit,
+        .form-navigation .btn-next {
+            min-width: 220px;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .form-body {
+                padding: 60px 40px;
+            }
+
+            .form-navigation {
+                padding: 20px 30px;
+            }
+
+            .style-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-header {
+                padding: 40px 20px;
+            }
+
+            .form-title {
+                font-size: 2.2rem !important;
+            }
+
+            .form-subtitle {
+                font-size: 1rem;
+            }
+
+            .form-body {
+                padding: 50px 25px;
+            }
+
+            .form-navigation {
+                padding: 20px 15px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .form-navigation .btn-prev {
+                position: static;
+                order: 2;
+            }
+
+            .form-navigation .btn-next,
+            .form-navigation .btn-submit {
+                order: 1;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+                padding: 14px 30px;
+                font-size: 1rem;
+            }
+
+            .progress-steps {
+                padding: 20px 15px 15px;
+                gap: 5px;
+            }
+
+            .progress-step {
+                font-size: 0.65rem;
+            }
+
+            .step-title {
+                font-size: 1.8rem !important;
+                margin-bottom: 12px;
+            }
+
+            .step-description {
+                font-size: 1rem;
+                margin-bottom: 35px;
+            }
+
+            .form-group {
+                margin-bottom: 30px;
+            }
+
+            .style-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-add-page {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+
+            .custom-page-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-remove-page {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Header -->
+        <div class="form-header">
+            <h1 class="form-title">Formulario de Membresía</h1>
+            <p class="form-subtitle">Completa los datos para crear tu web profesional</p>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">Negocio</div>
+            <div class="progress-step" data-step="2">Objetivos</div>
+            <div class="progress-step" data-step="3">Contenido</div>
+            <div class="progress-step" data-step="4">Diseño</div>
+            <div class="progress-step" data-step="5">SEO</div>
+            <div class="progress-step" data-step="6">Dominio</div>
+            <div class="progress-step" data-step="7">Legal</div>
+            <div class="progress-step" data-step="8">Cuenta</div>
+        </div>
+
+        <!-- Formulario -->
+        <form id="membershipForm" class="form-body">
+            <!-- PASO 1: Detalles del Negocio -->
+            <div class="form-step active" data-step="1">
+                <h2 class="step-title">Detalles del Negocio</h2>
+                <p class="step-description">Cuéntanos sobre tu empresa o proyecto</p>
+
+                <div class="form-group">
+                    <label class="form-label">Nombre de tu empresa o negocio <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="business_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Descripción general del negocio <span class="required">*</span></label>
+                    <textarea class="form-textarea" name="business_description" required placeholder="Cuéntanos qué hace tu empresa..."></textarea>
+                    <span class="helper-text">Breve descripción de tu actividad principal</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sector o industria <span class="required">*</span></label>
+                    <select class="form-select" name="industry" required onchange="handleSectorChange(this.value)">
+                        <option value="">Selecciona un sector...</option>
+                        
+                        <!-- Servicios Profesionales -->
+                        <option value="abogados">Despacho de Abogados</option>
+                        <option value="asesoria">Asesoría Fiscal y Gestoría</option>
+                        <option value="consultoria">Consultoría Empresarial</option>
+                        <option value="contabilidad">Contabilidad y Auditoría</option>
+                        <option value="notaria">Notaría</option>
+                        
+                        <!-- Salud y Bienestar -->
+                        <option value="clinica_dental">Clínica Dental</option>
+                        <option value="fisioterapia">Fisioterapia</option>
+                        <option value="psicologia">Psicología y Terapia</option>
+                        <option value="nutricion">Nutrición y Dietética</option>
+                        <option value="veterinaria">Veterinaria</option>
+                        
+                        <!-- Belleza y Cuidado Personal -->
+                        <option value="peluqueria">Peluquería y Barbería</option>
+                        <option value="estetica">Estética y Belleza</option>
+                        <option value="spa">Spa y Masajes</option>
+                        
+                        <!-- Servicios del Hogar -->
+                        <option value="electricidad">Electricidad y Fontanería</option>
+                        <option value="carpinteria">Carpintería</option>
+                        <option value="limpieza">Limpieza y Mantenimiento</option>
+                        <option value="jardineria">Jardinería y Paisajismo</option>
+                        <option value="mudanzas">Mudanzas y Transporte</option>
+                        <option value="mecanica">Taller Mecánico</option>
+                        
+                        <!-- Construcción y Reformas -->
+                        <option value="construccion">Construcción y Reformas</option>
+                        <option value="arquitectura">Arquitectura</option>
+                        <option value="decoracion">Decoración e Interiorismo</option>
+                        
+                        <!-- Inmobiliaria -->
+                        <option value="inmobiliaria">Inmobiliaria</option>
+                        
+                        <!-- Hostelería -->
+                        <option value="restaurantes">Restaurante</option>
+                        <option value="cafeteria">Cafetería o Café</option>
+                        <option value="bar">Bar o Pub</option>
+                        <option value="catering">Catering y Banquetes</option>
+                        
+                        <!-- Creativos y Digitales -->
+                        <option value="fotografia">Fotografía</option>
+                        <option value="diseño">Diseño Gráfico</option>
+                        <option value="marketing">Marketing y Publicidad</option>
+                        <option value="desarrolloweb">Desarrollo Web</option>
+                        
+                        <!-- Educación y Formación -->
+                        <option value="educacion">Academia o Centro de Formación</option>
+                        <option value="coaching">Coaching</option>
+                        <option value="yoga">Yoga y Meditación</option>
+                        
+                        <!-- Deporte -->
+                        <option value="fitness">Gimnasio o Entrenador Personal</option>
+                        
+                        <!-- Eventos -->
+                        <option value="eventos">Organización de Eventos</option>
+                        <option value="bodas">Wedding Planner</option>
+                        
+                        <!-- Seguros y Finanzas -->
+                        <option value="seguros">Agente de Seguros</option>
+                        
+                        <!-- Otros -->
+                        <option value="otro">Otro sector</option>
+                    </select>
+                </div>
+
+                <!-- DATOS FISCALES -->
+                <div class="form-group">
+                    <label class="form-label">CIF/NIF de la empresa <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="cif_nif" required placeholder="Ej: B12345678">
+                    <span class="helper-text">Necesario para la facturación y datos de contacto en la web</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Razón social <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="razon_social" required placeholder="Nombre legal de la empresa">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Dirección fiscal completa <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="direccion_fiscal" required placeholder="Calle, número, código postal, ciudad, provincia">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email de contacto de la empresa <span class="required">*</span></label>
+                    <input type="email" class="form-input" name="business_email" required placeholder="info@tuempresa.com">
+                    <span class="helper-text">Email principal que se mostrará en la web para que los clientes te contacten</span>
+                </div>
+
+                <!-- MÉTODOS DE CONTACTO -->
+                <div class="form-group">
+                    <label class="form-label">¿Qué métodos de contacto quieres mostrar en tu web? <span class="required">*</span></label>
+                    <span class="helper-text" style="color: #F1250E; display: block; margin-bottom: 10px;">Debes seleccionar al menos uno</span>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_phone" name="contact_methods[]" value="telefono" onchange="toggleContactFields()">
+                            <label for="contact_phone">📞 Teléfono</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_email" name="contact_methods[]" value="email" onchange="toggleContactFields()">
+                            <label for="contact_email">📧 Email</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_whatsapp" name="contact_methods[]" value="whatsapp" onchange="toggleContactFields()">
+                            <label for="contact_whatsapp">💬 WhatsApp</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_form" name="contact_methods[]" value="formulario" onchange="toggleContactFields()">
+                            <label for="contact_form">📝 Formulario de contacto</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_address" name="contact_methods[]" value="direccion" onchange="toggleContactFields()">
+                            <label for="contact_address">📍 Dirección física</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="contact_social" name="contact_methods[]" value="redes_sociales" onchange="toggleContactFields()">
+                            <label for="contact_social">🌐 Redes sociales</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos de contacto dinámicos -->
+                <div id="contactDetailsSection" style="display: none;">
+                    <div id="phoneField" class="form-group" style="display: none;">
+                        <label class="form-label">Número de teléfono <span class="required">*</span></label>
+                        <input type="tel" class="form-input" name="phone_number" placeholder="+34 600 000 000">
+                    </div>
+
+                    <div id="emailField" class="form-group" style="display: none;">
+                        <label class="form-label">Email de contacto <span class="required">*</span></label>
+                        <input type="email" class="form-input" name="email_contact" placeholder="info@tuempresa.com">
+                    </div>
+
+                    <div id="whatsappField" class="form-group" style="display: none;">
+                        <label class="form-label">Número de WhatsApp <span class="required">*</span></label>
+                        <input type="tel" class="form-input" name="whatsapp_number" placeholder="+34 600 000 000">
+                        <span class="helper-text">Se añadirá un botón de WhatsApp en la web</span>
+                    </div>
+
+                    <div id="formEmailField" class="form-group" style="display: none;">
+                        <label class="form-label">Email para recibir mensajes del formulario <span class="required">*</span></label>
+                        <input type="email" class="form-input" name="form_email" placeholder="contacto@tuempresa.com">
+                        <span class="helper-text">Los mensajes del formulario de contacto se enviarán a este email</span>
+                    </div>
+
+                    <div id="addressField" class="form-group" style="display: none;">
+                        <label class="form-label">Dirección del local/oficina <span class="required">*</span></label>
+                        <input type="text" class="form-input" name="physical_address" placeholder="Calle, número, código postal, ciudad">
+                        <span class="helper-text">Se mostrará con Google Maps integrado</span>
+                    </div>
+
+                    <div id="socialField" class="form-group" style="display: none;">
+                        <label class="form-label">Enlaces a redes sociales</label>
+                        <input type="url" class="form-input" name="instagram" placeholder="Instagram (URL completa)" style="margin-bottom: 10px;">
+                        <input type="url" class="form-input" name="facebook" placeholder="Facebook (URL completa)" style="margin-bottom: 10px;">
+                        <input type="url" class="form-input" name="linkedin" placeholder="LinkedIn (URL completa)" style="margin-bottom: 10px;">
+                        <input type="url" class="form-input" name="twitter" placeholder="Twitter/X (URL completa)">
+                    </div>
+                </div>
+
+                <!-- SECCIONES ESPECÍFICAS POR SECTOR -->
+                <div id="sectorSpecificSection"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Servicios o productos principales <span class="required">*</span></label>
+                    <textarea class="form-textarea" name="services" required placeholder="Lista tus servicios o productos clave..."></textarea>
+                    <span class="helper-text">Separa cada uno con una coma</span>
+                </div>
+            </div>
+
+            <!-- PASO 2: Objetivos del Sitio Web -->
+            <div class="form-step" data-step="2">
+                <h2 class="step-title">Objetivos del Sitio Web</h2>
+                <p class="step-description">Define qué quieres lograr con tu web</p>
+
+                <div class="form-group">
+                    <label class="form-label">¿Cuál es el propósito principal? <span class="required">*</span></label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purpose_info" name="purpose[]" value="informacion">
+                            <label for="purpose_info">Información sobre mi negocio</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purpose_leads" name="purpose[]" value="leads">
+                            <label for="purpose_leads">Generación de leads (captación de clientes)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="purpose_portfolio" name="purpose[]" value="portfolio">
+                            <label for="purpose_portfolio">Mostrar portfolio o trabajos</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">¿A quién va dirigido tu sitio web? <span class="required">*</span></label>
+                    <textarea class="form-textarea" name="target_audience" required placeholder="Describe tu público objetivo (edad, intereses, ubicación...)"></textarea>
+                </div>
+            </div>
+
+            <!-- PASO 3: Contenido del Sitio Web -->
+            <div class="form-step" data-step="3">
+                <h2 class="step-title">Contenido y Recursos</h2>
+                <p class="step-description">Sube tus textos, imágenes y logo</p>
+
+                <div class="form-group">
+                    <label class="form-label">¿Qué páginas necesitas? <span class="required">*</span> <span id="pageCounter" style="color: #0046FE; font-size: 0.9rem;">(1/5)</span></label>
+                    <div class="checkbox-group" id="pagesCheckboxGroup">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="page_home" name="pages[]" value="inicio" checked onchange="updatePageCounter()">
+                            <label for="page_home">Inicio</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="page_about" name="pages[]" value="nosotros" onchange="updatePageCounter()">
+                            <label for="page_about">Sobre Nosotros</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="page_services" name="pages[]" value="servicios" onchange="toggleServicesSection(this); updatePageCounter()">
+                            <label for="page_services">Servicios</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="page_contact" name="pages[]" value="contacto" onchange="updatePageCounter()">
+                            <label for="page_contact">Contacto</label>
+                        </div>
+                    </div>
+
+                    <!-- Páginas personalizadas -->
+                    <div id="customPagesContainer" style="margin-top: 20px;"></div>
+
+                    <button type="button" class="btn-add-page" id="addPageBtn" onclick="addCustomPage()">
+                        + Añadir otra página personalizada
+                    </button>
+                    <span class="helper-text" id="pageLimitWarning" style="display: none; color: #F1250E; font-weight: 600;">Límite de 5 páginas alcanzado (Plan Básico)</span>
+                </div>
+
+                <!-- Sección de Servicios (aparece si selecciona Servicios) -->
+                <div id="servicesSection" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Lista tus servicios</label>
+                        <textarea class="form-textarea" name="services_list" placeholder="Ej:&#10;- Diseño web&#10;- SEO&#10;- Marketing digital"></textarea>
+                        <span class="helper-text">Un servicio por línea</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Textos para cada servicio</label>
+                        <textarea class="form-textarea" name="services_texts" placeholder="Pega aquí las descripciones de cada servicio..." style="min-height: 150px;"></textarea>
+                        <button type="button" class="btn-ai" onclick="generateAITexts('services')">✨ Generar con IA</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Textos de tu web</label>
+                    <textarea class="form-textarea" name="web_texts" placeholder="Pega aquí todos los textos para tu web..." style="min-height: 180px;"></textarea>
+                    <button type="button" class="btn-ai" onclick="generateAITexts('general')">✨ Generar todos los textos con IA</button>
+                    <span class="helper-text">Si no tienes textos, podemos generarlos automáticamente</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sube tu logo <span class="required">*</span></label>
+                    <div class="file-upload" onclick="document.getElementById('logoUpload').click()">
+                        <div class="file-upload-icon">🎨</div>
+                        <div class="file-upload-text">
+                            <strong>Arrastra tu logo aquí o haz clic</strong><br>
+                            <span style="font-size: 0.85rem; color: #999;">PNG, SVG, JPG (máx. 5MB)</span>
+                        </div>
+                        <input type="file" id="logoUpload" name="logo" accept="image/*" required>
+                    </div>
+                    <span class="helper-text">El logo es fundamental para la identidad de tu web</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sube tus imágenes <span class="required">*</span></label>
+                    <div class="file-upload" onclick="document.getElementById('imagesUpload').click()">
+                        <div class="file-upload-icon">🖼️</div>
+                        <div class="file-upload-text">
+                            <strong>Arrastra tus imágenes aquí o haz clic</strong><br>
+                            <span style="font-size: 0.85rem; color: #999;">Puedes seleccionar múltiples archivos (mínimo 3-5 imágenes)</span>
+                        </div>
+                        <input type="file" id="imagesUpload" name="images[]" accept="image/*" multiple required>
+                    </div>
+                    <span class="helper-text">Imágenes de alta calidad son esenciales. Si no tienes suficientes, usaremos imágenes de stock profesionales como complemento</span>
+                </div>
+            </div>
+
+            <!-- PASO 4: Diseño y Estilo -->
+            <div class="form-step" data-step="4">
+                <h2 class="step-title">Diseño y Estilo</h2>
+                <p class="step-description">Personaliza el aspecto de tu web</p>
+
+                <div class="form-group">
+                    <label class="form-label">Estilo preferido <span class="required">*</span></label>
+                    <div class="style-cards-grid">
+                        <!-- Moderno -->
+                        <div class="style-card" onclick="selectStyle(this, 'moderno')">
+                            <input type="radio" name="design_style" value="moderno" required>
+                            <div class="style-preview" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <div style="width: 80%; height: 70%; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px; padding: 20px;">
+                                    <div style="width: 60%; height: 8px; background: #0046FE; border-radius: 4px;"></div>
+                                    <div style="width: 80%; height: 5px; background: #ddd; border-radius: 4px;"></div>
+                                    <div style="width: 70%; height: 5px; background: #ddd; border-radius: 4px;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Moderno y Minimalista</div>
+                                <div class="style-description">Limpio, espacioso, enfocado en contenido</div>
+                            </div>
+                        </div>
+
+                        <!-- Clásico -->
+                        <div class="style-card" onclick="selectStyle(this, 'clasico')">
+                            <input type="radio" name="design_style" value="clasico">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #fef5e7 0%, #f9e79f 100%);">
+                                <div style="width: 80%; height: 70%; background: white; border-radius: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 2px solid #d4af37;">
+                                    <div style="width: 50%; height: 8px; background: #8b4513; border-radius: 2px;"></div>
+                                    <div style="width: 75%; height: 4px; background: #ddd; border-radius: 2px;"></div>
+                                    <div style="width: 65%; height: 4px; background: #ddd; border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Clásico y Elegante</div>
+                                <div class="style-description">Sofisticado, atemporal, profesional</div>
+                            </div>
+                        </div>
+
+                        <!-- Corporativo -->
+                        <div class="style-card" onclick="selectStyle(this, 'corporativo')">
+                            <input type="radio" name="design_style" value="corporativo">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);">
+                                <div style="width: 80%; height: 70%; background: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+                                    <div style="width: 55%; height: 10px; background: #1B1B1B; border-radius: 3px;"></div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="width: 30%; height: 30px; background: #0046FE; border-radius: 5px;"></div>
+                                        <div style="width: 30%; height: 30px; background: #0046FE; border-radius: 5px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Corporativo</div>
+                                <div class="style-description">Profesional, serio, confiable</div>
+                            </div>
+                        </div>
+
+                        <!-- Creativo -->
+                        <div class="style-card" onclick="selectStyle(this, 'creativo')">
+                            <input type="radio" name="design_style" value="creativo">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);">
+                                <div style="width: 80%; height: 70%; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 10px; padding: 20px; transform: rotate(-2deg);">
+                                    <div style="width: 65%; height: 12px; background: linear-gradient(90deg, #EC6746, #F1250E); border-radius: 6px;"></div>
+                                    <div style="width: 40%; height: 40px; background: #E5FC63; border-radius: 50%; margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Creativo</div>
+                                <div class="style-description">Atrevido, único, llamativo</div>
+                            </div>
+                        </div>
+
+                        <!-- Tecnológico -->
+                        <div class="style-card" onclick="selectStyle(this, 'tecnologico')">
+                            <input type="radio" name="design_style" value="tecnologico">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #1B1B1B 0%, #2a2a2a 100%);">
+                                <div style="width: 80%; height: 70%; background: #1a1a2e; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 1px solid #00ffff;">
+                                    <div style="width: 60%; height: 8px; background: linear-gradient(90deg, #0046FE, #00ffff); border-radius: 4px;"></div>
+                                    <div style="width: 50%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                    <div style="width: 70%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Tecnológico</div>
+                                <div class="style-description">Moderno, digital, innovador</div>
+                            </div>
+                        </div>
+
+                        <!-- Minimalista -->
+                        <div class="style-card" onclick="selectStyle(this, 'minimalista')">
+                            <input type="radio" name="design_style" value="minimalista">
+                            <div class="style-preview" style="background: #ffffff;">
+                                <div style="width: 70%; height: 60%; background: white; border: 1px solid #e0e0e0; border-radius: 3px; display: flex; flex-direction: column; gap: 20px; padding: 20px; align-items: center; justify-content: center;">
+                                    <div style="width: 40%; height: 3px; background: #1B1B1B;"></div>
+                                    <div style="width: 60%; height: 2px; background: #ddd;"></div>
+                                    <div style="width: 50%; height: 2px; background: #ddd;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Ultra Minimalista</div>
+                                <div class="style-description">Máxima simplicidad, menos es más</div>
+                            </div>
+                        </div>
+
+                        <!-- Vibrante -->
+                        <div class="style-card" onclick="selectStyle(this, 'vibrante')">
+                            <input type="radio" name="design_style" value="vibrante">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #E5FC63 0%, #CFFF3F 100%);">
+                                <div style="width: 80%; height: 70%; background: white; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+                                    <div style="width: 55%; height: 10px; background: #0046FE; border-radius: 5px;"></div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="width: 25px; height: 25px; background: #EC6746; border-radius: 50%;"></div>
+                                        <div style="width: 25px; height: 25px; background: #009A62; border-radius: 50%;"></div>
+                                        <div style="width: 25px; height: 25px; background: #E5FC63; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Vibrante y Colorido</div>
+                                <div class="style-description">Energético, alegre, juvenil</div>
+                            </div>
+                        </div>
+
+                        <!-- Luxury -->
+                        <div class="style-card" onclick="selectStyle(this, 'luxury')">
+                            <input type="radio" name="design_style" value="luxury">
+                            <div class="style-preview" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);">
+                                <div style="width: 80%; height: 70%; background: linear-gradient(135deg, #2a2a2a, #1a1a1a); border-radius: 8px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 10px; padding: 20px; border: 2px solid #d4af37;">
+                                    <div style="width: 50%; height: 8px; background: linear-gradient(90deg, #d4af37, #f4e4a6); border-radius: 4px;"></div>
+                                    <div style="width: 70%; height: 5px; background: rgba(212,175,55,0.3); border-radius: 3px;"></div>
+                                    <div style="width: 60%; height: 5px; background: rgba(212,175,55,0.3); border-radius: 3px;"></div>
+                                </div>
+                            </div>
+                            <div class="style-info">
+                                <div class="style-name">Premium Luxury</div>
+                                <div class="style-description">Exclusivo, lujoso, sofisticado</div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="helper-text">Haz clic en el estilo que más te guste</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Colores corporativos</label>
+                    <input type="text" class="form-input" name="brand_colors" placeholder="Ej: Azul #0046FE, Amarillo #E5FC63">
+                    <span class="helper-text">Si no tienes, te ayudaremos a elegir</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">¿Tienes webs de referencia que te gusten? <span class="required">*</span></label>
+                    <textarea class="form-textarea" name="reference_websites" placeholder="Pega URLs de webs que te inspiren...&#10;&#10;Ej:&#10;https://ejemplo1.com - Me gusta su diseño&#10;https://ejemplo2.com - Buen uso de imágenes&#10;https://ejemplo3.com - Estructura clara" required></textarea>
+                    <span class="helper-text">Indícanos qué webs te gustan para entender tu visión (mínimo 1 web)</span>
+                </div>
+            </div>
+
+            <!-- PASO 5: SEO y Marketing -->
+            <div class="form-step" data-step="5">
+                <h2 class="step-title">SEO y Marketing</h2>
+                <p class="step-description">Optimización para motores de búsqueda</p>
+
+                <div class="form-group">
+                    <label class="form-label">Palabras clave para SEO <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="keywords" placeholder="Ej: diseño web Madrid, arquitecto Albacete..." required>
+                    <span class="helper-text">Palabras que tus clientes buscarían en Google (separa con comas)</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">¿Tienes Google Analytics o Search Console?</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="analytics_no" name="has_analytics" value="no" checked>
+                            <label for="analytics_no">No, configurar cuentas nuevas</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="analytics_yes" name="has_analytics" value="si">
+                            <label for="analytics_yes">Sí, tengo cuentas existentes</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 6: Dominio -->
+            <div class="form-step" data-step="6">
+                <h2 class="step-title">Tu Dominio</h2>
+                <p class="step-description">Elige el nombre de dominio para tu web</p>
+
+                <div class="form-group">
+                    <label class="form-label">¿Qué dominio quieres para tu web? <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="domain_name" placeholder="Ej: miempresa.com o miempresa.es" required>
+                    <span class="helper-text">El dominio y hosting están incluidos en tu plan</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Alternativas de dominio</label>
+                    <input type="text" class="form-input" name="domain_alt1" placeholder="Opción alternativa 1">
+                    <input type="text" class="form-input" name="domain_alt2" placeholder="Opción alternativa 2" style="margin-top: 10px;">
+                    <span class="helper-text">Por si el dominio principal no está disponible</span>
+                </div>
+            </div>
+
+            <!-- PASO 7: Legal y Cumplimiento -->
+            <div class="form-step" data-step="7">
+                <h2 class="step-title">Textos Legales</h2>
+                <p class="step-description">Política de privacidad y aviso legal</p>
+
+                <div class="form-group">
+                    <label class="form-label">Política de privacidad</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="privacy_auto" name="privacy_policy" value="generar" checked onchange="togglePrivacyUpload(this)">
+                            <label for="privacy_auto">Generar automáticamente (RGPD)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="privacy_own" name="privacy_policy" value="propia" onchange="togglePrivacyUpload(this)">
+                            <label for="privacy_own">Subir mi propia política</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="privacyUploadSection" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Sube tu política de privacidad</label>
+                        <div class="file-upload" onclick="document.getElementById('privacyUpload').click()">
+                            <div class="file-upload-icon">📄</div>
+                            <div class="file-upload-text">
+                                <strong>Sube tu archivo o pégalo abajo</strong><br>
+                                <span style="font-size: 0.85rem; color: #999;">PDF, DOC, TXT</span>
+                            </div>
+                            <input type="file" id="privacyUpload" name="privacy_file" accept=".pdf,.doc,.docx,.txt">
+                        </div>
+                        <textarea class="form-textarea" name="privacy_text" placeholder="O pega aquí el texto de tu política..." style="margin-top: 15px; min-height: 120px;"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Información adicional</label>
+                    <textarea class="form-textarea" name="additional_info" placeholder="¿Algo más que debamos saber?"></textarea>
+                </div>
+            </div>
+
+            <!-- PASO 8: Datos Personales (Crear Cuenta) -->
+            <div class="form-step" data-step="8">
+                <h2 class="step-title">Crea tu Cuenta</h2>
+                <p class="step-description">Datos para acceder a tu dashboard</p>
+
+                <div class="form-group">
+                    <label class="form-label">Nombre completo <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="full_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Correo electrónico <span class="required">*</span></label>
+                    <input type="email" class="form-input" name="email" required>
+                    <span class="helper-text">Usarás este email para acceder al dashboard</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Teléfono <span class="required">*</span></label>
+                    <input type="tel" class="form-input" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Dirección física</label>
+                    <input type="text" class="form-input" name="address" placeholder="Opcional">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Crea una contraseña <span class="required">*</span></label>
+                    <input type="password" class="form-input" name="password" required minlength="8">
+                    <span class="helper-text">Mínimo 8 caracteres</span>
+                </div>
+            </div>
+
+            <!-- Navegación -->
+            <div class="form-navigation">
+                <button type="button" class="btn btn-prev" id="prevBtn" style="display: none;">← Anterior</button>
+                <button type="button" class="btn btn-next" id="nextBtn">Siguiente →</button>
+                <button type="submit" class="btn btn-submit" id="submitBtn" style="display: none;">Ir al Pago 🚀</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 8;
+
+        function showStep(step) {
+            // Ocultar todos los pasos
+            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.progress-step').forEach(s => s.classList.remove('active'));
+
+            // Mostrar paso actual
+            document.querySelector(`.form-step[data-step="${step}"]`).classList.add('active');
+            document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
+
+            // Actualizar barra de progreso
+            const progress = (step / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Mostrar/ocultar botones
+            document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'inline-block';
+            document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').style.display = step === totalSteps ? 'inline-block' : 'none';
+
+            // Scroll al top
+            document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            // Limpiar errores anteriores
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+            const currentStepElement = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+            let firstError = null;
+            let errorCount = 0;
+
+            // Validación especial para el paso 1: al menos un método de contacto
+            if (currentStep === 1) {
+                const contactMethods = document.querySelectorAll('input[name="contact_methods[]"]:checked');
+                if (contactMethods.length === 0) {
+                    const checkboxGroup = currentStepElement.querySelector('.checkbox-group');
+                    const errorMsg = document.createElement('span');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = '⚠️ Debes seleccionar al menos un método de contacto';
+                    checkboxGroup.parentElement.appendChild(errorMsg);
+                    firstError = checkboxGroup;
+                    errorCount++;
+                }
+            }
+
+            // Validar todos los campos obligatorios
+            const requiredInputs = currentStepElement.querySelectorAll('[required]');
+            
+            requiredInputs.forEach(input => {
+                // Si el input está oculto (display: none), no validar
+                if (input.offsetParent === null && input.type !== 'radio' && input.type !== 'file') {
+                    return;
+                }
+
+                let isValid = true;
+                let errorMessage = '';
+
+                // Validación según tipo de campo
+                if (input.type === 'email') {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        errorMessage = 'Este campo es obligatorio';
+                    } else if (!input.checkValidity()) {
+                        isValid = false;
+                        errorMessage = 'Por favor, introduce un email válido';
+                    }
+                } else if (input.type === 'url') {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        errorMessage = 'Este campo es obligatorio';
+                    } else if (!input.checkValidity()) {
+                        isValid = false;
+                        errorMessage = 'Por favor, introduce una URL válida';
+                    }
+                } else if (input.type === 'file') {
+                    if (input.files.length === 0) {
+                        isValid = false;
+                        errorMessage = 'Debes subir al menos un archivo';
+                        input.closest('.file-upload')?.classList.add('error');
+                    }
+                } else if (input.type === 'radio') {
+                    const radioGroup = currentStepElement.querySelectorAll(`input[name="${input.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(r => r.checked);
+                    if (!isChecked) {
+                        isValid = false;
+                        errorMessage = 'Debes seleccionar una opción';
+                    }
+                } else if (input.type === 'checkbox') {
+                    // Los checkboxes individuales obligatorios
+                    if (!input.checked) {
+                        isValid = false;
+                        errorMessage = 'Este campo es obligatorio';
+                    }
+                } else {
+                    // Campos de texto, textarea, select, etc.
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        errorMessage = 'Este campo es obligatorio';
+                    } else if (input.minLength && input.value.length < input.minLength) {
+                        isValid = false;
+                        errorMessage = `Mínimo ${input.minLength} caracteres`;
+                    }
+                }
+
+                if (!isValid) {
+                    input.classList.add('error');
+                    
+                    // Solo añadir mensaje de error si no es un radio button (evita duplicados)
+                    if (input.type !== 'radio' || !input.parentElement.querySelector('.error-message')) {
+                        const errorMsg = document.createElement('span');
+                        errorMsg.className = 'error-message';
+                        errorMsg.textContent = errorMessage;
+                        
+                        if (input.type === 'file') {
+                            input.closest('.file-upload').parentElement.appendChild(errorMsg);
+                        } else if (input.type === 'radio') {
+                            const radioContainer = input.closest('.radio-group') || input.closest('.style-cards-grid');
+                            if (radioContainer && !radioContainer.parentElement.querySelector('.error-message')) {
+                                radioContainer.parentElement.appendChild(errorMsg);
+                            }
+                        } else {
+                            input.parentElement.appendChild(errorMsg);
+                        }
+                    }
+                    
+                    if (!firstError) {
+                        firstError = input;
+                    }
+                    errorCount++;
+                }
+            });
+
+            // Si hay errores, hacer scroll al primero
+            if (errorCount > 0) {
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        if (firstError.focus) firstError.focus();
+                    }, 500);
+                }
+                return;
+            }
+
+            // Si todo está válido, avanzar al siguiente paso
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+
+        document.getElementById('membershipForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Aquí irá la lógica de envío
+            alert('Redirigiendo al pago...');
+            
+            // Aquí rediriges a tu pasarela de pago
+            // window.location.href = 'URL_DE_TU_PASARELA_DE_PAGO';
+        });
+
+        // Seleccionar estilo visual
+        function selectStyle(card, value) {
+            // Remover selección de todas las cards
+            document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+            // Añadir selección a la card clickeada
+            card.classList.add('selected');
+            // Marcar el radio button
+            card.querySelector('input[type="radio"]').checked = true;
+        }
+
+        // Mostrar/ocultar sección de servicios
+        function toggleServicesSection(checkbox) {
+            const servicesSection = document.getElementById('servicesSection');
+            servicesSection.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // Mostrar/ocultar upload de política de privacidad
+        function togglePrivacyUpload(radio) {
+            const uploadSection = document.getElementById('privacyUploadSection');
+            uploadSection.style.display = radio.value === 'propia' ? 'block' : 'none';
+        }
+
+        // Contador de páginas personalizadas
+        let customPageCount = 0;
+
+        // Contar total de páginas seleccionadas
+        function countTotalPages() {
+            const checkboxes = document.querySelectorAll('#pagesCheckboxGroup input[type="checkbox"]:checked');
+            const customPages = document.querySelectorAll('.custom-page-item input[type="text"]');
+            return checkboxes.length + customPages.length;
+        }
+
+        // Actualizar contador de páginas
+        function updatePageCounter() {
+            const total = countTotalPages();
+            const counter = document.getElementById('pageCounter');
+            const addBtn = document.getElementById('addPageBtn');
+            const warning = document.getElementById('pageLimitWarning');
+            
+            counter.textContent = `(${total}/5)`;
+            
+            // Deshabilitar botón si se alcanza el límite
+            if (total >= 5) {
+                addBtn.disabled = true;
+                addBtn.style.display = 'none';
+                warning.style.display = 'inline-block';
+            } else {
+                addBtn.disabled = false;
+                addBtn.style.display = 'inline-flex';
+                warning.style.display = 'none';
+            }
+            
+            // Deshabilitar checkboxes si se alcanza el límite
+            const checkboxes = document.querySelectorAll('#pagesCheckboxGroup input[type="checkbox"]:not(:checked)');
+            checkboxes.forEach(cb => {
+                cb.disabled = total >= 5;
+                if (total >= 5) {
+                    cb.parentElement.style.opacity = '0.5';
+                } else {
+                    cb.parentElement.style.opacity = '1';
+                }
+            });
+        }
+
+        // Añadir página personalizada
+        function addCustomPage() {
+            const total = countTotalPages();
+            if (total >= 5) {
+                alert('Has alcanzado el límite de 5 páginas para el Plan Básico');
+                return;
+            }
+
+            customPageCount++;
+            const container = document.getElementById('customPagesContainer');
+            
+            const pageItem = document.createElement('div');
+            pageItem.className = 'custom-page-item';
+            pageItem.id = `customPage_${customPageCount}`;
+            
+            pageItem.innerHTML = `
+                <input 
+                    type="text" 
+                    name="custom_pages[]" 
+                    placeholder="Ej: Portfolio, Galería, FAQ..."
+                    required
+                    oninput="updatePageCounter()"
+                />
+                <button type="button" class="btn-remove-page" onclick="removeCustomPage(${customPageCount})">
+                    ✕ Eliminar
+                </button>
+            `;
+            
+            container.appendChild(pageItem);
+            updatePageCounter();
+            
+            // Hacer foco en el input
+            pageItem.querySelector('input').focus();
+        }
+
+        // Eliminar página personalizada
+        function removeCustomPage(id) {
+            const pageItem = document.getElementById(`customPage_${id}`);
+            if (pageItem) {
+                pageItem.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    pageItem.remove();
+                    updatePageCounter();
+                }, 300);
+            }
+        }
+
+        // Animación de salida
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Función para generar textos con IA (placeholder)
+        function generateAITexts(type) {
+            alert('Función de generación con IA en desarrollo.\nPor ahora, escribe los textos manualmente o déjalos en blanco.');
+            // Aquí integrarías tu API de IA (OpenAI, etc.)
+        }
+
+        // Mejorar feedback de archivos subidos
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const parent = this.closest('.file-upload');
+                const textEl = parent.querySelector('.file-upload-text strong');
+                if (this.files.length > 0) {
+                    if (this.multiple) {
+                        textEl.textContent = `${this.files.length} archivo(s) seleccionado(s) ✓`;
+                    } else {
+                        textEl.textContent = `${this.files[0].name} ✓`;
+                    }
+                    parent.style.borderColor = '#009A62';
+                    parent.style.background = 'rgba(0, 154, 98, 0.05)';
+                }
+            });
+        });
+
+        // Mostrar/ocultar campos de contacto según selección
+        function toggleContactFields() {
+            const phoneChecked = document.getElementById('contact_phone').checked;
+            const emailChecked = document.getElementById('contact_email').checked;
+            const whatsappChecked = document.getElementById('contact_whatsapp').checked;
+            const formChecked = document.getElementById('contact_form').checked;
+            const addressChecked = document.getElementById('contact_address').checked;
+            const socialChecked = document.getElementById('contact_social').checked;
+
+            const contactSection = document.getElementById('contactDetailsSection');
+            const anyChecked = phoneChecked || emailChecked || whatsappChecked || formChecked || addressChecked || socialChecked;
+
+            contactSection.style.display = anyChecked ? 'block' : 'none';
+
+            document.getElementById('phoneField').style.display = phoneChecked ? 'block' : 'none';
+            document.getElementById('emailField').style.display = emailChecked ? 'block' : 'none';
+            document.getElementById('whatsappField').style.display = whatsappChecked ? 'block' : 'none';
+            document.getElementById('formEmailField').style.display = formChecked ? 'block' : 'none';
+            document.getElementById('addressField').style.display = addressChecked ? 'block' : 'none';
+            document.getElementById('socialField').style.display = socialChecked ? 'block' : 'none';
+
+            // Actualizar required en los campos
+            document.querySelector('input[name="phone_number"]').required = phoneChecked;
+            document.querySelector('input[name="email_contact"]').required = emailChecked;
+            document.querySelector('input[name="whatsapp_number"]').required = whatsappChecked;
+            document.querySelector('input[name="form_email"]').required = formChecked;
+            document.querySelector('input[name="physical_address"]').required = addressChecked;
+        }
+
+        // Manejar cambio de sector y mostrar campos específicos
+        function handleSectorChange(sector) {
+            const sectorSection = document.getElementById('sectorSpecificSection');
+            sectorSection.innerHTML = ''; // Limpiar contenido previo
+
+            // Sectores con menú (restaurantes, cafeterías, bares)
+            const menuSectors = ['restaurantes', 'cafeteria', 'bar', 'catering'];
+            
+            // Sectores con lista de servicios (spas, peluquerías, clínicas, etc.)
+            const serviceSectors = ['spa', 'estetica', 'peluqueria', 'clinica_dental', 'fisioterapia', 
+                                   'psicologia', 'nutricion', 'yoga', 'coaching', 'veterinaria'];
+            
+            // Sectores con horarios destacados
+            const scheduleSectors = ['restaurantes', 'cafeteria', 'bar', 'catering', 'spa', 'estetica', 
+                                    'peluqueria', 'fitness', 'mecanica'];
+
+            // Sectores con portfolio/galería
+            const portfolioSectors = ['fotografia', 'diseño', 'carpinteria', 'decoracion', 
+                                     'jardineria', 'construccion', 'arquitectura'];
+
+            if (menuSectors.includes(sector)) {
+                sectorSection.innerHTML = `
+                    <div class="form-group" style="border: 2px solid #0046FE; border-radius: 15px; padding: 25px; background: rgba(0, 70, 254, 0.03); margin: 25px 0;">
+                        <label class="form-label" style="color: #0046FE; font-size: 1.1rem;">📋 Menú del ${getSectorName(sector)}</label>
+                        <textarea class="form-textarea" name="menu_content" rows="8" placeholder="Escribe o pega aquí tu menú completo:&#10;&#10;ENTRANTES&#10;- Ensalada César - 8€&#10;- Croquetas caseras - 6€&#10;&#10;PLATOS PRINCIPALES&#10;- Paella valenciana - 15€&#10;- Entrecot de ternera - 18€&#10;&#10;POSTRES&#10;- Tarta de queso - 5€&#10;- Helado artesanal - 4€"></textarea>
+                        <span class="helper-text">💡 Incluye categorías, platos/productos y precios. Se mostrará de forma atractiva en tu web.</span>
+                        <button type="button" class="btn-add-page" onclick="generateAITexts('menu')" style="margin-top: 15px;">
+                            ✨ Generar menú con IA
+                        </button>
+                    </div>
+                `;
+            }
+
+            if (serviceSectors.includes(sector)) {
+                sectorSection.innerHTML += `
+                    <div class="form-group" style="border: 2px solid #009A62; border-radius: 15px; padding: 25px; background: rgba(0, 154, 98, 0.03); margin: 25px 0;">
+                        <label class="form-label" style="color: #009A62; font-size: 1.1rem;">💼 Lista de Servicios y Tratamientos</label>
+                        <textarea class="form-textarea" name="services_list" rows="8" placeholder="Escribe tu lista de servicios con precios y duración:&#10;&#10;MASAJES&#10;- Masaje relajante (60 min) - 45€&#10;- Masaje deportivo (45 min) - 40€&#10;&#10;TRATAMIENTOS FACIALES&#10;- Limpieza facial profunda (75 min) - 55€&#10;- Peeling químico (60 min) - 65€"></textarea>
+                        <span class="helper-text">💡 Organiza por categorías e incluye duración y precios cuando sea relevante.</span>
+                    </div>
+                `;
+            }
+
+            if (scheduleSectors.includes(sector)) {
+                sectorSection.innerHTML += `
+                    <div class="form-group" style="border: 2px solid #F1250E; border-radius: 15px; padding: 25px; background: rgba(241, 37, 14, 0.03); margin: 25px 0;">
+                        <label class="form-label" style="color: #F1250E; font-size: 1.1rem;">🕐 Horarios de Apertura</label>
+                        <textarea class="form-textarea" name="opening_hours" rows="5" placeholder="Ejemplo:&#10;Lunes a Viernes: 9:00 - 20:00&#10;Sábados: 10:00 - 14:00&#10;Domingos: Cerrado&#10;&#10;Vacaciones de verano: 1-15 agosto"></textarea>
+                        <span class="helper-text">💡 Especifica horarios especiales, festivos o vacaciones.</span>
+                    </div>
+                `;
+            }
+
+            if (portfolioSectors.includes(sector)) {
+                sectorSection.innerHTML += `
+                    <div class="form-group" style="border: 2px solid #8B5CF6; border-radius: 15px; padding: 25px; background: rgba(139, 92, 246, 0.03); margin: 25px 0;">
+                        <label class="form-label" style="color: #8B5CF6; font-size: 1.1rem;">📸 Descripción de Proyectos Destacados</label>
+                        <textarea class="form-textarea" name="portfolio_description" rows="6" placeholder="Describe 3-5 proyectos que quieras destacar:&#10;&#10;PROYECTO 1: Sesión de boda en Mallorca&#10;Boda al atardecer en finca mallorquina, 300 invitados...&#10;&#10;PROYECTO 2: Branding para startup tecnológica&#10;Diseño completo de identidad corporativa..."></textarea>
+                        <span class="helper-text">💡 Estos proyectos se destacarán en tu portfolio. Podrás subir las imágenes después.</span>
+                    </div>
+                `;
+            }
+
+            // Agregar animación de entrada
+            if (sectorSection.innerHTML !== '') {
+                sectorSection.style.animation = 'slideIn 0.4s ease';
+            }
+        }
+
+        // Obtener nombre del sector para mostrar
+        function getSectorName(sector) {
+            const names = {
+                'restaurantes': 'Restaurante',
+                'cafeteria': 'Cafetería',
+                'bar': 'Bar',
+                'catering': 'Catering'
+            };
+            return names[sector] || 'Negocio';
+        }
+
+        // Quitar clase de error cuando el usuario empieza a escribir/seleccionar
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('error')) {
+                e.target.classList.remove('error');
+                // Buscar y eliminar mensaje de error asociado
+                const errorMsg = e.target.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('error')) {
+                e.target.classList.remove('error');
+                // Buscar y eliminar mensaje de error asociado
+                const errorMsg = e.target.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+                // Para file uploads
+                if (e.target.type === 'file') {
+                    const fileUpload = e.target.closest('.file-upload');
+                    if (fileUpload) {
+                        fileUpload.classList.remove('error');
+                    }
+                }
+            }
+        });
+
+        // Inicializar
+        showStep(1);
+    </script>
+</body>
+</html> 

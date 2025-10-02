@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Por Qué Elegirme</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Sección principal */
+        .comparativa-section {
+            background: #FEFAF5 !important;
+            padding: 100px 20px !important;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .comparativa-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-title {
+            color: #FEFAF5 !important;
+            font-size: clamp(2rem, 5vw, 3.5rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: clamp(1rem, 2vw, 1.2rem) !important;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Tabla comparativa */
+        .comparison-table-wrapper {
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Header de la tabla */
+        .table-header {
+            background: linear-gradient(135deg, #1B1B1B, #2a2a2a);
+        }
+
+        .table-header th {
+            padding: 30px 20px;
+            text-align: center;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            font-size: 1.5rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-header th:first-child {
+            text-align: left;
+            color: transparent;
+        }
+
+        .table-header th:nth-child(2) {
+            color: #E5FC63 !important;
+            background: linear-gradient(135deg, #0046FE, #0056ff);
+        }
+
+        .table-header th:nth-child(3) {
+            color: #ccc !important;
+        }
+
+        /* Logo en header */
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            font-size: 1.8rem !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+        }
+
+        /* Filas de la tabla */
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(0, 70, 254, 0.05);
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0, 70, 254, 0.1);
+        }
+
+        .comparison-table td {
+            padding: 25px 20px;
+            text-align: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #1B1B1B !important;
+            padding-left: 40px;
+        }
+
+        /* Fila de costes - destacada */
+        .cost-row {
+            background: rgba(229, 252, 99, 0.1);
+        }
+
+        .cost-row td {
+            padding: 30px 20px;
+            font-size: 1.3rem !important;
+            font-weight: 800 !important;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        .cost-row .cost-agutidesigns {
+            color: #009A62 !important;
+        }
+
+        .cost-row .cost-other {
+            color: #F1250E !important;
+        }
+
+        /* Checkmarks y X */
+        .check-icon,
+        .cross-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .check-icon {
+            background: #009A62;
+            color: white;
+        }
+
+        .cross-icon {
+            background: #F1250E;
+            color: white;
+        }
+
+        .comparison-table tbody tr:hover .check-icon {
+            transform: scale(1.2) rotate(360deg);
+            box-shadow: 0 5px 20px rgba(0, 154, 98, 0.5);
+        }
+
+        .comparison-table tbody tr:hover .cross-icon {
+            transform: scale(1.2) rotate(360deg);
+            box-shadow: 0 5px 20px rgba(241, 37, 14, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+
+            .table-header th {
+                padding: 20px 15px;
+                font-size: 1.2rem !important;
+            }
+
+            .comparison-table td {
+                padding: 20px 15px;
+            }
+
+            .comparison-table td:first-child {
+                padding-left: 20px;
+                font-size: 0.9rem;
+            }
+
+            .logo-text {
+                font-size: 1.3rem !important;
+            }
+
+            .check-icon,
+            .cross-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comparativa-section {
+                padding: 60px 15px !important;
+            }
+
+            .section-header {
+                margin-bottom: 50px;
+            }
+
+            .table-header th {
+                padding: 15px 10px;
+                font-size: 1rem !important;
+            }
+
+            .logo-text {
+                font-size: 1.1rem !important;
+            }
+
+            .comparison-table td {
+                padding: 15px 10px;
+                font-size: 0.85rem;
+            }
+
+            .comparison-table td:first-child {
+                padding-left: 15px;
+                font-size: 0.8rem;
+            }
+
+            .check-icon,
+            .cross-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+
+            .cost-row td {
+                font-size: 1.1rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="comparativa-section">
+        <div class="comparativa-container">
+            <!-- Header -->
+            <div class="section-header">
+                <h2 class="section-title">Por Qué Elegirme Sobre Otras Opciones</h2>
+                <p class="section-subtitle">
+                    Con mi sistema de membresía obtienes mucho más que una web: 
+                    accedes a un servicio continuo, flexible y personalizado.
+                </p>
+            </div>
+
+            <!-- Tabla comparativa -->
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>
+                                <div class="brand-logo">
+                                    <span class="logo-text">agutidesigns</span>
+                                </div>
+                            </th>
+                            <th>Diseñador web<br>profesional en plantilla</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sin costes de contratación</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sin impuestos asociados a personal</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr>
+                            <td>Sin costes de software</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr>
+                            <td>Diseñador experto en WordPress</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr>
+                            <td>Diseñador experto en CRO</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr>
+                            <td>Consultor SEO con experiencia probada</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                        <tr class="cost-row">
+                            <td>Costes</td>
+                            <td class="cost-agutidesigns">Asequible</td>
+                            <td class="cost-other">Caro</td>
+                        </tr>
+                        <tr>
+                            <td>Garantía de resultados</td>
+                            <td><span class="check-icon">✓</span></td>
+                            <td><span class="cross-icon">✕</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</body>
+</html> 

@@ -1,0 +1,93 @@
+📝 CÓMO OBTENER LAS URLs DE TUS FUENTES EN WORDPRESS
+=====================================================
+
+PASO 1: IR A LA BIBLIOTECA DE MEDIOS
+-------------------------------------
+1. Entra en tu panel de WordPress
+2. Ve a "Medios" → "Biblioteca"
+3. Busca tus archivos de fuentes (.woff2, .ttf, .woff)
+
+
+PASO 2: COPIAR LA URL DE CADA FUENTE
+-------------------------------------
+Para CADA archivo de fuente:
+
+1. Haz clic en el archivo de fuente
+2. Se abrirá un panel lateral a la derecha
+3. Busca el campo "URL del archivo" o "File URL"
+4. Copia esa URL completa
+
+Ejemplo de URL:
+https://tuweb.com/wp-content/uploads/2025/01/IBMPlexMono-Regular.woff2
+
+
+PASO 3: PEGAR LAS URLs EN EL CÓDIGO HTML
+-----------------------------------------
+Abre el archivo pricing-section.html y busca las líneas que dicen:
+
+TU_URL_AQUI
+
+Y reemplázalas con las URLs que copiaste.
+
+EJEMPLO ANTES:
+src: url('TU_URL_AQUI/IBMPlexMono-Regular.woff2') format('woff2'),
+
+EJEMPLO DESPUÉS:
+src: url('https://tuweb.com/wp-content/uploads/2025/01/IBMPlexMono-Regular.woff2') format('woff2'),
+
+
+📋 CHECKLIST DE FUENTES QUE NECESITAS:
+--------------------------------------
+Marca las que tengas subidas en WordPress:
+
+IBM Plex Mono:
+□ IBMPlexMono-Regular.woff2 (o .ttf)
+□ IBMPlexMono-SemiBold.woff2 (o .ttf) - OPCIONAL
+□ IBMPlexMono-Bold.woff2 (o .ttf)
+
+Soulcraft:
+□ Soulcraft.woff2 (o .ttf)
+
+
+💡 NOTAS IMPORTANTES:
+---------------------
+1. Si NO tienes el formato .woff2, puedes borrar esa línea y dejar solo .ttf
+   
+   Ejemplo:
+   src: url('https://tuweb.com/wp-content/uploads/Soulcraft.ttf') format('truetype');
+
+2. Si NO tienes SemiBold, puedes borrar todo ese bloque @font-face
+
+3. Los nombres de archivo pueden variar:
+   - IBMPlexMono-Regular.woff2
+   - ibm-plex-mono-regular.woff2
+   - IBMPlexMono_Regular.woff2
+   Usa el nombre EXACTO que veas en WordPress
+
+
+⚠️ PROBLEMA COMÚN:
+------------------
+Si después de pegar las URLs las fuentes NO se ven:
+
+1. Verifica que las URLs sean correctas (cópialas y pégalas en el navegador)
+2. Asegúrate de NO tener comillas tipográficas "" sino comillas simples ''
+3. Revisa que el nombre del archivo sea exactamente igual
+
+
+🎯 EJEMPLO COMPLETO CON URLs REALES:
+------------------------------------
+@font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('https://midominio.com/wp-content/uploads/2025/fuentes/IBMPlexMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Soulcraft';
+    src: url('https://midominio.com/wp-content/uploads/2025/fuentes/Soulcraft.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+} 

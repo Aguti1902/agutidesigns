@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos Realizados</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Sección Portfolio */
+        .portfolio-section {
+            background: linear-gradient(135deg, #0051ff 0%, #0066ff 100%) !important;
+            padding: 100px 20px !important;
+        }
+
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .portfolio-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .portfolio-title {
+            color: #FEFAF5 !important;
+            font-size: clamp(2rem, 5vw, 3.5rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', 'Impact', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .portfolio-subtitle {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: clamp(1rem, 2vw, 1.2rem) !important;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Grid de proyectos */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 350px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .project-card:hover .project-image::before {
+            opacity: 1;
+        }
+
+        .project-screenshot {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .project-card:hover .project-screenshot {
+            transform: scale(1.1);
+        }
+
+        .project-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #FEFAF5;
+            color: #1B1B1B;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-url {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+            z-index: 10;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .project-card:hover .project-url {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-content {
+            padding: 35px 30px;
+        }
+
+        .project-title {
+            color: #1B1B1B !important;
+            font-size: 1.8rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 15px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .project-description {
+            color: #333 !important;
+            font-size: 0.95rem !important;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(0, 81, 255, 0.1);
+            color: #0051ff !important;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .project-image {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-section {
+                padding: 60px 15px !important;
+            }
+
+            .portfolio-header {
+                margin-bottom: 50px;
+            }
+
+            .project-image {
+                height: 250px;
+            }
+
+            .project-content {
+                padding: 25px 20px;
+            }
+
+            .project-title {
+                font-size: 1.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="portfolio-section">
+        <div class="portfolio-container">
+            <!-- Header -->
+            <div class="portfolio-header">
+                <h2 class="portfolio-title">Proyectos Realizados</h2>
+                <p class="portfolio-subtitle">
+                    Webs profesionales diseñadas para convertir visitantes en clientes. 
+                    Cada proyecto único, adaptado a las necesidades del negocio.
+                </p>
+            </div>
+
+            <!-- Grid de proyectos -->
+            <div class="projects-grid">
+                <!-- Proyecto 1: GHSL Arquitectos -->
+                <div class="project-card" onclick="window.open('https://ghslarquitectos.com/', '_blank')">
+                    <div class="project-image">
+                        <div class="project-badge">Arquitectura</div>
+                        <div class="project-url">ghslarquitectos.com</div>
+                        <div class="project-screenshot" style="background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-family: 'Bebas Neue', sans-serif;">GHSL</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">GHSL Arquitectos</h3>
+                        <p class="project-description">
+                            Web profesional para estudio de arquitectura especializado en viviendas minimalistas. 
+                            Portfolio visual con galerías de proyectos residenciales.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Portfolio</span>
+                            <span class="tag">Responsive</span>
+                            <span class="tag">SEO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proyecto 2: MontePego Life -->
+                <div class="project-card" onclick="window.open('https://montepegolife.com/es/', '_blank')">
+                    <div class="project-image">
+                        <div class="project-badge">Inmobiliaria</div>
+                        <div class="project-url">montepegolife.com</div>
+                        <div class="project-screenshot" style="background: linear-gradient(135deg, #16a085, #2ecc71); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; font-family: 'Bebas Neue', sans-serif;">MONTEPEGO</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">MontePego Life</h3>
+                        <p class="project-description">
+                            Plataforma inmobiliaria completa con búsqueda de propiedades, 
+                            galería de imágenes y sección de servicios para Monte Pego Residencial.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Inmobiliaria</span>
+                            <span class="tag">Multiidioma</span>
+                            <span class="tag">Buscador</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proyecto 3: WonderPhotoshop -->
+                <div class="project-card" onclick="window.open('https://wonderphotoshop.es/', '_blank')">
+                    <div class="project-image">
+                        <div class="project-badge">Fotografía</div>
+                        <div class="project-url">wonderphotoshop.es</div>
+                        <div class="project-screenshot" style="background: linear-gradient(135deg, #8e44ad, #9b59b6); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: white; font-family: 'Bebas Neue', sans-serif;">WONDER</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Wonder Photoshop</h3>
+                        <p class="project-description">
+                            Web de servicios de edición fotográfica profesional. 
+                            Diseño moderno enfocado en mostrar antes/después de trabajos.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Portfolio</span>
+                            <span class="tag">Galería</span>
+                            <span class="tag">Contacto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proyecto 4: Nova Cuina -->
+                <div class="project-card" onclick="window.open('https://nova-cuina.com/', '_blank')">
+                    <div class="project-image">
+                        <div class="project-badge">Restauración</div>
+                        <div class="project-url">nova-cuina.com</div>
+                        <div class="project-screenshot" style="background: linear-gradient(135deg, #e74c3c, #c0392b); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; font-family: 'Bebas Neue', sans-serif;">NOVA CUINA</div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Nova Cuina</h3>
+                        <p class="project-description">
+                            Sitio web para restaurante profesional. Diseño elegante 
+                            con menú digital, reservas online y galería de platos.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Restaurante</span>
+                            <span class="tag">Reservas</span>
+                            <span class="tag">Menú Digital</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html> 

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Por Qué Elegirme</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .comparativa-section {
+            background: #FEFAF5 !important;
+            padding: 100px 20px !important;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .comparativa-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            color: #1B1B1B !important;
+            font-size: clamp(2rem, 5vw, 3.5rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            color: #333 !important;
+            font-size: clamp(1rem, 2vw, 1.2rem) !important;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Comparativa con 2 columnas */
+        .comparison-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .comparison-column {
+            background: white;
+            border-radius: 30px;
+            padding: 50px 40px;
+            position: relative;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-column.featured {
+            background: linear-gradient(135deg, #0046FE, #0056ff);
+            transform: scale(1.08);
+            box-shadow: 0 20px 60px rgba(0, 70, 254, 0.4);
+            border: 3px solid #E5FC63;
+        }
+
+        .comparison-column.featured::before {
+            content: '⭐ RECOMENDADO';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #E5FC63;
+            color: #1B1B1B;
+            padding: 10px 26px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(229, 252, 99, 0.4);
+            z-index: 100;
+        }
+
+        .comparison-column:not(.featured):hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .column-header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 35px;
+        }
+
+        .comparison-column.featured .column-header {
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .column-logo {
+            height: 60px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .column-logo img {
+            max-height: 100%;
+            width: auto;
+        }
+
+        .column-title {
+            font-size: 1.8rem !important;
+            font-weight: 800 !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            color: #1B1B1B !important;
+            margin-bottom: 10px;
+        }
+
+        .comparison-column.featured .column-title {
+            color: #E5FC63 !important;
+        }
+
+        .column-subtitle {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .comparison-column.featured .column-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Lista de beneficios */
+        .benefits-list {
+            list-style: none;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-column.featured .benefit-item {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .benefit-item:hover {
+            transform: translateX(10px);
+            background: rgba(0, 70, 254, 0.03);
+            padding-left: 15px;
+            padding-right: 15px;
+            border-radius: 10px;
+        }
+
+        .comparison-column.featured .benefit-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .benefit-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover .benefit-icon {
+            transform: rotate(360deg) scale(1.2);
+        }
+
+        .benefit-icon.check {
+            background: #009A62;
+            color: white;
+        }
+
+        .benefit-icon.cross {
+            background: #F1250E;
+            color: white;
+        }
+
+        .benefit-text {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .comparison-column.featured .benefit-text {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 500;
+        }
+
+        /* Precio destacado */
+        .price-highlight {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(0, 70, 254, 0.05);
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .comparison-column.featured .price-highlight {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comparison-column.featured .price-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .price-value {
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        .price-value.good {
+            color: #009A62 !important;
+        }
+
+        .price-value.bad {
+            color: #F1250E !important;
+        }
+
+        .comparison-column.featured .price-value.good {
+            color: #E5FC63 !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .comparison-wrapper {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .comparison-column.featured {
+                transform: scale(1);
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comparativa-section {
+                padding: 60px 15px !important;
+            }
+
+            .section-header {
+                margin-bottom: 50px;
+            }
+
+            .comparison-column {
+                padding: 40px 25px;
+            }
+
+            .column-logo {
+                height: 50px;
+            }
+
+            .benefit-item {
+                padding: 14px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="comparativa-section">
+        <div class="comparativa-container">
+            <div class="section-header">
+                <h2 class="section-title">Por Qué Elegirme Sobre Otras Opciones</h2>
+                <p class="section-subtitle">
+                    Con mi sistema de membresía obtienes mucho más que una web: 
+                    accedes a un servicio continuo, flexible y personalizado.
+                </p>
+            </div>
+
+            <div class="comparison-wrapper">
+                <!-- Tu columna (destacada) -->
+                <div class="comparison-column featured">
+                    <div class="column-header">
+                        <div class="column-logo">
+                            <svg width="200" height="60" viewBox="0 0 865 238" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g clip-path="url(#clip0_366_11271)">
+                                <path d="M311.4 39.6943H291.628H257.028H237.257V74.3751H257.028V198.361H291.628V74.3751H311.4V39.6943Z" fill="#E5FC63"/>
+                                <path d="M350.943 39.6943V198.361H316.343V39.6943H350.943Z" fill="#E5FC63"/>
+                                <path d="M627.743 0H593.143V34.7083H627.743V0Z" fill="#E5FC63"/>
+                                <path d="M627.743 39.7822H593.143V198.273H627.743V39.7822Z" fill="#E5FC63"/>
+                                <path d="M395.429 0L395.396 58.3926C394.824 47.9471 386.213 39.6667 375.657 39.6667C365.101 39.6667 355.886 48.5366 355.886 59.5V178.5C355.886 189.463 364.728 198.333 375.657 198.333C386.586 198.333 395.429 189.463 395.429 178.5V198.306H430.029L430.062 0H395.429ZM392.957 168.583C391.59 168.583 390.486 167.476 390.486 166.104V71.8958C390.486 70.524 391.59 69.4167 392.957 69.4167C394.325 69.4167 395.429 70.524 395.429 71.8958V166.104C395.429 167.476 394.325 168.583 392.957 168.583Z" fill="#E5FC63"/>
+                                <path d="M672.228 39.7823V59.5C672.228 48.3988 663.161 39.4463 652.045 39.6722C640.929 39.898 632.686 49.0103 632.686 59.8636V178.505C632.686 189.458 641.456 198.311 652.457 198.311C663.458 198.311 672.228 189.491 672.228 178.505V203.297H647.514V238.005H669.757C690.138 238.005 706.828 221.483 706.828 201.093V39.7823H672.228ZM669.757 168.583C668.389 168.583 667.286 167.476 667.286 166.104V71.8958C667.286 70.524 668.389 69.4166 669.757 69.4166C671.125 69.4166 672.228 70.524 672.228 71.8958V166.104C672.228 167.476 671.125 168.583 669.757 168.583Z" fill="#E5FC63"/>
+                                <path d="M746.371 59.5C746.371 48.3988 755.439 39.4463 766.555 39.6722C777.671 39.898 785.914 49.0103 785.914 59.8636V198.339H751.314V71.9013C751.314 70.5295 750.21 69.4221 748.843 69.4221C747.475 69.4221 746.371 70.5295 746.371 71.9013V198.339H711.771V39.7823H746.371V59.5Z" fill="#E5FC63"/>
+                                <path d="M37.0714 39.6665C15.1416 39.6665 0 54.5415 0 74.3748V94.2082H34.6V71.8957C34.6 70.5239 35.7039 69.4165 37.0714 69.4165C38.439 69.4165 39.5429 70.5239 39.5429 71.8957V123.958C39.5429 112.857 29.6571 104.13 19.7714 104.13C8.95206 104.13 0 113.469 0 124.322V178.142C0 188.995 8.95206 198.333 19.7714 198.333C29.6571 198.333 39.5429 189.601 39.5429 178.505V198.339H74.1429V74.5677C74.1429 54.547 59.3143 39.672 37.0714 39.672V39.6665ZM37.0714 168.583C35.7039 168.583 34.6 167.476 34.6 166.104V136.354C34.6 134.982 35.7039 133.875 37.0714 133.875C38.439 133.875 39.5429 134.982 39.5429 136.354V166.104C39.5429 167.476 38.439 168.583 37.0714 168.583Z" fill="#E5FC63"/>
+                                <path d="M588.2 133.875C588.2 117.43 572.723 104.125 553.599 104.125H548.657V71.8957C548.657 70.5239 549.761 69.4165 551.128 69.4165C552.496 69.4165 553.599 70.5239 553.599 71.8957V94.131H588.2V74.3748C588.2 54.5415 573.371 39.6665 551.128 39.6665C528.885 39.6665 514.057 54.5415 514.057 74.3748V94.2082C514.057 116.135 529.533 133.875 548.657 133.875L553.599 133.847V166.104C553.599 167.476 552.496 168.583 551.128 168.583C549.761 168.583 548.657 167.476 548.657 166.104V143.841H514.057V163.597C514.057 183.431 528.885 198.306 551.128 198.306C573.371 198.306 588.2 183.431 588.2 163.597V133.875Z" fill="#E5FC63"/>
+                                <path d="M865 133.875C865 117.43 849.524 104.125 830.4 104.125H825.457V71.8957C825.457 70.5239 826.561 69.4165 827.929 69.4165C829.296 69.4165 830.4 70.5239 830.4 71.8957V94.131H865V74.3748C865 54.5415 850.172 39.6665 827.929 39.6665C805.686 39.6665 790.857 49.5832 790.857 69.4165V94.2082C790.857 116.135 806.334 133.875 825.457 133.875L830.4 133.847V166.104C830.4 167.476 829.296 168.583 827.929 168.583C826.561 168.583 825.457 167.476 825.457 166.104V143.841H790.857V163.597C790.857 183.431 805.686 198.306 827.929 198.306C850.172 198.306 865 183.431 865 163.597V133.875Z" fill="#E5FC63"/>
+                                <path d="M509.115 133.875V74.3748C509.115 54.5415 494.286 39.6665 472.076 39.6665C449.866 39.6665 434.972 54.5415 434.972 74.3748V163.625C434.972 183.458 449.8 198.333 472.076 198.333C494.352 198.333 509.115 183.458 509.115 163.625V143.792H474.569V166.104C474.569 167.476 473.466 168.583 472.098 168.583H472.076C470.709 168.583 469.605 167.476 469.605 166.104V133.875H509.115ZM469.572 114.042V71.8957C469.572 70.5239 470.676 69.4165 472.043 69.4165C473.411 69.4165 474.515 70.5239 474.515 71.8957V114.042H469.572Z" fill="#E5FC63"/>
+                                <path d="M192.772 166.104V39.6943H158.172V158.667C158.172 180.594 174.752 198.333 195.243 198.333C215.734 198.333 232.315 180.594 232.315 158.667V39.6943H197.715V166.104C197.715 167.476 196.611 168.583 195.243 168.583C193.876 168.583 192.772 167.476 192.772 166.104Z" fill="#E5FC63"/>
+                                <path d="M153.229 74.3748C153.229 54.5415 138.4 39.6665 116.157 39.6665C93.9145 39.6665 79.0859 54.5415 79.0859 74.3748V163.625C79.0859 183.458 88.9717 198.333 108.743 198.333C123.572 198.333 133.457 183.458 133.457 163.625V198.333H153.229V104.125H118.629V119H138.4L118.629 123.958V166.104C118.629 167.476 117.525 168.583 116.157 168.583C114.79 168.583 113.686 167.476 113.686 166.104V71.8957C113.686 70.5239 114.79 69.4165 116.157 69.4165C117.525 69.4165 118.629 70.5239 118.629 71.8957V94.2082H153.229V74.3748Z" fill="#E5FC63"/>
+                                </g>
+                            </svg>
+                        </div>
+                        <h3 class="column-title">agutidesigns</h3>
+                        <p class="column-subtitle">Diseñador web en membresía</p>
+                    </div>
+
+                    <ul class="benefits-list">
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Sin costes de contratación</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Sin impuestos de personal</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Sin costes de software</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Experto en WordPress</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Experto en CRO</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">SEO con experiencia probada</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon check">✓</span>
+                            <span class="benefit-text">Garantía de resultados</span>
+                        </li>
+                    </ul>
+
+                    <div class="price-highlight">
+                        <div class="price-label">Coste Mensual</div>
+                        <div class="price-value good">Asequible</div>
+                    </div>
+                </div>
+
+                <!-- Columna otros -->
+                <div class="comparison-column">
+                    <div class="column-header">
+                        <div class="column-logo">
+                            <span style="font-size: 2.5rem; color: #ccc; font-family: 'Bebas Neue', sans-serif;">Otros</span>
+                        </div>
+                        <h3 class="column-title">Diseñador Tradicional</h3>
+                        <p class="column-subtitle">Contratación en plantilla</p>
+                    </div>
+
+                    <ul class="benefits-list">
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Costes de contratación altos</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Impuestos y seguridad social</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Licencias de software caras</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Conocimientos limitados</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Sin experiencia en CRO</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">SEO básico o inexistente</span>
+                        </li>
+                        <li class="benefit-item">
+                            <span class="benefit-icon cross">✕</span>
+                            <span class="benefit-text">Sin garantías</span>
+                        </li>
+                    </ul>
+
+                    <div class="price-highlight">
+                        <div class="price-label">Coste Mensual</div>
+                        <div class="price-value bad">Muy Caro</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

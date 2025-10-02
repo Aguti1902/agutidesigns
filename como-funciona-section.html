@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cómo Funciona la Membresía</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Sección principal */
+        .how-it-works {
+            background: #0046FE !important;
+            padding: 100px 20px !important;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .main-title {
+            color: #FEFAF5 !important;
+            font-size: clamp(2rem, 5vw, 3.5rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .main-subtitle {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: clamp(1rem, 2vw, 1.2rem) !important;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Steps Container */
+        .steps-wrapper {
+            position: relative;
+        }
+
+        /* Línea conectora */
+        .connector-line {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #E5FC63, #CFFF3F, #FEFAF5, rgba(255, 255, 255, 0.5));
+            border-radius: 2px;
+            z-index: 0;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Step Card */
+        .step-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            border-color: #FEFAF5;
+            background: white;
+        }
+
+        /* Número del paso */
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: #FEFAF5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover .step-number {
+            transform: rotate(360deg) scale(1.15);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            background: #E5FC63;
+        }
+
+        .step-number span {
+            color: #1B1B1B !important;
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        /* Icono del paso */
+        .step-icon {
+            font-size: 3rem;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            filter: grayscale(0);
+        }
+
+        .step-card:hover .step-icon {
+            transform: scale(1.2);
+        }
+
+        /* Contenido del paso */
+        .step-title {
+            color: #1B1B1B !important;
+            font-size: 1.5rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 15px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .step-description {
+            color: #555 !important;
+            font-size: 0.95rem !important;
+            line-height: 1.7;
+        }
+
+        /* Highlight especial para cada paso */
+        .step-highlight {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .step-card:nth-child(1) .step-highlight {
+            background: rgba(0, 81, 255, 0.1);
+            color: #0051ff !important;
+        }
+
+        .step-card:nth-child(2) .step-highlight {
+            background: rgba(0, 154, 98, 0.1);
+            color: #009A62 !important;
+        }
+
+        .step-card:nth-child(3) .step-highlight {
+            background: rgba(236, 103, 70, 0.1);
+            color: #EC6746 !important;
+        }
+
+        .step-card:nth-child(4) .step-highlight {
+            background: rgba(207, 255, 63, 0.3);
+            color: #1B1B1B !important;
+        }
+
+        /* CTA Final */
+        .final-cta {
+            text-align: center;
+            margin-top: 80px;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: white;
+        }
+
+        .cta-title {
+            color: #FEFAF5 !important;
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase !important;
+        }
+
+        .cta-text {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 35px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #E5FC63 !important;
+            color: #1B1B1B !important;
+            padding: 18px 50px !important;
+            border-radius: 50px;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 10px 30px rgba(229, 252, 99, 0.4);
+            text-decoration: none;
+            font-family: 'IBM Plex Mono', monospace !important;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(229, 252, 99, 0.6);
+            background: #CFFF3F !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 35px;
+            }
+
+            .connector-line {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .how-it-works {
+                padding: 60px 15px !important;
+            }
+
+            .section-header {
+                margin-bottom: 50px;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .step-card {
+                padding: 35px 25px;
+            }
+
+            .step-number {
+                width: 70px;
+                height: 70px;
+            }
+
+            .step-number span {
+                font-size: 2rem !important;
+            }
+
+            .step-icon {
+                font-size: 2.5rem;
+            }
+
+            .final-cta {
+                padding: 40px 25px;
+                margin-top: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="how-it-works">
+        <div class="container">
+            <!-- Header -->
+            <div class="section-header">
+                <h2 class="main-title">Cómo Funciona la Membresía</h2>
+                <p class="main-subtitle">
+                    Un proceso simple y rápido. De la idea a tu web en funcionamiento en solo 4 pasos.
+                </p>
+            </div>
+
+            <!-- Steps -->
+            <div class="steps-wrapper">
+                <div class="connector-line"></div>
+                
+                <div class="steps-grid">
+                    <!-- Paso 1 -->
+                    <div class="step-card">
+                        <div class="step-number">
+                            <span>1</span>
+                        </div>
+                        <div class="step-icon">📋</div>
+                        <h3 class="step-title">Elige Tu Plan</h3>
+                        <p class="step-description">
+                            Selecciona el plan que mejor se adapte a tu negocio. 
+                            Básico, Avanzado o Premium según tus necesidades.
+                        </p>
+                        <div class="step-highlight">5, 10 o 20 páginas</div>
+                    </div>
+
+                    <!-- Paso 2 -->
+                    <div class="step-card">
+                        <div class="step-number">
+                            <span>2</span>
+                        </div>
+                        <div class="step-icon">📝</div>
+                        <h3 class="step-title">Rellena el Formulario</h3>
+                        <p class="step-description">
+                            Cuéntame sobre tu negocio, objetivos y preferencias. 
+                            Todo lo necesario para crear tu web perfecta.
+                        </p>
+                        <div class="step-highlight">Simple y rápido</div>
+                    </div>
+
+                    <!-- Paso 3 -->
+                    <div class="step-card">
+                        <div class="step-number">
+                            <span>3</span>
+                        </div>
+                        <div class="step-icon">🚀</div>
+                        <h3 class="step-title">Web en 5 Días</h3>
+                        <p class="step-description">
+                            Diseño, desarrollo y lanzamiento. Tu web profesional 
+                            lista y funcionando en tiempo récord.
+                        </p>
+                        <div class="step-highlight">Lanzamiento rápido</div>
+                    </div>
+
+                    <!-- Paso 4 -->
+                    <div class="step-card">
+                        <div class="step-number">
+                            <span>4</span>
+                        </div>
+                        <div class="step-icon">⚙️</div>
+                        <h3 class="step-title">Dashboard de Control</h3>
+                        <p class="step-description">
+                            Accede a tu panel de control para modificar textos, 
+                            imágenes y contenido cuando quieras.
+                        </p>
+                        <div class="step-highlight">Control total</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Final -->
+            <div class="final-cta">
+                <h3 class="cta-title">Listo para empezar??</h3>
+                <p class="cta-text">
+                    Elige tu plan y comienza hoy mismo. Tu web profesional 
+                    está a solo unos días de distancia.
+                </p>
+                <a href="#planes" class="cta-button">Ver Planes y Precios</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html> 

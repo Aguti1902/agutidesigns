@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - agutidesigns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* LOGIN PAGE */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0046FE 0%, #E5FC63 100%);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-box h1 {
+            color: #0046FE;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0046FE;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* DASHBOARD */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .dashboard-content {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #0046FE;
+        }
+
+        .stat-card.green {
+            border-left-color: #009A62;
+        }
+
+        .stat-card.yellow {
+            border-left-color: #E5FC63;
+            border-left-width: 6px;
+        }
+
+        .stat-card.blue {
+            border-left-color: #0046FE;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            float: right;
+        }
+
+        .submissions-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .submissions-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #e7f1ff;
+            color: #0046FE;
+        }
+
+        .btn-view {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .btn-view:hover {
+            background: #0036C8;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <h1>🔒 Admin Login</h1>
+            <p>Dashboard de agutidesigns</p>
+            <div class="error-message" id="errorMessage">Usuario o contraseña incorrectos</div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+        <div class="dashboard-header">
+            <h1>📊 Dashboard Admin</h1>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div class="dashboard-content">
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-label">Total Solicitudes</div>
+                    <div class="stat-value" id="totalSubmissions">0</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Pagadas</div>
+                    <div class="stat-value" id="paidSubmissions">0</div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-label">Pendientes</div>
+                    <div class="stat-value" id="pendingSubmissions">0</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">Ingresos Totales</div>
+                    <div class="stat-value" id="totalRevenue">0€</div>
+                </div>
+            </div>
+
+            <!-- SUBMISSIONS TABLE -->
+            <div class="submissions-section">
+                <h2>📋 Todas las Solicitudes</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empresa</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="submissionsTable">
+                            <tr>
+                                <td colspan="8">
+                                    <div class="loader">
+                                        <div class="spinner"></div>
+                                        <p>Cargando solicitudes...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    loadDashboard();
+                } else {
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión. Asegúrate de que el servidor esté corriendo.');
+            }
+        });
+
+        // LOGOUT
+        function logout() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        // CARGAR DASHBOARD
+        async function loadDashboard() {
+            await loadStats();
+            await loadSubmissions();
+        }
+
+        // CARGAR ESTADÍSTICAS
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/stats`);
+                const stats = await response.json();
+
+                document.getElementById('totalSubmissions').textContent = stats.total || 0;
+                document.getElementById('paidSubmissions').textContent = stats.paid || 0;
+                document.getElementById('pendingSubmissions').textContent = stats.pending || 0;
+                document.getElementById('totalRevenue').textContent = (stats.revenue || 0) + '€';
+            } catch (error) {
+                console.error('Error cargando stats:', error);
+            }
+        }
+
+        // CARGAR SOLICITUDES
+        async function loadSubmissions() {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/submissions`);
+                const submissions = await response.json();
+
+                const tbody = document.getElementById('submissionsTable');
+                
+                if (submissions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No hay solicitudes aún</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = submissions.map(sub => `
+                    <tr>
+                        <td><strong>#${sub.id}</strong></td>
+                        <td>${sub.business_name || 'N/A'}</td>
+                        <td>${sub.email}</td>
+                        <td><span class="plan-badge">${formatPlan(sub.plan)}</span></td>
+                        <td><strong>${sub.amount}€/mes</strong></td>
+                        <td><span class="status-badge status-${sub.status}">${formatStatus(sub.status)}</span></td>
+                        <td>${formatDate(sub.created_at)}</td>
+                        <td><button class="btn-view" onclick="viewDetails(${sub.id})">Ver Detalles</button></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error cargando solicitudes:', error);
+            }
+        }
+
+        // VER DETALLES
+        function viewDetails(id) {
+            window.open(`/admin/details.html?id=${id}`, '_blank');
+        }
+
+        // FORMATEADORES
+        function formatPlan(plan) {
+            const names = {
+                'basico': 'Básico',
+                'avanzado': 'Avanzado',
+                'premium': 'Premium'
+            };
+            return names[plan] || plan;
+        }
+
+        function formatStatus(status) {
+            const names = {
+                'paid': 'Pagado',
+                'pending': 'Pendiente'
+            };
+            return names[status] || status;
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

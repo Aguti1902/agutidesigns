@@ -1,0 +1,120 @@
+🚀 SECCIÓN "CÓMO FUNCIONA LA MEMBRESÍA"
+========================================
+
+He creado una sección interactiva super visual que explica 
+tu proceso de trabajo en 4 pasos claros.
+
+✨ CARACTERÍSTICAS DEL DISEÑO:
+------------------------------
+✅ 4 cards en línea horizontal (1 paso = 1 card)
+✅ Línea conectora degradada entre los pasos
+✅ Números circulares azules que rotan en hover
+✅ Emojis ilustrativos en cada paso
+✅ Highlights de color diferente para cada paso
+✅ Efecto elevación espectacular en hover
+✅ CTA final con botón a planes
+✅ Fondo azul degradado (#0051ff → #0066ff)
+✅ 100% responsive
+
+📋 LOS 4 PASOS INCLUIDOS:
+-------------------------
+
+PASO 1: ELIGE TU PLAN
+- Emoji: 📋
+- Highlight azul: "5, 10 o 20 páginas"
+- Descripción: Selecciona el plan según necesidades
+
+PASO 2: RELLENA EL FORMULARIO
+- Emoji: 📝
+- Highlight verde: "Simple y rápido"
+- Descripción: Información sobre negocio y objetivos
+
+PASO 3: WEB EN 7-10 DÍAS
+- Emoji: 🚀
+- Highlight naranja: "Lanzamiento rápido"
+- Descripción: Diseño, desarrollo y lanzamiento
+
+PASO 4: DASHBOARD DE CONTROL
+- Emoji: ⚙️
+- Highlight amarillo: "Control total"
+- Descripción: Panel para modificar textos e imágenes
+
+🎨 EFECTOS INTERACTIVOS:
+------------------------
+1. Hover en card:
+   - Se eleva 15px
+   - Crece ligeramente (scale 1.05)
+   - Borde azul aparece
+   - Sombra dramática
+
+2. Hover en número circular:
+   - Rota 360 grados (efecto WOW)
+   - Escala 1.15
+   - Sombra crece
+
+3. Hover en emoji:
+   - Escala 1.2
+   - Se hace más grande
+
+4. Línea conectora:
+   - Degradado con tus 4 colores principales
+   - Conecta visualmente los 4 pasos
+
+🎯 CTA FINAL:
+-------------
+- Título: "¿Listo para Empezar?"
+- Botón: "Ver Planes y Precios"
+- Fondo glassmorphism (semi-transparente)
+- Botón amarillo (#E5FC63) que destaca sobre el azul
+- Hover: Cambia a amarillo más brillante
+
+🎨 COLORES USADOS:
+------------------
+- Fondo: Azul degradado (#0051ff → #0066ff)
+- Cards: Blanco semi-transparente con glassmorphism
+- Números: Blanco/Crema (cambia a amarillo en hover)
+- Línea conectora: Degradado claro (amarillo→blanco)
+- Highlights:
+  * Paso 1: Azul (#0051ff)
+  * Paso 2: Verde (#009A62)
+  * Paso 3: Naranja (#EC6746)
+  * Paso 4: Amarillo (#CFFF3F)
+
+📱 RESPONSIVE:
+--------------
+- Desktop (>1200px): 4 columnas en línea
+- Tablet (768-1200px): 2 columnas (2x2)
+- Móvil (<768px): 1 columna (apiladas)
+- La línea conectora se oculta en tablet/móvil
+
+🔧 PERSONALIZACIÓN:
+-------------------
+Si quieres cambiar los emojis:
+- Paso 1: 📋 puedes usar 🎯 📊 ✅
+- Paso 2: 📝 puedes usar ✍️ 📄 💬
+- Paso 3: 🚀 puedes usar ⚡ 🎨 💻
+- Paso 4: ⚙️ puedes usar 🎛️ 📱 💡
+
+CAMBIAR TEXTOS:
+- Títulos: <h3 class="step-title">
+- Descripciones: <p class="step-description">
+- Highlights: <div class="step-highlight">
+
+🚀 CÓMO USARLO:
+---------------
+1. Abre como-funciona-section.html
+2. Copia TODO el código
+3. Pega en widget HTML de Elementor
+4. Colócalo ANTES de la sección de precios
+5. ¡Listo!
+
+💡 FLUJO RECOMENDADO DE SECCIONES:
+----------------------------------
+1. Hero / Inicio
+2. Ventajas (ventajas-section-v2.html)
+3. CÓMO FUNCIONA (como-funciona-section.html) ← ESTA
+4. Portfolio (portfolio-section.html)
+5. Precios (pricing-section.html)
+6. Contacto
+
+✅ TODO LISTO PARA PEGAR EN ELEMENTOR 

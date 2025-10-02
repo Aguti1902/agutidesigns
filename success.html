@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso - agutidesigns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0046FE 0%, #E5FC63 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-header {
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            padding: 50px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            animation: bounceIn 0.8s ease;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        @keyframes bounceIn {
+            0%, 20%, 40%, 60%, 80%, 100% {
+                animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(.3, .3, .3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(.9, .9, .9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(.97, .97, .97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        .success-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .success-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .success-content {
+            padding: 40px 30px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #0046FE;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info-box h3 {
+            color: #0046FE;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #009A62 0%, #007a4d 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .next-steps {
+            background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        .next-steps h3 {
+            color: #1B1B1B;
+            margin-bottom: 15px;
+        }
+
+        .steps-list {
+            list-style: none;
+        }
+
+        .steps-list li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .steps-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            background: #009A62;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .email-notice {
+            background: #e8f4ff;
+            border: 2px solid #0046FE;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .email-notice strong {
+            color: #0046FE;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .btn-home {
+            display: block;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            color: white;
+            text-align: center;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 70, 254, 0.3);
+        }
+
+        .loader {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .success-header h1 {
+                font-size: 2rem;
+            }
+
+            .success-icon {
+                font-size: 4rem;
+            }
+
+            .success-content {
+                padding: 30px 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-header">
+            <span class="success-icon">🎉</span>
+            <h1>¡Pago Exitoso!</h1>
+            <p>Tu suscripción está activa</p>
+        </div>
+
+        <div class="success-content" id="content">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Cargando detalles de tu suscripción...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener session_id de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        if (sessionId) {
+            // Obtener detalles de la sesión
+            fetch(`http://localhost:3000/api/session/${sessionId}`)
+                .then(res => res.json())
+                .then(session => {
+                    displaySuccess(session);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayGenericSuccess();
+                });
+        } else {
+            displayGenericSuccess();
+        }
+
+        function displaySuccess(session) {
+            const planNames = {
+                'basico': 'Plan Básico',
+                'avanzado': 'Plan Avanzado',
+                'premium': 'Plan Premium'
+            };
+
+            const plan = session.metadata?.plan || 'basico';
+            const businessName = session.metadata?.business_name || 'tu empresa';
+
+            document.getElementById('content').innerHTML = `
+                <div class="info-box">
+                    <h3>📋 Detalles de tu Suscripción</h3>
+                    <div class="info-row">
+                        <span class="info-label">Empresa:</span>
+                        <span class="info-value">${businessName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Plan:</span>
+                        <span class="info-value"><span class="plan-badge">${planNames[plan]}</span></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Estado:</span>
+                        <span class="info-value" style="color: #009A62; font-weight: bold;">✓ Activo</span>
+                    </div>
+                </div>
+
+                <div class="email-notice">
+                    <strong>📧 Revisa tu email</strong>
+                    <p>Te hemos enviado un email de confirmación a <strong>${session.customer_email || session.customer_details?.email}</strong> con todos los detalles y próximos pasos.</p>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🚀 ¿Qué sigue ahora?</h3>
+                    <ul class="steps-list">
+                        <li>Recibirás un email de confirmación en los próximos minutos</li>
+                        <li>Nuestro equipo revisará tu solicitud en las próximas 24 horas</li>
+                        <li>Te contactaremos para coordinar los detalles finales</li>
+                        <li>Empezaremos a trabajar en tu web inmediatamente</li>
+                        <li>Recibirás acceso a tu dashboard para seguir el progreso</li>
+                    </ul>
+                </div>
+
+                <a href="/" class="btn-home">Volver al Inicio</a>
+            `;
+        }
+
+        function displayGenericSuccess() {
+            document.getElementById('content').innerHTML = `
+                <div class="info-box">
+                    <h3>✅ ¡Gracias por tu compra!</h3>
+                    <p>Tu pago se ha procesado correctamente y tu suscripción está activa.</p>
+                </div>
+
+                <div class="email-notice">
+                    <strong>📧 Revisa tu email</strong>
+                    <p>Te hemos enviado un email de confirmación con todos los detalles.</p>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🚀 Próximos Pasos</h3>
+                    <ul class="steps-list">
+                        <li>Revisa tu email para la confirmación</li>
+                        <li>Nuestro equipo te contactará pronto</li>
+                        <li>Empezaremos a trabajar en tu web</li>
+                    </ul>
+                </div>
+
+                <a href="/" class="btn-home">Volver al Inicio</a>
+            `;
+        }
+    </script>
+</body>
+</html> 

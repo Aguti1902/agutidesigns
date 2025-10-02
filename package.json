@@ -1,0 +1,27 @@
+{
+  "name": "calculadora-presupuesto-agutidesigns",
+  "version": "1.0.0",
+  "description": "Calculadora de presupuesto interactiva para AGUTIDESIGNS",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "serve": "python3 -m http.server 8000",
+    "open": "open http://localhost:8000"
+  },
+  "keywords": [
+    "calculadora",
+    "presupuesto",
+    "web",
+    "agutidesigns",
+    "diseño",
+    "wordpress"
+  ],
+  "author": "AGUTIDESIGNS",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agutidesigns/calculadora-presupuesto.git"
+  },
+  "homepage": "https://agutidesigns.com"
+} 
