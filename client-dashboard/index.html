@@ -663,6 +663,30 @@
                         </div>
                     </div>
 
+                    <!-- Banner de 24h para edición (solo con plan) -->
+                    <div id="editTimerBanner" style="display: none; background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 2px solid #0046FE;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                            <div>
+                                <h3 style="color: #1B1B1B; margin-bottom: 5px; font-size: 1.2rem;">⏰ Tiempo para editar tu información</h3>
+                                <p style="color: #666; font-size: 0.95rem;">Después de 24h desde tu pago, los datos se bloquearán</p>
+                            </div>
+                            <div id="countdown" style="background: #1B1B1B; color: #E5FC63; padding: 15px 25px; border-radius: 10px; font-family: monospace; font-size: 1.3rem; font-weight: 700; text-align: center;">
+                                --:--:--
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banner de tiempo expirado -->
+                    <div id="editExpiredBanner" style="display: none; background: #fee; border: 2px solid #fcc; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2rem;">🔒</div>
+                            <div>
+                                <h3 style="color: #c00; margin-bottom: 5px; font-size: 1.1rem;">Período de edición finalizado</h3>
+                                <p style="color: #666; font-size: 0.9rem;">Han pasado más de 24 horas desde tu pago. Para hacer cambios, contacta a soporte.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value" id="siteStatus">Activo</div>
@@ -878,6 +902,60 @@
                             <button class="btn-action" onclick="saveEditSection('fiscal')">💾 Guardar Cambios</button>
                         </div>
                     </div>
+
+                    <!-- Acordeones con más información -->
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">📱 Redes Sociales <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Instagram</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioInstagram">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Facebook</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioFacebook">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">LinkedIn</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioLinkedin">-</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">💼 Servicios que Ofreces <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; padding: 15px; background: #fafbfc; border-radius: 8px;">
+                            <p style="font-weight: 600; color: #1B1B1B;" id="negocioServicios">-</p>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">🎯 Objetivos y Público <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Objetivo de la Web</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioObjetivo">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Público Objetivo</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioPublico">-</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">🎨 Branding y Diseño <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Colores de Marca</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioColores">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Webs de Referencia</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioReferencias">-</p>
+                            </div>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- MI SITIO WEB -->
@@ -1225,6 +1303,8 @@
     <script>
         const API_URL = 'https://agutidesigns-production.up.railway.app';
         let currentClient = null;
+        let canEdit = true;
+        let countdownInterval = null;
 
         // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
