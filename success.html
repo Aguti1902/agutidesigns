@@ -281,7 +281,7 @@
 
         if (sessionId) {
             // Obtener detalles de la sesión
-            fetch(`http://localhost:3000/api/session/${sessionId}`)
+            fetch(`https://agutidesigns-production.up.railway.app/api/session/${sessionId}`)
                 .then(res => res.json())
                 .then(session => {
                     displaySuccess(session);
