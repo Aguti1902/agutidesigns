@@ -14,35 +14,55 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0046FE 0%, #E5FC63 100%);
+            background: #0046FE;
             min-height: 100vh;
             padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            position: fixed;
+            top: 30px;
+            left: 40px;
+            z-index: 1000;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1px;
         }
 
         .checkout-container {
-            max-width: 900px;
+            max-width: 1100px;
+            width: 100%;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
         }
 
         .checkout-header {
-            background: #0046FE;
-            padding: 40px;
-            color: white;
+            background: white;
+            padding: 35px 40px;
+            border-bottom: 1px solid #f0f0f0;
             text-align: center;
         }
 
         .checkout-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #1B1B1B;
+            font-weight: 700;
         }
 
         .checkout-header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            color: #666;
+            font-size: 1rem;
         }
 
         .checkout-content {
@@ -52,28 +72,30 @@
         }
 
         .order-summary {
-            background: #f8f9fa;
-            padding: 40px;
-            border-right: 1px solid #e0e0e0;
+            background: #fafbfc;
+            padding: 50px;
+            border-right: 1px solid #e8eaed;
         }
 
         .payment-form {
-            padding: 40px;
+            padding: 50px;
         }
 
         .summary-title {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 25px;
+            font-size: 1.3rem;
+            color: #1B1B1B;
+            margin-bottom: 30px;
             font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .plan-card {
             background: white;
-            border: 2px solid #0046FE;
-            border-radius: 15px;
-            padding: 25px;
+            border: 1px solid #e8eaed;
+            border-radius: 16px;
+            padding: 30px;
             margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .plan-name {
@@ -118,26 +140,26 @@
         }
 
         .total-section {
-            border-top: 2px solid #e0e0e0;
-            padding-top: 20px;
-            margin-top: 20px;
+            border-top: 1px solid #e8eaed;
+            padding-top: 25px;
+            margin-top: 25px;
         }
 
         .total-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 1rem;
+            margin-bottom: 14px;
+            font-size: 0.95rem;
             color: #666;
         }
 
         .total-row.final {
-            font-size: 1.8rem;
-            color: #333;
+            font-size: 1.6rem;
+            color: #1B1B1B;
             font-weight: 800;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #0046FE;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #1B1B1B;
         }
 
         .form-group {
@@ -154,17 +176,19 @@
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            padding: 16px 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
+            background: #fafbfc;
         }
 
         .form-input:focus {
             outline: none;
             border-color: #0046FE;
-            box-shadow: 0 0 0 4px rgba(0, 70, 254, 0.1);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 70, 254, 0.08);
         }
 
         /* Botones de pago rápido (Google Pay / Apple Pay) */
@@ -180,16 +204,17 @@
 
         /* Stripe Elements styling */
         #card-element {
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            background: white;
+            padding: 16px 18px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #fafbfc;
             transition: all 0.3s ease;
         }
 
         #card-element.StripeElement--focus {
             border-color: #0046FE;
-            box-shadow: 0 0 0 4px rgba(0, 70, 254, 0.1);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 70, 254, 0.08);
         }
 
         #card-element.StripeElement--invalid {
@@ -205,22 +230,23 @@
 
         .btn-pay {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            padding: 18px;
+            background: #0046FE;
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
-            box-shadow: 0 5px 20px rgba(0, 70, 254, 0.3);
+            margin-top: 25px;
+            letter-spacing: 0.3px;
         }
 
         .btn-pay:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 70, 254, 0.4);
+            background: #0036C8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 70, 254, 0.25);
         }
 
         .btn-pay:disabled {
@@ -266,30 +292,52 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .logo {
+                top: 20px;
+                left: 20px;
+            }
+
+            .logo-text {
+                font-size: 1.3rem;
+            }
+
             .checkout-content {
                 grid-template-columns: 1fr;
             }
 
             .order-summary {
                 border-right: none;
-                border-bottom: 1px solid #e0e0e0;
+                border-bottom: 1px solid #e8eaed;
+                padding: 35px 25px;
+            }
+
+            .checkout-header {
+                padding: 25px 20px;
             }
 
             .checkout-header h1 {
-                font-size: 2rem;
+                font-size: 1.6rem;
             }
 
-            .payment-form,
-            .order-summary {
-                padding: 30px 25px;
+            .payment-form {
+                padding: 35px 25px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Logo -->
+    <div class="logo">
+        <div class="logo-text">🎨 agutidesigns</div>
+    </div>
+
     <div class="checkout-container">
         <div class="checkout-header">
-            <h1>💳 Completar Pago</h1>
+            <h1>Completar Pago</h1>
             <p>Estás a un paso de tener tu web profesional</p>
         </div>
 
