@@ -588,6 +588,60 @@ app.post('/api/client/change-password', async (req, res) => {
     }
 });
 
+// TESTING: Crear cuenta de prueba rápida
+app.post('/api/create-test-account', async (req, res) => {
+    try {
+        const { email, password, full_name, plan } = req.body;
+        
+        // Validar que se proporcionen los datos básicos
+        const testEmail = email || `test${Date.now()}@agutidesigns.com`;
+        const testPassword = password || 'testing123';
+        const testName = full_name || 'Usuario Prueba';
+        const testPlan = plan || null; // null = sin plan
+        
+        // Hashear contraseña
+        const hashedPassword = await bcrypt.hash(testPassword, 10);
+        
+        // Crear cliente
+        const clientId = db.createClient({
+            email: testEmail,
+            password: hashedPassword,
+            full_name: testName,
+            business_name: 'Empresa de Prueba',
+            plan: testPlan,
+            submission_id: null,
+            stripe_customer_id: null,
+            stripe_subscription_id: null
+        });
+        
+        if (!clientId) {
+            return res.status(500).json({ error: 'Error al crear cuenta de prueba' });
+        }
+        
+        console.log('✅ Cuenta de prueba creada:', { clientId, email: testEmail });
+        
+        res.json({
+            success: true,
+            message: 'Cuenta de prueba creada',
+            credentials: {
+                email: testEmail,
+                password: testPassword,
+                dashboard_url: 'https://agutidesigns.vercel.app/client-dashboard/'
+            },
+            client: {
+                id: clientId,
+                email: testEmail,
+                full_name: testName,
+                plan: testPlan
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error creando cuenta de prueba:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
