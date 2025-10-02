@@ -83,6 +83,32 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_created_at ON submissions(created_at);
 `);
 
+// Crear tabla de clientes/usuarios
+db.exec(`
+    CREATE TABLE IF NOT EXISTS clients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        business_name TEXT,
+        plan TEXT,
+        status TEXT DEFAULT 'active',
+        submission_id INTEGER,
+        stripe_customer_id TEXT,
+        stripe_subscription_id TEXT,
+        website_url TEXT,
+        website_status TEXT DEFAULT 'en_construccion',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (submission_id) REFERENCES submissions(id)
+    )
+`);
+
+db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_client_email ON clients(email);
+    CREATE INDEX IF NOT EXISTS idx_client_status ON clients(status);
+`);
+
 // ===== FUNCIONES DE BASE DE DATOS =====
 
 // Crear nueva solicitud
@@ -233,11 +259,83 @@ function searchSubmissions(query) {
     return stmt.all(searchTerm, searchTerm, searchTerm);
 }
 
+// ===== FUNCIONES DE CLIENTES =====
+
+// Crear cliente
+function createClient(data) {
+    const stmt = db.prepare(`
+        INSERT INTO clients (
+            email, password, full_name, business_name, plan, 
+            submission_id, stripe_customer_id, stripe_subscription_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    try {
+        const result = stmt.run(
+            data.email,
+            data.password, // Ya debe estar hasheada
+            data.full_name,
+            data.business_name || null,
+            data.plan || null,
+            data.submission_id || null,
+            data.stripe_customer_id || null,
+            data.stripe_subscription_id || null
+        );
+        return result.lastInsertRowid;
+    } catch (error) {
+        console.error('Error creating client:', error);
+        return null;
+    }
+}
+
+// Obtener cliente por email
+function getClientByEmail(email) {
+    const stmt = db.prepare('SELECT * FROM clients WHERE email = ?');
+    return stmt.get(email);
+}
+
+// Obtener cliente por ID
+function getClientById(id) {
+    const stmt = db.prepare('SELECT * FROM clients WHERE id = ?');
+    return stmt.get(id);
+}
+
+// Actualizar estado del sitio web
+function updateWebsiteStatus(clientId, status, url = null) {
+    const stmt = db.prepare(`
+        UPDATE clients 
+        SET website_status = ?, 
+            website_url = COALESCE(?, website_url),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    `);
+    
+    return stmt.run(status, url, clientId);
+}
+
+// Obtener dashboard data del cliente
+function getClientDashboardData(clientId) {
+    const client = getClientById(clientId);
+    if (!client) return null;
+
+    const submission = client.submission_id ? getSubmission(client.submission_id) : null;
+    
+    return {
+        client,
+        submission
+    };
+}
+
 module.exports = {
     createSubmission,
     getSubmission,
     getAllSubmissions,
     updateSubmissionStatus,
     getStats,
-    searchSubmissions
+    searchSubmissions,
+    createClient,
+    getClientByEmail,
+    getClientById,
+    updateWebsiteStatus,
+    getClientDashboardData
 }; 

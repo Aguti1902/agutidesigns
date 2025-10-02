@@ -333,12 +333,34 @@
                     </ul>
                 </div>
 
-                                 <button class="btn-home" onclick="window.location.href='/admin-dashboard/'">Acceder al Dashboard</button>
+                                 <button class="btn-home" onclick="accessDashboard()">Acceder a Mi Dashboard</button>
             `;
         }
 
         // Mostrar contenido inmediatamente
         displaySuccess();
+
+        // Función para acceder al dashboard del cliente
+        function accessDashboard() {
+            if (!data) {
+                alert('No se encontraron los datos de la sesión');
+                return;
+            }
+
+            // Guardar credenciales del cliente para auto-login
+            const clientCredentials = {
+                email: data.email,
+                password: data.password || null,
+                full_name: data.full_name || data.nombre + ' ' + data.apellido,
+                business_name: data.businessInfo?.businessName,
+                plan: data.plan
+            };
+
+            sessionStorage.setItem('clientCredentials', JSON.stringify(clientCredentials));
+            
+            // Redirigir al dashboard del cliente
+            window.location.href = '/client-dashboard/';
+        }
 
         // Limpiar sessionStorage después de mostrar
         // sessionStorage.removeItem('orderData');

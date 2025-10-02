@@ -27,6 +27,7 @@ const STRIPE_PRICES = {
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const db = require('./database');
 const emailService = require('./email-service');
 
@@ -199,6 +200,19 @@ app.post('/api/create-subscription', async (req, res) => {
             // Obtener datos completos
             const submission = db.getSubmission(submissionId);
 
+            // Crear cliente/usuario con contraseña hasheada
+            const hashedPassword = await bcrypt.hash(formData.password || 'temp123', 10);
+            db.createClient({
+                email: formData.email,
+                password: hashedPassword,
+                full_name: formData.full_name || formData.nombre + ' ' + formData.apellido,
+                business_name: formData.business_name,
+                plan: plan,
+                submission_id: submissionId,
+                stripe_customer_id: customer.id,
+                stripe_subscription_id: subscription.id
+            });
+
             // Enviar emails
             await emailService.sendAdminNotification(submission);
             await emailService.sendClientConfirmation(submission);
@@ -329,6 +343,101 @@ app.get('/api/admin/stats', (req, res) => {
         res.json(stats);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== ENDPOINTS DE CLIENTES =====
+
+// Login de cliente
+app.post('/api/client/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email y contraseña son requeridos' });
+        }
+
+        // Buscar cliente
+        const client = db.getClientByEmail(email);
+        if (!client) {
+            return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+
+        // Verificar contraseña
+        const isValidPassword = await bcrypt.compare(password, client.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+
+        // No enviar la contraseña al cliente
+        delete client.password;
+
+        res.json({ 
+            success: true, 
+            client,
+            message: 'Login exitoso' 
+        });
+
+    } catch (error) {
+        console.error('Error en login de cliente:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Obtener datos del dashboard del cliente
+app.get('/api/client/dashboard/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        const dashboardData = db.getClientDashboardData(parseInt(clientId));
+        
+        if (!dashboardData) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+
+        // No enviar contraseña
+        if (dashboardData.client) {
+            delete dashboardData.client.password;
+        }
+
+        res.json(dashboardData);
+
+    } catch (error) {
+        console.error('Error obteniendo dashboard del cliente:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// Actualizar contraseña del cliente
+app.post('/api/client/change-password', async (req, res) => {
+    try {
+        const { clientId, currentPassword, newPassword } = req.body;
+
+        const client = db.getClientById(parseInt(clientId));
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+
+        // Verificar contraseña actual
+        const isValidPassword = await bcrypt.compare(currentPassword, client.password);
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+        }
+
+        // Hashear nueva contraseña
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // Actualizar en la base de datos
+        const stmt = require('./database').db.prepare(
+            'UPDATE clients SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+        );
+        stmt.run(hashedPassword, clientId);
+
+        res.json({ success: true, message: 'Contraseña actualizada' });
+
+    } catch (error) {
+        console.error('Error cambiando contraseña:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 });
 
