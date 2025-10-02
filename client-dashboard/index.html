@@ -752,10 +752,20 @@
                     <!-- Card de comparación de planes (solo sin plan) -->
                     <div class="card" id="planComparisonCard" style="display: none; background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%); border: 2px solid #0046FE;">
                         <h3 class="card-title" style="color: #0046FE;">💎 ¿Qué obtienes con cada plan?</h3>
+                        
+                        <!-- Toggle Mensual/Anual -->
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin: 20px 0;">
+                            <div style="display: flex; align-items: center; gap: 8px; background: #1B1B1B; padding: 5px; border-radius: 50px;">
+                                <button id="comparisonToggleMonthly" onclick="toggleComparisonBilling('monthly')" style="padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.85rem; background: #FEFAF5; color: #1B1B1B; border: none;">Mensual</button>
+                                <button id="comparisonToggleAnnual" onclick="toggleComparisonBilling('annual')" style="padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.85rem; background: transparent; color: #FEFAF5; border: none;">Anual</button>
+                            </div>
+                            <span style="background: #EC6746; color: #FEFAF5; padding: 5px 12px; border-radius: 50px; font-weight: 700; font-size: 0.75rem;">Ahorra hasta 20%</span>
+                        </div>
+                        
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
                             <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
                                 <h4 style="color: #0046FE; margin-bottom: 10px;">Básico</h4>
-                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">35€<span style="font-size: 0.9rem; color: #666;">/mes</span></p>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;"><span id="comparisonPriceBasico">35€</span><span style="font-size: 0.9rem; color: #666;" id="comparisonPeriodBasico">/mes</span></p>
                                 <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #666;">
                                     <li style="margin: 5px 0;">✓ 5 páginas</li>
                                     <li style="margin: 5px 0;">✓ Dominio incluido</li>
@@ -766,7 +776,7 @@
                             <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 10px; color: white; position: relative;">
                                 <div style="position: absolute; top: -10px; right: 10px; background: #E5FC63; color: #1B1B1B; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Recomendado</div>
                                 <h4 style="margin-bottom: 10px;">Avanzado</h4>
-                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">49€<span style="font-size: 0.9rem; opacity: 0.9;">/mes</span></p>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;"><span id="comparisonPriceAvanzado">49€</span><span style="font-size: 0.9rem; opacity: 0.9;" id="comparisonPeriodAvanzado">/mes</span></p>
                                 <ul style="list-style: none; padding: 0; font-size: 0.9rem; opacity: 0.95;">
                                     <li style="margin: 5px 0;">✓ 10 páginas</li>
                                     <li style="margin: 5px 0;">✓ Todo del Básico +</li>
@@ -776,7 +786,7 @@
                             </div>
                             <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
                                 <h4 style="color: #0046FE; margin-bottom: 10px;">Premium</h4>
-                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">65€<span style="font-size: 0.9rem; color: #666;">/mes</span></p>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;"><span id="comparisonPricePremium">65€</span><span style="font-size: 0.9rem; color: #666;" id="comparisonPeriodPremium">/mes</span></p>
                                 <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #666;">
                                     <li style="margin: 5px 0;">✓ 20 páginas</li>
                                     <li style="margin: 5px 0;">✓ Todo del Avanzado +</li>
@@ -1819,6 +1829,49 @@
             document.getElementById('modalPeriodAvanzado').textContent = prices[cycle].avanzado.period;
             document.getElementById('modalPricePremium').textContent = prices[cycle].premium.price;
             document.getElementById('modalPeriodPremium').textContent = prices[cycle].premium.period;
+        }
+
+        // Toggle de billing en la card de comparación (usuarios sin plan)
+        function toggleComparisonBilling(cycle) {
+            // Actualizar modalBillingCycle también
+            modalBillingCycle = cycle;
+            
+            const monthlyBtn = document.getElementById('comparisonToggleMonthly');
+            const annualBtn = document.getElementById('comparisonToggleAnnual');
+            
+            // Actualizar estilos de los botones
+            if (cycle === 'monthly') {
+                monthlyBtn.style.background = '#FEFAF5';
+                monthlyBtn.style.color = '#1B1B1B';
+                annualBtn.style.background = 'transparent';
+                annualBtn.style.color = '#FEFAF5';
+            } else {
+                monthlyBtn.style.background = 'transparent';
+                monthlyBtn.style.color = '#FEFAF5';
+                annualBtn.style.background = '#FEFAF5';
+                annualBtn.style.color = '#1B1B1B';
+            }
+            
+            // Actualizar precios de la comparación
+            const prices = {
+                monthly: {
+                    basico: { price: '35€', period: '/mes' },
+                    avanzado: { price: '49€', period: '/mes' },
+                    premium: { price: '65€', period: '/mes' }
+                },
+                annual: {
+                    basico: { price: '28€', period: '/mes (336€/año)' },
+                    avanzado: { price: '39€', period: '/mes (468€/año)' },
+                    premium: { price: '52€', period: '/mes (624€/año)' }
+                }
+            };
+            
+            document.getElementById('comparisonPriceBasico').textContent = prices[cycle].basico.price;
+            document.getElementById('comparisonPeriodBasico').textContent = prices[cycle].basico.period;
+            document.getElementById('comparisonPriceAvanzado').textContent = prices[cycle].avanzado.price;
+            document.getElementById('comparisonPeriodAvanzado').textContent = prices[cycle].avanzado.period;
+            document.getElementById('comparisonPricePremium').textContent = prices[cycle].premium.price;
+            document.getElementById('comparisonPeriodPremium').textContent = prices[cycle].premium.period;
         }
 
         async function selectPlanAndCheckout(plan) {
