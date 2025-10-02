@@ -501,6 +501,32 @@
             color: #666;
         }
 
+        /* Modal de selección de plan */
+        .plan-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .plan-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 80px;
@@ -632,7 +658,7 @@
                             </div>
                             
                             <div>
-                                <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.15rem; padding: 18px 50px; font-weight: 700; box-shadow: 0 8px 25px rgba(0,0,0,0.2);" onclick="selectPlanAndCheckout('avanzado')">Activar Mi Web Ahora</button>
+                                <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.15rem; padding: 18px 50px; font-weight: 700; box-shadow: 0 8px 25px rgba(0,0,0,0.2);" onclick="openPlanModal()">Activar Mi Web Ahora</button>
                             </div>
                         </div>
                     </div>
@@ -1088,6 +1114,64 @@
         </div>
     </div>
 
+    <!-- Modal de Selección de Plan -->
+    <div class="plan-modal" id="planModal" onclick="closePlanModal(event)">
+        <div class="plan-modal-content" onclick="event.stopPropagation()">
+            <h2 style="color: #0046FE; margin-bottom: 10px; font-size: 2rem; text-align: center;">Elige tu Plan</h2>
+            <p style="color: #666; text-align: center; margin-bottom: 30px;">Selecciona el plan que mejor se adapte a tus necesidades</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <!-- Plan Básico -->
+                <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="selectPlanAndCheckout('basico')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
+                    <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Básico</h3>
+                    <p style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">35€</p>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                        <li style="margin: 10px 0; color: #666;">✓ Hasta 5 páginas</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Dominio incluido</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Hosting incluido</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Soporte básico</li>
+                        <li style="margin: 10px 0; color: #666;">✓ SSL gratis</li>
+                    </ul>
+                    <button class="btn-action" style="width: 100%; background: #0046FE; color: white;">Seleccionar</button>
+                </div>
+                
+                <!-- Plan Avanzado -->
+                <div style="padding: 30px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 15px; border: 2px solid #0046FE; text-align: center; position: relative; color: white; transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,70,254,0.3);" onclick="selectPlanAndCheckout('avanzado')">
+                    <div style="position: absolute; top: -12px; right: 20px; background: #E5FC63; color: #1B1B1B; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Recomendado</div>
+                    <h3 style="margin-bottom: 15px; font-size: 1.4rem;">Avanzado</h3>
+                    <p style="font-size: 2.5rem; font-weight: 700; margin-bottom: 5px;">49€</p>
+                    <p style="opacity: 0.9; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                        <li style="margin: 10px 0; opacity: 0.95;">✓ Hasta 10 páginas</li>
+                        <li style="margin: 10px 0; opacity: 0.95;">✓ Todo del plan Básico</li>
+                        <li style="margin: 10px 0; opacity: 0.95;">✓ SEO avanzado</li>
+                        <li style="margin: 10px 0; opacity: 0.95;">✓ Google Analytics</li>
+                        <li style="margin: 10px 0; opacity: 0.95;">✓ Soporte prioritario</li>
+                    </ul>
+                    <button class="btn-action" style="width: 100%; background: #E5FC63; color: #1B1B1B; font-weight: 700;">Seleccionar</button>
+                </div>
+                
+                <!-- Plan Premium -->
+                <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="selectPlanAndCheckout('premium')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
+                    <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Premium</h3>
+                    <p style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">65€</p>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                    <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                        <li style="margin: 10px 0; color: #666;">✓ Hasta 20 páginas</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Todo del plan Avanzado</li>
+                        <li style="margin: 10px 0; color: #666;">✓ SEO premium</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Email marketing</li>
+                        <li style="margin: 10px 0; color: #666;">✓ Soporte 24/7</li>
+                    </ul>
+                    <button class="btn-action" style="width: 100%; background: #0046FE; color: white;">Seleccionar</button>
+                </div>
+            </div>
+            
+            <button style="margin-top: 25px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #666;" onclick="closePlanModal(event)">Cancelar</button>
+        </div>
+    </div>
+
     <script>
         const API_URL = 'https://agutidesigns-production.up.railway.app';
         let currentClient = null;
@@ -1354,7 +1438,7 @@
                     <h2 style="color: #0046FE; margin-bottom: 12px; font-size: 1.8rem; font-weight: 700;">${msg.title}</h2>
                     <p style="color: #666; margin-bottom: 8px; font-size: 1.05rem; line-height: 1.6;">${msg.desc}</p>
                     <p style="color: #009A62; font-weight: 700; font-size: 1.1rem; margin-bottom: 25px;">${msg.cta}</p>
-                    <button class="btn-action" style="padding: 16px 45px; font-size: 1.05rem;" onclick="selectPlanAndCheckout('avanzado')">Contratar Ahora</button>
+                    <button class="btn-action" style="padding: 16px 45px; font-size: 1.05rem;" onclick="openPlanModal()">Ver Planes</button>
                     <p style="margin-top: 15px; font-size: 0.85rem; color: #999;">✓ Sin permanencia • ✓ Cancela cuando quieras</p>
                 </div>
             `;
@@ -1427,10 +1511,20 @@
             }
         }
         
-        // Mostrar modal de precios (para overlays)
+        // Abrir modal de selección de plan
+        function openPlanModal() {
+            document.getElementById('planModal').style.display = 'flex';
+        }
+
+        // Cerrar modal de selección de plan
+        function closePlanModal(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('planModal').style.display = 'none';
+        }
+
+        // Mostrar modal de precios (para overlays y card de comparación)
         function showPricingModal() {
-            // Redirigir al checkout con plan básico por defecto
-            selectPlanAndCheckout('basico');
+            openPlanModal();
         }
 
         // Edición de campos
