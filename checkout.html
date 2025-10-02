@@ -14,54 +14,52 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0046FE;
+            background: #f7f7f7;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 60px 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
         .logo {
-            position: fixed;
-            top: 30px;
-            left: 40px;
-            z-index: 1000;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
         .logo-text {
-            color: white;
-            font-size: 1.8rem;
+            color: #0046FE;
+            font-size: 2.2rem;
             font-weight: 900;
             letter-spacing: 1px;
         }
 
         .checkout-container {
-            max-width: 1100px;
+            max-width: 950px;
             width: 100%;
             margin: 0 auto;
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
 
         .checkout-header {
-            background: white;
-            padding: 35px 40px;
-            border-bottom: 1px solid #f0f0f0;
+            background: #0046FE;
+            padding: 30px 40px;
             text-align: center;
         }
 
         .checkout-header h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            color: #1B1B1B;
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            color: white;
             font-weight: 700;
         }
 
         .checkout-header p {
-            color: #666;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1rem;
         }
 
@@ -293,16 +291,11 @@
 
         @media (max-width: 768px) {
             body {
-                padding: 20px 15px;
-            }
-
-            .logo {
-                top: 20px;
-                left: 20px;
+                padding: 30px 15px;
             }
 
             .logo-text {
-                font-size: 1.3rem;
+                font-size: 1.6rem;
             }
 
             .checkout-content {
@@ -330,9 +323,10 @@
     </style>
 </head>
 <body>
-    <!-- Logo -->
+    <!-- Logo centrado arriba -->
     <div class="logo">
-        <div class="logo-text">🎨 agutidesigns</div>
+        <div class="logo-text">agutidesigns</div>
+        <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Tu web profesional por suscripción</p>
     </div>
 
     <div class="checkout-container">
@@ -474,6 +468,7 @@
                 const config = await configResponse.json();
                 
                 stripe = Stripe(config.publishableKey);
+                elements = stripe.elements();
 
                 // Crear Payment Request para Google/Apple Pay
                 paymentRequest = stripe.paymentRequest({
@@ -488,24 +483,23 @@
                 });
 
                 // Verificar disponibilidad de Google/Apple Pay
-                const prButton = elements.create('paymentRequestButton', {
-                    paymentRequest: paymentRequest,
-                    style: {
-                        paymentRequestButton: {
-                            type: 'default',
-                            theme: 'dark',
-                            height: '50px',
-                        },
-                    },
-                });
-
-                // Solo mostrar si está disponible
                 const canMakePayment = await paymentRequest.canMakePayment();
                 if (canMakePayment) {
+                    const prButton = elements.create('paymentRequestButton', {
+                        paymentRequest: paymentRequest,
+                        style: {
+                            paymentRequestButton: {
+                                type: 'default',
+                                theme: 'dark',
+                                height: '50px',
+                            },
+                        },
+                    });
                     prButton.mount('#payment-request-button');
                 } else {
                     document.getElementById('payment-request-button').style.display = 'none';
-                    document.querySelector('.payment-form > div:nth-child(3)').style.display = 'none'; // Ocultar "O paga con tarjeta"
+                    const divider = document.querySelector('.payment-form > div:nth-of-type(2)');
+                    if (divider) divider.style.display = 'none';
                 }
 
                 // Manejar pago con Google/Apple Pay
@@ -545,7 +539,6 @@
                 });
 
                 // Crear elemento de tarjeta normal
-                elements = stripe.elements();
                 cardElement = elements.create('card', {
                     style: {
                         base: {
