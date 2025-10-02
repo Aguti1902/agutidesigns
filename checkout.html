@@ -424,30 +424,67 @@
         // Obtener datos del sessionStorage
         const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
         
-        // Configurar plan
+        // Configurar plan con precios mensuales y anuales
         const planDetails = {
-            'basico': { name: 'Plan Básico', price: 35, pages: 5 },
-            'avanzado': { name: 'Plan Avanzado', price: 49, pages: 10 },
-            'premium': { name: 'Plan Premium', price: 65, pages: 20 }
+            'basico': { 
+                name: 'Plan Básico', 
+                monthly: 35,
+                annual: 28,
+                annualTotal: 336,
+                pages: 5 
+            },
+            'avanzado': { 
+                name: 'Plan Avanzado', 
+                monthly: 49,
+                annual: 39,
+                annualTotal: 468,
+                pages: 10 
+            },
+            'premium': { 
+                name: 'Plan Premium', 
+                monthly: 65,
+                annual: 52,
+                annualTotal: 624,
+                pages: 20 
+            }
         };
 
         const plan = orderData.plan || 'basico';
+        const billingCycle = orderData.billing_cycle || 'monthly'; // 'monthly' o 'annual'
         const details = planDetails[plan];
 
+        // Determinar el precio según el billing_cycle
+        let price, billingText;
+        if (billingCycle === 'annual') {
+            price = details.annual;
+            billingText = `${price}€/mes (${details.annualTotal}€/año facturado anualmente)`;
+        } else {
+            price = details.monthly;
+            billingText = `${price}€/mes`;
+        }
+
         // Mostrar información del plan
-        document.getElementById('planName').textContent = details.name;
-        document.getElementById('planPrice').textContent = details.price;
+        document.getElementById('planName').textContent = `${details.name} - ${billingCycle === 'annual' ? 'Anual' : 'Mensual'}`;
+        document.getElementById('planPrice').textContent = price;
         document.getElementById('planFeatures').innerHTML = `
             <li>Hasta ${details.pages} páginas</li>
             <li>Dominio y hosting incluido</li>
             <li>Soporte continuo</li>
             <li>Actualizaciones ilimitadas</li>
+            ${billingCycle === 'annual' ? '<li style="color: #EC6746; font-weight: 600;">💰 Ahorro anual incluido</li>' : ''}
         `;
 
-        // Calcular totales
-        const subtotal = details.price;
-        const iva = subtotal * 0.21;
-        const total = subtotal + iva;
+        // Calcular totales (para anual, mostrar el total anual)
+        let subtotal, iva, total;
+        if (billingCycle === 'annual') {
+            subtotal = details.annualTotal;
+            iva = subtotal * 0.21;
+            total = subtotal + iva;
+        } else {
+            subtotal = price;
+            iva = subtotal * 0.21;
+            total = subtotal + iva;
+        }
 
         document.getElementById('subtotal').textContent = subtotal.toFixed(2) + '€';
         document.getElementById('iva').textContent = iva.toFixed(2) + '€';
@@ -514,6 +551,7 @@
                             body: JSON.stringify({
                                 paymentMethodId: ev.paymentMethod.id,
                                 plan: plan,
+                                billing_cycle: billingCycle,
                                 formData: orderData.formData,
                                 billingDetails: {
                                     name: ev.payerName,
@@ -616,6 +654,7 @@
                     body: JSON.stringify({
                         paymentMethodId: paymentMethod.id,
                         plan: plan,
+                        billing_cycle: billingCycle,
                         formData: orderData.formData,
                         billingDetails: {
                             name: cardholderName,

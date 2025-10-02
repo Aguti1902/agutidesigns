@@ -18,11 +18,22 @@ const STRIPE_WEBHOOK_SECRET = isTestMode
     ? process.env.STRIPE_WEBHOOK_SECRET_TEST
     : process.env.STRIPE_WEBHOOK_SECRET;
 
-const STRIPE_PRICES = {
-    basico: isTestMode ? process.env.STRIPE_PRICE_BASICO_TEST : process.env.STRIPE_PRICE_BASICO,
-    avanzado: isTestMode ? process.env.STRIPE_PRICE_AVANZADO_TEST : process.env.STRIPE_PRICE_AVANZADO,
-    premium: isTestMode ? process.env.STRIPE_PRICE_PREMIUM_TEST : process.env.STRIPE_PRICE_PREMIUM
+// Price IDs mensuales
+const STRIPE_PRICES_MONTHLY = {
+    basico: isTestMode ? process.env.STRIPE_PRICE_BASICO_MONTHLY_TEST : process.env.STRIPE_PRICE_BASICO_MONTHLY,
+    avanzado: isTestMode ? process.env.STRIPE_PRICE_AVANZADO_MONTHLY_TEST : process.env.STRIPE_PRICE_AVANZADO_MONTHLY,
+    premium: isTestMode ? process.env.STRIPE_PRICE_PREMIUM_MONTHLY_TEST : process.env.STRIPE_PRICE_PREMIUM_MONTHLY
 };
+
+// Price IDs anuales
+const STRIPE_PRICES_ANNUAL = {
+    basico: isTestMode ? process.env.STRIPE_PRICE_BASICO_ANNUAL_TEST : process.env.STRIPE_PRICE_BASICO_ANNUAL,
+    avanzado: isTestMode ? process.env.STRIPE_PRICE_AVANZADO_ANNUAL_TEST : process.env.STRIPE_PRICE_AVANZADO_ANNUAL,
+    premium: isTestMode ? process.env.STRIPE_PRICE_PREMIUM_ANNUAL_TEST : process.env.STRIPE_PRICE_PREMIUM_ANNUAL
+};
+
+// Mantener compatibilidad hacia atrás (por defecto mensual)
+const STRIPE_PRICES = STRIPE_PRICES_MONTHLY;
 
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
 const fileUpload = require('express-fileupload');
@@ -138,18 +149,31 @@ app.post('/api/create-checkout-session', async (req, res) => {
 // 2B. CREAR SUSCRIPCIÓN CON STRIPE ELEMENTS (checkout personalizado)
 app.post('/api/create-subscription', async (req, res) => {
     try {
-        const { paymentMethodId, plan, formData, billingDetails } = req.body;
+        const { paymentMethodId, plan, billing_cycle, formData, billingDetails } = req.body;
 
-        // Usar Price ID según el modo (test/live)
-        const priceId = STRIPE_PRICES[plan];
+        // Determinar qué Price IDs usar según billing_cycle
+        const billingCycle = billing_cycle || 'monthly';
+        const PRICES = billingCycle === 'annual' ? STRIPE_PRICES_ANNUAL : STRIPE_PRICES_MONTHLY;
+        
+        // Usar Price ID según el plan y billing_cycle
+        const priceId = PRICES[plan];
         if (!priceId) {
-            return res.status(400).json({ error: 'Plan inválido' });
+            return res.status(400).json({ error: 'Plan inválido o Price ID no configurado' });
         }
+
+        console.log(`💳 Creando suscripción ${billingCycle} para plan ${plan} con Price ID:`, priceId);
 
         // Construir full_name desde first_name y last_name
         const fullName = formData.first_name && formData.last_name 
             ? `${formData.first_name} ${formData.last_name}`.trim()
             : (formData.full_name || 'Cliente');
+
+        // Calcular amount según plan y billing_cycle
+        const amounts = {
+            monthly: { basico: 35, avanzado: 49, premium: 65 },
+            annual: { basico: 336, avanzado: 468, premium: 624 }
+        };
+        const amount = amounts[billingCycle][plan];
 
         // Guardar datos del formulario temporalmente (pending)
         const submissionId = db.createSubmission({
@@ -157,7 +181,7 @@ app.post('/api/create-subscription', async (req, res) => {
             full_name: fullName,
             plan,
             status: 'pending',
-            amount: plan === 'basico' ? 35 : plan === 'avanzado' ? 49 : 65
+            amount: amount
         });
 
         // Crear o obtener cliente en Stripe
@@ -182,6 +206,7 @@ app.post('/api/create-subscription', async (req, res) => {
             metadata: {
                 submission_id: String(submissionId),
                 plan: plan,
+                billing_cycle: billingCycle,
                 business_name: formData.business_name || ''
             }
         });
