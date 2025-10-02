@@ -46,8 +46,8 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Permitir requests sin origin (como Postman o apps móviles)
-        if (!origin) return callback(null, true);
+        // Permitir requests sin origin (como Postman, apps móviles, archivos locales)
+        if (!origin || origin === 'null') return callback(null, true);
         
         // Verificar si el origin está en la lista de permitidos
         if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace(/\/$/, '')))) {
