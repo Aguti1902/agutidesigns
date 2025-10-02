@@ -584,14 +584,15 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <ul class="sidebar-menu">
-                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">🏠</span><span>Resumen</span></button></li>
-                    <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
-                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
-                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
-                    <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
-                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('soporte')"><span class="menu-icon">💬</span><span>Soporte</span></button></li>
-                    <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
+                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">▣</span><span>Resumen</span></button></li>
+                    <li><button onclick="showSection('negocio')"><span class="menu-icon">◈</span><span>Mi Negocio</span></button></li>
+                    <li><button onclick="showSection('sitio')"><span class="menu-icon">⬡</span><span>Mi Sitio Web</span></button></li>
+                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">▨</span><span>Estadísticas</span></button></li>
+                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">▶</span><span>Tutoriales</span></button></li>
+                    <li><button onclick="showSection('dominio')"><span class="menu-icon">◉</span><span>Dominio & Hosting</span></button></li>
+                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">▦</span><span>Facturación</span></button></li>
+                    <li><button onclick="showSection('soporte')"><span class="menu-icon">◐</span><span>Soporte</span></button></li>
+                    <li><button onclick="showSection('seo')"><span class="menu-icon">◆</span><span>SEO & Marketing</span></button></li>
                 </ul>
             </div>
 
@@ -605,10 +606,33 @@
                     </div>
 
                     <!-- Banner para usuarios sin plan -->
-                    <div id="noPlanBanner" style="display: none; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); color: white; padding: 30px; border-radius: 15px; margin-bottom: 25px; text-align: center;">
-                        <h2 style="margin-bottom: 15px; font-size: 1.8rem;">🚀 ¡Activa tu sitio web ahora!</h2>
-                        <p style="margin-bottom: 20px; font-size: 1.1rem; opacity: 0.95;">Selecciona un plan para comenzar a construir tu presencia online</p>
-                        <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.1rem; padding: 15px 40px;" onclick="showPricingModal()">Ver Planes y Precios</button>
+                    <div id="noPlanBanner" style="display: none; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); color: white; padding: 40px; border-radius: 15px; margin-bottom: 25px; text-align: center; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                        <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%;"></div>
+                        
+                        <div style="position: relative; z-index: 1;">
+                            <h2 style="margin-bottom: 12px; font-size: 2rem; font-weight: 700;">Tu web profesional te está esperando</h2>
+                            <p style="margin-bottom: 25px; font-size: 1.1rem; opacity: 0.95; line-height: 1.6;">Activa tu plan y tendrás tu sitio web listo en solo 5 días</p>
+                            
+                            <div style="display: inline-flex; align-items: center; gap: 30px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700;">5 días</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Entrega garantizada</div>
+                                </div>
+                                <div style="width: 2px; height: 40px; background: rgba(255,255,255,0.3);"></div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700;">Desde 35€</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Por mes + IVA</div>
+                                </div>
+                                <div style="width: 2px; height: 40px; background: rgba(255,255,255,0.3);"></div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 1.5rem; font-weight: 700;">Sin permanencia</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">Cancela cuando quieras</div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.15rem; padding: 18px 50px; font-weight: 700; box-shadow: 0 8px 25px rgba(0,0,0,0.2);" onclick="showPricingModal()">Activar Mi Web Ahora</button>
+                        </div>
                     </div>
 
                     <div class="stats-grid">
@@ -627,42 +651,167 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🚀 Acciones Rápidas</h3>
+                        <h3 class="card-title">▶ Acciones Rápidas</h3>
                         <div class="quick-actions">
-                            <button class="btn-action" onclick="showSection('sitio')" id="btnEditSite">Editar Mi Sitio</button>
-                            <button class="btn-action secondary" onclick="showSection('estadisticas')">Ver Estadísticas</button>
-                            <button class="btn-action secondary" onclick="showSection('soporte')">Contactar Soporte</button>
+                            <button class="btn-action" onclick="showSection('sitio')" id="btnEditSite">⬡ Editar Mi Sitio</button>
+                            <button class="btn-action secondary" onclick="showSection('estadisticas')">▨ Ver Estadísticas</button>
+                            <button class="btn-action secondary" onclick="showSection('soporte')">◐ Contactar Soporte</button>
+                        </div>
+                    </div>
+
+                    <!-- Card de comparación de planes (solo sin plan) -->
+                    <div class="card" id="planComparisonCard" style="display: none; background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%); border: 2px solid #0046FE;">
+                        <h3 class="card-title" style="color: #0046FE;">¿Qué obtienes con cada plan?</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                            <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
+                                <h4 style="color: #0046FE; margin-bottom: 10px;">Básico</h4>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">35€<span style="font-size: 0.9rem; color: #666;">/mes</span></p>
+                                <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #666;">
+                                    <li style="margin: 5px 0;">✓ 5 páginas</li>
+                                    <li style="margin: 5px 0;">✓ Dominio incluido</li>
+                                    <li style="margin: 5px 0;">✓ Soporte básico</li>
+                                </ul>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                            </div>
+                            <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 10px; color: white; position: relative;">
+                                <div style="position: absolute; top: -10px; right: 10px; background: #E5FC63; color: #1B1B1B; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Recomendado</div>
+                                <h4 style="margin-bottom: 10px;">Avanzado</h4>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">49€<span style="font-size: 0.9rem; opacity: 0.9;">/mes</span></p>
+                                <ul style="list-style: none; padding: 0; font-size: 0.9rem; opacity: 0.95;">
+                                    <li style="margin: 5px 0;">✓ 10 páginas</li>
+                                    <li style="margin: 5px 0;">✓ Todo del Básico +</li>
+                                    <li style="margin: 5px 0;">✓ SEO avanzado</li>
+                                </ul>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; background: #E5FC63; color: #1B1B1B; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                            </div>
+                            <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
+                                <h4 style="color: #0046FE; margin-bottom: 10px;">Premium</h4>
+                                <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">65€<span style="font-size: 0.9rem; color: #666;">/mes</span></p>
+                                <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #666;">
+                                    <li style="margin: 5px 0;">✓ 20 páginas</li>
+                                    <li style="margin: 5px 0;">✓ Todo del Avanzado +</li>
+                                    <li style="margin: 5px 0;">✓ Soporte premium</li>
+                                </ul>
+                                <button class="btn-action" style="width: 100%; margin-top: 15px; font-size: 0.9rem;" onclick="showPricingModal()">Seleccionar</button>
+                            </div>
                         </div>
                     </div>
 
                     <div class="card" id="businessInfoCard">
-                        <h3 class="card-title">📋 Información de tu Negocio</h3>
+                        <h3 class="card-title">▣ Información de tu Negocio</h3>
                         <p><strong>Empresa:</strong> <span id="businessName">Cargando...</span></p>
                         <p><strong>Dominio:</strong> <span id="domainName">Pendiente</span></p>
                         <p><strong>Estado:</strong> <span class="status-badge status-construction" id="websiteStatus">En Construcción</span></p>
                     </div>
                 </div>
 
+                <!-- MI NEGOCIO (Nueva Sección) -->
+                <div id="negocio" class="content-section">
+                    <div class="section-header">
+                        <h1 class="section-title">◈ Mi Negocio</h1>
+                        <p class="section-subtitle">Toda la información que proporcionaste</p>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">▣ Datos del Negocio</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Nombre de la Empresa</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmpresa">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Sector / Industria</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioIndustria">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Descripción</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDescripcion">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">◉ Datos de Contacto</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email de Contacto</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailContacto">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Teléfono</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioTelefono">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">WhatsApp</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioWhatsapp">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">⬡ Páginas Solicitadas</h3>
+                        <div id="negocioPaginas" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                            <span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Cargando...</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">◆ Dominio y SEO</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dominio Deseado</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominio">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Palabras Clave (SEO)</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioKeywords">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estilo de Diseño</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEstilo">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">▦ Datos Fiscales</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">CIF/NIF</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioCIF">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Razón Social</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioRazonSocial">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dirección Fiscal</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDireccion">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- MI SITIO WEB -->
                 <div id="sitio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">🌐 Mi Sitio Web</h1>
+                        <h1 class="section-title">⬡ Mi Sitio Web</h1>
                         <p class="section-subtitle">Gestiona y edita tu sitio web</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🎨 Editor Visual</h3>
+                        <h3 class="card-title">⬡ Editor Visual</h3>
                         <p style="margin-bottom: 20px; color: #666;">Utiliza nuestro editor visual para hacer cambios en tu sitio web de forma intuitiva.</p>
                         <button class="btn-action" onclick="alert('Próximamente: Acceso directo al editor Elementor')">Abrir Editor</button>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📁 Subir Contenido</h3>
+                        <h3 class="card-title">▦ Subir Contenido</h3>
                         <p style="margin-bottom: 15px; color: #666;">Agrega nuevas imágenes, textos o videos a tu sitio web.</p>
                         <div class="quick-actions">
-                            <button class="btn-action secondary">📷 Subir Imágenes</button>
-                            <button class="btn-action secondary">📝 Añadir Texto</button>
-                            <button class="btn-action secondary">🎬 Subir Video</button>
+                            <button class="btn-action secondary">◈ Subir Imágenes</button>
+                            <button class="btn-action secondary">▣ Añadir Texto</button>
+                            <button class="btn-action secondary">▶ Subir Video</button>
                         </div>
                     </div>
                 </div>
@@ -670,7 +819,7 @@
                 <!-- ESTADÍSTICAS -->
                 <div id="estadisticas" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">📊 Estadísticas</h1>
+                        <h1 class="section-title">▨ Estadísticas</h1>
                         <p class="section-subtitle">Análisis y métricas de tu sitio web</p>
                     </div>
 
@@ -690,15 +839,15 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📈 Gráfico de Visitas</h3>
+                        <h3 class="card-title">▨ Gráfico de Visitas</h3>
                         <p style="color: #666;">Las estadísticas estarán disponibles una vez que tu sitio web esté activo.</p>
                         <div style="background: #f9fafb; height: 200px; border-radius: 10px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: #999;">
-                            <p>📊 Gráfico de visitas próximamente</p>
+                            <p>▨ Gráfico de visitas próximamente</p>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🔗 Google Analytics</h3>
+                        <h3 class="card-title">◉ Google Analytics</h3>
                         <p style="color: #666; margin-bottom: 15px;">Conecta tu cuenta de Google Analytics para obtener estadísticas detalladas.</p>
                         <button class="btn-action">Conectar Google Analytics</button>
                     </div>
@@ -707,7 +856,7 @@
                 <!-- TUTORIALES -->
                 <div id="tutoriales" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">🎥 Videos Tutoriales</h1>
+                        <h1 class="section-title">▶ Videos Tutoriales</h1>
                         <p class="section-subtitle">Aprende a gestionar tu sitio web</p>
                     </div>
 
@@ -760,12 +909,12 @@
                 <!-- DOMINIO & HOSTING -->
                 <div id="dominio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">🔗 Dominio & Hosting</h1>
+                        <h1 class="section-title">◉ Dominio & Hosting</h1>
                         <p class="section-subtitle">Información sobre tu dominio y servidor</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🌐 Tu Dominio</h3>
+                        <h3 class="card-title">◉ Tu Dominio</h3>
                         <p><strong>Dominio Principal:</strong> <span id="domainInfo">Pendiente de configuración</span></p>
                         <p><strong>Estado:</strong> <span class="status-badge status-construction">Configurando</span></p>
                         <p><strong>Renovación:</strong> Automática (incluida en tu plan)</p>
@@ -773,7 +922,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🖥️ Hosting</h3>
+                        <h3 class="card-title">▦ Hosting</h3>
                         <p><strong>Servidor:</strong> Europa (Alta velocidad)</p>
                         <p><strong>Espacio usado:</strong> 0 MB / 5 GB</p>
                         <p><strong>Ancho de banda:</strong> Ilimitado</p>
@@ -784,12 +933,12 @@
                 <!-- FACTURACIÓN -->
                 <div id="facturacion" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">💳 Facturación</h1>
+                        <h1 class="section-title">▦ Facturación</h1>
                         <p class="section-subtitle">Gestiona tus pagos y facturas</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📋 Tu Plan</h3>
+                        <h3 class="card-title">▦ Tu Plan</h3>
                         <p><strong>Plan Actual:</strong> <span id="currentPlan" style="color: #0046FE; font-weight: 600;">Plan Básico</span></p>
                         <p><strong>Precio:</strong> <span id="planPrice">35€/mes + IVA</span></p>
                         <p><strong>Renovación:</strong> Automática cada mes</p>
@@ -797,7 +946,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🧾 Historial de Facturas</h3>
+                        <h3 class="card-title">▣ Historial de Facturas</h3>
                         <p style="color: #666; margin-bottom: 15px;">Accede a todas tus facturas anteriores</p>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
                             <p style="color: #999;">No hay facturas disponibles aún</p>
@@ -805,7 +954,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">💳 Método de Pago</h3>
+                        <h3 class="card-title">▦ Método de Pago</h3>
                         <p style="color: #666; margin-bottom: 15px;">Tarjeta terminada en ••••</p>
                         <button class="btn-action secondary">Actualizar Método de Pago</button>
                     </div>
@@ -814,38 +963,38 @@
                 <!-- SOPORTE -->
                 <div id="soporte" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">💬 Soporte Técnico</h1>
+                        <h1 class="section-title">◐ Soporte Técnico</h1>
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
 
                     <div class="support-options">
                         <div class="support-option" onclick="window.open('https://calendly.com/tu-link', '_blank')">
-                            <div class="support-icon">📅</div>
+                            <div class="support-icon">◉</div>
                             <div class="support-title">Agendar Reunión</div>
                             <div class="support-desc">Reserva una llamada con nuestro equipo</div>
                         </div>
 
                         <div class="support-option" onclick="alert('Chat en vivo próximamente')">
-                            <div class="support-icon">💬</div>
+                            <div class="support-icon">◐</div>
                             <div class="support-title">Chat en Vivo</div>
                             <div class="support-desc">Chatea con nosotros ahora</div>
                         </div>
 
                         <div class="support-option" onclick="alert('Crear ticket de soporte')">
-                            <div class="support-icon">🎫</div>
+                            <div class="support-icon">▣</div>
                             <div class="support-title">Crear Ticket</div>
                             <div class="support-desc">Envía tu consulta por escrito</div>
                         </div>
 
                         <div class="support-option" onclick="alert('WhatsApp: +34 XXX XXX XXX')">
-                            <div class="support-icon">📱</div>
+                            <div class="support-icon">◆</div>
                             <div class="support-title">WhatsApp</div>
                             <div class="support-desc">Contáctanos por WhatsApp</div>
                         </div>
                     </div>
 
                     <div class="card" style="margin-top: 30px;">
-                        <h3 class="card-title">❓ Preguntas Frecuentes</h3>
+                        <h3 class="card-title">◐ Preguntas Frecuentes</h3>
                         
                         <div class="faq-item">
                             <button class="faq-question" onclick="toggleFAQ(this)">
@@ -892,12 +1041,12 @@
                 <!-- SEO & MARKETING -->
                 <div id="seo" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">🚀 SEO & Marketing</h1>
+                        <h1 class="section-title">◆ SEO & Marketing</h1>
                         <p class="section-subtitle">Optimiza y promociona tu sitio web</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🔍 Optimización SEO</h3>
+                        <h3 class="card-title">◆ Optimización SEO</h3>
                         <p style="color: #666; margin-bottom: 15px;">Mejora el posicionamiento de tu sitio en buscadores</p>
                         <div style="background: #f9fafb; padding: 20px; border-radius: 10px;">
                             <p><strong>Palabras clave configuradas:</strong> <span id="seoKeywords">Pendiente</span></p>
@@ -908,13 +1057,13 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📧 Email Marketing</h3>
+                        <h3 class="card-title">◈ Email Marketing</h3>
                         <p style="color: #666; margin-bottom: 15px;">Gestiona tus campañas de email (disponible en planes avanzados)</p>
                         <button class="btn-action secondary">Actualizar a Plan Avanzado</button>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📱 Redes Sociales</h3>
+                        <h3 class="card-title">◉ Redes Sociales</h3>
                         <p style="color: #666; margin-bottom: 15px;">Conecta tu sitio web con tus redes sociales</p>
                         <div class="quick-actions">
                             <button class="btn-action secondary">Conectar Instagram</button>
@@ -996,19 +1145,27 @@
                 const data = await response.json();
 
                 if (data.client) {
-                    document.getElementById('businessName').textContent = data.client.business_name || 'No especificado';
-                    document.getElementById('domainName').textContent = data.submission?.domain_name || 'Pendiente';
-                    document.getElementById('domainInfo').textContent = data.submission?.domain_name || 'Pendiente de configuración';
-                    document.getElementById('seoKeywords').textContent = data.submission?.keywords || 'Pendiente';
+                    const submission = data.submission;
                     
-                    // Estado del sitio
+                    document.getElementById('businessName').textContent = data.client.business_name || 'No especificado';
+                    document.getElementById('domainName').textContent = submission?.domain_name || 'Pendiente';
+                    document.getElementById('domainInfo').textContent = submission?.domain_name || 'Pendiente de configuración';
+                    document.getElementById('seoKeywords').textContent = submission?.keywords || 'Pendiente';
+                    
+                    // Estado del sitio (si no tiene plan, no está en construcción)
                     const statusMap = {
                         'activo': { text: 'Activo', class: 'status-active' },
                         'en_construccion': { text: 'En Construcción', class: 'status-construction' },
-                        'inactivo': { text: 'Inactivo', class: 'status-inactive' }
+                        'inactivo': { text: 'Sin Plan Activo', class: 'status-inactive' }
                     };
                     
-                    const status = statusMap[data.client.website_status] || statusMap['en_construccion'];
+                    // Si no tiene plan, forzar estado inactivo
+                    let websiteStatus = data.client.website_status;
+                    if (!hasPlan) {
+                        websiteStatus = 'inactivo';
+                    }
+                    
+                    const status = statusMap[websiteStatus] || statusMap['en_construccion'];
                     document.getElementById('siteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').className = `status-badge ${status.class}`;
@@ -1027,6 +1184,31 @@
                     } else {
                         document.getElementById('currentPlan').textContent = 'Sin plan activo';
                         document.getElementById('planPrice').textContent = 'Contratar un plan para activar tu web';
+                    }
+
+                    // Llenar datos de la sección "Mi Negocio"
+                    if (submission) {
+                        document.getElementById('negocioEmpresa').textContent = submission.business_name || '-';
+                        document.getElementById('negocioIndustria').textContent = submission.industry || '-';
+                        document.getElementById('negocioDescripcion').textContent = submission.business_description || '-';
+                        document.getElementById('negocioEmailContacto').textContent = submission.email_contact || submission.email || '-';
+                        document.getElementById('negocioTelefono').textContent = submission.phone_number || '-';
+                        document.getElementById('negocioWhatsapp').textContent = submission.whatsapp_number || '-';
+                        document.getElementById('negocioDominio').textContent = submission.domain_name || '-';
+                        document.getElementById('negocioKeywords').textContent = submission.keywords || '-';
+                        document.getElementById('negocioEstilo').textContent = submission.design_style || '-';
+                        document.getElementById('negocioCIF').textContent = submission.cif_nif || '-';
+                        document.getElementById('negocioRazonSocial').textContent = submission.razon_social || '-';
+                        document.getElementById('negocioDireccion').textContent = submission.direccion_fiscal || '-';
+                        
+                        // Páginas solicitadas
+                        if (submission.pages) {
+                            const pages = Array.isArray(submission.pages) ? submission.pages : [];
+                            const pagesHTML = pages.map(page => 
+                                `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
+                            ).join('');
+                            document.getElementById('negocioPaginas').innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
+                        }
                     }
                 }
             } catch (error) {
@@ -1080,8 +1262,11 @@
         function applyFreePlanRestrictions() {
             console.log('🔒 Aplicando restricciones de plan gratuito');
             
+            // Mostrar card de comparación de planes
+            document.getElementById('planComparisonCard').style.display = 'block';
+            
             // Desactivar secciones restringidas
-            const restrictedSections = ['sitio', 'estadisticas'];
+            const restrictedSections = ['sitio', 'estadisticas', 'dominio', 'seo'];
             restrictedSections.forEach(sectionId => {
                 const section = document.getElementById(sectionId);
                 if (section) {
@@ -1090,9 +1275,15 @@
                 }
             });
             
-            // Deshabilitar estadísticas
-            document.getElementById('visitsCount').textContent = '🔒';
+            // Actualizar estadísticas para sin plan
+            document.getElementById('visitsCount').innerHTML = '<span style="font-size: 1.5rem;">▨</span>';
             document.getElementById('siteStatus').textContent = 'Sin Plan';
+            
+            // Cambiar texto de acciones rápidas
+            const btnEditSite = document.getElementById('btnEditSite');
+            if (btnEditSite) {
+                btnEditSite.innerHTML = '⬡ Ver Demo del Sitio';
+            }
         }
 
         // Añadir overlay de bloqueo a secciones
@@ -1104,21 +1295,53 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(255, 255, 255, 0.95);
+                background: rgba(247, 247, 247, 0.98);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 z-index: 100;
                 border-radius: 12px;
+                backdrop-filter: blur(3px);
             `;
             
+            const messages = {
+                'sitio': {
+                    icon: '⬡',
+                    title: 'Edita tu Sitio Web',
+                    desc: 'Modifica textos, imágenes y diseño en tiempo real',
+                    cta: 'Desde 35€/mes'
+                },
+                'estadisticas': {
+                    icon: '▨',
+                    title: 'Analiza tu Tráfico',
+                    desc: 'Conoce a tus visitantes y optimiza tu web',
+                    cta: 'Activa tu plan'
+                },
+                'dominio': {
+                    icon: '◉',
+                    title: 'Dominio Profesional',
+                    desc: 'Tu dominio .com incluido y configurado',
+                    cta: 'Incluido en todos los planes'
+                },
+                'seo': {
+                    icon: '◆',
+                    title: 'Posiciónate en Google',
+                    desc: 'Optimización SEO profesional para tu web',
+                    cta: 'Planes desde 35€/mes'
+                }
+            };
+            
+            const msg = messages[sectionId] || messages['sitio'];
+            
             overlay.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
-                    <h2 style="color: #1B1B1B; margin-bottom: 15px; font-size: 1.8rem;">Función No Disponible</h2>
-                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1rem;">Contrata un plan para acceder a esta funcionalidad</p>
-                    <button class="btn-action" style="padding: 15px 40px; font-size: 1rem;" onclick="showPricingModal()">Ver Planes</button>
+                <div style="text-align: center; padding: 40px; max-width: 500px;">
+                    <div style="font-size: 5rem; margin-bottom: 20px; opacity: 0.3;">${msg.icon}</div>
+                    <h2 style="color: #0046FE; margin-bottom: 12px; font-size: 1.8rem; font-weight: 700;">${msg.title}</h2>
+                    <p style="color: #666; margin-bottom: 8px; font-size: 1.05rem; line-height: 1.6;">${msg.desc}</p>
+                    <p style="color: #009A62; font-weight: 700; font-size: 1.1rem; margin-bottom: 25px;">${msg.cta}</p>
+                    <button class="btn-action" style="padding: 16px 45px; font-size: 1.05rem;" onclick="showPricingModal()">Contratar Ahora</button>
+                    <p style="margin-top: 15px; font-size: 0.85rem; color: #999;">✓ Sin permanencia • ✓ Cancela cuando quieras</p>
                 </div>
             `;
             
