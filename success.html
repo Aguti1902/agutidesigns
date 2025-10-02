@@ -291,45 +291,81 @@
 
         // Cargar datos desde el backend
         async function loadSuccessData() {
+            console.log('🔍 Cargando datos de success...', { 
+                subscriptionId, 
+                hasSessionStorage: !!sessionStorage.getItem('orderData') 
+            });
+
             // Primero intentar obtener del sessionStorage
             const orderData = sessionStorage.getItem('orderData');
             if (orderData) {
                 try {
                     data = JSON.parse(orderData);
                     submissionData = data;
+                    console.log('✅ Datos obtenidos de sessionStorage:', data);
                     displaySuccess();
                     return;
                 } catch (e) {
-                    console.error('Error parsing orderData:', e);
+                    console.error('❌ Error parsing orderData:', e);
                 }
             }
 
             // Si no hay datos en sessionStorage, obtener del backend usando subscriptionId
             if (subscriptionId) {
+                console.log('🌐 Obteniendo datos del backend...', subscriptionId);
                 try {
                     const response = await fetch(`${API_URL}/api/subscription-data/${subscriptionId}`);
                     if (response.ok) {
                         submissionData = await response.json();
                         data = submissionData;
+                        console.log('✅ Datos obtenidos del backend:', submissionData);
                         displaySuccess();
                     } else {
-                        // Mostrar versión genérica si falla
+                        console.error('❌ Error del servidor:', response.status);
                         displayGenericSuccess();
                     }
                 } catch (error) {
-                    console.error('Error loading subscription data:', error);
+                    console.error('❌ Error loading subscription data:', error);
                     displayGenericSuccess();
                 }
             } else {
+                console.warn('⚠️ No hay subscriptionId en la URL');
                 displayGenericSuccess();
             }
         }
 
         function displaySuccess() {
+            // Obtener plan
             const plan = data?.plan || submissionData?.plan || 'basico';
-            const businessName = data?.businessInfo?.businessName || data?.business_name || submissionData?.business_name || 'tu empresa';
-            const email = data?.email || submissionData?.email || 'tu correo';
+            
+            // Obtener nombre de empresa (múltiples fuentes)
+            let businessName = 'tu empresa';
+            if (submissionData?.business_name) {
+                businessName = submissionData.business_name;
+            } else if (data?.formData?.business_name) {
+                businessName = data.formData.business_name;
+            } else if (data?.businessInfo?.businessName) {
+                businessName = data.businessInfo.businessName;
+            } else if (data?.business_name) {
+                businessName = data.business_name;
+            }
+            
+            // Obtener email
+            const email = submissionData?.email || data?.formData?.email || data?.email || 'tu correo';
+            
+            // Obtener nombre completo
+            const fullName = submissionData?.full_name || data?.formData?.full_name || data?.full_name || null;
+            
             const planDetails = planInfo[plan];
+
+            console.log('🎯 Mostrando success con datos:', { 
+                plan, 
+                businessName, 
+                email, 
+                fullName,
+                dataKeys: data ? Object.keys(data) : 'no data',
+                submissionKeys: submissionData ? Object.keys(submissionData) : 'no submission'
+            });
 
             document.getElementById('content').innerHTML = `
                 <div class="details-section">
@@ -369,16 +405,14 @@
         }
 
         function displayGenericSuccess() {
+            console.log('⚠️ Mostrando success genérico (no se encontraron datos específicos)');
+            
             document.getElementById('content').innerHTML = `
                 <div class="details-section">
                     <h3>📋 Detalles de tu Suscripción</h3>
                     <div class="detail-row">
-                        <span class="detail-label">Empresa:</span>
-                        <span class="detail-value">tu empresa</span>
-                    </div>
-                    <div class="detail-row">
                         <span class="detail-label">Plan:</span>
-                        <span class="detail-value"><span class="plan-badge">Plan Básico</span></span>
+                        <span class="detail-value"><span class="plan-badge">Suscripción Activa</span></span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Estado:</span>
