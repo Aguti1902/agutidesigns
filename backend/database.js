@@ -344,6 +344,7 @@ function getClientDashboardData(clientId) {
 }
 
 module.exports = {
+    db, // Exportar db para queries directas
     createSubmission,
     getSubmission,
     getSubmissionBySubscriptionId,

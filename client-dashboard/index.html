@@ -715,20 +715,30 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📋 Datos del Negocio</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 class="card-title" style="margin: 0;">📋 Datos del Negocio</h3>
+                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEdit('negocio')">✏️ Editar</button>
+                        </div>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Nombre de la Empresa</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmpresa">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Nombre de la Empresa</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmpresa" class="editable-field">-</p>
+                                <input type="text" id="negocioEmpresaInput" class="form-input edit-input" style="display: none; margin-top: 5px;" placeholder="Nombre de tu empresa">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Sector / Industria</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioIndustria">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Sector / Industria</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioIndustria" class="editable-field">-</p>
+                                <input type="text" id="negocioIndustriaInput" class="form-input edit-input" style="display: none; margin-top: 5px;" placeholder="Tu sector">
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Descripción</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDescripcion">-</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Descripción</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDescripcion" class="editable-field">-</p>
+                                <textarea id="negocioDescripcionInput" class="form-input edit-input" style="display: none; margin-top: 5px; min-height: 80px;" placeholder="Describe tu negocio"></textarea>
                             </div>
+                        </div>
+                        <div id="negocioButtons" style="display: none; margin-top: 15px; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-action secondary" onclick="cancelEdit('negocio')">Cancelar</button>
+                            <button class="btn-action" onclick="saveEdit('negocio')">💾 Guardar Cambios</button>
                         </div>
                     </div>
 
@@ -1359,6 +1369,7 @@
             
             // Mostrar loading
             const loadingMsg = document.createElement('div');
+            loadingMsg.id = 'checkoutLoading';
             loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; text-align: center;';
             loadingMsg.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">⏳</div><p>Preparando tu checkout...</p>';
             document.body.appendChild(loadingMsg);
@@ -1368,54 +1379,51 @@
                 const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
                 const dashboardData = await response.json();
                 
-                if (dashboardData.submission) {
-                    // Guardar datos en sessionStorage para el checkout
-                    sessionStorage.setItem('orderData', JSON.stringify({
-                        plan: plan,
-                        formData: {
-                            business_name: dashboardData.submission.business_name || dashboardData.client.business_name,
-                            business_description: dashboardData.submission.business_description || '',
-                            industry: dashboardData.submission.industry || '',
-                            cif_nif: dashboardData.submission.cif_nif || '',
-                            razon_social: dashboardData.submission.razon_social || '',
-                            direccion_fiscal: dashboardData.submission.direccion_fiscal || '',
-                            email: dashboardData.submission.email || currentClient.email,
-                            first_name: dashboardData.client.full_name?.split(' ')[0] || '',
-                            last_name: dashboardData.client.full_name?.split(' ').slice(1).join(' ') || '',
-                            phone_number: dashboardData.submission.phone_number || '',
-                            email_contact: dashboardData.submission.email_contact || currentClient.email,
-                            whatsapp_number: dashboardData.submission.whatsapp_number || '',
-                            domain_name: dashboardData.submission.domain_name || '',
-                            keywords: dashboardData.submission.keywords || '',
-                            design_style: dashboardData.submission.design_style || '',
-                            pages: dashboardData.submission.pages || [],
-                            password: 'temp123' // Password temporal para backend
-                        }
-                    }));
-                    
-                    // Redirigir al checkout
+                console.log('📊 Dashboard data recibida:', dashboardData);
+                
+                // Preparar datos para el checkout
+                const submission = dashboardData.submission;
+                const client = dashboardData.client;
+                
+                const checkoutData = {
+                    plan: plan,
+                    formData: {
+                        business_name: submission?.business_name || client.business_name || 'Mi Empresa',
+                        business_description: submission?.business_description || '',
+                        industry: submission?.industry || '',
+                        cif_nif: submission?.cif_nif || '',
+                        razon_social: submission?.razon_social || '',
+                        direccion_fiscal: submission?.direccion_fiscal || '',
+                        email: submission?.email || currentClient.email,
+                        first_name: currentClient.full_name?.split(' ')[0] || 'Cliente',
+                        last_name: currentClient.full_name?.split(' ').slice(1).join(' ') || '',
+                        phone_number: submission?.phone_number || '',
+                        email_contact: submission?.email_contact || currentClient.email,
+                        whatsapp_number: submission?.whatsapp_number || '',
+                        domain_name: submission?.domain_name || '',
+                        keywords: submission?.keywords || '',
+                        design_style: submission?.design_style || '',
+                        pages: submission?.pages || [],
+                        password: 'existing_user' // Indicar que es usuario existente
+                    }
+                };
+                
+                console.log('✅ Datos para checkout:', checkoutData);
+                
+                // Guardar en sessionStorage
+                sessionStorage.setItem('orderData', JSON.stringify(checkoutData));
+                
+                // Pequeño delay para asegurar que se guarda
+                setTimeout(() => {
+                    console.log('🚀 Redirigiendo a checkout...');
                     window.location.href = '/checkout.html';
-                } else {
-                    // Si no tiene submission, usar datos básicos del cliente
-                    sessionStorage.setItem('orderData', JSON.stringify({
-                        plan: plan,
-                        formData: {
-                            business_name: dashboardData.client.business_name || 'Mi Empresa',
-                            email: currentClient.email,
-                            first_name: dashboardData.client.full_name?.split(' ')[0] || 'Cliente',
-                            last_name: dashboardData.client.full_name?.split(' ').slice(1).join(' ') || '',
-                            email_contact: currentClient.email,
-                            password: 'temp123'
-                        }
-                    }));
-                    
-                    // Redirigir al checkout de todas formas
-                    window.location.href = '/checkout.html';
-                }
+                }, 300);
+                
             } catch (error) {
-                console.error('Error:', error);
-                document.body.removeChild(loadingMsg);
-                alert('Hubo un error. Por favor, intenta de nuevo.');
+                console.error('❌ Error:', error);
+                const loading = document.getElementById('checkoutLoading');
+                if (loading) document.body.removeChild(loading);
+                alert('Hubo un error al preparar el checkout. Por favor, intenta de nuevo.');
             }
         }
         
@@ -1423,6 +1431,77 @@
         function showPricingModal() {
             // Redirigir al checkout con plan básico por defecto
             selectPlanAndCheckout('basico');
+        }
+
+        // Edición de campos
+        function toggleEdit(section) {
+            // Ocultar textos y mostrar inputs
+            document.querySelectorAll('.editable-field').forEach(field => field.style.display = 'none');
+            document.querySelectorAll('.edit-input').forEach(input => {
+                input.style.display = 'block';
+                // Copiar valor actual al input
+                const fieldId = input.id.replace('Input', '');
+                const currentValue = document.getElementById(fieldId).textContent;
+                if (currentValue !== '-') {
+                    input.value = currentValue;
+                }
+            });
+            
+            // Mostrar botones de guardar/cancelar
+            document.getElementById('negocioButtons').style.display = 'flex';
+        }
+
+        function cancelEdit(section) {
+            // Mostrar textos y ocultar inputs
+            document.querySelectorAll('.editable-field').forEach(field => field.style.display = 'block');
+            document.querySelectorAll('.edit-input').forEach(input => input.style.display = 'none');
+            
+            // Ocultar botones
+            document.getElementById('negocioButtons').style.display = 'none';
+        }
+
+        async function saveEdit(section) {
+            const loading = document.createElement('div');
+            loading.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; text-align: center;';
+            loading.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">💾</div><p>Guardando cambios...</p>';
+            document.body.appendChild(loading);
+            
+            try {
+                // Obtener valores de los inputs
+                const updatedData = {
+                    business_name: document.getElementById('negocioEmpresaInput').value,
+                    industry: document.getElementById('negocioIndustriaInput').value,
+                    business_description: document.getElementById('negocioDescripcionInput').value
+                };
+                
+                // Actualizar en el backend
+                const response = await fetch(`${API_URL}/api/client/update-business/${currentClient.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+                
+                if (response.ok) {
+                    // Actualizar visualización
+                    document.getElementById('negocioEmpresa').textContent = updatedData.business_name || '-';
+                    document.getElementById('negocioIndustria').textContent = updatedData.industry || '-';
+                    document.getElementById('negocioDescripcion').textContent = updatedData.business_description || '-';
+                    document.getElementById('businessName').textContent = updatedData.business_name || 'No especificado';
+                    
+                    // Cancelar modo edición
+                    cancelEdit(section);
+                    
+                    document.body.removeChild(loading);
+                    alert('✅ Cambios guardados correctamente');
+                } else {
+                    document.body.removeChild(loading);
+                    alert('❌ Error al guardar. Por favor, intenta de nuevo.');
+                }
+            } catch (error) {
+                console.error('Error guardando:', error);
+                document.body.removeChild(loading);
+                alert('❌ Error al guardar. Por favor, intenta de nuevo.');
+            }
         }
 
         // Capitalizar
