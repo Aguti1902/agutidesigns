@@ -604,13 +604,20 @@
                         <p class="section-subtitle">Aquí está el resumen de tu sitio web</p>
                     </div>
 
+                    <!-- Banner para usuarios sin plan -->
+                    <div id="noPlanBanner" style="display: none; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); color: white; padding: 30px; border-radius: 15px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="margin-bottom: 15px; font-size: 1.8rem;">🚀 ¡Activa tu sitio web ahora!</h2>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem; opacity: 0.95;">Selecciona un plan para comenzar a construir tu presencia online</p>
+                        <button class="btn-action" style="background: #E5FC63; color: #1B1B1B; font-size: 1.1rem; padding: 15px 40px;" onclick="showPricingModal()">Ver Planes y Precios</button>
+                    </div>
+
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value" id="siteStatus">Activo</div>
                             <div class="stat-label">Estado del sitio</div>
                         </div>
                         <div class="stat-card" style="background: linear-gradient(135deg, #009A62 0%, #007a4d 100%)">
-                            <div class="stat-value">0</div>
+                            <div class="stat-value" id="visitsCount">0</div>
                             <div class="stat-label">Visitas este mes</div>
                         </div>
                         <div class="stat-card" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
@@ -622,7 +629,7 @@
                     <div class="card">
                         <h3 class="card-title">🚀 Acciones Rápidas</h3>
                         <div class="quick-actions">
-                            <button class="btn-action" onclick="showSection('sitio')">Editar Mi Sitio</button>
+                            <button class="btn-action" onclick="showSection('sitio')" id="btnEditSite">Editar Mi Sitio</button>
                             <button class="btn-action secondary" onclick="showSection('estadisticas')">Ver Estadísticas</button>
                             <button class="btn-action secondary" onclick="showSection('soporte')">Contactar Soporte</button>
                         </div>
@@ -967,11 +974,17 @@
             // Cargar datos del cliente
             document.getElementById('userName').textContent = currentClient.full_name || 'Usuario';
             
+            // Verificar si tiene plan activo
+            const hasPlan = currentClient.plan && currentClient.plan !== 'null';
+            
             // Mostrar plan
-            if (currentClient.plan) {
+            if (hasPlan) {
                 document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
+                document.getElementById('noPlanBanner').style.display = 'none';
             } else {
                 document.getElementById('userPlan').textContent = 'Sin plan activo';
+                document.getElementById('noPlanBanner').style.display = 'block';
+                applyFreePlanRestrictions();
             }
             
             const firstName = currentClient.full_name ? currentClient.full_name.split(' ')[0] : 'Usuario';
@@ -1061,6 +1074,62 @@
             if (!isOpen) {
                 answer.classList.add('open');
             }
+        }
+
+        // Aplicar restricciones para usuarios sin plan
+        function applyFreePlanRestrictions() {
+            console.log('🔒 Aplicando restricciones de plan gratuito');
+            
+            // Desactivar secciones restringidas
+            const restrictedSections = ['sitio', 'estadisticas'];
+            restrictedSections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    // Añadir overlay de bloqueo
+                    addLockOverlay(section, sectionId);
+                }
+            });
+            
+            // Deshabilitar estadísticas
+            document.getElementById('visitsCount').textContent = '🔒';
+            document.getElementById('siteStatus').textContent = 'Sin Plan';
+        }
+
+        // Añadir overlay de bloqueo a secciones
+        function addLockOverlay(section, sectionId) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.95);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                border-radius: 12px;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+                    <h2 style="color: #1B1B1B; margin-bottom: 15px; font-size: 1.8rem;">Función No Disponible</h2>
+                    <p style="color: #666; margin-bottom: 25px; font-size: 1.1rem;">Contrata un plan para acceder a esta funcionalidad</p>
+                    <button class="btn-action" style="padding: 15px 40px; font-size: 1rem;" onclick="showPricingModal()">Ver Planes</button>
+                </div>
+            `;
+            
+            section.style.position = 'relative';
+            section.appendChild(overlay);
+        }
+
+        // Mostrar modal de precios
+        function showPricingModal() {
+            alert('Redirigiendo a la página de precios...');
+            window.open('/formulario-membresia.html', '_blank');
         }
 
         // Capitalizar
