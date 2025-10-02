@@ -1108,21 +1108,22 @@
                         <p><strong>Plan Actual:</strong> <span id="currentPlan" style="color: #0046FE; font-weight: 600;">Plan Básico</span></p>
                         <p><strong>Precio:</strong> <span id="planPrice">35€/mes + IVA</span></p>
                         <p><strong>Renovación:</strong> Automática cada mes</p>
-                        <button class="btn-action" style="margin-top: 15px;">Cambiar Plan</button>
+                        <p><strong>Próximo cobro:</strong> <span id="nextBilling">Calculando...</span></p>
+                        <button class="btn-action" style="margin-top: 15px;" onclick="openPlanModal()">Cambiar Plan</button>
                     </div>
 
                     <div class="card">
                         <h3 class="card-title">🧾 Historial de Facturas</h3>
                         <p style="color: #666; margin-bottom: 15px;">Accede a todas tus facturas anteriores</p>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
-                            <p style="color: #999;">No hay facturas disponibles aún</p>
+                            <p style="color: #999;">Próximamente podrás descargar tus facturas en PDF</p>
                         </div>
                     </div>
 
                     <div class="card">
                         <h3 class="card-title">💳 Método de Pago</h3>
-                        <p style="color: #666; margin-bottom: 15px;">Tarjeta terminada en ••••</p>
-                        <button class="btn-action secondary">Actualizar Método de Pago</button>
+                        <p style="color: #666; margin-bottom: 15px;">Gestiona tu método de pago con Stripe</p>
+                        <button class="btn-action secondary" onclick="alert('Próximamente: Portal de Stripe para gestionar tu método de pago')">Gestionar en Stripe</button>
                     </div>
                 </div>
 
