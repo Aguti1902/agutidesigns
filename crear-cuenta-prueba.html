@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuentas de Prueba - agutidesigns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0046FE;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-sin-plan {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .btn-basico {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-avanzado {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .credentials {
+            background: #1B1B1B;
+            color: #E5FC63;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
+
+        .credentials p {
+            color: #E5FC63;
+            margin: 5px 0;
+        }
+
+        .btn-copy {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .btn-copy:hover {
+            background: #0036C8;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Crear Cuentas de Prueba</h1>
+        <p>Crea cuentas de prueba rápidamente para testing</p>
+
+        <div class="button-group">
+            <button class="btn btn-sin-plan" onclick="createAccount(null)">
+                <div>🔒 Usuario SIN PLAN</div>
+                <small style="opacity: 0.9; font-weight: 400;">Dashboard con restricciones</small>
+            </button>
+
+            <button class="btn btn-basico" onclick="createAccount('basico')">
+                <div>✨ Usuario Plan BÁSICO</div>
+                <small style="opacity: 0.9; font-weight: 400;">35€/mes - Dashboard completo</small>
+            </button>
+
+            <button class="btn btn-avanzado" onclick="createAccount('avanzado')">
+                <div>🚀 Usuario Plan AVANZADO</div>
+                <small style="opacity: 0.9; font-weight: 400;">49€/mes - Dashboard completo</small>
+            </button>
+
+            <button class="btn btn-premium" onclick="createAccount('premium')">
+                <div>⭐ Usuario Plan PREMIUM</div>
+                <small style="opacity: 0.9; font-weight: 400;">65€/mes - Dashboard completo</small>
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Creando cuenta...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+
+        async function createAccount(plan) {
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // Mostrar loading
+            loading.style.display = 'block';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/api/create-test-account`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plan: plan
+                    })
+                });
+
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (response.ok && data.success) {
+                    const planText = plan ? `Plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}` : 'Sin Plan';
+                    
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ Cuenta creada exitosamente</h3>
+                        <p><strong>Tipo:</strong> ${planText}</p>
+                        
+                        <div class="credentials">
+                            <p><strong>📧 Email:</strong> ${data.credentials.email}</p>
+                            <p><strong>🔒 Password:</strong> ${data.credentials.password}</p>
+                            <p><strong>🔗 Dashboard:</strong> <a href="${data.credentials.dashboard_url}" target="_blank" style="color: #E5FC63;">${data.credentials.dashboard_url}</a></p>
+                        </div>
+
+                        <button class="btn-copy" onclick="copyCredentials('${data.credentials.email}', '${data.credentials.password}')">
+                            📋 Copiar Credenciales
+                        </button>
+
+                        <button class="btn-copy" onclick="window.open('${data.credentials.dashboard_url}', '_blank')" style="background: #009A62; margin-left: 10px;">
+                            🚀 Abrir Dashboard
+                        </button>
+                    `;
+                    result.style.display = 'block';
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <h3>❌ Error</h3>
+                        <p>${data.error || 'No se pudo crear la cuenta'}</p>
+                    `;
+                    result.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Error de Conexión</h3>
+                    <p>${error.message}</p>
+                    <p><small>Asegúrate de que Railway esté desplegado</small></p>
+                `;
+                result.style.display = 'block';
+            }
+        }
+
+        function copyCredentials(email, password) {
+            const text = `Email: ${email}\nPassword: ${password}\nDashboard: https://agutidesigns.vercel.app/client-dashboard/`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Credenciales copiadas al portapapeles');
+            }).catch(err => {
+                alert('❌ Error al copiar: ' + err);
+            });
+        }
+    </script>
+</body>
+</html> 
