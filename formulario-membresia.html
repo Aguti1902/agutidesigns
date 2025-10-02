@@ -1913,8 +1913,32 @@
             }
         });
 
+        // Detectar plan desde URL y seleccionarlo automáticamente
+        function detectPlanFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const planParam = urlParams.get('plan');
+            
+            if (planParam && ['basico', 'avanzado', 'premium'].includes(planParam)) {
+                // Actualizar input hidden
+                document.getElementById('selectedPlan').value = planParam;
+                
+                // Actualizar botones visuales
+                document.querySelectorAll('.plan-selector-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    const btnText = btn.textContent.toLowerCase();
+                    if (btnText.includes(planParam)) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Actualizar contador de páginas
+                updatePageCounter();
+            }
+        }
+
         // Inicializar
         showStep(1);
+        detectPlanFromURL();
     </script>
 </body>
 </html> 
