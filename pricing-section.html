@@ -443,7 +443,7 @@
                         </ul>
                     </div>
                     
-                    <a href="/formulario-membresia.html?plan=basico" class="plan-button">Elegir Plan Básico</a>
+                    <button onclick="selectPlan('basico')" class="plan-button">Elegir Plan Básico</button>
                 </div>
 
                 <!-- Plan Avanzado (Featured) -->
@@ -478,7 +478,7 @@
                         </ul>
                     </div>
                     
-                    <a href="/formulario-membresia.html?plan=avanzado" class="plan-button">Elegir Plan Avanzado</a>
+                    <button onclick="selectPlan('avanzado')" class="plan-button">Elegir Plan Avanzado</button>
                 </div>
 
                 <!-- Plan Premium -->
@@ -512,7 +512,7 @@
                         </ul>
                     </div>
                     
-                    <a href="/formulario-membresia.html?plan=premium" class="plan-button">Elegir Plan Premium</a>
+                    <button onclick="selectPlan('premium')" class="plan-button">Elegir Plan Premium</button>
                 </div>
             </div>
             
@@ -575,6 +575,16 @@
                 button.classList.add('active');
                 button.innerHTML = 'Ocultar comparativa <span class="arrow">▼</span>';
             }
+        }
+
+        // Función para seleccionar plan con billing_cycle
+        function selectPlan(plan) {
+            // Detectar si el toggle está en mensual o anual
+            const activeToggle = document.querySelector('.toggle-option.active');
+            const billingCycle = activeToggle.getAttribute('data-period'); // 'monthly' o 'annual'
+            
+            // Redirigir al formulario con plan y billing_cycle
+            window.location.href = `/formulario-membresia.html?plan=${plan}&billing=${billingCycle}`;
         }
     </script>
 </body>

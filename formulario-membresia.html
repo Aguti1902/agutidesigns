@@ -758,24 +758,24 @@
                 <div style="background: white; padding: 30px; border-radius: 20px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease;">
                     <h3 style="color: #0046FE; margin-bottom: 20px; font-size: 1.4rem; text-align: center; font-weight: 800;">Cambia tu Plan</h3>
                     <div style="display: grid; gap: 12px;">
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('basico', 'Básico - 35€/mes')">
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('basico')">
                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <span style="font-size: 1.1rem; font-weight: 700;">Básico</span>
-                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">35€</span>
+                                <span id="modal-price-basico" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">35€/mes</span>
                             </div>
                             <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">5 páginas</span>
                         </button>
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('avanzado', 'Avanzado - 49€/mes')">
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('avanzado')">
                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <span style="font-size: 1.1rem; font-weight: 700;">Avanzado</span>
-                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">49€</span>
+                                <span id="modal-price-avanzado" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">49€/mes</span>
                             </div>
                             <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">10 páginas · ⭐ Popular</span>
                         </button>
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('premium', 'Premium - 65€/mes')">
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('premium')">
                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <span style="font-size: 1.1rem; font-weight: 700;">Premium</span>
-                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">65€</span>
+                                <span id="modal-price-premium" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">65€/mes</span>
                             </div>
                             <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">20 páginas · 👑 Completo</span>
                         </button>
@@ -1620,6 +1620,7 @@
             // Guardar datos en sessionStorage para la página de checkout
             sessionStorage.setItem('orderData', JSON.stringify({
                 plan: plan,
+                billing_cycle: window.selectedBilling || 'monthly',
                 formData: data
             }));
 
@@ -1629,6 +1630,25 @@
 
         // Abrir modal de selección de plan
         function openPlanSelector() {
+            // Actualizar precios del modal según billing_cycle
+            const billing = window.selectedBilling || 'monthly';
+            const prices = {
+                monthly: {
+                    basico: '35€/mes',
+                    avanzado: '49€/mes',
+                    premium: '65€/mes'
+                },
+                annual: {
+                    basico: '28€/mes (336€/año)',
+                    avanzado: '39€/mes (468€/año)',
+                    premium: '52€/mes (624€/año)'
+                }
+            };
+            
+            document.getElementById('modal-price-basico').textContent = prices[billing].basico;
+            document.getElementById('modal-price-avanzado').textContent = prices[billing].avanzado;
+            document.getElementById('modal-price-premium').textContent = prices[billing].premium;
+            
             document.getElementById('planModal').style.display = 'flex';
         }
 
@@ -1638,8 +1658,25 @@
         }
 
         // Cambiar plan desde el modal
-        function changePlan(plan, displayText) {
+        function changePlan(plan, billingCycle) {
             const oldPlan = document.getElementById('selectedPlan').value;
+            
+            // Definir precios
+            const planPrices = {
+                monthly: {
+                    'basico': 'Básico - 35€/mes',
+                    'avanzado': 'Avanzado - 49€/mes',
+                    'premium': 'Premium - 65€/mes'
+                },
+                annual: {
+                    'basico': 'Básico - 28€/mes (facturado anualmente: 336€/año)',
+                    'avanzado': 'Avanzado - 39€/mes (facturado anualmente: 468€/año)',
+                    'premium': 'Premium - 52€/mes (facturado anualmente: 624€/año)'
+                }
+            };
+            
+            const billing = billingCycle || window.selectedBilling || 'monthly';
+            window.selectedBilling = billing;
             
             // Obtener límites
             const limits = {
@@ -1691,7 +1728,7 @@
             // Actualizar input hidden
             document.getElementById('selectedPlan').value = plan;
             // Actualizar texto visible
-            document.getElementById('planDisplayText').textContent = displayText;
+            document.getElementById('planDisplayText').textContent = planPrices[billing][plan];
             // Cerrar modal
             closePlanSelector();
             // Actualizar contador de páginas
@@ -2090,13 +2127,26 @@
         function detectPlanFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const planParam = urlParams.get('plan');
+            const billingParam = urlParams.get('billing'); // 'monthly' o 'annual'
             
             if (planParam && ['basico', 'avanzado', 'premium'].includes(planParam)) {
-                const planTexts = {
-                    'basico': 'Básico - 35€/mes',
-                    'avanzado': 'Avanzado - 49€/mes',
-                    'premium': 'Premium - 65€/mes'
+                const planPrices = {
+                    monthly: {
+                        'basico': 'Básico - 35€/mes',
+                        'avanzado': 'Avanzado - 49€/mes',
+                        'premium': 'Premium - 65€/mes'
+                    },
+                    annual: {
+                        'basico': 'Básico - 28€/mes (facturado anualmente: 336€/año)',
+                        'avanzado': 'Avanzado - 39€/mes (facturado anualmente: 468€/año)',
+                        'premium': 'Premium - 52€/mes (facturado anualmente: 624€/año)'
+                    }
                 };
+                
+                const billing = billingParam === 'annual' ? 'annual' : 'monthly';
+                
+                // Guardar billing_cycle en variable global
+                window.selectedBilling = billing;
                 
                 // Actualizar input hidden
                 document.getElementById('selectedPlan').value = planParam;
@@ -2104,7 +2154,7 @@
                 // Actualizar texto visible
                 const displayText = document.getElementById('planDisplayText');
                 if (displayText) {
-                    displayText.textContent = planTexts[planParam];
+                    displayText.textContent = planPrices[billing][planParam];
                 }
                 
                 // Actualizar contador de páginas
