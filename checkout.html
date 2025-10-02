@@ -167,6 +167,17 @@
             box-shadow: 0 0 0 4px rgba(0, 70, 254, 0.1);
         }
 
+        /* Botones de pago rápido (Google Pay / Apple Pay) */
+        #payment-request-button {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #payment-request-button button {
+            border-radius: 12px !important;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+
         /* Stripe Elements styling */
         #card-element {
             padding: 14px 16px;
@@ -322,6 +333,15 @@
             <div class="payment-form">
                 <h2 class="summary-title">💳 Datos de Pago</h2>
                 
+                <!-- Botones de pago rápido -->
+                <div id="payment-request-button" style="margin-bottom: 25px;">
+                    <!-- Google Pay / Apple Pay se mostrarán aquí automáticamente -->
+                </div>
+
+                <div style="text-align: center; margin: 20px 0; color: #999; font-size: 0.9rem; font-weight: 600;">
+                    O paga con tarjeta:
+                </div>
+                
                 <form id="payment-form">
                     <div class="form-group">
                         <label>Nombre en la tarjeta</label>
@@ -397,7 +417,7 @@
         }
 
         // Inicializar Stripe Elements
-        let stripe, elements, cardElement;
+        let stripe, elements, cardElement, paymentRequest;
 
         async function initStripe() {
             try {
@@ -406,9 +426,78 @@
                 const config = await configResponse.json();
                 
                 stripe = Stripe(config.publishableKey);
-                elements = stripe.elements();
 
-                // Crear elemento de tarjeta
+                // Crear Payment Request para Google/Apple Pay
+                paymentRequest = stripe.paymentRequest({
+                    country: 'ES',
+                    currency: 'eur',
+                    total: {
+                        label: details.name,
+                        amount: Math.round(total * 100), // Stripe usa centavos
+                    },
+                    requestPayerName: true,
+                    requestPayerEmail: true,
+                });
+
+                // Verificar disponibilidad de Google/Apple Pay
+                const prButton = elements.create('paymentRequestButton', {
+                    paymentRequest: paymentRequest,
+                    style: {
+                        paymentRequestButton: {
+                            type: 'default',
+                            theme: 'dark',
+                            height: '50px',
+                        },
+                    },
+                });
+
+                // Solo mostrar si está disponible
+                const canMakePayment = await paymentRequest.canMakePayment();
+                if (canMakePayment) {
+                    prButton.mount('#payment-request-button');
+                } else {
+                    document.getElementById('payment-request-button').style.display = 'none';
+                    document.querySelector('.payment-form > div:nth-child(3)').style.display = 'none'; // Ocultar "O paga con tarjeta"
+                }
+
+                // Manejar pago con Google/Apple Pay
+                paymentRequest.on('paymentmethod', async (ev) => {
+                    try {
+                        // Crear suscripción
+                        const response = await fetch('https://agutidesigns-production.up.railway.app/api/create-subscription', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                paymentMethodId: ev.paymentMethod.id,
+                                plan: plan,
+                                formData: orderData.formData,
+                                billingDetails: {
+                                    name: ev.payerName,
+                                    email: ev.payerEmail
+                                }
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            ev.complete('success');
+                            sessionStorage.removeItem('orderData');
+                            window.location.href = '/success.html?session_id=' + result.subscriptionId;
+                        } else {
+                            ev.complete('fail');
+                            throw new Error(result.error || 'Error al procesar el pago');
+                        }
+                    } catch (error) {
+                        ev.complete('fail');
+                        alert('Error: ' + error.message);
+                    }
+                });
+
+                // Crear elemento de tarjeta normal
+                elements = stripe.elements();
                 cardElement = elements.create('card', {
                     style: {
                         base: {
