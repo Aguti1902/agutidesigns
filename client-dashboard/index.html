@@ -509,22 +509,23 @@
         }
 
         .faq-item {
-            background: #f8f9fa;
+            background: white;
             border: 1px solid #e8eaed;
-            border-radius: 10px;
-            padding: 18px 20px;
+            border-radius: 8px;
+            padding: 20px 24px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .faq-item:hover {
-            background: #f0f2f5;
-            border-color: #0046FE;
+            background: #fafbfc;
+            border-color: #c5ccd4;
         }
 
         .faq-item[open] {
-            background: #e8f4ff;
+            background: #f6f8fa;
             border-color: #0046FE;
+            box-shadow: 0 2px 8px rgba(0, 70, 254, 0.1);
         }
 
         .faq-question {
@@ -535,6 +536,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 15px;
         }
 
         .faq-question::-webkit-details-marker {
@@ -542,24 +544,24 @@
         }
 
         .faq-question::after {
-            content: '+';
-            font-size: 1.5rem;
-            font-weight: 300;
-            color: #0046FE;
+            content: '▼';
+            font-size: 0.85rem;
+            color: #666;
             transition: transform 0.3s ease;
+            flex-shrink: 0;
         }
 
         .faq-item[open] .faq-question::after {
-            content: '−';
-            transform: rotate(0deg);
+            transform: rotate(180deg);
         }
 
         .faq-answer {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #dfe1e5;
-            color: #666;
-            line-height: 1.6;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e8eaed;
+            color: #586069;
+            line-height: 1.7;
+            font-size: 0.95rem;
             animation: fadeIn 0.3s ease;
         }
 
@@ -1314,50 +1316,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="card" style="margin-top: 30px;">
-                        <h3 class="card-title">❓ Preguntas Frecuentes</h3>
-                        
-                        <div class="faq-item">
-                            <button class="faq-question" onclick="toggleFAQ(this)">
-                                <span>¿Cómo puedo editar mi sitio web?</span>
-                                <span>▼</span>
-                            </button>
-                            <div class="faq-answer">
-                                Puedes editar tu sitio web desde la sección "Mi Sitio Web" usando nuestro editor visual Elementor. También ofrecemos tutoriales en video para guiarte paso a paso.
-                            </div>
-                        </div>
-
-                        <div class="faq-item">
-                            <button class="faq-question" onclick="toggleFAQ(this)">
-                                <span>¿Cuánto tiempo tarda la entrega de mi web?</span>
-                                <span>▼</span>
-                            </button>
-                            <div class="faq-answer">
-                                Normalmente entregamos tu sitio web en un plazo de 5 días laborables desde que recibimos toda la información necesaria.
-                            </div>
-                        </div>
-
-                        <div class="faq-item">
-                            <button class="faq-question" onclick="toggleFAQ(this)">
-                                <span>¿Puedo cambiar de plan en cualquier momento?</span>
-                                <span>▼</span>
-                            </button>
-                            <div class="faq-answer">
-                                Sí, puedes cambiar de plan en cualquier momento desde la sección de Facturación. Los cambios se aplicarán en tu próximo ciclo de facturación.
-                            </div>
-                        </div>
-
-                        <div class="faq-item">
-                            <button class="faq-question" onclick="toggleFAQ(this)">
-                                <span>¿Qué incluye el hosting?</span>
-                                <span>▼</span>
-                            </button>
-                            <div class="faq-answer">
-                                Tu plan incluye hosting en servidores europeos de alta velocidad, SSL/HTTPS gratuito, ancho de banda ilimitado y copias de seguridad automáticas diarias.
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- SEO & MARKETING -->
@@ -1754,21 +1712,6 @@
             // Marcar botón activo
             event.target.closest('button').classList.add('active');
         }
-
-        // Toggle FAQ
-        function toggleFAQ(button) {
-            const answer = button.nextElementSibling;
-            const isOpen = answer.classList.contains('open');
-            
-            // Cerrar todas las respuestas
-            document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
-            
-            // Abrir/cerrar la seleccionada
-            if (!isOpen) {
-                answer.classList.add('open');
-            }
-        }
-
         // Aplicar restricciones para usuarios sin plan
         function applyFreePlanRestrictions() {
             console.log('🔒 Aplicando restricciones de plan gratuito');
