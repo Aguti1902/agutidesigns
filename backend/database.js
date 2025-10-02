@@ -111,6 +111,34 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_client_status ON clients(status);
 `);
 
+// Crear tabla de tickets de soporte
+db.exec(`
+    CREATE TABLE IF NOT EXISTS tickets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id INTEGER NOT NULL,
+        client_email TEXT NOT NULL,
+        client_name TEXT,
+        business_name TEXT,
+        subject TEXT NOT NULL,
+        category TEXT NOT NULL,
+        description TEXT NOT NULL,
+        priority TEXT DEFAULT 'media',
+        status TEXT DEFAULT 'abierto',
+        admin_response TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        closed_at DATETIME,
+        FOREIGN KEY (client_id) REFERENCES clients(id)
+    )
+`);
+
+db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_ticket_client_id ON tickets(client_id);
+    CREATE INDEX IF NOT EXISTS idx_ticket_status ON tickets(status);
+    CREATE INDEX IF NOT EXISTS idx_ticket_priority ON tickets(priority);
+    CREATE INDEX IF NOT EXISTS idx_ticket_created_at ON tickets(created_at);
+`);
+
 // ===== FUNCIONES DE BASE DE DATOS =====
 
 // Crear nueva solicitud
@@ -345,6 +373,98 @@ function getClientDashboardData(clientId) {
     };
 }
 
+// ===== FUNCIONES DE TICKETS =====
+
+// Crear nuevo ticket
+function createTicket(data) {
+    const stmt = db.prepare(`
+        INSERT INTO tickets (
+            client_id, client_email, client_name, business_name,
+            subject, category, description, priority, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const result = stmt.run(
+        data.client_id,
+        data.client_email,
+        data.client_name || null,
+        data.business_name || null,
+        data.subject,
+        data.category,
+        data.description,
+        data.priority || 'media',
+        data.status || 'abierto'
+    );
+    
+    return {
+        id: result.lastInsertRowid,
+        ...data
+    };
+}
+
+// Obtener todos los tickets
+function getAllTickets() {
+    const stmt = db.prepare(`
+        SELECT * FROM tickets 
+        ORDER BY 
+            CASE priority 
+                WHEN 'alta' THEN 1 
+                WHEN 'media' THEN 2 
+                WHEN 'baja' THEN 3 
+            END,
+            created_at DESC
+    `);
+    
+    return stmt.all();
+}
+
+// Obtener tickets por cliente
+function getTicketsByClient(clientId) {
+    const stmt = db.prepare(`
+        SELECT * FROM tickets 
+        WHERE client_id = ?
+        ORDER BY created_at DESC
+    `);
+    
+    return stmt.all(clientId);
+}
+
+// Obtener un ticket por ID
+function getTicketById(ticketId) {
+    const stmt = db.prepare('SELECT * FROM tickets WHERE id = ?');
+    return stmt.get(ticketId);
+}
+
+// Actualizar ticket (respuesta del admin o cambio de estado)
+function updateTicket(ticketId, updates) {
+    const { status, admin_response } = updates;
+    const stmt = db.prepare(`
+        UPDATE tickets 
+        SET status = COALESCE(?, status),
+            admin_response = COALESCE(?, admin_response),
+            updated_at = CURRENT_TIMESTAMP,
+            closed_at = CASE WHEN ? = 'cerrado' THEN CURRENT_TIMESTAMP ELSE closed_at END
+        WHERE id = ?
+    `);
+    
+    return stmt.run(status, admin_response, status, ticketId);
+}
+
+// Estadísticas de tickets
+function getTicketStats() {
+    const stmt = db.prepare(`
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'abierto' THEN 1 ELSE 0 END) as abiertos,
+            SUM(CASE WHEN status = 'en_proceso' THEN 1 ELSE 0 END) as en_proceso,
+            SUM(CASE WHEN status = 'cerrado' THEN 1 ELSE 0 END) as cerrados,
+            SUM(CASE WHEN priority = 'alta' THEN 1 ELSE 0 END) as alta_prioridad
+        FROM tickets
+    `);
+    
+    return stmt.get();
+}
+
 module.exports = {
     db, // Exportar db para queries directas
     createSubmission,
@@ -358,5 +478,12 @@ module.exports = {
     getClientByEmail,
     getClientById,
     updateWebsiteStatus,
-    getClientDashboardData
+    getClientDashboardData,
+    // Tickets
+    createTicket,
+    getAllTickets,
+    getTicketsByClient,
+    getTicketById,
+    updateTicket,
+    getTicketStats
 }; 

@@ -717,6 +717,207 @@ app.post('/api/create-test-account', async (req, res) => {
     }
 });
 
+// =============================================
+// ENDPOINTS DE SOPORTE: TICKETS Y CHAT IA
+// =============================================
+
+// Crear ticket de soporte
+app.post('/api/tickets', async (req, res) => {
+    try {
+        const ticketData = req.body;
+        
+        console.log('📩 Nuevo ticket recibido:', ticketData);
+        
+        // Crear ticket en la BD
+        const ticket = db.createTicket(ticketData);
+        
+        // Enviar email al admin notificando del nuevo ticket
+        try {
+            await emailService.sendEmail({
+                to: 'info@agutidesigns.com',
+                subject: `🎫 Nuevo Ticket de Soporte #${ticket.id} - ${ticketData.priority.toUpperCase()}`,
+                html: `
+                    <h2>Nuevo Ticket de Soporte</h2>
+                    <p><strong>ID:</strong> ${ticket.id}</p>
+                    <p><strong>Cliente:</strong> ${ticketData.client_name} (${ticketData.client_email})</p>
+                    <p><strong>Negocio:</strong> ${ticketData.business_name || 'N/A'}</p>
+                    <p><strong>Asunto:</strong> ${ticketData.subject}</p>
+                    <p><strong>Categoría:</strong> ${ticketData.category}</p>
+                    <p><strong>Prioridad:</strong> ${ticketData.priority}</p>
+                    <hr>
+                    <h3>Descripción:</h3>
+                    <p>${ticketData.description}</p>
+                    <hr>
+                    <p style="color: #666; font-size: 0.9rem;">Fecha: ${new Date().toLocaleString('es-ES')}</p>
+                `
+            });
+        } catch (emailError) {
+            console.error('Error enviando email de notificación:', emailError);
+        }
+        
+        // Enviar confirmación al cliente
+        try {
+            await emailService.sendEmail({
+                to: ticketData.client_email,
+                subject: `Ticket de Soporte #${ticket.id} - agutidesigns`,
+                html: `
+                    <h2>¡Ticket Recibido!</h2>
+                    <p>Hola ${ticketData.client_name},</p>
+                    <p>Hemos recibido tu consulta y nuestro equipo la revisará pronto.</p>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <p><strong>Ticket #${ticket.id}</strong></p>
+                        <p><strong>Asunto:</strong> ${ticketData.subject}</p>
+                        <p><strong>Prioridad:</strong> ${ticketData.priority}</p>
+                        <p><strong>Tiempo estimado de respuesta:</strong></p>
+                        <ul>
+                            <li>Alta: 6 horas</li>
+                            <li>Media: 24 horas</li>
+                            <li>Baja: 48 horas</li>
+                        </ul>
+                    </div>
+                    <p>Te responderemos a este email cuando tengamos una solución.</p>
+                    <p>Gracias,<br>El equipo de agutidesigns</p>
+                `
+            });
+        } catch (emailError) {
+            console.error('Error enviando confirmación al cliente:', emailError);
+        }
+        
+        res.json({
+            success: true,
+            ticket: ticket,
+            message: 'Ticket creado correctamente'
+        });
+        
+    } catch (error) {
+        console.error('Error creando ticket:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener todos los tickets (para admin)
+app.get('/api/tickets', (req, res) => {
+    try {
+        const tickets = db.getAllTickets();
+        res.json({ tickets });
+    } catch (error) {
+        console.error('Error obteniendo tickets:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener tickets de un cliente
+app.get('/api/tickets/client/:clientId', (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const tickets = db.getTicketsByClient(parseInt(clientId));
+        res.json({ tickets });
+    } catch (error) {
+        console.error('Error obteniendo tickets del cliente:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Actualizar ticket (responder o cambiar estado)
+app.patch('/api/tickets/:ticketId', async (req, res) => {
+    try {
+        const { ticketId } = req.params;
+        const { status, admin_response } = req.body;
+        
+        db.updateTicket(parseInt(ticketId), { status, admin_response });
+        
+        const ticket = db.getTicketById(parseInt(ticketId));
+        
+        // Si hay respuesta del admin, enviar email al cliente
+        if (admin_response) {
+            try {
+                await emailService.sendEmail({
+                    to: ticket.client_email,
+                    subject: `Respuesta a tu Ticket #${ticketId} - agutidesigns`,
+                    html: `
+                        <h2>Respuesta a tu Consulta</h2>
+                        <p>Hola ${ticket.client_name},</p>
+                        <p>Hemos respondido a tu ticket:</p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <p><strong>Ticket #${ticketId}: ${ticket.subject}</strong></p>
+                            <hr>
+                            <h3>Respuesta:</h3>
+                            <p style="white-space: pre-wrap;">${admin_response}</p>
+                        </div>
+                        <p>Si necesitas más ayuda, no dudes en responder a este email o crear un nuevo ticket desde tu dashboard.</p>
+                        <p>Saludos,<br>El equipo de agutidesigns</p>
+                    `
+                });
+            } catch (emailError) {
+                console.error('Error enviando respuesta al cliente:', emailError);
+            }
+        }
+        
+        res.json({
+            success: true,
+            ticket: ticket,
+            message: 'Ticket actualizado correctamente'
+        });
+        
+    } catch (error) {
+        console.error('Error actualizando ticket:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Chat con IA (versión básica - podrás integrar OpenAI más tarde)
+app.post('/api/chat-ai', async (req, res) => {
+    try {
+        const { message, client_id, context } = req.body;
+        
+        console.log('💬 Mensaje de chat recibido:', message, 'Cliente:', client_id);
+        
+        // Por ahora, respuestas predefinidas basadas en keywords
+        // TODO: Integrar con OpenAI API para respuestas reales
+        let response = '';
+        
+        const messageLower = message.toLowerCase();
+        
+        if (messageLower.includes('editar') || messageLower.includes('cambiar') || messageLower.includes('modificar')) {
+            response = `Para editar tu sitio web:\n\n1️⃣ Ve a la sección "Mi Sitio Web" en el menú lateral\n2️⃣ Haz clic en "Editar Contenido"\n3️⃣ Modifica los textos, imágenes o cualquier elemento\n4️⃣ Guarda los cambios\n\n¿Necesitas ayuda con algo específico?`;
+        } else if (messageLower.includes('dominio') || messageLower.includes('url')) {
+            response = `Sobre tu dominio:\n\n✓ Tu dominio está incluido en tu plan ${context?.plan || ''}\n✓ Puedes ver los detalles en "Dominio & Hosting"\n✓ El dominio se activa en 24-48h después del pago\n\n¿Quieres cambiar tu dominio o necesitas más información?`;
+        } else if (messageLower.includes('precio') || messageLower.includes('plan') || messageLower.includes('pago')) {
+            response = `Información de planes:\n\n📦 Plan Básico: 35€/mes + IVA (5 páginas)\n📦 Plan Avanzado: 49€/mes + IVA (10 páginas)\n📦 Plan Premium: 65€/mes + IVA (20 páginas)\n\nTodos incluyen:\n✓ Dominio .com o .es\n✓ Hosting y SSL\n✓ Soporte técnico\n✓ Actualizaciones ilimitadas\n\nVe a "Facturación" para cambiar de plan.`;
+        } else if (messageLower.includes('tiempo') || messageLower.includes('cuando') || messageLower.includes('entrega')) {
+            response = `⏰ Tiempos de entrega:\n\n✓ Tu web estará lista en 5 días hábiles\n✓ Recibirás actualizaciones por email\n✓ Puedes ver el progreso en tu dashboard\n\nSi ya han pasado más de 5 días, por favor crea un ticket de soporte para que nuestro equipo lo revise.`;
+        } else if (messageLower.includes('soporte') || messageLower.includes('ayuda') || messageLower.includes('problema')) {
+            response = `🆘 Formas de obtener ayuda:\n\n1. Chat IA (estás aquí) - Respuestas rápidas 24/7\n2. Tickets de Soporte - Para consultas detalladas\n3. Tutoriales en Video - Guías paso a paso\n\n¿Quieres que te ayude con algo específico o prefieres crear un ticket de soporte?`;
+        } else if (messageLower.includes('seo') || messageLower.includes('google') || messageLower.includes('posicionamiento')) {
+            response = `🚀 Optimización SEO:\n\nTu plan incluye:\n✓ Configuración básica de SEO\n✓ Meta descripciones optimizadas\n✓ Estructura de URLs amigables\n✓ Sitemap automático\n\nEn la sección "SEO & Marketing" puedes:\n- Ver tus keywords\n- Conectar Google Analytics\n- Optimizar contenido\n\n¿Te ayudo con algo más específico de SEO?`;
+        } else if (messageLower.includes('imagen') || messageLower.includes('foto') || messageLower.includes('logo')) {
+            response = `🖼️ Gestión de imágenes:\n\nDesde "Mi Sitio Web" puedes:\n✓ Subir nuevas imágenes (máx 5MB)\n✓ Reemplazar imágenes existentes\n✓ Optimizar automáticamente para web\n\nTodas las imágenes se optimizan para carga rápida.\n\n¿Necesitas ayuda para subir imágenes?`;
+        } else {
+            response = `Estoy aquí para ayudarte con tu sitio web de agutidesigns.\n\nPuedo ayudarte con:\n\n📝 Edición de contenido\n🌐 Información de dominio\n💳 Planes y facturación\n🚀 SEO y marketing\n🖼️ Gestión de imágenes\n📊 Estadísticas\n⏰ Tiempos de entrega\n\n¿Qué necesitas saber? Pregúntame algo específico o crea un ticket si necesitas ayuda personalizada.`;
+        }
+        
+        res.json({
+            success: true,
+            response: response
+        });
+        
+    } catch (error) {
+        console.error('Error en chat IA:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Estadísticas de tickets (para admin)
+app.get('/api/tickets/stats', (req, res) => {
+    try {
+        const stats = db.getTicketStats();
+        res.json({ stats });
+    } catch (error) {
+        console.error('Error obteniendo estadísticas de tickets:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

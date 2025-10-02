@@ -501,6 +501,79 @@
             color: #666;
         }
 
+        /* FAQ Styles */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 10px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: #f0f2f5;
+            border-color: #0046FE;
+        }
+
+        .faq-item[open] {
+            background: #e8f4ff;
+            border-color: #0046FE;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #1B1B1B;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #0046FE;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item[open] .faq-question::after {
+            content: '−';
+            transform: rotate(0deg);
+        }
+
+        .faq-answer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #dfe1e5;
+            color: #666;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Modal de selección de plan */
         .plan-modal {
             display: none;
@@ -1134,29 +1207,111 @@
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
 
-                    <div class="support-options">
-                        <div class="support-option" onclick="window.open('https://calendly.com/tu-link', '_blank')">
-                            <div class="support-icon">📅</div>
-                            <div class="support-title">Agendar Reunión</div>
-                            <div class="support-desc">Reserva una llamada con nuestro equipo</div>
+                    <!-- Soporte para CLIENTES CON PLAN -->
+                    <div id="supportWithPlan" style="display: none;">
+                        <div class="support-options" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                            <div class="support-option" onclick="openChatWidget()">
+                                <div class="support-icon">💬</div>
+                                <div class="support-title">Chat en Vivo con IA</div>
+                                <div class="support-desc">Obtén respuestas instantáneas a tus preguntas</div>
+                            </div>
+
+                            <div class="support-option" onclick="openTicketModal()">
+                                <div class="support-icon">🎫</div>
+                                <div class="support-title">Crear Ticket de Soporte</div>
+                                <div class="support-desc">Envía tu consulta y te responderemos pronto</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Soporte para USUARIOS SIN PLAN -->
+                    <div id="supportNoPlan" style="display: none;">
+                        <div class="card" style="background: #e8f4ff; border: 2px solid #0046FE; margin-bottom: 30px;">
+                            <h3 class="card-title" style="color: #0046FE;">📧 Contáctanos por Email</h3>
+                            <p style="margin-bottom: 15px; color: #666;">¿Tienes alguna pregunta antes de contratar? Escríbenos y te responderemos pronto.</p>
+                            <a href="mailto:info@agutidesigns.com" class="btn-action" style="display: inline-block; text-decoration: none;">Enviar Email a info@agutidesigns.com</a>
                         </div>
 
-                        <div class="support-option" onclick="alert('Chat en vivo próximamente')">
-                            <div class="support-icon">💬</div>
-                            <div class="support-title">Chat en Vivo</div>
-                            <div class="support-desc">Chatea con nosotros ahora</div>
-                        </div>
+                        <!-- Preguntas Frecuentes -->
+                        <div class="card">
+                            <h3 class="card-title">❓ Preguntas Frecuentes</h3>
+                            
+                            <div class="faq-list">
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Cómo puedo editar mi sitio web?</summary>
+                                    <div class="faq-answer">Una vez contrates un plan, tendrás acceso a la sección "Mi Sitio Web" donde podrás editar textos, imágenes y contenido de tu página en tiempo real desde tu dashboard.</div>
+                                </details>
 
-                        <div class="support-option" onclick="alert('Crear ticket de soporte')">
-                            <div class="support-icon">🎫</div>
-                            <div class="support-title">Crear Ticket</div>
-                            <div class="support-desc">Envía tu consulta por escrito</div>
-                        </div>
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Cuánto tiempo tarda la entrega de mi web?</summary>
+                                    <div class="faq-answer">Tu web estará lista en solo 5 días hábiles después de completar el pago y proporcionar toda la información necesaria en el formulario.</div>
+                                </details>
 
-                        <div class="support-option" onclick="alert('WhatsApp: +34 XXX XXX XXX')">
-                            <div class="support-icon">📱</div>
-                            <div class="support-title">WhatsApp</div>
-                            <div class="support-desc">Contáctanos por WhatsApp</div>
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Puedo cambiar de plan en cualquier momento?</summary>
+                                    <div class="faq-answer">Sí, puedes cambiar de plan cuando quieras. Si cambias a un plan superior, se aplicará inmediatamente. Si cambias a uno inferior, el cambio se aplicará en tu próximo ciclo de facturación.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Qué incluye el hosting?</summary>
+                                    <div class="faq-answer">El hosting incluye alojamiento web seguro, certificado SSL, copias de seguridad automáticas, y soporte técnico 24/7. Todo está incluido en tu plan mensual.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿El dominio está incluido?</summary>
+                                    <div class="faq-answer">Sí, todos nuestros planes incluyen un dominio .com o .es durante el primer año. Después del primer año, la renovación del dominio tiene un coste adicional de 15€/año.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Puedo cancelar mi suscripción?</summary>
+                                    <div class="faq-answer">Sí, puedes cancelar tu suscripción en cualquier momento desde tu panel de facturación. Tu web seguirá activa hasta el final del período pagado.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Qué diferencia hay entre los planes?</summary>
+                                    <div class="faq-answer">La principal diferencia es el número de páginas: Básico (5 páginas), Avanzado (10 páginas), Premium (20 páginas). Los planes superiores también incluyen características adicionales como analytics avanzados y optimización SEO premium.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Puedo ver ejemplos de webs que habéis hecho?</summary>
+                                    <div class="faq-answer">Por supuesto. Visita nuestra página principal en agutidesigns.com donde encontrarás nuestro portfolio con proyectos realizados para diferentes sectores.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Necesito conocimientos técnicos para gestionar mi web?</summary>
+                                    <div class="faq-answer">No necesitas conocimientos técnicos. Una vez contrates un plan, tendrás acceso a tutoriales en video y un chat con IA que te guiará paso a paso en la gestión de tu web.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Qué métodos de pago aceptáis?</summary>
+                                    <div class="faq-answer">Aceptamos tarjetas de crédito/débito (Visa, Mastercard, American Express), Apple Pay y Google Pay. Todos los pagos son procesados de forma segura a través de Stripe.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Ofrecéis soporte técnico después de la entrega?</summary>
+                                    <div class="faq-answer">Sí, todos nuestros planes incluyen soporte técnico continuo. Con un plan activo tendrás acceso a chat en vivo con IA 24/7 y sistema de tickets para consultas más complejas.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Puedo añadir más páginas después?</summary>
+                                    <div class="faq-answer">Sí, puedes añadir más páginas cambiando a un plan superior o contratando páginas adicionales por 25€/página adicional al mes.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿La web será responsive (adaptada a móviles)?</summary>
+                                    <div class="faq-answer">Absolutamente. Todas nuestras webs están 100% optimizadas para dispositivos móviles, tablets y ordenadores, garantizando una experiencia perfecta en cualquier pantalla.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Puedo tener un email corporativo?</summary>
+                                    <div class="faq-answer">Sí, podemos configurar emails corporativos (ej: info@tunegocio.com) por un coste adicional de 5€/mes por cada cuenta de correo.</div>
+                                </details>
+
+                                <details class="faq-item">
+                                    <summary class="faq-question">¿Qué pasa si no tengo el logo o las imágenes?</summary>
+                                    <div class="faq-answer">No te preocupes. Todos nuestros planes incluyen redacción de textos e imágenes de stock de alta calidad. El diseño de logo tiene un coste adicional de 50€ (pago único).</div>
+                                </details>
+                            </div>
                         </div>
                     </div>
 
@@ -1301,6 +1456,82 @@
         </div>
     </div>
 
+    <!-- Modal de Crear Ticket -->
+    <div class="plan-modal" id="ticketModal" onclick="closeTicketModal(event)">
+        <div class="plan-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+            <h2 style="color: #0046FE; margin-bottom: 10px; font-size: 1.8rem;">🎫 Crear Ticket de Soporte</h2>
+            <p style="color: #666; margin-bottom: 25px;">Envía tu consulta y nuestro equipo te responderá pronto</p>
+            
+            <form id="ticketForm" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">Asunto</label>
+                    <input type="text" id="ticketSubject" required style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s;" placeholder="Ej: Problema con las imágenes">
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">Categoría</label>
+                    <select id="ticketCategory" required style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem;">
+                        <option value="">Selecciona una categoría</option>
+                        <option value="tecnico">🔧 Problema Técnico</option>
+                        <option value="contenido">📝 Edición de Contenido</option>
+                        <option value="dominio">🌐 Dominio y Hosting</option>
+                        <option value="facturacion">💳 Facturación</option>
+                        <option value="seo">🚀 SEO y Marketing</option>
+                        <option value="otro">💬 Otro</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">Descripción</label>
+                    <textarea id="ticketDescription" required rows="6" style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem; resize: vertical; font-family: inherit;" placeholder="Describe tu consulta con el mayor detalle posible..."></textarea>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">Prioridad</label>
+                    <select id="ticketPriority" required style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem;">
+                        <option value="baja">🟢 Baja (respuesta en 48h)</option>
+                        <option value="media" selected>🟡 Media (respuesta en 24h)</option>
+                        <option value="alta">🔴 Alta (respuesta en 6h)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-action" style="width: 100%; padding: 14px; background: #0046FE; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">Enviar Ticket</button>
+                <button type="button" style="width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #666;" onclick="closeTicketModal(event)">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Widget de Chat Flotante -->
+    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none;">
+        <div id="chatButton" onclick="toggleChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 70, 254, 0.4); transition: all 0.3s ease;">
+            <span id="chatButtonIcon" style="font-size: 1.8rem;">💬</span>
+        </div>
+        
+        <div id="chatWindow" style="display: none; position: absolute; bottom: 75px; right: 0; width: 380px; height: 550px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden; flex-direction: column;">
+            <!-- Chat Header -->
+            <div style="background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem;">💬 Chat IA</h3>
+                    <p style="margin: 5px 0 0; font-size: 0.85rem; opacity: 0.9;">Asistente virtual 24/7</p>
+                </div>
+                <button onclick="toggleChat()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chatMessages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #f8f9fa;">
+                <!-- Los mensajes se añadirán aquí dinámicamente -->
+            </div>
+            
+            <!-- Chat Input -->
+            <div style="padding: 15px; background: white; border-top: 1px solid #e8eaed;">
+                <form id="chatForm" style="display: flex; gap: 10px;">
+                    <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." style="flex: 1; padding: 12px; border: 2px solid #e8eaed; border-radius: 25px; font-size: 0.95rem; outline: none;">
+                    <button type="submit" style="background: #0046FE; border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">➤</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_URL = 'https://agutidesigns-production.up.railway.app';
         let currentClient = null;
@@ -1357,6 +1588,9 @@
             if (hasPlan) {
                 document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
                 document.getElementById('noPlanBanner').style.display = 'none';
+                // Mostrar soporte para clientes con plan
+                document.getElementById('supportWithPlan').style.display = 'block';
+                document.getElementById('supportNoPlan').style.display = 'none';
             } else {
                 document.getElementById('userPlan').textContent = 'Sin plan activo';
                 document.getElementById('noPlanBanner').style.display = 'block';
@@ -1561,6 +1795,10 @@
             if (btnEditSite) {
                 btnEditSite.innerHTML = '🌐 Ver Demo del Sitio';
             }
+            
+            // Gestionar sección de Soporte
+            document.getElementById('supportWithPlan').style.display = 'none';
+            document.getElementById('supportNoPlan').style.display = 'block';
         }
 
         // Añadir overlay de bloqueo a secciones
@@ -2032,6 +2270,202 @@
                 }
             }
         });
+
+        // =============================================
+        // FUNCIONES DE SOPORTE: TICKETS Y CHAT
+        // =============================================
+
+        // Abrir modal de ticket
+        function openTicketModal() {
+            document.getElementById('ticketModal').style.display = 'flex';
+        }
+
+        // Cerrar modal de ticket
+        function closeTicketModal(event) {
+            event.stopPropagation();
+            document.getElementById('ticketModal').style.display = 'none';
+            document.getElementById('ticketForm').reset();
+        }
+
+        // Enviar ticket
+        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const subject = document.getElementById('ticketSubject').value;
+            const category = document.getElementById('ticketCategory').value;
+            const description = document.getElementById('ticketDescription').value;
+            const priority = document.getElementById('ticketPriority').value;
+            
+            const ticketData = {
+                client_id: currentClient.id,
+                client_email: currentClient.email,
+                client_name: currentClient.full_name,
+                business_name: currentClient.business_name,
+                subject: subject,
+                category: category,
+                description: description,
+                priority: priority,
+                status: 'abierto',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/api/tickets`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ticketData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Ticket creado correctamente. Te responderemos pronto a tu email.');
+                    closeTicketModal(e);
+                } else {
+                    alert('❌ Error al crear el ticket: ' + (data.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error al enviar ticket:', error);
+                alert('❌ Error al enviar el ticket. Por favor, intenta de nuevo.');
+            }
+        });
+
+        // =============================================
+        // CHAT WIDGET CON IA
+        // =============================================
+
+        let chatOpen = false;
+
+        // Toggle chat
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            const chatWindow = document.getElementById('chatWindow');
+            const chatButtonIcon = document.getElementById('chatButtonIcon');
+            
+            if (chatOpen) {
+                chatWindow.style.display = 'flex';
+                chatButtonIcon.textContent = '×';
+                // Mensaje de bienvenida si es la primera vez
+                if (document.getElementById('chatMessages').children.length === 0) {
+                    addChatMessage('bot', `¡Hola ${currentClient.full_name?.split(' ')[0] || 'Usuario'}! 👋\n\nSoy tu asistente virtual de agutidesigns. ¿En qué puedo ayudarte hoy?`);
+                }
+            } else {
+                chatWindow.style.display = 'none';
+                chatButtonIcon.textContent = '💬';
+            }
+        }
+
+        // Abrir chat desde botón de la sección
+        function openChatWidget() {
+            // Mostrar el widget si está oculto
+            document.getElementById('chatWidget').style.display = 'block';
+            // Abrir el chat
+            if (!chatOpen) {
+                toggleChat();
+            }
+        }
+
+        // Añadir mensaje al chat
+        function addChatMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            if (sender === 'bot') {
+                messageDiv.style.cssText = `
+                    background: white;
+                    padding: 12px 16px;
+                    border-radius: 15px 15px 15px 4px;
+                    max-width: 80%;
+                    align-self: flex-start;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                    border: 1px solid #e8eaed;
+                `;
+                messageDiv.innerHTML = `<strong style="color: #0046FE; display: block; margin-bottom: 5px;">🤖 Asistente IA</strong><p style="margin: 0; color: #1B1B1B; line-height: 1.5; white-space: pre-wrap;">${text}</p>`;
+            } else {
+                messageDiv.style.cssText = `
+                    background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 15px 15px 4px 15px;
+                    max-width: 80%;
+                    align-self: flex-end;
+                    box-shadow: 0 2px 8px rgba(0,70,254,0.3);
+                `;
+                messageDiv.innerHTML = `<p style="margin: 0; line-height: 1.5;">${text}</p>`;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Enviar mensaje del chat
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const input = document.getElementById('chatInput');
+            const userMessage = input.value.trim();
+            
+            if (!userMessage) return;
+            
+            // Añadir mensaje del usuario
+            addChatMessage('user', userMessage);
+            input.value = '';
+            
+            // Simular "escribiendo..."
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing';
+            typingDiv.style.cssText = `
+                background: white;
+                padding: 12px 16px;
+                border-radius: 15px;
+                max-width: 80px;
+                align-self: flex-start;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                border: 1px solid #e8eaed;
+            `;
+            typingDiv.textContent = '...';
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            
+            try {
+                // Llamar a la IA (OpenAI API a través del backend)
+                const response = await fetch(`${API_URL}/api/chat-ai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        client_id: currentClient.id,
+                        context: {
+                            plan: currentClient.plan,
+                            business_name: currentClient.business_name
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Eliminar "escribiendo..."
+                document.getElementById('typing')?.remove();
+                
+                if (response.ok && data.response) {
+                    addChatMessage('bot', data.response);
+                } else {
+                    addChatMessage('bot', 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo o crea un ticket de soporte.');
+                }
+            } catch (error) {
+                console.error('Error en chat IA:', error);
+                document.getElementById('typing')?.remove();
+                addChatMessage('bot', 'Lo siento, no puedo responder ahora. Por favor, intenta más tarde o crea un ticket de soporte.');
+            }
+        });
+
+        // Mostrar widget de chat solo para clientes con plan
+        if (currentClient && currentClient.plan && currentClient.plan !== 'null') {
+            document.getElementById('chatWidget').style.display = 'block';
+        }
     </script>
 </body>
 </html> 
