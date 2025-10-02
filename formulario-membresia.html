@@ -1348,68 +1348,48 @@
             <!-- PASO 8: Datos Personales (Crear Cuenta) -->
             <div class="form-step" data-step="8">
                 <h2 class="step-title">Crea tu Cuenta</h2>
-                <p class="step-description">Datos para acceder a tu dashboard</p>
+                <p class="step-description">Solo necesitamos estos datos para tu dashboard</p>
 
                 <!-- Opción de registro con Google -->
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <button type="button" class="btn-google" onclick="registerWithGoogle()" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 30px; background: white; color: #333; border: 2px solid #e0e0e0; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem;">
+                <div style="text-align: center; margin-bottom: 35px;">
+                    <button type="button" class="btn-google" onclick="registerWithGoogle()" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 35px; background: white; color: #333; border: 2px solid #e0e0e0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
                         Continuar con Google
                     </button>
-                    <p style="margin: 20px 0; color: #999; font-size: 0.9rem;">O crea tu cuenta manualmente:</p>
+                    <p style="margin: 25px 0; color: #999; font-size: 0.95rem; font-weight: 500;">O crea tu cuenta manualmente:</p>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Nombre completo <span class="required">*</span></label>
-                    <input type="text" class="form-input" name="full_name" required>
+                    <label class="form-label">Nombre <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="first_name" required placeholder="Tu nombre">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Apellido <span class="required">*</span></label>
+                    <input type="text" class="form-input" name="last_name" required placeholder="Tu apellido">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Correo electrónico <span class="required">*</span></label>
-                    <input type="email" class="form-input" name="email" required>
-                    <span class="helper-text">Usarás este email para acceder al dashboard</span>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Teléfono <span class="required">*</span></label>
-                    <input type="tel" class="form-input" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Fecha de nacimiento <span class="required">*</span></label>
-                    <input type="date" class="form-input" name="birthdate" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">DNI/NIE <span class="required">*</span></label>
-                    <input type="text" class="form-input" name="dni" required placeholder="Ej: 12345678A">
-                    <span class="helper-text">Necesario para la facturación</span>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Dirección completa <span class="required">*</span></label>
-                    <input type="text" class="form-input" name="address" placeholder="Calle, número, piso..." required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Código postal <span class="required">*</span></label>
-                    <input type="text" class="form-input" name="postal_code" required placeholder="Ej: 28001">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ciudad <span class="required">*</span></label>
-                    <input type="text" class="form-input" name="city" required>
+                    <input type="email" class="form-input" name="email" required placeholder="tu@email.com">
+                    <span class="helper-text">Usarás este email para acceder a tu dashboard</span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Crea una contraseña <span class="required">*</span></label>
-                    <input type="password" class="form-input" name="password" required minlength="8">
-                    <span class="helper-text">Mínimo 8 caracteres, incluye números y letras</span>
+                    <input type="password" class="form-input" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    <span class="helper-text">Incluye al menos una letra y un número</span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Confirma tu contraseña <span class="required">*</span></label>
-                    <input type="password" class="form-input" name="password_confirm" required minlength="8">
+                    <input type="password" class="form-input" name="password_confirm" required minlength="8" placeholder="Repite tu contraseña">
+                </div>
+
+                <div class="form-group" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #0046FE; margin-top: 25px;">
+                    <p style="font-size: 0.9rem; color: #666; line-height: 1.6;">
+                        ℹ️ Al completar el pago, se creará automáticamente tu cuenta con acceso al dashboard donde podrás hacer seguimiento de tu proyecto.
+                    </p>
                 </div>
             </div>
 
@@ -1623,6 +1603,11 @@
                     })
                 });
 
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+                }
+
                 const result = await response.json();
 
                 if (result.sessionUrl) {
@@ -1632,8 +1617,8 @@
                     throw new Error('No se pudo crear la sesión de pago');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
+                console.error('Error completo:', error);
+                alert(`❌ Error al procesar el pago:\n\n${error.message}\n\nPor favor, verifica tu conexión e inténtalo de nuevo.\n\nSi el problema persiste, contacta con soporte.`);
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
