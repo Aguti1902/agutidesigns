@@ -78,24 +78,35 @@
         }
 
         /* Modal de selección de plan */
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         .plan-modal-btn {
             background: #f8f9fa;
-            border: 3px solid #e0e0e0;
-            padding: 25px;
-            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            padding: 18px 20px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            align-items: center;
+            align-items: flex-start;
         }
 
         .plan-modal-btn:hover {
             background: #E5FC63;
             border-color: #0046FE;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 70, 254, 0.15);
         }
 
         /* Botón de upgrade */
@@ -104,7 +115,7 @@
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: #EC6746;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -116,9 +127,9 @@
         }
 
         .btn-upgrade-plan:hover {
-            background: #d95a3a;
+            background: linear-gradient(135deg, #0036C8 0%, #002a9e 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(236, 103, 70, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 70, 254, 0.4);
         }
 
         /* Barra de progreso */
@@ -743,27 +754,33 @@
             </div>
             
             <!-- Modal para cambiar plan -->
-            <div id="planModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
-                <div style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%;">
-                    <h3 style="color: #0046FE; margin-bottom: 25px; font-size: 1.8rem; text-align: center;">Selecciona tu Plan</h3>
-                    <div style="display: grid; gap: 15px;">
+            <div id="planModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+                <div style="background: white; padding: 30px; border-radius: 20px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease;">
+                    <h3 style="color: #0046FE; margin-bottom: 20px; font-size: 1.4rem; text-align: center; font-weight: 800;">Cambia tu Plan</h3>
+                    <div style="display: grid; gap: 12px;">
                         <button type="button" class="plan-modal-btn" onclick="changePlan('basico', 'Básico - 35€/mes')">
-                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Básico</span>
-                            <span style="font-size: 2rem; color: #0046FE;">35€/mes</span>
-                            <span style="font-size: 0.9rem; color: #666;">Hasta 5 páginas</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span style="font-size: 1.1rem; font-weight: 700;">Básico</span>
+                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">35€</span>
+                            </div>
+                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">5 páginas</span>
                         </button>
                         <button type="button" class="plan-modal-btn" onclick="changePlan('avanzado', 'Avanzado - 49€/mes')">
-                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Avanzado</span>
-                            <span style="font-size: 2rem; color: #0046FE;">49€/mes</span>
-                            <span style="font-size: 0.9rem; color: #666;">Hasta 10 páginas</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span style="font-size: 1.1rem; font-weight: 700;">Avanzado</span>
+                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">49€</span>
+                            </div>
+                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">10 páginas · ⭐ Popular</span>
                         </button>
                         <button type="button" class="plan-modal-btn" onclick="changePlan('premium', 'Premium - 65€/mes')">
-                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Premium</span>
-                            <span style="font-size: 2rem; color: #0046FE;">65€/mes</span>
-                            <span style="font-size: 0.9rem; color: #666;">Hasta 20 páginas</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span style="font-size: 1.1rem; font-weight: 700;">Premium</span>
+                                <span style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">65€</span>
+                            </div>
+                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">20 páginas · 👑 Completo</span>
                         </button>
                     </div>
-                    <button type="button" onclick="closePlanSelector()" style="margin-top: 20px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    <button type="button" onclick="closePlanSelector()" style="margin-top: 15px; width: 100%; padding: 10px; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.3s ease;">
                         Cancelar
                     </button>
                 </div>
@@ -1634,6 +1651,55 @@
 
         // Cambiar plan desde el modal
         function changePlan(plan, displayText) {
+            const oldPlan = document.getElementById('selectedPlan').value;
+            
+            // Obtener límites
+            const limits = {
+                'basico': 5,
+                'avanzado': 10,
+                'premium': 20
+            };
+            
+            const newLimit = limits[plan];
+            const currentTotal = countTotalPages();
+            
+            // Si el nuevo plan tiene menos páginas que las actuales
+            if (currentTotal > newLimit) {
+                const diff = currentTotal - newLimit;
+                const confirmChange = confirm(
+                    `⚠️ Atención: El nuevo plan permite solo ${newLimit} páginas.\n\n` +
+                    `Actualmente tienes ${currentTotal} páginas seleccionadas.\n\n` +
+                    `Se eliminarán automáticamente ${diff} página(s) personalizada(s).\n\n` +
+                    `¿Deseas continuar?`
+                );
+                
+                if (!confirmChange) {
+                    return; // Cancelar cambio de plan
+                }
+                
+                // Eliminar páginas personalizadas hasta cumplir el límite
+                const customPages = document.querySelectorAll('.custom-page-item');
+                let pagesToRemove = diff;
+                
+                // Eliminar desde la última hacia atrás
+                for (let i = customPages.length - 1; i >= 0 && pagesToRemove > 0; i--) {
+                    customPages[i].remove();
+                    pagesToRemove--;
+                }
+                
+                // Si aún hay que eliminar más, desmarcar checkboxes
+                if (pagesToRemove > 0) {
+                    const checkboxes = document.querySelectorAll('#pagesCheckboxGroup input[type="checkbox"]:checked');
+                    // No desmarcar "Inicio" que es obligatorio
+                    for (let i = checkboxes.length - 1; i >= 0 && pagesToRemove > 0; i--) {
+                        if (checkboxes[i].id !== 'page_home') {
+                            checkboxes[i].checked = false;
+                            pagesToRemove--;
+                        }
+                    }
+                }
+            }
+            
             // Actualizar input hidden
             document.getElementById('selectedPlan').value = plan;
             // Actualizar texto visible
