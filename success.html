@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pago Exitoso - agutidesigns</title>
+    <title>¡Pago Exitoso! - agutidesigns</title>
     <style>
         * {
             margin: 0;
@@ -13,28 +13,45 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0046FE 0%, #E5FC63 100%);
+            background: #f7f7f7;
             min-height: 100vh;
+            padding: 60px 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .logo img {
+            height: 50px;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
         }
 
         .success-container {
-            background: white;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            animation: slideUp 0.6s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            animation: slideUp 0.5s ease;
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -43,115 +60,141 @@
         }
 
         .success-header {
-            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
-            padding: 50px 30px;
+            background: #0046FE;
+            padding: 40px 30px;
             text-align: center;
             color: white;
         }
 
         .success-icon {
-            font-size: 5rem;
-            animation: bounceIn 0.8s ease;
+            font-size: 4rem;
             display: block;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            animation: bounceIn 0.6s ease;
         }
 
         @keyframes bounceIn {
-            0%, 20%, 40%, 60%, 80%, 100% {
-                animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-            }
             0% {
                 opacity: 0;
-                transform: scale3d(.3, .3, .3);
+                transform: scale(0.3);
             }
-            20% {
-                transform: scale3d(1.1, 1.1, 1.1);
-            }
-            40% {
-                transform: scale3d(.9, .9, .9);
-            }
-            60% {
+            50% {
                 opacity: 1;
-                transform: scale3d(1.03, 1.03, 1.03);
+                transform: scale(1.05);
             }
-            80% {
-                transform: scale3d(.97, .97, .97);
+            70% {
+                transform: scale(0.95);
             }
             100% {
-                opacity: 1;
-                transform: scale3d(1, 1, 1);
+                transform: scale(1);
             }
         }
 
         .success-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .success-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+            font-size: 1.05rem;
+            opacity: 0.95;
         }
 
         .success-content {
-            padding: 40px 30px;
+            padding: 45px 40px;
         }
 
-        .info-box {
-            background: #f8f9fa;
-            border-left: 4px solid #0046FE;
-            padding: 20px;
-            border-radius: 8px;
+        .details-section {
+            background: #fafbfc;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 25px;
         }
 
-        .info-box h3 {
-            color: #0046FE;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+        .details-section h3 {
+            color: #1B1B1B;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            font-weight: 700;
         }
 
-        .info-row {
+        .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e8eaed;
         }
 
-        .info-row:last-child {
+        .detail-row:last-child {
             border-bottom: none;
         }
 
-        .info-label {
-            font-weight: 600;
+        .detail-label {
             color: #666;
-        }
-
-        .info-value {
-            color: #333;
             font-weight: 500;
-        }
-
-        .plan-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #009A62 0%, #007a4d 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: bold;
             font-size: 0.95rem;
         }
 
+        .detail-value {
+            color: #1B1B1B;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .plan-badge {
+            background: #009A62;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            color: #009A62;
+            font-weight: 700;
+        }
+
+        .email-box {
+            background: #e8f4ff;
+            border-left: 4px solid #0046FE;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .email-box strong {
+            color: #0046FE;
+            font-size: 1.05rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .email-box p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .email-highlight {
+            color: #0046FE;
+            font-weight: 600;
+        }
+
         .next-steps {
-            background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%);
-            padding: 25px;
+            background: #f9fafb;
             border-radius: 12px;
-            margin: 25px 0;
+            padding: 25px;
+            margin-bottom: 25px;
         }
 
         .next-steps h3 {
             color: #1B1B1B;
-            margin-bottom: 15px;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            font-weight: 700;
         }
 
         .steps-list {
@@ -159,106 +202,93 @@
         }
 
         .steps-list li {
-            padding: 12px 0;
-            padding-left: 35px;
+            padding: 10px 0 10px 35px;
             position: relative;
             color: #333;
             font-weight: 500;
+            line-height: 1.6;
         }
 
         .steps-list li:before {
             content: "✓";
             position: absolute;
             left: 0;
+            top: 10px;
             background: #009A62;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .email-notice {
-            background: #e8f4ff;
-            border: 2px solid #0046FE;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 25px 0;
-        }
-
-        .email-notice strong {
-            color: #0046FE;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 1.1rem;
+            font-size: 0.85rem;
         }
 
         .btn-home {
             display: block;
-            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            width: 100%;
+            background: #0046FE;
             color: white;
             text-align: center;
-            padding: 15px 30px;
+            padding: 16px;
             border-radius: 10px;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 700;
+            font-size: 1rem;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-home:hover {
+            background: #0036C8;
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 70, 254, 0.3);
-        }
-
-        .loader {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #0046FE;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.25);
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 30px 15px;
+            }
+
+            .success-header {
+                padding: 35px 25px;
+            }
+
             .success-header h1 {
-                font-size: 2rem;
+                font-size: 1.6rem;
             }
 
             .success-icon {
-                font-size: 4rem;
+                font-size: 3.5rem;
             }
 
             .success-content {
-                padding: 30px 20px;
+                padding: 30px 25px;
             }
 
-            .info-row {
+            .detail-row {
                 flex-direction: column;
+                align-items: flex-start;
                 gap: 5px;
+            }
+
+            .details-section,
+            .next-steps {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Logo centrado arriba -->
+    <div class="logo">
+        <img src="/images/Logo.svg" alt="agutidesigns">
+        <p>Tu web profesional por suscripción</p>
+    </div>
+
     <div class="success-container">
         <div class="success-header">
             <span class="success-icon">🎉</span>
@@ -267,63 +297,58 @@
         </div>
 
         <div class="success-content" id="content">
-            <div class="loader">
-                <div class="spinner"></div>
-                <p>Cargando detalles de tu suscripción...</p>
-            </div>
+            <!-- El contenido se llenará dinámicamente -->
         </div>
     </div>
 
     <script>
-        // Obtener session_id de la URL
+        // Obtener datos del sessionStorage o URL
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
-
-        if (sessionId) {
-            // Obtener detalles de la sesión
-            fetch(`https://agutidesigns-production.up.railway.app/api/session/${sessionId}`)
-                .then(res => res.json())
-                .then(session => {
-                    displaySuccess(session);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    displayGenericSuccess();
-                });
-        } else {
-            displayGenericSuccess();
+        const orderData = sessionStorage.getItem('orderData');
+        
+        let data = null;
+        if (orderData) {
+            try {
+                data = JSON.parse(orderData);
+            } catch (e) {
+                console.error('Error parsing orderData:', e);
+            }
         }
 
-        function displaySuccess(session) {
-            const planNames = {
-                'basico': 'Plan Básico',
-                'avanzado': 'Plan Avanzado',
-                'premium': 'Plan Premium'
-            };
+        // Mapeo de planes
+        const planInfo = {
+            'basico': { name: 'Plan Básico', price: '35€', pages: '5 páginas' },
+            'avanzado': { name: 'Plan Avanzado', price: '49€', pages: '10 páginas' },
+            'premium': { name: 'Plan Premium', price: '65€', pages: '20 páginas' }
+        };
 
-            const plan = session.metadata?.plan || 'basico';
-            const businessName = session.metadata?.business_name || 'tu empresa';
+        function displaySuccess() {
+            const plan = data?.plan || 'basico';
+            const businessName = data?.businessInfo?.businessName || 'tu empresa';
+            const email = data?.email || 'tu correo';
+            const planDetails = planInfo[plan];
 
             document.getElementById('content').innerHTML = `
-                <div class="info-box">
+                <div class="details-section">
                     <h3>📋 Detalles de tu Suscripción</h3>
-                    <div class="info-row">
-                        <span class="info-label">Empresa:</span>
-                        <span class="info-value">${businessName}</span>
+                    <div class="detail-row">
+                        <span class="detail-label">Empresa:</span>
+                        <span class="detail-value">${businessName}</span>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Plan:</span>
-                        <span class="info-value"><span class="plan-badge">${planNames[plan]}</span></span>
+                    <div class="detail-row">
+                        <span class="detail-label">Plan:</span>
+                        <span class="detail-value"><span class="plan-badge">${planDetails.name}</span></span>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">Estado:</span>
-                        <span class="info-value" style="color: #009A62; font-weight: bold;">✓ Activo</span>
+                    <div class="detail-row">
+                        <span class="detail-label">Estado:</span>
+                        <span class="status-badge">✓ Activo</span>
                     </div>
                 </div>
 
-                <div class="email-notice">
+                <div class="email-box">
                     <strong>📧 Revisa tu email</strong>
-                    <p>Te hemos enviado un email de confirmación a <strong>${session.customer_email || session.customer_details?.email}</strong> con todos los detalles y próximos pasos.</p>
+                    <p>Te hemos enviado un email de confirmación a <span class="email-highlight">${email}</span> con todos los detalles y próximos pasos.</p>
                 </div>
 
                 <div class="next-steps">
@@ -332,39 +357,20 @@
                         <li>Recibirás un email de confirmación en los próximos minutos</li>
                         <li>Nuestro equipo revisará tu solicitud en las próximas 24 horas</li>
                         <li>Te contactaremos para coordinar los detalles finales</li>
-                        <li>Empezaremos a trabajar en tu web inmediatamente</li>
-                        <li>Recibirás acceso a tu dashboard para seguir el progreso</li>
+                        <li>Empezaremos a trabajar en tu web en 5 días</li>
+                        <li>Recibirás acceso a tu dashboard para hacer cambios</li>
                     </ul>
                 </div>
 
-                <a href="/" class="btn-home">Volver al Inicio</a>
+                <button class="btn-home" onclick="window.location.href='/'">Volver al Inicio</button>
             `;
         }
 
-        function displayGenericSuccess() {
-            document.getElementById('content').innerHTML = `
-                <div class="info-box">
-                    <h3>✅ ¡Gracias por tu compra!</h3>
-                    <p>Tu pago se ha procesado correctamente y tu suscripción está activa.</p>
-                </div>
+        // Mostrar contenido inmediatamente
+        displaySuccess();
 
-                <div class="email-notice">
-                    <strong>📧 Revisa tu email</strong>
-                    <p>Te hemos enviado un email de confirmación con todos los detalles.</p>
-                </div>
-
-                <div class="next-steps">
-                    <h3>🚀 Próximos Pasos</h3>
-                    <ul class="steps-list">
-                        <li>Revisa tu email para la confirmación</li>
-                        <li>Nuestro equipo te contactará pronto</li>
-                        <li>Empezaremos a trabajar en tu web</li>
-                    </ul>
-                </div>
-
-                <a href="/" class="btn-home">Volver al Inicio</a>
-            `;
-        }
+        // Limpiar sessionStorage después de mostrar
+        // sessionStorage.removeItem('orderData');
     </script>
 </body>
 </html> 
