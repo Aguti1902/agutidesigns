@@ -703,7 +703,7 @@
                         <h3 class="card-title">▣ Información de tu Negocio</h3>
                         <p><strong>Empresa:</strong> <span id="businessName">Cargando...</span></p>
                         <p><strong>Dominio:</strong> <span id="domainName">Pendiente</span></p>
-                        <p><strong>Estado:</strong> <span class="status-badge status-construction" id="websiteStatus">En Construcción</span></p>
+                        <p><strong>Estado:</strong> <span class="status-badge" id="websiteStatus">Cargando...</span></p>
                     </div>
                 </div>
 
@@ -1162,12 +1162,14 @@
                     };
                     
                     // Si no tiene plan, forzar estado inactivo
-                    let websiteStatus = data.client.website_status;
+                    let websiteStatus;
                     if (!hasPlan) {
                         websiteStatus = 'inactivo';
+                    } else {
+                        websiteStatus = data.client.website_status || 'en_construccion';
                     }
                     
-                    const status = statusMap[websiteStatus] || statusMap['en_construccion'];
+                    const status = statusMap[websiteStatus];
                     document.getElementById('siteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').className = `status-badge ${status.class}`;
