@@ -200,18 +200,30 @@ app.post('/api/create-subscription', async (req, res) => {
             // Obtener datos completos
             const submission = db.getSubmission(submissionId);
 
-            // Crear cliente/usuario con contraseña hasheada
-            const hashedPassword = await bcrypt.hash(formData.password || 'temp123', 10);
-            db.createClient({
-                email: formData.email,
-                password: hashedPassword,
-                full_name: formData.full_name || formData.nombre + ' ' + formData.apellido,
-                business_name: formData.business_name,
-                plan: plan,
-                submission_id: submissionId,
-                stripe_customer_id: customer.id,
-                stripe_subscription_id: subscription.id
-            });
+            // Crear cliente/usuario con contraseña hasheada (si no existe ya)
+            const existingClient = db.getClientByEmail(submission.email);
+            
+            if (!existingClient) {
+                // Hashear la contraseña desde la submission
+                const passwordToHash = submission.password || formData.password || 'temp123';
+                const hashedPassword = await bcrypt.hash(passwordToHash, 10);
+                
+                db.createClient({
+                    email: submission.email,
+                    password: hashedPassword,
+                    full_name: submission.full_name || (formData.nombre && formData.apellido ? formData.nombre + ' ' + formData.apellido : 'Cliente'),
+                    business_name: submission.business_name,
+                    plan: plan,
+                    submission_id: submissionId,
+                    stripe_customer_id: customer.id,
+                    stripe_subscription_id: subscription.id
+                });
+
+                console.log('Cliente creado exitosamente:', submission.email);
+            } else {
+                console.log('Cliente ya existe, actualizando datos de suscripción');
+                // TODO: Actualizar cliente existente con datos de Stripe
+            }
 
             // Enviar emails
             await emailService.sendAdminNotification(submission);
@@ -375,6 +387,65 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
 });
 
 // ===== ENDPOINTS DE CLIENTES =====
+
+// Registro de cliente (sin pagar)
+app.post('/api/client/register', async (req, res) => {
+    try {
+        const { email, password, full_name, business_name, plan } = req.body;
+
+        console.log('Intento de registro:', { email, full_name, plan });
+
+        // Validaciones
+        if (!email || !password || !full_name) {
+            return res.status(400).json({ error: 'Email, contraseña y nombre son requeridos' });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+        }
+
+        // Verificar si el cliente ya existe
+        const existingClient = db.getClientByEmail(email);
+        if (existingClient) {
+            return res.status(400).json({ error: 'Ya existe una cuenta con este email' });
+        }
+
+        // Hashear contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Crear cliente sin plan activo (plan null o 'ninguno')
+        const clientId = db.createClient({
+            email: email,
+            password: hashedPassword,
+            full_name: full_name,
+            business_name: business_name || null,
+            plan: plan || null,
+            submission_id: null,
+            stripe_customer_id: null,
+            stripe_subscription_id: null
+        });
+
+        if (!clientId) {
+            return res.status(500).json({ error: 'Error al crear la cuenta' });
+        }
+
+        console.log('Cliente registrado exitosamente:', { clientId, email });
+
+        // Obtener cliente recién creado (sin contraseña)
+        const client = db.getClientById(clientId);
+        delete client.password;
+
+        res.json({
+            success: true,
+            message: 'Cuenta creada exitosamente',
+            client
+        });
+
+    } catch (error) {
+        console.error('Error en registro de cliente:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
 
 // Debug: Verificar si un cliente existe por email
 app.get('/api/client/check/:email', async (req, res) => {

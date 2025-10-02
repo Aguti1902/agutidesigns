@@ -61,6 +61,7 @@ db.exec(`
         email TEXT NOT NULL,
         phone TEXT,
         address TEXT,
+        password TEXT,
         
         -- Plan y pago
         plan TEXT NOT NULL,
@@ -123,7 +124,7 @@ function createSubmission(data) {
             keywords, has_analytics,
             domain_name, domain_alt1, domain_alt2,
             privacy_policy,
-            full_name, email, phone, address,
+            full_name, email, phone, address, password,
             plan, amount, status
         ) VALUES (
             ?, ?, ?, ?, ?, ?, ?,
@@ -134,7 +135,7 @@ function createSubmission(data) {
             ?, ?,
             ?, ?, ?,
             ?,
-            ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
             ?, ?, ?
         )
     `);
@@ -174,6 +175,7 @@ function createSubmission(data) {
         data.email,
         data.phone || null,
         data.address || null,
+        data.password || null,
         data.plan,
         data.amount,
         data.status || 'pending'

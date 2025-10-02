@@ -1584,6 +1584,37 @@
                 }
             });
 
+            // PRIMERO: Registrar al usuario (crear cuenta)
+            try {
+                const response = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: data.email,
+                        password: data.password,
+                        full_name: `${data.nombre} ${data.apellido}`,
+                        business_name: data.business_name || null,
+                        plan: plan
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    // Si el usuario ya existe, está bien (puede estar repitiendo el proceso)
+                    if (result.error && !result.error.includes('Ya existe')) {
+                        alert('Error al crear tu cuenta: ' + result.error);
+                        return;
+                    }
+                }
+
+                console.log('✅ Cuenta creada/verificada:', result);
+            } catch (error) {
+                console.error('Error al registrar usuario:', error);
+                alert('Hubo un problema al crear tu cuenta. Por favor, intenta de nuevo.');
+                return;
+            }
+
             // Guardar datos en sessionStorage para la página de checkout
             sessionStorage.setItem('orderData', JSON.stringify({
                 plan: plan,
