@@ -1,7 +1,30 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// Determinar si estamos en modo test
+const isTestMode = process.env.TEST_MODE === 'true';
+
+// Usar claves de Stripe según el modo
+const STRIPE_SECRET_KEY = isTestMode 
+    ? process.env.STRIPE_SECRET_KEY_TEST 
+    : process.env.STRIPE_SECRET_KEY;
+
+const STRIPE_PUBLISHABLE_KEY = isTestMode
+    ? process.env.STRIPE_PUBLISHABLE_KEY_TEST
+    : process.env.STRIPE_PUBLISHABLE_KEY;
+
+const STRIPE_WEBHOOK_SECRET = isTestMode
+    ? process.env.STRIPE_WEBHOOK_SECRET_TEST
+    : process.env.STRIPE_WEBHOOK_SECRET;
+
+const STRIPE_PRICES = {
+    basico: isTestMode ? process.env.STRIPE_PRICE_BASICO_TEST : process.env.STRIPE_PRICE_BASICO,
+    avanzado: isTestMode ? process.env.STRIPE_PRICE_AVANZADO_TEST : process.env.STRIPE_PRICE_AVANZADO,
+    premium: isTestMode ? process.env.STRIPE_PRICE_PREMIUM_TEST : process.env.STRIPE_PRICE_PREMIUM
+};
+
+const stripe = require('stripe')(STRIPE_SECRET_KEY);
 const fileUpload = require('express-fileupload');
 const path = require('path');
 const db = require('./database');
@@ -9,6 +32,8 @@ const emailService = require('./email-service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+console.log(`🚀 Servidor iniciando en modo: ${isTestMode ? 'TEST ⚠️' : 'PRODUCCIÓN ✅'}`);
 
 // Middleware - Configuración CORS mejorada
 const allowedOrigins = [
@@ -56,7 +81,8 @@ app.use('/admin', express.static(path.join(__dirname, '../admin-dashboard')));
 // 1. OBTENER CLAVE PÚBLICA DE STRIPE
 app.get('/api/config', (req, res) => {
     res.json({
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        publishableKey: STRIPE_PUBLISHABLE_KEY,
+        testMode: isTestMode
     });
 });
 
@@ -65,14 +91,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
     try {
         const { plan, formData } = req.body;
 
-        // Mapear plan a Price ID de Stripe
-        const priceIds = {
-            'basico': process.env.STRIPE_PRICE_BASICO,
-            'avanzado': process.env.STRIPE_PRICE_AVANZADO,
-            'premium': process.env.STRIPE_PRICE_PREMIUM
-        };
-
-        const priceId = priceIds[plan];
+        // Usar Price ID según el modo (test/live)
+        const priceId = STRIPE_PRICES[plan];
         if (!priceId) {
             return res.status(400).json({ error: 'Plan inválido' });
         }
@@ -119,14 +139,8 @@ app.post('/api/create-subscription', async (req, res) => {
     try {
         const { paymentMethodId, plan, formData, billingDetails } = req.body;
 
-        // Mapear plan a Price ID de Stripe
-        const priceIds = {
-            'basico': process.env.STRIPE_PRICE_BASICO,
-            'avanzado': process.env.STRIPE_PRICE_AVANZADO,
-            'premium': process.env.STRIPE_PRICE_PREMIUM
-        };
-
-        const priceId = priceIds[plan];
+        // Usar Price ID según el modo (test/live)
+        const priceId = STRIPE_PRICES[plan];
         if (!priceId) {
             return res.status(400).json({ error: 'Plan inválido' });
         }
@@ -212,7 +226,7 @@ app.post('/webhook', async (req, res) => {
         event = stripe.webhooks.constructEvent(
             req.body,
             sig,
-            process.env.STRIPE_WEBHOOK_SECRET
+            STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
         console.error('Webhook signature verification failed:', err.message);
