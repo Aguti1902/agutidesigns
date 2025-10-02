@@ -77,6 +77,50 @@
             box-shadow: 0 5px 20px rgba(229, 252, 99, 0.4);
         }
 
+        /* Modal de selección de plan */
+        .plan-modal-btn {
+            background: #f8f9fa;
+            border: 3px solid #e0e0e0;
+            padding: 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .plan-modal-btn:hover {
+            background: #E5FC63;
+            border-color: #0046FE;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.2);
+        }
+
+        /* Botón de upgrade */
+        .btn-upgrade-plan {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #EC6746;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .btn-upgrade-plan:hover {
+            background: #d95a3a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(236, 103, 70, 0.3);
+        }
+
         /* Barra de progreso */
         .progress-bar-container {
             background: #f0f0f0;
@@ -686,17 +730,41 @@
             
             <!-- Selector de Plan -->
             <input type="hidden" id="selectedPlan" name="selected_plan" value="basico">
-            <div style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; display: inline-block;">
+            <div id="planDisplay" style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; display: inline-block;">
                 <p style="margin-bottom: 10px; font-size: 0.9rem; color: white; font-weight: 600;">Plan seleccionado:</p>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-                    <button type="button" class="plan-selector-btn active" onclick="selectPlan('basico', this)">
-                        Básico - 35€/mes
+                <div style="display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                    <div class="plan-selected-display" style="background: #E5FC63; color: #1B1B1B; padding: 12px 30px; border-radius: 10px; font-weight: bold; font-size: 1.1rem;">
+                        <span id="planDisplayText">Básico - 35€/mes</span>
+                    </div>
+                    <button type="button" onclick="openPlanSelector()" style="background: white; color: #0046FE; border: 2px solid white; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem;">
+                        Cambiar Plan
                     </button>
-                    <button type="button" class="plan-selector-btn" onclick="selectPlan('avanzado', this)">
-                        Avanzado - 49€/mes
-                    </button>
-                    <button type="button" class="plan-selector-btn" onclick="selectPlan('premium', this)">
-                        Premium - 65€/mes
+                </div>
+            </div>
+            
+            <!-- Modal para cambiar plan -->
+            <div id="planModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%;">
+                    <h3 style="color: #0046FE; margin-bottom: 25px; font-size: 1.8rem; text-align: center;">Selecciona tu Plan</h3>
+                    <div style="display: grid; gap: 15px;">
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('basico', 'Básico - 35€/mes')">
+                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Básico</span>
+                            <span style="font-size: 2rem; color: #0046FE;">35€/mes</span>
+                            <span style="font-size: 0.9rem; color: #666;">Hasta 5 páginas</span>
+                        </button>
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('avanzado', 'Avanzado - 49€/mes')">
+                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Avanzado</span>
+                            <span style="font-size: 2rem; color: #0046FE;">49€/mes</span>
+                            <span style="font-size: 0.9rem; color: #666;">Hasta 10 páginas</span>
+                        </button>
+                        <button type="button" class="plan-modal-btn" onclick="changePlan('premium', 'Premium - 65€/mes')">
+                            <span style="font-size: 1.3rem; font-weight: 800;">Plan Premium</span>
+                            <span style="font-size: 2rem; color: #0046FE;">65€/mes</span>
+                            <span style="font-size: 0.9rem; color: #666;">Hasta 20 páginas</span>
+                        </button>
+                    </div>
+                    <button type="button" onclick="closePlanSelector()" style="margin-top: 20px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                        Cancelar
                     </button>
                 </div>
             </div>
@@ -1554,17 +1622,40 @@
             }
         });
 
-        // Seleccionar plan
-        function selectPlan(plan, button) {
-            // Remover clase active de todos los botones
-            document.querySelectorAll('.plan-selector-btn').forEach(btn => btn.classList.remove('active'));
-            // Añadir active al botón seleccionado
-            button.classList.add('active');
+        // Abrir modal de selección de plan
+        function openPlanSelector() {
+            document.getElementById('planModal').style.display = 'flex';
+        }
+
+        // Cerrar modal
+        function closePlanSelector() {
+            document.getElementById('planModal').style.display = 'none';
+        }
+
+        // Cambiar plan desde el modal
+        function changePlan(plan, displayText) {
             // Actualizar input hidden
             document.getElementById('selectedPlan').value = plan;
-            // Actualizar contador de páginas con el nuevo límite
-            if (typeof updatePageCounter === 'function') {
-                updatePageCounter();
+            // Actualizar texto visible
+            document.getElementById('planDisplayText').textContent = displayText;
+            // Cerrar modal
+            closePlanSelector();
+            // Actualizar contador de páginas
+            updatePageCounter();
+        }
+
+        // Upgrade de plan (botón que aparece cuando se alcanza el límite)
+        function upgradePlan() {
+            const currentPlan = document.getElementById('selectedPlan').value;
+            
+            if (currentPlan === 'basico') {
+                changePlan('avanzado', 'Avanzado - 49€/mes');
+                alert('✨ ¡Plan mejorado a Avanzado!\n\nAhora puedes añadir hasta 10 páginas.');
+            } else if (currentPlan === 'avanzado') {
+                changePlan('premium', 'Premium - 65€/mes');
+                alert('✨ ¡Plan mejorado a Premium!\n\nAhora puedes añadir hasta 20 páginas.');
+            } else {
+                alert('Ya estás en el plan Premium con el máximo de páginas (20).');
             }
         }
 
@@ -1624,17 +1715,45 @@
                 'avanzado': 'Plan Avanzado',
                 'premium': 'Plan Premium'
             };
-            warning.textContent = `Límite de ${maxPages} páginas alcanzado (${planNames[plan]})`;
+            if (plan === 'premium') {
+                warning.textContent = `Límite de ${maxPages} páginas alcanzado (${planNames[plan]})`;
+            } else {
+                warning.textContent = `Límite de ${maxPages} páginas alcanzado`;
+            }
             
             // Deshabilitar botón si se alcanza el límite
             if (total >= maxPages) {
                 addBtn.disabled = true;
                 addBtn.style.display = 'none';
                 warning.style.display = 'inline-block';
+                
+                // Mostrar botón de upgrade si no está en Premium
+                const plan = document.getElementById('selectedPlan').value;
+                if (plan !== 'premium') {
+                    // Buscar si ya existe el botón de upgrade
+                    let upgradeBtn = document.getElementById('upgradePlanBtn');
+                    if (!upgradeBtn) {
+                        upgradeBtn = document.createElement('button');
+                        upgradeBtn.id = 'upgradePlanBtn';
+                        upgradeBtn.type = 'button';
+                        upgradeBtn.className = 'btn-upgrade-plan';
+                        upgradeBtn.onclick = upgradePlan;
+                        upgradeBtn.innerHTML = '⬆️ Mejorar Plan';
+                        warning.parentElement.appendChild(upgradeBtn);
+                    }
+                    upgradeBtn.style.display = 'inline-flex';
+                } else {
+                    // Ocultar botón de upgrade si está en premium
+                    const upgradeBtn = document.getElementById('upgradePlanBtn');
+                    if (upgradeBtn) upgradeBtn.style.display = 'none';
+                }
             } else {
                 addBtn.disabled = false;
                 addBtn.style.display = 'inline-flex';
                 warning.style.display = 'none';
+                // Ocultar botón de upgrade
+                const upgradeBtn = document.getElementById('upgradePlanBtn');
+                if (upgradeBtn) upgradeBtn.style.display = 'none';
             }
             
             // Deshabilitar checkboxes si se alcanza el límite
@@ -1919,17 +2038,20 @@
             const planParam = urlParams.get('plan');
             
             if (planParam && ['basico', 'avanzado', 'premium'].includes(planParam)) {
+                const planTexts = {
+                    'basico': 'Básico - 35€/mes',
+                    'avanzado': 'Avanzado - 49€/mes',
+                    'premium': 'Premium - 65€/mes'
+                };
+                
                 // Actualizar input hidden
                 document.getElementById('selectedPlan').value = planParam;
                 
-                // Actualizar botones visuales
-                document.querySelectorAll('.plan-selector-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    const btnText = btn.textContent.toLowerCase();
-                    if (btnText.includes(planParam)) {
-                        btn.classList.add('active');
-                    }
-                });
+                // Actualizar texto visible
+                const displayText = document.getElementById('planDisplayText');
+                if (displayText) {
+                    displayText.textContent = planTexts[planParam];
+                }
                 
                 // Actualizar contador de páginas
                 updatePageCounter();
