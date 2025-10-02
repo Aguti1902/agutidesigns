@@ -584,15 +584,15 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <ul class="sidebar-menu">
-                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">▣</span><span>Resumen</span></button></li>
-                    <li><button onclick="showSection('negocio')"><span class="menu-icon">◈</span><span>Mi Negocio</span></button></li>
-                    <li><button onclick="showSection('sitio')"><span class="menu-icon">⬡</span><span>Mi Sitio Web</span></button></li>
-                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">▨</span><span>Estadísticas</span></button></li>
-                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">▶</span><span>Tutoriales</span></button></li>
-                    <li><button onclick="showSection('dominio')"><span class="menu-icon">◉</span><span>Dominio & Hosting</span></button></li>
-                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">▦</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('soporte')"><span class="menu-icon">◐</span><span>Soporte</span></button></li>
-                    <li><button onclick="showSection('seo')"><span class="menu-icon">◆</span><span>SEO & Marketing</span></button></li>
+                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">🏠</span><span>Resumen</span></button></li>
+                    <li><button onclick="showSection('negocio')"><span class="menu-icon">🏢</span><span>Mi Negocio</span></button></li>
+                    <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
+                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
+                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
+                    <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
+                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
+                    <li><button onclick="showSection('soporte')"><span class="menu-icon">💬</span><span>Soporte</span></button></li>
+                    <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                 </ul>
             </div>
 
@@ -653,17 +653,17 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▶ Acciones Rápidas</h3>
+                        <h3 class="card-title">🚀 Acciones Rápidas</h3>
                         <div class="quick-actions">
-                            <button class="btn-action" onclick="showSection('sitio')" id="btnEditSite">⬡ Editar Mi Sitio</button>
-                            <button class="btn-action secondary" onclick="showSection('estadisticas')">▨ Ver Estadísticas</button>
-                            <button class="btn-action secondary" onclick="showSection('soporte')">◐ Contactar Soporte</button>
+                            <button class="btn-action" onclick="showSection('sitio')" id="btnEditSite">🌐 Editar Mi Sitio</button>
+                            <button class="btn-action secondary" onclick="showSection('estadisticas')">📊 Ver Estadísticas</button>
+                            <button class="btn-action secondary" onclick="showSection('soporte')">💬 Contactar Soporte</button>
                         </div>
                     </div>
 
                     <!-- Card de comparación de planes (solo sin plan) -->
                     <div class="card" id="planComparisonCard" style="display: none; background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%); border: 2px solid #0046FE;">
-                        <h3 class="card-title" style="color: #0046FE;">¿Qué obtienes con cada plan?</h3>
+                        <h3 class="card-title" style="color: #0046FE;">💎 ¿Qué obtienes con cada plan?</h3>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
                             <div style="padding: 20px; background: white; border-radius: 10px; border: 2px solid #e8eaed;">
                                 <h4 style="color: #0046FE; margin-bottom: 10px;">Básico</h4>
@@ -700,7 +700,7 @@
                     </div>
 
                     <div class="card" id="businessInfoCard">
-                        <h3 class="card-title">▣ Información de tu Negocio</h3>
+                        <h3 class="card-title">📋 Información de tu Negocio</h3>
                         <p><strong>Empresa:</strong> <span id="businessName">Cargando...</span></p>
                         <p><strong>Dominio:</strong> <span id="domainName">Pendiente</span></p>
                         <p><strong>Estado:</strong> <span class="status-badge" id="websiteStatus">Cargando...</span></p>
@@ -710,12 +710,12 @@
                 <!-- MI NEGOCIO (Nueva Sección) -->
                 <div id="negocio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">◈ Mi Negocio</h1>
+                        <h1 class="section-title">🏢 Mi Negocio</h1>
                         <p class="section-subtitle">Toda la información que proporcionaste</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▣ Datos del Negocio</h3>
+                        <h3 class="card-title">📋 Datos del Negocio</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Nombre de la Empresa</p>
@@ -733,7 +733,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◉ Datos de Contacto</h3>
+                        <h3 class="card-title">📞 Datos de Contacto</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email de Contacto</p>
@@ -751,14 +751,14 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">⬡ Páginas Solicitadas</h3>
+                        <h3 class="card-title">📄 Páginas Solicitadas</h3>
                         <div id="negocioPaginas" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                             <span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Cargando...</span>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◆ Dominio y SEO</h3>
+                        <h3 class="card-title">🔍 Dominio y SEO</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dominio Deseado</p>
@@ -776,7 +776,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▦ Datos Fiscales</h3>
+                        <h3 class="card-title">🏛️ Datos Fiscales</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">CIF/NIF</p>
@@ -797,23 +797,23 @@
                 <!-- MI SITIO WEB -->
                 <div id="sitio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">⬡ Mi Sitio Web</h1>
+                        <h1 class="section-title">🌐 Mi Sitio Web</h1>
                         <p class="section-subtitle">Gestiona y edita tu sitio web</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">⬡ Editor Visual</h3>
+                        <h3 class="card-title">🎨 Editor Visual</h3>
                         <p style="margin-bottom: 20px; color: #666;">Utiliza nuestro editor visual para hacer cambios en tu sitio web de forma intuitiva.</p>
                         <button class="btn-action" onclick="alert('Próximamente: Acceso directo al editor Elementor')">Abrir Editor</button>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▦ Subir Contenido</h3>
+                        <h3 class="card-title">📁 Subir Contenido</h3>
                         <p style="margin-bottom: 15px; color: #666;">Agrega nuevas imágenes, textos o videos a tu sitio web.</p>
                         <div class="quick-actions">
-                            <button class="btn-action secondary">◈ Subir Imágenes</button>
-                            <button class="btn-action secondary">▣ Añadir Texto</button>
-                            <button class="btn-action secondary">▶ Subir Video</button>
+                            <button class="btn-action secondary">📷 Subir Imágenes</button>
+                            <button class="btn-action secondary">📝 Añadir Texto</button>
+                            <button class="btn-action secondary">🎬 Subir Video</button>
                         </div>
                     </div>
                 </div>
@@ -821,7 +821,7 @@
                 <!-- ESTADÍSTICAS -->
                 <div id="estadisticas" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">▨ Estadísticas</h1>
+                        <h1 class="section-title">📊 Estadísticas</h1>
                         <p class="section-subtitle">Análisis y métricas de tu sitio web</p>
                     </div>
 
@@ -841,15 +841,15 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▨ Gráfico de Visitas</h3>
+                        <h3 class="card-title">📈 Gráfico de Visitas</h3>
                         <p style="color: #666;">Las estadísticas estarán disponibles una vez que tu sitio web esté activo.</p>
                         <div style="background: #f9fafb; height: 200px; border-radius: 10px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: #999;">
-                            <p>▨ Gráfico de visitas próximamente</p>
+                            <p>📊 Gráfico de visitas próximamente</p>
                         </div>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◉ Google Analytics</h3>
+                        <h3 class="card-title">🔗 Google Analytics</h3>
                         <p style="color: #666; margin-bottom: 15px;">Conecta tu cuenta de Google Analytics para obtener estadísticas detalladas.</p>
                         <button class="btn-action">Conectar Google Analytics</button>
                     </div>
@@ -858,7 +858,7 @@
                 <!-- TUTORIALES -->
                 <div id="tutoriales" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">▶ Videos Tutoriales</h1>
+                        <h1 class="section-title">🎥 Videos Tutoriales</h1>
                         <p class="section-subtitle">Aprende a gestionar tu sitio web</p>
                     </div>
 
@@ -911,12 +911,12 @@
                 <!-- DOMINIO & HOSTING -->
                 <div id="dominio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">◉ Dominio & Hosting</h1>
+                        <h1 class="section-title">🔗 Dominio & Hosting</h1>
                         <p class="section-subtitle">Información sobre tu dominio y servidor</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◉ Tu Dominio</h3>
+                        <h3 class="card-title">🌐 Tu Dominio</h3>
                         <p><strong>Dominio Principal:</strong> <span id="domainInfo">Pendiente de configuración</span></p>
                         <p><strong>Estado:</strong> <span class="status-badge status-construction">Configurando</span></p>
                         <p><strong>Renovación:</strong> Automática (incluida en tu plan)</p>
@@ -924,7 +924,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▦ Hosting</h3>
+                        <h3 class="card-title">🖥️ Hosting</h3>
                         <p><strong>Servidor:</strong> Europa (Alta velocidad)</p>
                         <p><strong>Espacio usado:</strong> 0 MB / 5 GB</p>
                         <p><strong>Ancho de banda:</strong> Ilimitado</p>
@@ -935,12 +935,12 @@
                 <!-- FACTURACIÓN -->
                 <div id="facturacion" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">▦ Facturación</h1>
+                        <h1 class="section-title">💳 Facturación</h1>
                         <p class="section-subtitle">Gestiona tus pagos y facturas</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▦ Tu Plan</h3>
+                        <h3 class="card-title">📋 Tu Plan</h3>
                         <p><strong>Plan Actual:</strong> <span id="currentPlan" style="color: #0046FE; font-weight: 600;">Plan Básico</span></p>
                         <p><strong>Precio:</strong> <span id="planPrice">35€/mes + IVA</span></p>
                         <p><strong>Renovación:</strong> Automática cada mes</p>
@@ -948,7 +948,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▣ Historial de Facturas</h3>
+                        <h3 class="card-title">🧾 Historial de Facturas</h3>
                         <p style="color: #666; margin-bottom: 15px;">Accede a todas tus facturas anteriores</p>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 8px;">
                             <p style="color: #999;">No hay facturas disponibles aún</p>
@@ -956,7 +956,7 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">▦ Método de Pago</h3>
+                        <h3 class="card-title">💳 Método de Pago</h3>
                         <p style="color: #666; margin-bottom: 15px;">Tarjeta terminada en ••••</p>
                         <button class="btn-action secondary">Actualizar Método de Pago</button>
                     </div>
@@ -965,38 +965,38 @@
                 <!-- SOPORTE -->
                 <div id="soporte" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">◐ Soporte Técnico</h1>
+                        <h1 class="section-title">💬 Soporte Técnico</h1>
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
 
                     <div class="support-options">
                         <div class="support-option" onclick="window.open('https://calendly.com/tu-link', '_blank')">
-                            <div class="support-icon">◉</div>
+                            <div class="support-icon">📅</div>
                             <div class="support-title">Agendar Reunión</div>
                             <div class="support-desc">Reserva una llamada con nuestro equipo</div>
                         </div>
 
                         <div class="support-option" onclick="alert('Chat en vivo próximamente')">
-                            <div class="support-icon">◐</div>
+                            <div class="support-icon">💬</div>
                             <div class="support-title">Chat en Vivo</div>
                             <div class="support-desc">Chatea con nosotros ahora</div>
                         </div>
 
                         <div class="support-option" onclick="alert('Crear ticket de soporte')">
-                            <div class="support-icon">▣</div>
+                            <div class="support-icon">🎫</div>
                             <div class="support-title">Crear Ticket</div>
                             <div class="support-desc">Envía tu consulta por escrito</div>
                         </div>
 
                         <div class="support-option" onclick="alert('WhatsApp: +34 XXX XXX XXX')">
-                            <div class="support-icon">◆</div>
+                            <div class="support-icon">📱</div>
                             <div class="support-title">WhatsApp</div>
                             <div class="support-desc">Contáctanos por WhatsApp</div>
                         </div>
                     </div>
 
                     <div class="card" style="margin-top: 30px;">
-                        <h3 class="card-title">◐ Preguntas Frecuentes</h3>
+                        <h3 class="card-title">❓ Preguntas Frecuentes</h3>
                         
                         <div class="faq-item">
                             <button class="faq-question" onclick="toggleFAQ(this)">
@@ -1043,12 +1043,12 @@
                 <!-- SEO & MARKETING -->
                 <div id="seo" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">◆ SEO & Marketing</h1>
+                        <h1 class="section-title">🚀 SEO & Marketing</h1>
                         <p class="section-subtitle">Optimiza y promociona tu sitio web</p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◆ Optimización SEO</h3>
+                        <h3 class="card-title">🔍 Optimización SEO</h3>
                         <p style="color: #666; margin-bottom: 15px;">Mejora el posicionamiento de tu sitio en buscadores</p>
                         <div style="background: #f9fafb; padding: 20px; border-radius: 10px;">
                             <p><strong>Palabras clave configuradas:</strong> <span id="seoKeywords">Pendiente</span></p>
@@ -1059,13 +1059,13 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◈ Email Marketing</h3>
+                        <h3 class="card-title">📧 Email Marketing</h3>
                         <p style="color: #666; margin-bottom: 15px;">Gestiona tus campañas de email (disponible en planes avanzados)</p>
                         <button class="btn-action secondary">Actualizar a Plan Avanzado</button>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">◉ Redes Sociales</h3>
+                        <h3 class="card-title">📱 Redes Sociales</h3>
                         <p style="color: #666; margin-bottom: 15px;">Conecta tu sitio web con tus redes sociales</p>
                         <div class="quick-actions">
                             <button class="btn-action secondary">Conectar Instagram</button>
@@ -1280,13 +1280,13 @@
             });
             
             // Actualizar estadísticas para sin plan
-            document.getElementById('visitsCount').innerHTML = '<span style="font-size: 1.5rem;">▨</span>';
+            document.getElementById('visitsCount').innerHTML = '🔒';
             document.getElementById('siteStatus').textContent = 'Sin Plan';
             
             // Cambiar texto de acciones rápidas
             const btnEditSite = document.getElementById('btnEditSite');
             if (btnEditSite) {
-                btnEditSite.innerHTML = '⬡ Ver Demo del Sitio';
+                btnEditSite.innerHTML = '🌐 Ver Demo del Sitio';
             }
         }
 
@@ -1311,25 +1311,25 @@
             
             const messages = {
                 'sitio': {
-                    icon: '⬡',
+                    icon: '🌐',
                     title: 'Edita tu Sitio Web',
                     desc: 'Modifica textos, imágenes y diseño en tiempo real',
                     cta: 'Desde 35€/mes'
                 },
                 'estadisticas': {
-                    icon: '▨',
+                    icon: '📊',
                     title: 'Analiza tu Tráfico',
                     desc: 'Conoce a tus visitantes y optimiza tu web',
                     cta: 'Activa tu plan'
                 },
                 'dominio': {
-                    icon: '◉',
+                    icon: '🔗',
                     title: 'Dominio Profesional',
                     desc: 'Tu dominio .com incluido y configurado',
                     cta: 'Incluido en todos los planes'
                 },
                 'seo': {
-                    icon: '◆',
+                    icon: '🚀',
                     title: 'Posiciónate en Google',
                     desc: 'Optimización SEO profesional para tu web',
                     cta: 'Planes desde 35€/mes'
