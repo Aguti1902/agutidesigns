@@ -965,9 +965,17 @@
             document.getElementById('dashboardPage').style.display = 'block';
 
             // Cargar datos del cliente
-            document.getElementById('userName').textContent = currentClient.full_name;
-            document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan || 'básico')}`;
-            document.getElementById('welcomeTitle').textContent = `¡Bienvenido/a, ${currentClient.full_name.split(' ')[0]}!`;
+            document.getElementById('userName').textContent = currentClient.full_name || 'Usuario';
+            
+            // Mostrar plan
+            if (currentClient.plan) {
+                document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
+            } else {
+                document.getElementById('userPlan').textContent = 'Sin plan activo';
+            }
+            
+            const firstName = currentClient.full_name ? currentClient.full_name.split(' ')[0] : 'Usuario';
+            document.getElementById('welcomeTitle').textContent = `¡Bienvenido/a, ${firstName}!`;
 
             // Cargar dashboard data
             try {
@@ -998,9 +1006,15 @@
                         'avanzado': { name: 'Plan Avanzado', price: '49€/mes + IVA' },
                         'premium': { name: 'Plan Premium', price: '65€/mes + IVA' }
                     };
-                    const plan = planInfo[data.client.plan] || planInfo['basico'];
-                    document.getElementById('currentPlan').textContent = plan.name;
-                    document.getElementById('planPrice').textContent = plan.price;
+                    
+                    if (data.client.plan && planInfo[data.client.plan]) {
+                        const plan = planInfo[data.client.plan];
+                        document.getElementById('currentPlan').textContent = plan.name;
+                        document.getElementById('planPrice').textContent = plan.price;
+                    } else {
+                        document.getElementById('currentPlan').textContent = 'Sin plan activo';
+                        document.getElementById('planPrice').textContent = 'Contratar un plan para activar tu web';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);

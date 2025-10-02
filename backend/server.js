@@ -146,9 +146,15 @@ app.post('/api/create-subscription', async (req, res) => {
             return res.status(400).json({ error: 'Plan inválido' });
         }
 
+        // Construir full_name desde first_name y last_name
+        const fullName = formData.first_name && formData.last_name 
+            ? `${formData.first_name} ${formData.last_name}`.trim()
+            : (formData.full_name || 'Cliente');
+
         // Guardar datos del formulario temporalmente (pending)
         const submissionId = db.createSubmission({
             ...formData,
+            full_name: fullName,
             plan,
             status: 'pending',
             amount: plan === 'basico' ? 35 : plan === 'avanzado' ? 49 : 65
@@ -208,10 +214,18 @@ app.post('/api/create-subscription', async (req, res) => {
                 const passwordToHash = submission.password || formData.password || 'temp123';
                 const hashedPassword = await bcrypt.hash(passwordToHash, 10);
                 
+                // Construir full_name correctamente
+                let fullName = submission.full_name;
+                if (!fullName && formData.first_name && formData.last_name) {
+                    fullName = `${formData.first_name} ${formData.last_name}`;
+                } else if (!fullName) {
+                    fullName = 'Cliente';
+                }
+                
                 db.createClient({
                     email: submission.email,
                     password: hashedPassword,
-                    full_name: submission.full_name || (formData.nombre && formData.apellido ? formData.nombre + ' ' + formData.apellido : 'Cliente'),
+                    full_name: fullName,
                     business_name: submission.business_name,
                     plan: plan,
                     submission_id: submissionId,

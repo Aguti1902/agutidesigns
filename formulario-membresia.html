@@ -1586,13 +1586,15 @@
 
             // PRIMERO: Registrar al usuario (crear cuenta)
             try {
+                const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+                
                 const response = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: data.email,
                         password: data.password,
-                        full_name: `${data.nombre} ${data.apellido}`,
+                        full_name: fullName || 'Cliente',
                         business_name: data.business_name || null,
                         plan: plan
                     })
