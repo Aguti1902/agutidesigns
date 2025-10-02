@@ -99,6 +99,7 @@ db.exec(`
         stripe_subscription_id TEXT,
         website_url TEXT,
         website_status TEXT DEFAULT 'en_construccion',
+        payment_date DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (submission_id) REFERENCES submissions(id)
@@ -283,8 +284,8 @@ function createClient(data) {
     const stmt = db.prepare(`
         INSERT INTO clients (
             email, password, full_name, business_name, plan, 
-            submission_id, stripe_customer_id, stripe_subscription_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            submission_id, stripe_customer_id, stripe_subscription_id, payment_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     try {
@@ -296,7 +297,8 @@ function createClient(data) {
             data.plan || null,
             data.submission_id || null,
             data.stripe_customer_id || null,
-            data.stripe_subscription_id || null
+            data.stripe_subscription_id || null,
+            data.payment_date || null
         );
         return result.lastInsertRowid;
     } catch (error) {

@@ -1438,6 +1438,23 @@
                         document.getElementById('negocioRazonSocial').textContent = submission.razon_social || '-';
                         document.getElementById('negocioDireccion').textContent = submission.direccion_fiscal || '-';
                         
+                        // Redes sociales
+                        document.getElementById('negocioInstagram').textContent = submission.instagram || '-';
+                        document.getElementById('negocioFacebook').textContent = submission.facebook || '-';
+                        document.getElementById('negocioLinkedin').textContent = submission.linkedin || '-';
+                        
+                        // Servicios
+                        document.getElementById('negocioServicios').textContent = submission.services || '-';
+                        
+                        // Objetivos
+                        const purposeText = submission.purpose ? (Array.isArray(submission.purpose) ? submission.purpose.join(', ') : submission.purpose) : '-';
+                        document.getElementById('negocioObjetivo').textContent = purposeText;
+                        document.getElementById('negocioPublico').textContent = submission.target_audience || '-';
+                        
+                        // Branding
+                        document.getElementById('negocioColores').textContent = submission.brand_colors || '-';
+                        document.getElementById('negocioReferencias').textContent = submission.reference_websites || '-';
+                        
                         // Páginas solicitadas
                         if (submission.pages) {
                             const pages = Array.isArray(submission.pages) ? submission.pages : [];
@@ -1447,6 +1464,14 @@
                             ).join('');
                             document.getElementById('negocioPaginas').innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
                         }
+                    }
+                    
+                    // Iniciar temporizador de 24h si tiene plan y payment_date
+                    if (hasPlan && data.client.payment_date) {
+                        startEditTimer(data.client.payment_date);
+                    } else if (hasPlan) {
+                        // Si tiene plan pero no payment_date (datos antiguos), usar created_at
+                        startEditTimer(data.client.created_at);
                     }
                 }
             } catch (error) {
@@ -1667,33 +1692,9 @@
             openPlanModal();
         }
 
-        // Edición de secciones
+        // Variables para edición
         let currentPages = [];
         let pageLimit = 5;
-        
-        function toggleEditSection(section) {
-            // Ocultar campos y mostrar inputs de esa sección
-            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'none');
-            document.querySelectorAll(`.input-${section}`).forEach(input => {
-                input.style.display = 'block';
-                // Copiar valor actual al input
-                const fieldId = input.id.replace('Input', '');
-                const currentValue = document.getElementById(fieldId)?.textContent;
-                if (currentValue && currentValue !== '-') {
-                    input.value = currentValue;
-                }
-            });
-            
-            // Manejo especial para páginas
-            if (section === 'paginas') {
-                document.getElementById('negocioPaginas').style.display = 'none';
-                document.getElementById('paginasEditor').style.display = 'block';
-                loadPagesForEdit();
-            }
-            
-            // Mostrar botones de esa sección
-            document.getElementById(`${section}Buttons`).style.display = 'flex';
-        }
 
         function cancelEditSection(section) {
             // Mostrar campos y ocultar inputs
@@ -1810,9 +1811,20 @@
                     if (loadingEl) document.body.removeChild(loadingEl);
                     alert('✅ Cambios guardados correctamente');
                 } else {
+                    const errorData = await response.json();
                     const loadingEl = document.getElementById('saveLoading');
                     if (loadingEl) document.body.removeChild(loadingEl);
-                    alert('❌ Error al guardar. Por favor, intenta de nuevo.');
+                    
+                    // Si el tiempo expiró, actualizar interfaz
+                    if (errorData.expired) {
+                        canEdit = false;
+                        document.getElementById('editTimerBanner').style.display = 'none';
+                        document.getElementById('editExpiredBanner').style.display = 'block';
+                        disableAllEditButtons();
+                        if (countdownInterval) clearInterval(countdownInterval);
+                    }
+                    
+                    alert('❌ ' + (errorData.error || 'Error al guardar. Por favor, intenta de nuevo.'));
                 }
             } catch (error) {
                 console.error('Error guardando:', error);
@@ -1858,6 +1870,97 @@
         // Compatibilidad con función anterior
         async function saveEdit(section) {
             await saveEditSection(section);
+        }
+
+        // Temporizador de 24h
+        function startEditTimer(createdAt) {
+            const createdDate = new Date(createdAt);
+            const expirationDate = new Date(createdDate.getTime() + (24 * 60 * 60 * 1000)); // +24 horas
+            
+            function updateCountdown() {
+                const now = new Date();
+                const timeLeft = expirationDate - now;
+                
+                if (timeLeft <= 0) {
+                    // Tiempo expirado
+                    canEdit = false;
+                    document.getElementById('editTimerBanner').style.display = 'none';
+                    document.getElementById('editExpiredBanner').style.display = 'block';
+                    disableAllEditButtons();
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    return;
+                }
+                
+                // Calcular horas, minutos, segundos
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                // Formatear con ceros
+                const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const countdownEl = document.getElementById('countdown');
+                if (countdownEl) {
+                    countdownEl.textContent = formatted;
+                }
+                
+                // Cambiar color cuando queda menos de 1 hora
+                if (hours < 1 && countdownEl) {
+                    countdownEl.style.background = '#ff4444';
+                    countdownEl.style.color = 'white';
+                }
+            }
+            
+            // Mostrar banner de temporizador
+            document.getElementById('editTimerBanner').style.display = 'block';
+            
+            // Actualizar inmediatamente
+            updateCountdown();
+            
+            // Actualizar cada segundo
+            countdownInterval = setInterval(updateCountdown, 1000);
+        }
+        
+        function disableAllEditButtons() {
+            // Deshabilitar todos los botones de editar
+            const editButtons = document.querySelectorAll('[onclick*="toggleEditSection"]');
+            editButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.onclick = () => alert('⏰ El período de edición ha finalizado. Contacta a soporte para hacer cambios.');
+            });
+        }
+
+        // Verificar si puede editar
+        function toggleEditSection(section) {
+            if (!canEdit) {
+                alert('⏰ El período de edición (24h) ha finalizado. Contacta a soporte para hacer cambios.');
+                return;
+            }
+            
+            // Resto del código original...
+            // Ocultar campos y mostrar inputs de esa sección
+            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'none');
+            document.querySelectorAll(`.input-${section}`).forEach(input => {
+                input.style.display = 'block';
+                // Copiar valor actual al input
+                const fieldId = input.id.replace('Input', '');
+                const currentValue = document.getElementById(fieldId)?.textContent;
+                if (currentValue && currentValue !== '-') {
+                    input.value = currentValue;
+                }
+            });
+            
+            // Manejo especial para páginas
+            if (section === 'paginas') {
+                document.getElementById('negocioPaginas').style.display = 'none';
+                document.getElementById('paginasEditor').style.display = 'block';
+                loadPagesForEdit();
+            }
+            
+            // Mostrar botones de esa sección
+            document.getElementById(`${section}Buttons`).style.display = 'flex';
         }
 
         // Capitalizar

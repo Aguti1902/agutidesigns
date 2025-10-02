@@ -230,13 +230,18 @@ app.post('/api/create-subscription', async (req, res) => {
                     plan: plan,
                     submission_id: submissionId,
                     stripe_customer_id: customer.id,
-                    stripe_subscription_id: subscription.id
+                    stripe_subscription_id: subscription.id,
+                    payment_date: new Date().toISOString()
                 });
 
                 console.log('Cliente creado exitosamente:', submission.email);
             } else {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
-                // TODO: Actualizar cliente existente con datos de Stripe
+                // Actualizar plan y payment_date
+                const stmt = db.db.prepare(
+                    'UPDATE clients SET plan = ?, stripe_subscription_id = ?, payment_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                );
+                stmt.run(plan, subscription.id, new Date().toISOString(), existingClient.id);
             }
 
             // Enviar emails
@@ -591,7 +596,7 @@ app.post('/api/client/change-password', async (req, res) => {
 // Actualizar información del cliente (general)
 app.patch('/api/client/update-info/:clientId', async (req, res) => {
     try {
-        const { clientId } = req.params;
+        const { clientId} = req.params;
         const { section, data } = req.body;
 
         console.log('Actualizando información del cliente:', clientId, section, data);
@@ -600,6 +605,21 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
         if (!client) {
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
+
+        // Verificar si puede editar (24h para clientes con plan)
+        if (client.plan && client.payment_date) {
+            const paymentDate = new Date(client.payment_date);
+            const now = new Date();
+            const hoursSincePayment = (now - paymentDate) / (1000 * 60 * 60);
+            
+            if (hoursSincePayment > 24) {
+                return res.status(403).json({ 
+                    error: 'El período de edición (24h) ha finalizado. Contacta a soporte para hacer cambios.',
+                    expired: true
+                });
+            }
+        }
+        // Usuarios sin plan pueden editar siempre (no se valida)
 
         // Si tiene submission asociada, actualizar ahí
         if (client.submission_id) {
