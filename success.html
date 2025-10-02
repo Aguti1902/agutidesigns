@@ -273,19 +273,14 @@
     </div>
 
     <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+        
         // Obtener datos del sessionStorage o URL
         const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        const orderData = sessionStorage.getItem('orderData');
+        const subscriptionId = urlParams.get('session_id');
         
         let data = null;
-        if (orderData) {
-            try {
-                data = JSON.parse(orderData);
-            } catch (e) {
-                console.error('Error parsing orderData:', e);
-            }
-        }
+        let submissionData = null;
 
         // Mapeo de planes
         const planInfo = {
@@ -294,10 +289,46 @@
             'premium': { name: 'Plan Premium', price: '65€', pages: '20 páginas' }
         };
 
+        // Cargar datos desde el backend
+        async function loadSuccessData() {
+            // Primero intentar obtener del sessionStorage
+            const orderData = sessionStorage.getItem('orderData');
+            if (orderData) {
+                try {
+                    data = JSON.parse(orderData);
+                    submissionData = data;
+                    displaySuccess();
+                    return;
+                } catch (e) {
+                    console.error('Error parsing orderData:', e);
+                }
+            }
+
+            // Si no hay datos en sessionStorage, obtener del backend usando subscriptionId
+            if (subscriptionId) {
+                try {
+                    const response = await fetch(`${API_URL}/api/subscription-data/${subscriptionId}`);
+                    if (response.ok) {
+                        submissionData = await response.json();
+                        data = submissionData;
+                        displaySuccess();
+                    } else {
+                        // Mostrar versión genérica si falla
+                        displayGenericSuccess();
+                    }
+                } catch (error) {
+                    console.error('Error loading subscription data:', error);
+                    displayGenericSuccess();
+                }
+            } else {
+                displayGenericSuccess();
+            }
+        }
+
         function displaySuccess() {
-            const plan = data?.plan || 'basico';
-            const businessName = data?.businessInfo?.businessName || 'tu empresa';
-            const email = data?.email || 'tu correo';
+            const plan = data?.plan || submissionData?.plan || 'basico';
+            const businessName = data?.businessInfo?.businessName || data?.business_name || submissionData?.business_name || 'tu empresa';
+            const email = data?.email || submissionData?.email || 'tu correo';
             const planDetails = planInfo[plan];
 
             document.getElementById('content').innerHTML = `
@@ -337,23 +368,64 @@
             `;
         }
 
-        // Mostrar contenido inmediatamente
-        displaySuccess();
+        function displayGenericSuccess() {
+            document.getElementById('content').innerHTML = `
+                <div class="details-section">
+                    <h3>📋 Detalles de tu Suscripción</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Empresa:</span>
+                        <span class="detail-value">tu empresa</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Plan:</span>
+                        <span class="detail-value"><span class="plan-badge">Plan Básico</span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Estado:</span>
+                        <span class="status-badge">✓ Activo</span>
+                    </div>
+                </div>
+
+                <div class="email-box">
+                    <strong>📧 Revisa tu email</strong>
+                    <p>Te hemos enviado un email de confirmación con todos los detalles y próximos pasos.</p>
+                </div>
+
+                <div class="next-steps">
+                    <h3>🚀 ¿Qué sigue ahora?</h3>
+                    <ul class="steps-list">
+                        <li>Recibirás un email de confirmación en los próximos minutos</li>
+                        <li>Nuestro equipo revisará tu solicitud en las próximas 24 horas</li>
+                        <li>Te contactaremos para coordinar los detalles finales</li>
+                        <li>Empezaremos a trabajar en tu web en 5 días</li>
+                        <li>Recibirás acceso a tu dashboard para hacer cambios</li>
+                    </ul>
+                </div>
+
+                <button class="btn-home" onclick="window.location.href='/client-dashboard/'">Acceder a Mi Dashboard</button>
+            `;
+        }
+
+        // Cargar datos cuando se carga la página
+        loadSuccessData();
 
         // Función para acceder al dashboard del cliente
         function accessDashboard() {
-            if (!data) {
-                alert('No se encontraron los datos de la sesión');
+            const currentData = data || submissionData;
+            
+            if (!currentData) {
+                // Si no hay datos, redirigir directamente al dashboard para hacer login manual
+                window.location.href = '/client-dashboard/';
                 return;
             }
 
             // Guardar credenciales del cliente para auto-login
             const clientCredentials = {
-                email: data.email,
-                password: data.password || null,
-                full_name: data.full_name || data.nombre + ' ' + data.apellido,
-                business_name: data.businessInfo?.businessName,
-                plan: data.plan
+                email: currentData.email,
+                password: currentData.password || null,
+                full_name: currentData.full_name || (currentData.nombre && currentData.apellido ? currentData.nombre + ' ' + currentData.apellido : null),
+                business_name: currentData.businessInfo?.businessName || currentData.business_name,
+                plan: currentData.plan
             };
 
             sessionStorage.setItem('clientCredentials', JSON.stringify(clientCredentials));

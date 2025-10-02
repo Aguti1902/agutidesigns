@@ -346,6 +346,34 @@ app.get('/api/admin/stats', (req, res) => {
     }
 });
 
+// Endpoint para obtener datos de suscripción (para success page)
+app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
+    try {
+        const { subscriptionId } = req.params;
+        
+        // Buscar la submission por stripe_subscription_id
+        const submission = db.getSubmissionBySubscriptionId(subscriptionId);
+        
+        if (!submission) {
+            return res.status(404).json({ error: 'Suscripción no encontrada' });
+        }
+
+        // Devolver datos necesarios para la página de éxito
+        res.json({
+            plan: submission.plan,
+            business_name: submission.business_name,
+            email: submission.email,
+            full_name: submission.full_name,
+            domain_name: submission.domain_name,
+            status: submission.status
+        });
+
+    } catch (error) {
+        console.error('Error obteniendo datos de suscripción:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
 // ===== ENDPOINTS DE CLIENTES =====
 
 // Login de cliente

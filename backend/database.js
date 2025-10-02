@@ -197,6 +197,21 @@ function getSubmission(id) {
     return submission;
 }
 
+// Obtener solicitud por Stripe Subscription ID
+function getSubmissionBySubscriptionId(subscriptionId) {
+    const stmt = db.prepare('SELECT * FROM submissions WHERE stripe_subscription_id = ?');
+    const submission = stmt.get(subscriptionId);
+    
+    if (submission) {
+        // Parsear JSON fields
+        if (submission.contact_methods) submission.contact_methods = JSON.parse(submission.contact_methods);
+        if (submission.purpose) submission.purpose = JSON.parse(submission.purpose);
+        if (submission.pages) submission.pages = JSON.parse(submission.pages);
+    }
+    
+    return submission;
+}
+
 // Obtener todas las solicitudes
 function getAllSubmissions() {
     const stmt = db.prepare('SELECT * FROM submissions ORDER BY created_at DESC');
@@ -329,6 +344,7 @@ function getClientDashboardData(clientId) {
 module.exports = {
     createSubmission,
     getSubmission,
+    getSubmissionBySubscriptionId,
     getAllSubmissions,
     updateSubmissionStatus,
     getStats,
