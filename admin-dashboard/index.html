@@ -1717,6 +1717,11 @@
             const response = document.getElementById('adminResponse').value;
             const newStatus = document.getElementById('ticketNewStatus').value;
             
+            console.log('🎫 [ADMIN] sendTicketResponse iniciado');
+            console.log('🎫 [ADMIN] ticketId:', ticketId);
+            console.log('🎫 [ADMIN] response:', response ? `"${response.substring(0, 50)}..."` : 'VACÍO');
+            console.log('🎫 [ADMIN] newStatus:', newStatus);
+            
             if (!response || response.trim() === '') {
                 showNotification('Por favor, escribe una respuesta antes de enviar.', 'warning');
                 return;
@@ -1724,20 +1729,30 @@
             
             console.log('🎫 [ADMIN] Enviando respuesta para ticket #', ticketId);
             
+            const requestBody = {
+                admin_response: response,
+                status: newStatus
+            };
+            
+            console.log('🎫 [ADMIN] Request body:', requestBody);
+            console.log('🎫 [ADMIN] URL:', `${API_URL}/api/tickets/${ticketId}`);
+            
             try {
                 const res = await fetch(`${API_URL}/api/tickets/${ticketId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        admin_response: response,
-                        status: newStatus
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
+                console.log('🎫 [ADMIN] Response status:', res.status);
+                console.log('🎫 [ADMIN] Response ok?:', res.ok);
+                
                 if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
+                    const errorText = await res.text();
+                    console.error('❌ [ADMIN] Error response:', errorText);
+                    throw new Error(`HTTP error! status: ${res.status}, message: ${errorText}`);
                 }
                 
                 const data = await res.json();
@@ -1749,7 +1764,8 @@
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error enviando respuesta:', error);
-                showNotification('Error enviando respuesta', 'error');
+                console.error('❌ [ADMIN] Error stack:', error.stack);
+                showNotification('Error enviando respuesta: ' + error.message, 'error');
             }
         }
 

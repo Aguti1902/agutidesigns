@@ -1448,13 +1448,10 @@
                     <textarea id="ticketDescription" required rows="6" style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem; resize: vertical; font-family: inherit;" placeholder="Describe tu consulta con el mayor detalle posible..."></textarea>
                 </div>
                 
-                <div>
-                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">Prioridad</label>
-                    <select id="ticketPriority" required style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem;">
-                        <option value="baja">🟢 Baja (respuesta en 48h)</option>
-                        <option value="media" selected>🟡 Media (respuesta en 24h)</option>
-                        <option value="alta">🔴 Alta (respuesta en 6h)</option>
-                    </select>
+                <!-- Información de Prioridad -->
+                <div style="background: #e8f4ff; border: 2px solid #0046FE; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <p style="margin: 0; color: #0046FE; font-weight: 600; font-size: 0.9rem;">⏱️ Tiempo de respuesta según tu plan:</p>
+                    <p id="ticketResponseTimeInfo" style="margin: 8px 0 0 0; color: #666; font-size: 0.9rem;"></p>
                 </div>
                 
                 <button type="submit" class="btn-action" style="width: 100%; padding: 14px; background: #0046FE; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">Enviar Ticket</button>
@@ -2432,6 +2429,19 @@
         // Abrir modal de ticket
         function openTicketModal() {
             document.getElementById('ticketModal').style.display = 'flex';
+            
+            // Mostrar tiempo de respuesta según plan
+            const plan = currentClient?.plan?.toLowerCase() || 'sin plan';
+            const responseTimeInfo = document.getElementById('ticketResponseTimeInfo');
+            
+            const responseTime = {
+                'premium': '🔴 Alta prioridad - Respuesta en máximo 6 horas',
+                'avanzado': '🟡 Prioridad media - Respuesta en máximo 24 horas',
+                'basico': '🟢 Prioridad normal - Respuesta en máximo 48 horas',
+                'sin plan': '🟢 Prioridad normal - Respuesta en máximo 48 horas'
+            };
+            
+            responseTimeInfo.textContent = responseTime[plan] || responseTime['sin plan'];
         }
 
         // Cerrar modal de ticket
@@ -2448,7 +2458,18 @@
             const subject = document.getElementById('ticketSubject').value;
             const category = document.getElementById('ticketCategory').value;
             const description = document.getElementById('ticketDescription').value;
-            const priority = document.getElementById('ticketPriority').value;
+            
+            // Calcular prioridad automáticamente según el plan del cliente
+            const plan = currentClient?.plan?.toLowerCase() || 'sin plan';
+            const priorityByPlan = {
+                'premium': 'alta',
+                'avanzado': 'media',
+                'basico': 'baja',
+                'sin plan': 'baja'
+            };
+            const priority = priorityByPlan[plan] || 'baja';
+            
+            console.log('🎯 [CLIENT] Prioridad asignada automáticamente:', priority, 'según plan:', plan);
             
             const ticketData = {
                 client_id: currentClient.id,

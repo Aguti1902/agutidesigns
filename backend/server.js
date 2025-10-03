@@ -1111,19 +1111,27 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         const { ticketId } = req.params;
         const { status, admin_response } = req.body;
         
-        db.updateTicket(parseInt(ticketId), { status, admin_response });
+        console.log('🎫 [BACKEND] PATCH /api/tickets/:ticketId');
+        console.log('🎫 [BACKEND] ticketId:', ticketId);
+        console.log('🎫 [BACKEND] Body:', { status, admin_response: admin_response ? 'SÍ' : 'NO' });
+        
+        // Actualizar ticket
+        const result = db.updateTicket(parseInt(ticketId), { status, admin_response });
+        console.log('🎫 [BACKEND] Ticket actualizado, changes:', result.changes);
         
         const ticket = db.getTicketById(parseInt(ticketId));
+        console.log('🎫 [BACKEND] Ticket obtenido:', ticket ? `#${ticket.id}` : 'NO ENCONTRADO');
         
         // Si hay respuesta del admin, enviar email al cliente
-        if (admin_response) {
+        if (admin_response && ticket) {
+            console.log('📧 [BACKEND] Enviando email al cliente:', ticket.client_email);
             try {
                 await emailService.sendEmail({
                     to: ticket.client_email,
                     subject: `Respuesta a tu Ticket #${ticketId} - agutidesigns`,
                     html: `
                         <h2>Respuesta a tu Consulta</h2>
-                        <p>Hola ${ticket.client_name},</p>
+                        <p>Hola ${ticket.client_name || 'Cliente'},</p>
                         <p>Hemos respondido a tu ticket:</p>
                         <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                             <p><strong>Ticket #${ticketId}: ${ticket.subject}</strong></p>
@@ -1135,8 +1143,9 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
                         <p>Saludos,<br>El equipo de agutidesigns</p>
                     `
                 });
+                console.log('✅ [BACKEND] Email enviado correctamente');
             } catch (emailError) {
-                console.error('Error enviando respuesta al cliente:', emailError);
+                console.error('❌ [BACKEND] Error enviando respuesta al cliente:', emailError);
             }
         }
         
