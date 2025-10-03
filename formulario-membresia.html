@@ -1610,50 +1610,88 @@
         document.getElementById('membershipForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Obtener el plan seleccionado
-            const plan = document.getElementById('selectedPlan').value;
+            console.log('🚀 Formulario enviado - Iniciando procesamiento...');
             
-            // Recopilar todos los datos del formulario
-            const formData = new FormData(e.target);
-            const data = {};
+            // Deshabilitar botón y mostrar loading
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Procesando...';
+            submitBtn.style.opacity = '0.7';
             
-            // Procesar archivos (logo e imágenes)
-            const logoFile = document.getElementById('logoUpload').files[0];
-            const imageFiles = document.getElementById('imagesUpload').files;
-            
-            console.log('📸 Procesando archivos...');
-            console.log('Logo:', logoFile ? logoFile.name : 'No hay logo');
-            console.log('Imágenes:', imageFiles.length, 'archivo(s)');
-            
-            // Convertir logo a base64
-            if (logoFile) {
-                try {
-                    data.logo_data = await fileToBase64(logoFile);
-                    data.logo_name = logoFile.name;
-                    console.log('✅ Logo procesado:', logoFile.name);
-                } catch (error) {
-                    console.error('Error procesando logo:', error);
+            try {
+                // Obtener el plan seleccionado
+                const plan = document.getElementById('selectedPlan').value;
+                
+                if (!plan || plan === 'Selecciona un plan') {
+                    alert('❌ Por favor selecciona un plan antes de continuar');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.style.opacity = '1';
+                    return;
                 }
-            }
-            
-            // Convertir imágenes a base64
-            if (imageFiles && imageFiles.length > 0) {
-                data.images_data = [];
-                data.images_names = [];
-                for (let i = 0; i < imageFiles.length; i++) {
+                
+                console.log('📋 Plan seleccionado:', plan);
+                
+                // Recopilar todos los datos del formulario
+                const formData = new FormData(e.target);
+                const data = {};
+                
+                // Procesar archivos (logo e imágenes)
+                const logoFile = document.getElementById('logoUpload').files[0];
+                const imageFiles = document.getElementById('imagesUpload').files;
+                
+                console.log('📸 Procesando archivos...');
+                console.log('Logo:', logoFile ? logoFile.name : 'No hay logo');
+                console.log('Imágenes:', imageFiles ? imageFiles.length : 0, 'archivo(s)');
+                
+                submitBtn.innerHTML = '⏳ Procesando archivos...';
+                
+                // Convertir logo a base64
+                if (logoFile) {
                     try {
-                        const base64 = await fileToBase64(imageFiles[i]);
-                        data.images_data.push(base64);
-                        data.images_names.push(imageFiles[i].name);
-                        console.log(`✅ Imagen ${i + 1} procesada:`, imageFiles[i].name);
+                        console.log('🎨 Convirtiendo logo a base64...');
+                        data.logo_data = await fileToBase64(logoFile);
+                        data.logo_name = logoFile.name;
+                        console.log('✅ Logo procesado:', logoFile.name, '- Tamaño:', Math.round(data.logo_data.length / 1024), 'KB');
                     } catch (error) {
-                        console.error(`Error procesando imagen ${i + 1}:`, error);
+                        console.error('❌ Error procesando logo:', error);
+                        alert('Error al procesar el logo. Por favor, intenta con otro archivo.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.style.opacity = '1';
+                        return;
                     }
                 }
-                // Convertir arrays a JSON strings para almacenamiento
-                data.images_data = JSON.stringify(data.images_data);
-                data.images_names = JSON.stringify(data.images_names);
-            }
+                
+                // Convertir imágenes a base64
+                if (imageFiles && imageFiles.length > 0) {
+                    data.images_data = [];
+                    data.images_names = [];
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        try {
+                            console.log(`🖼️ Convirtiendo imagen ${i + 1}/${imageFiles.length}...`);
+                            const base64 = await fileToBase64(imageFiles[i]);
+                            data.images_data.push(base64);
+                            data.images_names.push(imageFiles[i].name);
+                            console.log(`✅ Imagen ${i + 1} procesada:`, imageFiles[i].name);
+                        } catch (error) {
+                            console.error(`❌ Error procesando imagen ${i + 1}:`, error);
+                            alert(`Error al procesar la imagen ${imageFiles[i].name}. Por favor, intenta con otro archivo.`);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.style.opacity = '1';
+                            return;
+                        }
+                    }
+                    // Convertir arrays a JSON strings para almacenamiento
+                    data.images_data = JSON.stringify(data.images_data);
+                    data.images_names = JSON.stringify(data.images_names);
+                    console.log('✅ Total de imágenes procesadas:', imageFiles.length);
+                }
+                
+                console.log('📦 Archivos procesados exitosamente');
+                submitBtn.innerHTML = '⏳ Recopilando datos...';
             
             formData.forEach((value, key) => {
                 // Skip file inputs, we already processed them
@@ -1671,11 +1709,14 @@
                 }
             });
 
-            // PRIMERO: Registrar al usuario (crear cuenta)
-            try {
+                // PRIMERO: Registrar al usuario (crear cuenta)
+                submitBtn.innerHTML = '⏳ Creando cuenta...';
+                
                 const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
                 
-                const response = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
+                console.log('👤 Creando cuenta para:', data.email);
+                
+                const registerResponse = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1687,32 +1728,49 @@
                     })
                 });
 
-                const result = await response.json();
+                const registerResult = await registerResponse.json();
 
-                if (!response.ok) {
+                if (!registerResponse.ok) {
                     // Si el usuario ya existe, está bien (puede estar repitiendo el proceso)
-                    if (result.error && !result.error.includes('Ya existe')) {
-                        alert('Error al crear tu cuenta: ' + result.error);
+                    if (registerResult.error && !registerResult.error.includes('Ya existe')) {
+                        console.error('❌ Error al crear cuenta:', registerResult.error);
+                        alert('Error al crear tu cuenta: ' + registerResult.error);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.style.opacity = '1';
                         return;
                     }
                 }
 
-                console.log('✅ Cuenta creada/verificada:', result);
+                console.log('✅ Cuenta creada/verificada:', registerResult);
+                
+                // Guardar datos en sessionStorage para la página de checkout
+                submitBtn.innerHTML = '⏳ Preparando pago...';
+                
+                console.log('💾 Guardando datos en sessionStorage...');
+                sessionStorage.setItem('orderData', JSON.stringify({
+                    plan: plan,
+                    billing_cycle: window.selectedBilling || 'monthly',
+                    formData: data
+                }));
+                
+                console.log('✅ Datos guardados correctamente');
+                
+                // Redirigir a la página de checkout personalizada
+                submitBtn.innerHTML = '✅ Redirigiendo al pago...';
+                console.log('🚀 Redirigiendo a checkout...');
+                
+                setTimeout(() => {
+                    window.location.href = '/checkout.html';
+                }, 500);
+                
             } catch (error) {
-                console.error('Error al registrar usuario:', error);
-                alert('Hubo un problema al crear tu cuenta. Por favor, intenta de nuevo.');
-                return;
+                console.error('❌ ERROR GENERAL:', error);
+                alert('Hubo un problema al procesar tu solicitud. Por favor, intenta de nuevo.\n\nError: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.style.opacity = '1';
             }
-
-            // Guardar datos en sessionStorage para la página de checkout
-            sessionStorage.setItem('orderData', JSON.stringify({
-                plan: plan,
-                billing_cycle: window.selectedBilling || 'monthly',
-                formData: data
-            }));
-
-            // Redirigir a la página de checkout personalizada
-            window.location.href = '/checkout.html';
         });
 
         // Toggle de billing en el MODAL del formulario
