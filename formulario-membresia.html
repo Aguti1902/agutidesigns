@@ -1597,7 +1597,51 @@
             }
         });
 
-        // Función para convertir archivo a base64
+        // 🆕 Función para redimensionar y comprimir imagen
+        function resizeImage(file, maxWidth = 1920, maxHeight = 1920, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Calcular nuevas dimensiones manteniendo aspecto
+                        if (width > maxWidth || height > maxHeight) {
+                            const ratio = Math.min(maxWidth / width, maxHeight / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+                        
+                        // Crear canvas y redimensionar
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Convertir a base64 con compresión
+                        const compressedBase64 = canvas.toDataURL(file.type || 'image/jpeg', quality);
+                        
+                        // Calcular reducción
+                        const originalSize = Math.round(e.target.result.length / 1024);
+                        const compressedSize = Math.round(compressedBase64.length / 1024);
+                        const reduction = Math.round((1 - compressedSize / originalSize) * 100);
+                        
+                        console.log(`   📉 Original: ${originalSize} KB → Optimizada: ${compressedSize} KB (${reduction}% reducción)`);
+                        
+                        resolve(compressedBase64);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+            });
+        }
+        
+        // Función para convertir archivo a base64 (sin compresión, para archivos pequeños)
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1647,16 +1691,36 @@
                 
                 submitBtn.innerHTML = '⏳ Procesando archivos...';
                 
-                // Convertir logo a base64
+                // Convertir y optimizar logo
                 if (logoFile) {
                     try {
-                        console.log('🎨 Convirtiendo logo a base64...');
-                        data.logo_data = await fileToBase64(logoFile);
+                        console.log('🎨 Convirtiendo y optimizando logo...');
+                        console.log(`   📦 Archivo original: ${logoFile.name} (${Math.round(logoFile.size / 1024)} KB)`);
+                        
+                        // Validar tipo de archivo
+                        if (!logoFile.type.startsWith('image/')) {
+                            alert('❌ El logo debe ser una imagen (JPG, PNG, etc.)');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.style.opacity = '1';
+                            return;
+                        }
+                        
+                        // Redimensionar y comprimir (máx 800x800 para logos)
+                        data.logo_data = await resizeImage(logoFile, 800, 800, 0.85);
                         data.logo_name = logoFile.name;
-                        console.log('✅ Logo procesado:', logoFile.name, '- Tamaño:', Math.round(data.logo_data.length / 1024), 'KB');
+                        
+                        const finalSize = Math.round(data.logo_data.length / 1024);
+                        console.log('✅ Logo procesado:', logoFile.name, '- Tamaño final:', finalSize, 'KB');
+                        
+                        // Advertir si aún es muy grande
+                        if (finalSize > 2000) {
+                            console.warn('⚠️ Logo optimizado pero aún grande. Considera usar una imagen más pequeña.');
+                        }
+                        
                     } catch (error) {
                         console.error('❌ Error procesando logo:', error);
-                        alert('Error al procesar el logo. Por favor, intenta con otro archivo.');
+                        alert('Error al procesar el logo. Por favor, intenta con otro archivo o una imagen más pequeña.');
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnText;
                         submitBtn.style.opacity = '1';
@@ -1664,30 +1728,59 @@
                     }
                 }
                 
-                // Convertir imágenes a base64
+                // Convertir y optimizar imágenes adicionales
                 if (imageFiles && imageFiles.length > 0) {
                     data.images_data = [];
                     data.images_names = [];
+                    
                     for (let i = 0; i < imageFiles.length; i++) {
                         try {
-                            console.log(`🖼️ Convirtiendo imagen ${i + 1}/${imageFiles.length}...`);
-                            const base64 = await fileToBase64(imageFiles[i]);
+                            const file = imageFiles[i];
+                            console.log(`🖼️ Procesando imagen ${i + 1}/${imageFiles.length}...`);
+                            console.log(`   📦 Archivo original: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+                            
+                            // Validar tipo de archivo
+                            if (!file.type.startsWith('image/')) {
+                                alert(`❌ El archivo "${file.name}" no es una imagen válida`);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                                submitBtn.style.opacity = '1';
+                                return;
+                            }
+                            
+                            // Validar tamaño máximo antes de procesar (50MB)
+                            if (file.size > 50 * 1024 * 1024) {
+                                alert(`❌ La imagen "${file.name}" es demasiado grande (máx 50MB)`);
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                                submitBtn.style.opacity = '1';
+                                return;
+                            }
+                            
+                            // Redimensionar y comprimir (máx 1920x1920 para imágenes de contenido)
+                            const base64 = await resizeImage(file, 1920, 1920, 0.8);
                             data.images_data.push(base64);
-                            data.images_names.push(imageFiles[i].name);
-                            console.log(`✅ Imagen ${i + 1} procesada:`, imageFiles[i].name);
+                            data.images_names.push(file.name);
+                            
+                            const finalSize = Math.round(base64.length / 1024);
+                            console.log(`✅ Imagen ${i + 1} procesada:`, file.name, '- Tamaño final:', finalSize, 'KB');
+                            
                         } catch (error) {
                             console.error(`❌ Error procesando imagen ${i + 1}:`, error);
-                            alert(`Error al procesar la imagen ${imageFiles[i].name}. Por favor, intenta con otro archivo.`);
+                            alert(`Error al procesar la imagen ${imageFiles[i].name}. Por favor, intenta con otro archivo o una imagen más pequeña.`);
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalBtnText;
                             submitBtn.style.opacity = '1';
                             return;
                         }
                     }
+                    
                     // Convertir arrays a JSON strings para almacenamiento
                     data.images_data = JSON.stringify(data.images_data);
                     data.images_names = JSON.stringify(data.images_names);
-                    console.log('✅ Total de imágenes procesadas:', imageFiles.length);
+                    
+                    const totalSize = data.images_data.length / 1024;
+                    console.log('✅ Total de imágenes procesadas:', imageFiles.length, '- Tamaño total:', Math.round(totalSize), 'KB');
                 }
                 
                 console.log('📦 Archivos procesados exitosamente');
