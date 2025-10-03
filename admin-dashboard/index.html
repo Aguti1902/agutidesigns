@@ -1702,7 +1702,7 @@
                         
                         ${ticket.admin_response ? `
                         <!-- Respuesta del Admin -->
-                        <div style="border: 2px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <div style="border: 2px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;" data-admin-response>
                             <h4 style="color: #28a745; margin: 0 0 10px 0; font-size: 1rem;">💬 Tu Respuesta</h4>
                             <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
                             ${ticket.admin_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.admin_response_at)}</p>` : ''}
@@ -1711,7 +1711,7 @@
                         
                         ${ticket.client_response ? `
                         <!-- Respuesta del Cliente -->
-                        <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                        <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;" data-client-response data-timestamp="${ticket.client_response_at || ''}">
                             <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">💬 Respuesta del Cliente</h4>
                             <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.client_response}</p>
                             ${ticket.client_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.client_response_at)}</p>` : ''}
@@ -1743,8 +1743,10 @@
                     </div>
                 `;
                 
+                // 🆕 Registrar el ticket abierto para auto-actualización
+                currentOpenAdminTicketId = id;
                 document.getElementById('ticketModal').classList.add('active');
-                console.log('✅ [ADMIN] Modal de ticket abierto correctamente');
+                console.log('✅ [ADMIN] Modal de ticket abierto correctamente - Auto-actualización activada');
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando detalles del ticket:', error);
@@ -1809,7 +1811,10 @@
         }
 
         function closeTicketModal() {
+            // 🆕 Limpiar el ticket abierto para detener auto-actualización
+            currentOpenAdminTicketId = null;
             document.getElementById('ticketModal').classList.remove('active');
+            console.log('✅ [ADMIN] Modal cerrado - Auto-actualización del ticket desactivada');
         }
 
         // ===== PEDIDOS =====
@@ -2532,6 +2537,9 @@
         // ===== ACTUALIZACIÓN AUTOMÁTICA DE TICKETS =====
         let autoUpdateIntervalAdmin = null;
 
+        // Variable para rastrear el ticket actualmente abierto en admin
+        let currentOpenAdminTicketId = null;
+
         async function updateAdminUnreadBadge() {
             try {
                 console.log('🔄 [AUTO-UPDATE ADMIN] Actualizando contador de mensajes...');
@@ -2576,19 +2584,92 @@
                     }
                 }
                 
+                // 🆕 Si hay un modal de ticket abierto, actualizarlo automáticamente
+                const modal = document.getElementById('ticketModal');
+                if (modal && modal.style.display === 'flex' && currentOpenAdminTicketId) {
+                    console.log(`🔄 [AUTO-UPDATE ADMIN] Actualizando ticket abierto #${currentOpenAdminTicketId}`);
+                    await refreshAdminOpenTicket(currentOpenAdminTicketId);
+                }
+                
             } catch (error) {
                 console.error('❌ [AUTO-UPDATE ADMIN] Error actualizando badge:', error);
             }
         }
 
-        // Iniciar actualización automática cada 30 segundos
-        console.log('⏰ [AUTO-UPDATE ADMIN] Iniciando actualización automática cada 30 segundos');
+        // 🆕 Función para actualizar el ticket abierto en el modal admin (sin marcarlo como leído)
+        async function refreshAdminOpenTicket(ticketId) {
+            try {
+                // NO marcar como leído, solo obtener los datos
+                const response = await fetch(`${API_URL}/api/tickets/${ticketId}`);
+                if (!response.ok) throw new Error('Error al obtener ticket');
+                
+                const ticket = await response.json();
+                
+                // Recargar completamente el contenido del modal (sin marcar como leído)
+                const detailsDiv = document.getElementById('ticketDetails');
+                if (!detailsDiv) return;
+                
+                const priorityColors = {
+                    'alta': 'danger',
+                    'media': 'warning',
+                    'baja': 'info'
+                };
+                
+                const statusColors = {
+                    'abierto': 'warning',
+                    'en_proceso': 'info',
+                    'cerrado': 'success'
+                };
+                
+                const statusText = {
+                    'abierto': 'Abierto',
+                    'en_proceso': 'En Proceso',
+                    'cerrado': 'Cerrado'
+                };
+                
+                // Actualizar solo la parte que puede cambiar (respuestas del cliente)
+                // Primero verificar si hay una nueva respuesta del cliente
+                const clientResponseDiv = detailsDiv.querySelector('[data-client-response]');
+                const hasNewClientResponse = ticket.client_response && (!clientResponseDiv || clientResponseDiv.getAttribute('data-timestamp') !== ticket.client_response_at);
+                
+                if (hasNewClientResponse || ticket.admin_response) {
+                    // Solo actualizar si hay cambios en las respuestas
+                    // Buscar y actualizar la sección de respuesta del cliente
+                    if (ticket.client_response) {
+                        const clientResponseHTML = `
+                            <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;" data-client-response data-timestamp="${ticket.client_response_at || ''}">
+                                <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">💬 Respuesta del Cliente</h4>
+                                <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.client_response}</p>
+                                ${ticket.client_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.client_response_at)}</p>` : ''}
+                            </div>
+                        `;
+                        
+                        // Si no existe, agregar después de la respuesta del admin
+                        if (!clientResponseDiv) {
+                            const adminResponseDiv = detailsDiv.querySelector('[data-admin-response]');
+                            if (adminResponseDiv) {
+                                adminResponseDiv.insertAdjacentHTML('afterend', clientResponseHTML);
+                                console.log('✅ [AUTO-UPDATE ADMIN] Nueva respuesta del cliente agregada');
+                            }
+                        }
+                    }
+                }
+                
+                console.log('✅ [AUTO-UPDATE ADMIN] Ticket actualizado en modal');
+                
+            } catch (error) {
+                console.error('❌ [AUTO-UPDATE ADMIN] Error al actualizar ticket:', error);
+            }
+        }
+
+        // Iniciar actualización automática cada 10 segundos
+        console.log('⏰ [AUTO-UPDATE ADMIN] Iniciando actualización automática cada 10 segundos');
         
         // Primera actualización inmediata
         updateAdminUnreadBadge();
         
-        // Actualizaciones periódicas
-        autoUpdateIntervalAdmin = setInterval(updateAdminUnreadBadge, 30000); // 30 segundos
+        // Actualizaciones periódicas cada 10 segundos
+        autoUpdateIntervalAdmin = setInterval(updateAdminUnreadBadge, 10000); // 10 segundos
 
         // ===== FORMATEADORES =====
         function formatPlan(plan) {
