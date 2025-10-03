@@ -1918,6 +1918,16 @@
                                     <p style="margin: 5px 0;"><strong>Instagram:</strong> ${pedido.instagram || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>Facebook:</strong> ${pedido.facebook || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>LinkedIn:</strong> ${pedido.linkedin || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Twitter:</strong> ${pedido.twitter || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Más Contacto -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📞 Más Contacto</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Dirección:</strong> ${pedido.physical_address || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Email Empresa:</strong> ${pedido.business_email || 'N/A'}</p>
                                 </div>
                             </div>
                             
@@ -1964,6 +1974,41 @@
                                     <p style="margin: 5px 0;"><strong>Keywords:</strong> ${pedido.keywords || 'N/A'}</p>
                                 </div>
                             </div>
+                            
+                            ${pedido.web_texts ? `
+                            <!-- Textos Personalizados -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; grid-column: 1/-1;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📝 Textos Personalizados</h4>
+                                <p style="font-size: 0.85rem; margin: 0; line-height: 1.6; white-space: pre-wrap; background: #f8f9fa; padding: 12px; border-radius: 6px;">${pedido.web_texts}</p>
+                            </div>
+                            ` : ''}
+                            
+                            ${pedido.menu_content || pedido.opening_hours || pedido.portfolio_description ? `
+                            <!-- Campos Dinámicos por Sector -->
+                            <div style="border: 2px solid #009A62; border-radius: 10px; padding: 15px; grid-column: 1/-1; background: rgba(0, 154, 98, 0.02);">
+                                <h4 style="color: #009A62; margin: 0 0 15px 0; font-size: 1.1rem;">🍽️ Información Específica del Sector</h4>
+                                <div style="display: grid; gap: 15px;">
+                                    ${pedido.menu_content ? `
+                                        <div style="border: 1px solid #009A62; border-radius: 8px; padding: 12px; background: white;">
+                                            <p style="margin: 0 0 8px 0; font-weight: 700; color: #009A62; font-size: 0.9rem;">📋 Menú (Restaurante/Bar/Cafetería)</p>
+                                            <p style="font-size: 0.85rem; margin: 0; line-height: 1.6; white-space: pre-wrap; background: #f8fef8; padding: 10px; border-radius: 5px;">${pedido.menu_content}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${pedido.opening_hours ? `
+                                        <div style="border: 1px solid #009A62; border-radius: 8px; padding: 12px; background: white;">
+                                            <p style="margin: 0 0 8px 0; font-weight: 700; color: #009A62; font-size: 0.9rem;">🕐 Horarios de Apertura</p>
+                                            <p style="font-size: 0.85rem; margin: 0; line-height: 1.6; white-space: pre-wrap; background: #f8fef8; padding: 10px; border-radius: 5px;">${pedido.opening_hours}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${pedido.portfolio_description ? `
+                                        <div style="border: 1px solid #009A62; border-radius: 8px; padding: 12px; background: white;">
+                                            <p style="margin: 0 0 8px 0; font-weight: 700; color: #009A62; font-size: 0.9rem;">📸 Descripción de Portfolio/Proyectos</p>
+                                            <p style="font-size: 0.85rem; margin: 0; line-height: 1.6; white-space: pre-wrap; background: #f8fef8; padding: 10px; border-radius: 5px;">${pedido.portfolio_description}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
                             
                             <!-- Fiscal -->
                             <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; grid-column: 1/-1;">

@@ -986,6 +986,10 @@
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">LinkedIn</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioLinkedin">-</p>
                             </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Twitter</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioTwitter">-</p>
+                            </div>
                         </div>
                     </details>
 
@@ -1020,6 +1024,45 @@
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Webs de Referencia</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioReferencias">-</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">📝 Textos Personalizados <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; padding: 15px; background: #fafbfc; border-radius: 8px;">
+                            <p style="font-weight: 600; color: #1B1B1B; white-space: pre-wrap;" id="negocioTextos">-</p>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;" id="dynamicFieldsCard">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">🍽️ Información Específica del Sector <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;" id="menuContentCard">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 10px;">📋 Menú (Restaurante/Bar/Cafetería)</p>
+                                <p style="font-weight: 600; color: #1B1B1B; white-space: pre-wrap;" id="negocioMenu">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;" id="openingHoursCard">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 10px;">🕐 Horarios de Apertura</p>
+                                <p style="font-weight: 600; color: #1B1B1B; white-space: pre-wrap;" id="negocioHorarios">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;" id="portfolioDescCard">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 10px;">📸 Descripción de Portfolio/Proyectos</p>
+                                <p style="font-weight: 600; color: #1B1B1B; white-space: pre-wrap;" id="negocioPortfolio">-</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">📞 Más Datos de Contacto <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Dirección Física</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDireccionFisica">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email Empresarial</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailEmpresa">-</p>
                             </div>
                         </div>
                     </details>
@@ -1760,9 +1803,53 @@
                         document.getElementById('negocioInstagram').textContent = source.instagram || '-';
                         document.getElementById('negocioFacebook').textContent = source.facebook || '-';
                         document.getElementById('negocioLinkedin').textContent = source.linkedin || '-';
+                        document.getElementById('negocioTwitter').textContent = source.twitter || '-';
                         
                         // Servicios
-                        document.getElementById('negocioServicios').textContent = source.services || '-';
+                        document.getElementById('negocioServicios').textContent = source.services || source.services_list || '-';
+                        
+                        // 🆕 Textos personalizados
+                        document.getElementById('negocioTextos').textContent = source.web_texts || '-';
+                        
+                        // 🆕 Más datos de contacto
+                        document.getElementById('negocioDireccionFisica').textContent = source.physical_address || '-';
+                        document.getElementById('negocioEmailEmpresa').textContent = source.business_email || '-';
+                        
+                        // 🆕 Campos dinámicos por sector
+                        const menuContentCard = document.getElementById('menuContentCard');
+                        const openingHoursCard = document.getElementById('openingHoursCard');
+                        const portfolioDescCard = document.getElementById('portfolioDescCard');
+                        const dynamicFieldsCard = document.getElementById('dynamicFieldsCard');
+                        
+                        // Mostrar/ocultar según si hay datos
+                        let hasDynamicFields = false;
+                        
+                        if (source.menu_content) {
+                            document.getElementById('negocioMenu').textContent = source.menu_content;
+                            menuContentCard.style.display = 'block';
+                            hasDynamicFields = true;
+                        } else {
+                            menuContentCard.style.display = 'none';
+                        }
+                        
+                        if (source.opening_hours) {
+                            document.getElementById('negocioHorarios').textContent = source.opening_hours;
+                            openingHoursCard.style.display = 'block';
+                            hasDynamicFields = true;
+                        } else {
+                            openingHoursCard.style.display = 'none';
+                        }
+                        
+                        if (source.portfolio_description) {
+                            document.getElementById('negocioPortfolio').textContent = source.portfolio_description;
+                            portfolioDescCard.style.display = 'block';
+                            hasDynamicFields = true;
+                        } else {
+                            portfolioDescCard.style.display = 'none';
+                        }
+                        
+                        // Ocultar todo el acordeón si no hay campos dinámicos
+                        dynamicFieldsCard.style.display = hasDynamicFields ? 'block' : 'none';
                         
                         // Objetivos
                         const purposeText = source.purpose ? (Array.isArray(source.purpose) ? source.purpose.join(', ') : source.purpose) : '-';
