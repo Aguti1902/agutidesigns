@@ -112,23 +112,21 @@ db.exec(`
 `);
 
 // MIGRACIÓN: Recrear tabla de tickets sin FOREIGN KEY constraint
-// Esto es necesario porque SQLite no permite eliminar constraints
+// NOTA: Esta migración ya se ejecutó en deploys anteriores.
+// Mantenerla aquí por compatibilidad pero probablemente no hará nada.
 try {
-    // Verificar si la tabla existe con la constraint antigua
     const tableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='tickets'").get();
     
     if (tableInfo && tableInfo.sql.includes('FOREIGN KEY')) {
-        console.log('🔧 [DB] Migrando tabla tickets para remover FOREIGN KEY constraint...');
+        console.log('🔧 [DB] Detectada tabla tickets con FOREIGN KEY, migrando...');
         
         // Backup de datos existentes
-        db.exec(`
-            CREATE TABLE IF NOT EXISTS tickets_backup AS SELECT * FROM tickets;
-        `);
+        db.exec(`CREATE TABLE IF NOT EXISTS tickets_backup AS SELECT * FROM tickets;`);
         
         // Eliminar tabla antigua
         db.exec(`DROP TABLE IF EXISTS tickets;`);
         
-        // Crear nueva tabla sin constraint
+        // Crear nueva tabla sin constraint y CON las nuevas columnas
         db.exec(`
             CREATE TABLE tickets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -142,15 +140,24 @@ try {
                 priority TEXT DEFAULT 'media',
                 status TEXT DEFAULT 'abierto',
                 admin_response TEXT,
+                client_response TEXT,
+                admin_response_at DATETIME,
+                client_response_at DATETIME,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 closed_at DATETIME
             )
         `);
         
-        // Restaurar datos
+        // Restaurar datos (solo columnas que existían antes)
         db.exec(`
-            INSERT INTO tickets SELECT * FROM tickets_backup;
+            INSERT INTO tickets (id, client_id, client_email, client_name, business_name, 
+                                 subject, category, description, priority, status, 
+                                 admin_response, created_at, updated_at, closed_at)
+            SELECT id, client_id, client_email, client_name, business_name,
+                   subject, category, description, priority, status,
+                   admin_response, created_at, updated_at, closed_at
+            FROM tickets_backup;
         `);
         
         // Eliminar backup
@@ -159,7 +166,7 @@ try {
         console.log('✅ [DB] Migración de tickets completada exitosamente');
     }
 } catch (error) {
-    console.log('⚠️ [DB] Error en migración (probablemente primera ejecución):', error.message);
+    console.log('⚠️ [DB] Migración de FOREIGN KEY ya ejecutada o no necesaria:', error.message);
 }
 
 // Agregar columna client_response si no existe (migración)
@@ -178,7 +185,9 @@ try {
     db.exec(`ALTER TABLE tickets ADD COLUMN admin_response_at DATETIME;`);
     console.log('✅ [DB] Columna admin_response_at agregada a tickets');
 } catch (error) {
-    if (!error.message.includes('duplicate column name')) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna admin_response_at ya existe');
+    } else {
         console.log('⚠️ [DB] Error agregando columna admin_response_at:', error.message);
     }
 }
@@ -188,7 +197,9 @@ try {
     db.exec(`ALTER TABLE tickets ADD COLUMN client_response_at DATETIME;`);
     console.log('✅ [DB] Columna client_response_at agregada a tickets');
 } catch (error) {
-    if (!error.message.includes('duplicate column name')) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna client_response_at ya existe');
+    } else {
         console.log('⚠️ [DB] Error agregando columna client_response_at:', error.message);
     }
 }
@@ -209,6 +220,8 @@ db.exec(`
         status TEXT DEFAULT 'abierto',
         admin_response TEXT,
         client_response TEXT,
+        admin_response_at DATETIME,
+        client_response_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         closed_at DATETIME
