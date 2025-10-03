@@ -1284,9 +1284,139 @@
             }
         }
 
-        function viewPedido(id) {
-            // TODO: Implementar vista detallada del pedido
-            alert(`Ver pedido #${id} - Implementar próximamente`);
+        async function viewPedido(id) {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/submissions/${id}`);
+                const pedido = await response.json();
+                
+                const detailsDiv = document.getElementById('pedidoDetails');
+                
+                // Parsear arrays/objetos JSON
+                const pages = pedido.pages ? (typeof pedido.pages === 'string' ? JSON.parse(pedido.pages) : pedido.pages) : [];
+                const purpose = pedido.purpose ? (typeof pedido.purpose === 'string' ? JSON.parse(pedido.purpose) : pedido.purpose) : [];
+                const contactMethods = pedido.contact_methods ? (typeof pedido.contact_methods === 'string' ? JSON.parse(pedido.contact_methods) : pedido.contact_methods) : [];
+                
+                detailsDiv.innerHTML = `
+                    <div style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                        <!-- Plan Contratado -->
+                        <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; color: white; margin-bottom: 20px;">
+                            <h3 style="margin: 0 0 15px 0; font-size: 1.3rem;">Plan Contratado</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Plan:</p><p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${formatPlan(pedido.plan)}</p></div>
+                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Monto:</p><p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${pedido.amount}€</p></div>
+                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Estado:</p><p style="margin: 5px 0 0 0;">${formatStatus(pedido.status)}</p></div>
+                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Fecha:</p><p style="margin: 5px 0 0 0;">${formatDate(pedido.created_at)}</p></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grid de 2 columnas para el resto -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            
+                            <!-- Datos del Negocio -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">🏢 Datos del Negocio</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Nombre:</strong> ${pedido.business_name || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Industria:</strong> ${pedido.industry || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Descripción:</strong> ${pedido.business_description || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Datos del Cliente -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">👤 Datos del Cliente</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Nombre:</strong> ${pedido.full_name || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Email:</strong> ${pedido.email || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Teléfono:</strong> ${pedido.phone || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Contacto -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📞 Contacto Web</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Email:</strong> ${pedido.email_contact || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Teléfono:</strong> ${pedido.phone_number || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>WhatsApp:</strong> ${pedido.whatsapp_number || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Métodos:</strong> ${contactMethods.join(', ') || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Redes Sociales -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📱 Redes Sociales</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Instagram:</strong> ${pedido.instagram || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Facebook:</strong> ${pedido.facebook || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>LinkedIn:</strong> ${pedido.linkedin || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Servicios -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; grid-column: 1/-1;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">💼 Servicios</h4>
+                                <p style="font-size: 0.85rem; margin: 0; line-height: 1.6;">${pedido.services || 'N/A'}</p>
+                            </div>
+                            
+                            <!-- Páginas -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📄 Páginas</h4>
+                                <div style="font-size: 0.85rem;">
+                                    ${pages.length > 0 ? pages.map(p => `<div style="padding: 5px; background: #f8f9fa; margin-bottom: 3px; border-radius: 5px;">✓ ${p}</div>`).join('') : '<p>No especificadas</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- Objetivos -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">🎯 Objetivos</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Propósito:</strong> ${purpose.join(', ') || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Público:</strong> ${pedido.target_audience || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Diseño -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">🎨 Diseño</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Estilo:</strong> ${pedido.design_style || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Colores:</strong> ${pedido.brand_colors || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Referencias:</strong> ${pedido.reference_websites || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- SEO y Dominio -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">🔍 SEO y Dominio</h4>
+                                <div style="font-size: 0.85rem; line-height: 1.6;">
+                                    <p style="margin: 5px 0;"><strong>Dominio:</strong> ${pedido.domain_name || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Alt 1:</strong> ${pedido.domain_alt1 || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Alt 2:</strong> ${pedido.domain_alt2 || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Keywords:</strong> ${pedido.keywords || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Fiscal -->
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; grid-column: 1/-1;">
+                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">⚖️ Datos Fiscales</h4>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85rem;">
+                                    <p style="margin: 0;"><strong>CIF/NIF:</strong> ${pedido.cif_nif || 'N/A'}</p>
+                                    <p style="margin: 0;"><strong>Razón Social:</strong> ${pedido.razon_social || 'N/A'}</p>
+                                    <p style="margin: 0; grid-column: 1/-1;"><strong>Dirección:</strong> ${pedido.direccion_fiscal || 'N/A'}</p>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('pedidoModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error cargando detalles del pedido');
+            }
         }
 
         function closePedidoModal() {
