@@ -43,6 +43,8 @@ db.exec(`
         design_style TEXT,
         brand_colors TEXT,
         reference_websites TEXT,
+        logo_data TEXT,
+        images_data TEXT,
         
         -- SEO
         keywords TEXT,
@@ -228,6 +230,30 @@ try {
     }
 }
 
+// Agregar columna logo_data si no existe (migración)
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN logo_data TEXT;`);
+    console.log('✅ [DB] Columna logo_data agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna logo_data ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna logo_data:', error.message);
+    }
+}
+
+// Agregar columna images_data si no existe (migración)
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN images_data TEXT;`);
+    console.log('✅ [DB] Columna images_data agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna images_data ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna images_data:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
@@ -304,7 +330,7 @@ function createSubmission(data) {
             contact_methods, phone_number, email_contact, whatsapp_number, form_email, physical_address,
             instagram, facebook, linkedin, twitter,
             services, purpose, target_audience, pages,
-            design_style, brand_colors, reference_websites,
+            design_style, brand_colors, reference_websites, logo_data, images_data,
             keywords, has_analytics,
             domain_name, domain_alt1, domain_alt2,
             privacy_policy,
@@ -315,7 +341,7 @@ function createSubmission(data) {
             ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?,
-            ?, ?, ?,
+            ?, ?, ?, ?, ?,
             ?, ?,
             ?, ?, ?,
             ?,
@@ -349,6 +375,8 @@ function createSubmission(data) {
         data.design_style || null,
         data.brand_colors || null,
         data.reference_websites || null,
+        data.logo_data || null,  // 🆕 Logo en base64
+        data.images_data || null,  // 🆕 Imágenes en base64 (JSON string)
         data.keywords || null,
         data.has_analytics || null,
         data.domain_name || null,
@@ -378,6 +406,13 @@ function getSubmission(id) {
         if (submission.contact_methods) submission.contact_methods = JSON.parse(submission.contact_methods);
         if (submission.purpose) submission.purpose = JSON.parse(submission.purpose);
         if (submission.pages) submission.pages = JSON.parse(submission.pages);
+        if (submission.images_data) {
+            try {
+                submission.images_data = JSON.parse(submission.images_data);
+            } catch (e) {
+                console.log('⚠️ Error parsing images_data:', e);
+            }
+        }
     }
     
     return submission;
@@ -407,6 +442,13 @@ function getAllSubmissions() {
         if (sub.contact_methods) sub.contact_methods = JSON.parse(sub.contact_methods);
         if (sub.purpose) sub.purpose = JSON.parse(sub.purpose);
         if (sub.pages) sub.pages = JSON.parse(sub.pages);
+        if (sub.images_data) {
+            try {
+                sub.images_data = JSON.parse(sub.images_data);
+            } catch (e) {
+                console.log('⚠️ Error parsing images_data:', e);
+            }
+        }
         return sub;
     });
 }

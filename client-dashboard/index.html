@@ -951,6 +951,25 @@
                         </div>
                     </div>
 
+                    <!-- Logo y Imágenes -->
+                    <div class="card">
+                        <h3 class="card-title">🎨 Logo y Diseño</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 10px;">Logo de tu Negocio</p>
+                                <div id="negocioLogo" style="min-height: 120px; display: flex; align-items: center; justify-content: center; background: white; border: 2px dashed #e0e0e0; border-radius: 8px;">
+                                    <p style="color: #999;">No se ha subido un logo</p>
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 10px;">Imágenes Adicionales (<span id="imageCount">0</span>)</p>
+                                <div id="negocioImagenes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; min-height: 120px;">
+                                    <p style="color: #999; grid-column: 1/-1; text-align: center;">No se han subido imágenes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Acordeones con más información -->
                     <details class="card" style="cursor: pointer;">
                         <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">📱 Redes Sociales <span style="float: right;">▼</span></summary>
@@ -1721,6 +1740,37 @@
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
                             ).join('');
                             document.getElementById('negocioPaginas').innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
+                        }
+                        
+                        // 🆕 Logo
+                        const logoContainer = document.getElementById('negocioLogo');
+                        if (source.logo_data) {
+                            logoContainer.innerHTML = `
+                                <img src="${source.logo_data}" alt="Logo" style="max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px;">
+                            `;
+                            console.log('✅ Logo cargado');
+                        } else {
+                            logoContainer.innerHTML = '<p style="color: #999;">No se ha subido un logo</p>';
+                        }
+                        
+                        // 🆕 Imágenes adicionales
+                        const imagenesContainer = document.getElementById('negocioImagenes');
+                        const imageCountSpan = document.getElementById('imageCount');
+                        if (source.images_data && Array.isArray(source.images_data) && source.images_data.length > 0) {
+                            imageCountSpan.textContent = source.images_data.length;
+                            const imagesHTML = source.images_data.map((imgData, index) => `
+                                <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e0e0e0; aspect-ratio: 1; cursor: pointer;" onclick="window.open('${imgData}', '_blank')">
+                                    <img src="${imgData}" alt="Imagen ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; text-align: center; font-size: 0.75rem;">
+                                        Imagen ${index + 1}
+                                    </div>
+                                </div>
+                            `).join('');
+                            imagenesContainer.innerHTML = imagesHTML;
+                            console.log('✅ Imágenes cargadas:', source.images_data.length);
+                        } else {
+                            imageCountSpan.textContent = '0';
+                            imagenesContainer.innerHTML = '<p style="color: #999; grid-column: 1/-1; text-align: center;">No se han subido imágenes</p>';
                         }
                         
                         console.log('✅ Datos cargados desde:', submission ? 'submission' : 'client fallback');

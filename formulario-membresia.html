@@ -1597,6 +1597,16 @@
             }
         });
 
+        // Función para convertir archivo a base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         document.getElementById('membershipForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1607,7 +1617,50 @@
             const formData = new FormData(e.target);
             const data = {};
             
+            // Procesar archivos (logo e imágenes)
+            const logoFile = document.getElementById('logoUpload').files[0];
+            const imageFiles = document.getElementById('imagesUpload').files;
+            
+            console.log('📸 Procesando archivos...');
+            console.log('Logo:', logoFile ? logoFile.name : 'No hay logo');
+            console.log('Imágenes:', imageFiles.length, 'archivo(s)');
+            
+            // Convertir logo a base64
+            if (logoFile) {
+                try {
+                    data.logo_data = await fileToBase64(logoFile);
+                    data.logo_name = logoFile.name;
+                    console.log('✅ Logo procesado:', logoFile.name);
+                } catch (error) {
+                    console.error('Error procesando logo:', error);
+                }
+            }
+            
+            // Convertir imágenes a base64
+            if (imageFiles && imageFiles.length > 0) {
+                data.images_data = [];
+                data.images_names = [];
+                for (let i = 0; i < imageFiles.length; i++) {
+                    try {
+                        const base64 = await fileToBase64(imageFiles[i]);
+                        data.images_data.push(base64);
+                        data.images_names.push(imageFiles[i].name);
+                        console.log(`✅ Imagen ${i + 1} procesada:`, imageFiles[i].name);
+                    } catch (error) {
+                        console.error(`Error procesando imagen ${i + 1}:`, error);
+                    }
+                }
+                // Convertir arrays a JSON strings para almacenamiento
+                data.images_data = JSON.stringify(data.images_data);
+                data.images_names = JSON.stringify(data.images_names);
+            }
+            
             formData.forEach((value, key) => {
+                // Skip file inputs, we already processed them
+                if (key === 'logo' || key === 'images[]') {
+                    return;
+                }
+                
                 if (key.endsWith('[]')) {
                     // Campos múltiples (arrays)
                     const cleanKey = key.replace('[]', '');
