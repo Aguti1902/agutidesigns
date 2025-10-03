@@ -1823,6 +1823,12 @@
                 
                 submitBtn.innerHTML = '⏳ Recopilando datos...';
             
+            // 🔍 DEBUG: Ver todos los campos que captura FormData
+            console.log('🔍 DEBUG FormData - Todos los campos:');
+            formData.forEach((value, key) => {
+                console.log(`  - ${key}:`, value ? (value.length > 50 ? value.substring(0, 50) + '...' : value) : 'vacío');
+            });
+            
             formData.forEach((value, key) => {
                 // Skip file inputs, we already processed them
                 if (key === 'logo' || key === 'images[]' || key === 'privacy_file') {
@@ -1841,6 +1847,11 @@
             
             // Logs simples para consola
             console.log('📋 Datos del formulario:', data);
+            console.log('🔍 Verificar campos críticos:');
+            console.log('  - services_list:', data.services_list);
+            console.log('  - menu_content:', data.menu_content);
+            console.log('  - opening_hours:', data.opening_hours);
+            console.log('  - web_texts:', data.web_texts);
             console.log('💼 Plan seleccionado:', plan);
             console.log('💳 Ciclo de facturación:', window.selectedBilling || 'monthly');
             
