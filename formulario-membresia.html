@@ -739,15 +739,6 @@
             <h1 class="form-title">Formulario de Membresía</h1>
             <p class="form-subtitle">Completa los datos para crear tu web profesional</p>
             
-            <!-- Toggle Mensual/Anual -->
-            <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin: 25px 0 15px 0;">
-                <div style="display: flex; align-items: center; gap: 8px; background: #1B1B1B; padding: 6px; border-radius: 50px;">
-                    <button type="button" id="formToggleMonthly" onclick="toggleFormBilling('monthly')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: #FEFAF5; color: #1B1B1B; border: none;">Mensual</button>
-                    <button type="button" id="formToggleAnnual" onclick="toggleFormBilling('annual')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: transparent; border: none;">Anual</button>
-                </div>
-                <span style="background: #EC6746; color: #FEFAF5; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.85rem;">Ahorra hasta 20%</span>
-            </div>
-            
             <!-- Selector de Plan -->
             <input type="hidden" id="selectedPlan" name="selected_plan" value="basico">
             <div id="planDisplay" style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; display: inline-block;">
@@ -764,34 +755,68 @@
             
             <!-- Modal para cambiar plan -->
             <div id="planModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-                <div style="background: white; padding: 30px; border-radius: 20px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease;">
-                    <h3 style="color: #0046FE; margin-bottom: 20px; font-size: 1.4rem; text-align: center; font-weight: 800;">Cambia tu Plan</h3>
-                    <div style="display: grid; gap: 12px;">
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('basico')">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <span style="font-size: 1.1rem; font-weight: 700;">Básico</span>
-                                <span id="modal-price-basico" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">35€/mes</span>
-                            </div>
-                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">5 páginas</span>
-                        </button>
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('avanzado')">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <span style="font-size: 1.1rem; font-weight: 700;">Avanzado</span>
-                                <span id="modal-price-avanzado" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">49€/mes</span>
-                            </div>
-                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">10 páginas · ⭐ Popular</span>
-                        </button>
-                        <button type="button" class="plan-modal-btn" onclick="changePlan('premium')">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <span style="font-size: 1.1rem; font-weight: 700;">Premium</span>
-                                <span id="modal-price-premium" style="font-size: 1.3rem; color: #0046FE; font-weight: 800;">65€/mes</span>
-                            </div>
-                            <span style="font-size: 0.85rem; color: #666; align-self: flex-start;">20 páginas · 👑 Completo</span>
-                        </button>
+                <div style="background: white; padding: 35px; border-radius: 20px; max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: modalSlideIn 0.3s ease;">
+                    <h2 style="color: #0046FE; margin-bottom: 10px; font-size: 2rem; text-align: center;">Elige tu Plan</h2>
+                    <p style="color: #666; text-align: center; margin-bottom: 20px;">Selecciona el plan que mejor se adapte a tus necesidades</p>
+                    
+                    <!-- Toggle Mensual/Anual -->
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px;">
+                        <div style="display: flex; align-items: center; gap: 10px; background: #1B1B1B; padding: 6px; border-radius: 50px;">
+                            <button type="button" id="formModalToggleMonthly" onclick="toggleFormModalBilling('monthly')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: #FEFAF5; color: #1B1B1B; border: none;">Mensual</button>
+                            <button type="button" id="formModalToggleAnnual" onclick="toggleFormModalBilling('annual')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: transparent; border: none;">Anual</button>
+                        </div>
+                        <span style="background: #EC6746; color: #FEFAF5; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.85rem;">Ahorra hasta 20%</span>
                     </div>
-                    <button type="button" onclick="closePlanSelector()" style="margin-top: 15px; width: 100%; padding: 10px; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.3s ease;">
-                        Cancelar
-                    </button>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <!-- Plan Básico -->
+                        <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="changePlan('basico')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
+                            <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Básico</h3>
+                            <p id="formModalPriceBasico" style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">35€</p>
+                            <p id="formModalPeriodBasico" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                            <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                                <li style="margin: 10px 0; color: #666;">✓ Hasta 5 páginas</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Dominio incluido</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Hosting incluido</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Soporte básico</li>
+                                <li style="margin: 10px 0; color: #666;">✓ SSL gratis</li>
+                            </ul>
+                            <button type="button" class="btn-action" style="width: 100%; background: #0046FE; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Seleccionar</button>
+                        </div>
+                        
+                        <!-- Plan Avanzado -->
+                        <div style="padding: 30px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 15px; border: 2px solid #0046FE; text-align: center; position: relative; color: white; transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,70,254,0.3); cursor: pointer;" onclick="changePlan('avanzado')">
+                            <div style="position: absolute; top: -12px; right: 20px; background: #E5FC63; color: #1B1B1B; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Recomendado</div>
+                            <h3 style="margin-bottom: 15px; font-size: 1.4rem;">Avanzado</h3>
+                            <p id="formModalPriceAvanzado" style="font-size: 2.5rem; font-weight: 700; margin-bottom: 5px;">49€</p>
+                            <p id="formModalPeriodAvanzado" style="opacity: 0.9; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                            <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                                <li style="margin: 10px 0; opacity: 0.95;">✓ Hasta 10 páginas</li>
+                                <li style="margin: 10px 0; opacity: 0.95;">✓ Todo del plan Básico</li>
+                                <li style="margin: 10px 0; opacity: 0.95;">✓ SEO avanzado</li>
+                                <li style="margin: 10px 0; opacity: 0.95;">✓ Google Analytics</li>
+                                <li style="margin: 10px 0; opacity: 0.95;">✓ Soporte prioritario</li>
+                            </ul>
+                            <button type="button" class="btn-action" style="width: 100%; background: #E5FC63; color: #1B1B1B; font-weight: 700; border: none; padding: 12px; border-radius: 8px; cursor: pointer;">Seleccionar</button>
+                        </div>
+                        
+                        <!-- Plan Premium -->
+                        <div style="padding: 30px; background: white; border-radius: 15px; border: 2px solid #e8eaed; text-align: center; transition: all 0.3s ease; cursor: pointer;" onclick="changePlan('premium')" onmouseover="this.style.borderColor='#0046FE'; this.style.transform='translateY(-5px)'" onmouseout="this.style.borderColor='#e8eaed'; this.style.transform='translateY(0)'">
+                            <h3 style="color: #0046FE; margin-bottom: 15px; font-size: 1.4rem;">Premium</h3>
+                            <p id="formModalPricePremium" style="font-size: 2.5rem; font-weight: 700; color: #1B1B1B; margin-bottom: 5px;">65€</p>
+                            <p id="formModalPeriodPremium" style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">por mes + IVA</p>
+                            <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 25px;">
+                                <li style="margin: 10px 0; color: #666;">✓ Hasta 20 páginas</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Todo del plan Avanzado</li>
+                                <li style="margin: 10px 0; color: #666;">✓ SEO premium</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Email marketing</li>
+                                <li style="margin: 10px 0; color: #666;">✓ Soporte 24/7</li>
+                            </ul>
+                            <button type="button" class="btn-action" style="width: 100%; background: #0046FE; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">Seleccionar</button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="closePlanSelector()" style="margin-top: 25px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #666;">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -1637,12 +1662,12 @@
             window.location.href = '/checkout.html';
         });
 
-        // Toggle de billing en el formulario (header)
-        function toggleFormBilling(cycle) {
+        // Toggle de billing en el MODAL del formulario
+        function toggleFormModalBilling(cycle) {
             window.selectedBilling = cycle;
             
-            const monthlyBtn = document.getElementById('formToggleMonthly');
-            const annualBtn = document.getElementById('formToggleAnnual');
+            const monthlyBtn = document.getElementById('formModalToggleMonthly');
+            const annualBtn = document.getElementById('formModalToggleAnnual');
             
             // Actualizar estilos de los botones
             if (cycle === 'monthly') {
@@ -1657,52 +1682,52 @@
                 annualBtn.style.color = '#1B1B1B';
             }
             
-            // Actualizar el texto del plan mostrado
-            const plan = document.getElementById('selectedPlan').value;
-            const planPrices = {
-                monthly: {
-                    'basico': 'Básico - 35€/mes',
-                    'avanzado': 'Avanzado - 49€/mes',
-                    'premium': 'Premium - 65€/mes'
-                },
-                annual: {
-                    'basico': 'Básico - 28€/mes (facturado anualmente: 336€/año)',
-                    'avanzado': 'Avanzado - 39€/mes (facturado anualmente: 468€/año)',
-                    'premium': 'Premium - 52€/mes (facturado anualmente: 624€/año)'
-                }
-            };
-            
-            document.getElementById('planDisplayText').textContent = planPrices[cycle][plan];
-            
-            // Actualizar precios del modal también
-            updateModalPrices(cycle);
-        }
-
-        // Actualizar precios del modal
-        function updateModalPrices(billing) {
+            // Actualizar precios del modal
             const prices = {
                 monthly: {
-                    basico: '35€/mes',
-                    avanzado: '49€/mes',
-                    premium: '65€/mes'
+                    basico: { price: '35€', period: 'por mes + IVA' },
+                    avanzado: { price: '49€', period: 'por mes + IVA' },
+                    premium: { price: '65€', period: 'por mes + IVA' }
                 },
                 annual: {
-                    basico: '28€/mes (336€/año)',
-                    avanzado: '39€/mes (468€/año)',
-                    premium: '52€/mes (624€/año)'
+                    basico: { price: '28€', period: 'por mes (336€/año) + IVA' },
+                    avanzado: { price: '39€', period: 'por mes (468€/año) + IVA' },
+                    premium: { price: '52€', period: 'por mes (624€/año) + IVA' }
                 }
             };
             
-            document.getElementById('modal-price-basico').textContent = prices[billing].basico;
-            document.getElementById('modal-price-avanzado').textContent = prices[billing].avanzado;
-            document.getElementById('modal-price-premium').textContent = prices[billing].premium;
+            document.getElementById('formModalPriceBasico').textContent = prices[cycle].basico.price;
+            document.getElementById('formModalPeriodBasico').textContent = prices[cycle].basico.period;
+            document.getElementById('formModalPriceAvanzado').textContent = prices[cycle].avanzado.price;
+            document.getElementById('formModalPeriodAvanzado').textContent = prices[cycle].avanzado.period;
+            document.getElementById('formModalPricePremium').textContent = prices[cycle].premium.price;
+            document.getElementById('formModalPeriodPremium').textContent = prices[cycle].premium.period;
         }
 
         // Abrir modal de selección de plan
         function openPlanSelector() {
-            // Actualizar precios del modal según billing_cycle
+            // Actualizar toggle y precios del modal según billing_cycle
             const billing = window.selectedBilling || 'monthly';
-            updateModalPrices(billing);
+            
+            // Actualizar toggle
+            const monthlyBtn = document.getElementById('formModalToggleMonthly');
+            const annualBtn = document.getElementById('formModalToggleAnnual');
+            if (monthlyBtn && annualBtn) {
+                if (billing === 'annual') {
+                    monthlyBtn.style.background = 'transparent';
+                    monthlyBtn.style.color = '#FEFAF5';
+                    annualBtn.style.background = '#FEFAF5';
+                    annualBtn.style.color = '#1B1B1B';
+                } else {
+                    monthlyBtn.style.background = '#FEFAF5';
+                    monthlyBtn.style.color = '#1B1B1B';
+                    annualBtn.style.background = 'transparent';
+                    annualBtn.style.color = '#FEFAF5';
+                }
+            }
+            
+            // Actualizar precios
+            toggleFormModalBilling(billing);
             
             document.getElementById('planModal').style.display = 'flex';
         }
@@ -1713,7 +1738,7 @@
         }
 
         // Cambiar plan desde el modal
-        function changePlan(plan, billingCycle) {
+        function changePlan(plan) {
             const oldPlan = document.getElementById('selectedPlan').value;
             
             // Definir precios
@@ -1730,8 +1755,7 @@
                 }
             };
             
-            const billing = billingCycle || window.selectedBilling || 'monthly';
-            window.selectedBilling = billing;
+            const billing = window.selectedBilling || 'monthly';
             
             // Obtener límites
             const limits = {
@@ -2210,23 +2234,6 @@
                 const displayText = document.getElementById('planDisplayText');
                 if (displayText) {
                     displayText.textContent = planPrices[billing][planParam];
-                }
-                
-                // Actualizar toggle del formulario
-                const monthlyBtn = document.getElementById('formToggleMonthly');
-                const annualBtn = document.getElementById('formToggleAnnual');
-                if (monthlyBtn && annualBtn) {
-                    if (billing === 'annual') {
-                        monthlyBtn.style.background = 'transparent';
-                        monthlyBtn.style.color = '#FEFAF5';
-                        annualBtn.style.background = '#FEFAF5';
-                        annualBtn.style.color = '#1B1B1B';
-                    } else {
-                        monthlyBtn.style.background = '#FEFAF5';
-                        monthlyBtn.style.color = '#1B1B1B';
-                        annualBtn.style.background = 'transparent';
-                        annualBtn.style.color = '#FEFAF5';
-                    }
                 }
                 
                 // Actualizar contador de páginas
