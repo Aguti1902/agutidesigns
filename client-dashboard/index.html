@@ -1666,8 +1666,10 @@
                     plan: data.client?.plan
                 });
 
+                // Definir submission FUERA del if para que esté disponible en todo el scope
+                const submission = data.submission;
+
                 if (data.client) {
-                    const submission = data.submission;
                     
                     // Verificar si submission existe
                     if (!submission) {
@@ -1797,19 +1799,32 @@
 
                     // Llenar datos de la sección "Mi Negocio"
                     console.log('📝 Llenando datos de "Mi Negocio"...');
+                    console.log('📦 Submission completa:', submission);
+                    console.log('👤 Client completo:', data.client);
                     
                     // Usar submission o fallback a client
                     const source = submission || data.client;
+                    
+                    console.log('🎯 Source elegido:', source);
+                    console.log('🔍 Campos en source:', Object.keys(source || {}));
                     
                     if (source) {
                         document.getElementById('negocioEmpresa').textContent = source.business_name || '-';
                         document.getElementById('negocioIndustria').textContent = source.industry || '-';
                         document.getElementById('negocioDescripcion').textContent = source.business_description || '-';
                         
+                        console.log('✅ Datos básicos cargados:', {
+                            business_name: source.business_name,
+                            industry: source.industry,
+                            business_description: source.business_description
+                        });
+                        
                         // Métodos de contacto
                         const metodosContacto = source.contact_methods ? 
                             (Array.isArray(source.contact_methods) ? source.contact_methods.join(', ') : source.contact_methods) : '-';
                         document.getElementById('negocioMetodosContacto').textContent = metodosContacto;
+                        
+                        console.log('✅ Métodos de contacto:', metodosContacto);
                         
                         document.getElementById('negocioEmailContacto').textContent = source.email_contact || source.email || '-';
                         document.getElementById('negocioTelefono').textContent = source.phone_number || '-';
