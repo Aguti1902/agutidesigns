@@ -725,9 +725,9 @@
                 </div>
 
                 <div class="sidebar-footer">
-                    <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
                 </div>
-            </div>
+        </div>
 
             <!-- MAIN CONTENT -->
             <div class="main-content">
@@ -738,37 +738,37 @@
                         <p>Vista general del negocio</p>
                     </div>
 
-                    <div class="stats-grid">
-                        <div class="stat-card blue">
+            <div class="stats-grid">
+                <div class="stat-card blue">
                             <div class="stat-label">
                                 <span>📝</span>
                                 Total Solicitudes
                             </div>
-                            <div class="stat-value" id="totalSubmissions">0</div>
+                    <div class="stat-value" id="totalSubmissions">0</div>
                             <div class="stat-change">+12% este mes</div>
-                        </div>
-                        <div class="stat-card green">
+                </div>
+                <div class="stat-card green">
                             <div class="stat-label">
                                 <span>✅</span>
                                 Clientes Activos
                             </div>
                             <div class="stat-value" id="activeClients">0</div>
                             <div class="stat-change">Clientes con plan</div>
-                        </div>
-                        <div class="stat-card yellow">
+                </div>
+                <div class="stat-card yellow">
                             <div class="stat-label">
                                 <span>⏳</span>
                                 Sin Plan
                             </div>
                             <div class="stat-value" id="inactiveClients">0</div>
                             <div class="stat-change">Oportunidades de venta</div>
-                        </div>
-                        <div class="stat-card green">
+                </div>
+                <div class="stat-card green">
                             <div class="stat-label">
                                 <span>💰</span>
                                 Ingresos Totales
                             </div>
-                            <div class="stat-value" id="totalRevenue">0€</div>
+                    <div class="stat-value" id="totalRevenue">0€</div>
                             <div class="stat-change">Revenue acumulado</div>
                         </div>
                         <div class="stat-card blue">
@@ -786,8 +786,8 @@
                             </div>
                             <div class="stat-value" id="websInProgress">0</div>
                             <div class="stat-change">Proyectos activos</div>
-                        </div>
-                    </div>
+                </div>
+            </div>
 
                     <div class="card">
                         <div class="card-header">
@@ -909,33 +909,33 @@
                             <h2>Lista de Pedidos</h2>
                             <button class="btn-primary" onclick="loadPedidos()">🔄 Actualizar</button>
                         </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Empresa</th>
-                                        <th>Email</th>
-                                        <th>Plan</th>
-                                        <th>Monto</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Empresa</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
                                 <tbody id="pedidosTable">
-                                    <tr>
-                                        <td colspan="8">
-                                            <div class="loader">
-                                                <div class="spinner"></div>
+                            <tr>
+                                <td colspan="8">
+                                    <div class="loader">
+                                        <div class="spinner"></div>
                                                 <p>Cargando pedidos...</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
                 </div>
 
                 <!-- SECCIÓN: CLIENTES -->
@@ -1358,26 +1358,197 @@
 
         // ===== PROYECTOS (KANBAN) =====
         async function loadProjects() {
-            // TODO: Implementar carga de proyectos desde base de datos
-            const statuses = ['sin_empezar', 'desarrollo', 'revision', 'entregada'];
-            statuses.forEach(status => {
-                document.getElementById(`kanban-${status}`).innerHTML = `
-                    <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9rem;">
-                        Sin proyectos
-                    </div>
-                `;
-                document.getElementById(`count-${status}`).textContent = '0';
-            });
+            try {
+                const response = await fetch(`${API_URL}/api/admin/projects`);
+                const projects = await response.json();
+                
+                // Limpiar columnas
+                const statuses = ['sin_empezar', 'desarrollo', 'revision', 'entregada'];
+                statuses.forEach(status => {
+                    document.getElementById(`kanban-${status.replace('_', '-')}`).innerHTML = '';
+                });
+                
+                // Agrupar proyectos por estado
+                const projectsByStatus = {
+                    sin_empezar: [],
+                    en_desarrollo: [],
+                    revision: [],
+                    entregada: []
+                };
+                
+                projects.forEach(project => {
+                    if (projectsByStatus[project.status]) {
+                        projectsByStatus[project.status].push(project);
+                    }
+                });
+                
+                // Renderizar proyectos en cada columna
+                statuses.forEach(status => {
+                    const columnId = status.replace('_', '-');
+                    const column = document.getElementById(`kanban-${columnId}`);
+                    const count = document.getElementById(`count-${columnId}`);
+                    
+                    const projectList = projectsByStatus[status] || [];
+                    count.textContent = projectList.length;
+                    
+                    if (projectList.length === 0) {
+                        column.innerHTML = `
+                            <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9rem;">
+                                Sin proyectos
+                            </div>
+                        `;
+                    } else {
+                        column.innerHTML = projectList.map(project => {
+                            const priorityEmoji = {
+                                'low': '🟢',
+                                'normal': '🔵',
+                                'high': '🟠',
+                                'urgent': '🔴'
+                            }[project.priority] || '⚪';
+                            
+                            const planBadge = {
+                                'basico': 'Básico',
+                                'avanzado': 'Avanzado',
+                                'premium': 'Premium'
+                            }[project.plan] || project.plan;
+                            
+                            return `
+                                <div class="kanban-card" draggable="true" data-project-id="${project.id}">
+                                    <div class="kanban-card-title">${project.project_name}</div>
+                                    <div class="kanban-card-info">👤 ${project.business_name || 'Sin cliente'}</div>
+                                    <div class="kanban-card-info">📧 ${project.client_email || 'N/A'}</div>
+                                    <div class="kanban-card-info">📦 ${planBadge}</div>
+                                    ${project.deadline ? `<div class="kanban-card-info">📅 ${formatDate(project.deadline)}</div>` : ''}
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${project.progress}%"></div>
+                                    </div>
+                                    <div class="kanban-card-footer">
+                                        <span>${priorityEmoji} ${project.priority}</span>
+                                        <span>${project.progress}%</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        
+                        // Añadir event listeners para drag & drop
+                        column.querySelectorAll('.kanban-card').forEach(card => {
+                            card.addEventListener('dragstart', handleDragStart);
+                            card.addEventListener('click', () => editProject(card.dataset.projectId));
+                        });
+                    }
+                });
+                
+                // Añadir event listeners para drop zones
+                statuses.forEach(status => {
+                    const columnId = status.replace('_', '-');
+                    const column = document.getElementById(`kanban-${columnId}`).parentElement;
+                    column.addEventListener('dragover', handleDragOver);
+                    column.addEventListener('drop', (e) => handleDrop(e, status));
+                });
+                
+                // Actualizar estadísticas
+                const statsResponse = await fetch(`${API_URL}/api/admin/projects/stats`);
+                const stats = await statsResponse.json();
+                if (document.getElementById('websInProgress')) {
+                    document.getElementById('websInProgress').textContent = stats.en_desarrollo || 0;
+                }
+                
+            } catch (error) {
+                console.error('Error cargando proyectos:', error);
+            }
+        }
+        
+        // Drag & Drop handlers
+        let draggedProject = null;
+        
+        function handleDragStart(e) {
+            draggedProject = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            e.target.style.opacity = '0.5';
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        
+        async function handleDrop(e, newStatus) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedProject) {
+                const projectId = draggedProject.dataset.projectId;
+                draggedProject.style.opacity = '';
+                
+                try {
+                    // Actualizar estado en el backend
+                    await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    
+                    // Recargar proyectos
+                    await loadProjects();
+                } catch (error) {
+                    console.error('Error moviendo proyecto:', error);
+                    alert('Error moviendo el proyecto');
+                }
+            }
+            
+            return false;
+        }
+        
+        // Editar proyecto
+        async function editProject(projectId) {
+            try {
+                const response = await fetch(`${API_URL}/api/admin/projects/${projectId}`);
+                const project = await response.json();
+                
+                // Pre-llenar modal con datos del proyecto
+                document.getElementById('projectClient').value = project.client_id;
+                document.getElementById('projectName').value = project.project_name;
+                document.getElementById('projectStatus').value = project.status;
+                document.getElementById('projectPriority').value = project.priority;
+                document.getElementById('projectDeadline').value = project.deadline || '';
+                document.getElementById('projectProgress').value = project.progress;
+                document.getElementById('projectNotes').value = project.notes || '';
+                
+                // Cambiar el formulario a modo edición
+                const form = document.getElementById('projectForm');
+                form.dataset.projectId = projectId;
+                form.dataset.mode = 'edit';
+                
+                // Cambiar título del modal
+                document.querySelector('#projectModal .modal-header h3').textContent = '✏️ Editar Proyecto';
+                
+                document.getElementById('projectModal').classList.add('active');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error cargando datos del proyecto');
+            }
         }
 
         function openNewProjectModal() {
+            const form = document.getElementById('projectForm');
+            delete form.dataset.projectId;
+            delete form.dataset.mode;
+            form.reset();
+            document.querySelector('#projectModal .modal-header h3').textContent = '🌐 Nuevo Proyecto';
             document.getElementById('projectModal').classList.add('active');
             loadClientsForSelect();
         }
 
         function closeProjectModal() {
             document.getElementById('projectModal').classList.remove('active');
-            document.getElementById('projectForm').reset();
+            const form = document.getElementById('projectForm');
+            form.reset();
+            delete form.dataset.projectId;
+            delete form.dataset.mode;
         }
 
         async function loadClientsForSelect() {
@@ -1394,9 +1565,43 @@
 
         document.getElementById('projectForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // TODO: Implementar creación de proyecto
-            alert('Sistema de proyectos - Implementar próximamente');
-            closeProjectModal();
+            
+            const form = e.target;
+            const projectData = {
+                client_id: parseInt(document.getElementById('projectClient').value),
+                project_name: document.getElementById('projectName').value,
+                status: document.getElementById('projectStatus').value,
+                priority: document.getElementById('projectPriority').value,
+                deadline: document.getElementById('projectDeadline').value || null,
+                progress: parseInt(document.getElementById('projectProgress').value),
+                notes: document.getElementById('projectNotes').value || null
+            };
+            
+            try {
+                if (form.dataset.mode === 'edit' && form.dataset.projectId) {
+                    // Modo edición
+                    await fetch(`${API_URL}/api/admin/projects/${form.dataset.projectId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(projectData)
+                    });
+                    alert('Proyecto actualizado exitosamente');
+                } else {
+                    // Modo creación
+                    await fetch(`${API_URL}/api/admin/projects`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(projectData)
+                    });
+                    alert('Proyecto creado exitosamente');
+                }
+                
+                closeProjectModal();
+                await loadProjects();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error guardando el proyecto');
+            }
         });
 
         // ===== FORMATEADORES =====
