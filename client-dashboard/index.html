@@ -1808,6 +1808,19 @@
                     console.log('🎯 Source elegido:', source);
                     console.log('🔍 Campos en source:', Object.keys(source || {}));
                     
+                    // 🆕 Log detallado de TODOS los campos
+                    console.log('📋 DETALLE COMPLETO DE CAMPOS:');
+                    console.log('pages:', source.pages);
+                    console.log('services:', source.services);
+                    console.log('services_list:', source.services_list);
+                    console.log('web_texts:', source.web_texts);
+                    console.log('menu_content:', source.menu_content);
+                    console.log('opening_hours:', source.opening_hours);
+                    console.log('portfolio_description:', source.portfolio_description);
+                    console.log('privacy_policy:', source.privacy_policy);
+                    console.log('logo_data:', source.logo_data ? 'SÍ TIENE' : 'NO TIENE');
+                    console.log('images_data:', source.images_data ? (Array.isArray(source.images_data) ? `SÍ TIENE (${source.images_data.length} imágenes)` : 'SÍ TIENE') : 'NO TIENE');
+                    
                     if (source) {
                         document.getElementById('negocioEmpresa').textContent = source.business_name || '-';
                         document.getElementById('negocioIndustria').textContent = source.industry || '-';
