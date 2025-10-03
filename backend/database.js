@@ -159,7 +159,7 @@ async function initializeTables() {
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
     } finally {
-        release();
+        client.release();
     }
 }
 
