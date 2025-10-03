@@ -1666,7 +1666,7 @@
                         <div style="border: 2px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
                             <h4 style="color: #28a745; margin: 0 0 10px 0; font-size: 1rem;">💬 Tu Respuesta</h4>
                             <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
-                            ${ticket.updated_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">Respondido: ${formatDate(ticket.updated_at)}</p>` : ''}
+                            ${ticket.admin_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.admin_response_at)}</p>` : ''}
                         </div>
                         ` : ''}
                         
@@ -1675,7 +1675,8 @@
                         <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
                             <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">💬 Respuesta del Cliente</h4>
                             <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.client_response}</p>
-                            <p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">⚠️ El cliente ha respondido - revisa y responde nuevamente si es necesario</p>
+                            ${ticket.client_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.client_response_at)}</p>` : ''}
+                            <p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #0046FE; font-weight: 600;">⚠️ El cliente ha respondido - revisa y responde nuevamente si es necesario</p>
                         </div>
                         ` : ''}
                         

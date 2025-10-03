@@ -173,6 +173,26 @@ try {
     }
 }
 
+// Agregar columna admin_response_at si no existe (migración)
+try {
+    db.exec(`ALTER TABLE tickets ADD COLUMN admin_response_at DATETIME;`);
+    console.log('✅ [DB] Columna admin_response_at agregada a tickets');
+} catch (error) {
+    if (!error.message.includes('duplicate column name')) {
+        console.log('⚠️ [DB] Error agregando columna admin_response_at:', error.message);
+    }
+}
+
+// Agregar columna client_response_at si no existe (migración)
+try {
+    db.exec(`ALTER TABLE tickets ADD COLUMN client_response_at DATETIME;`);
+    console.log('✅ [DB] Columna client_response_at agregada a tickets');
+} catch (error) {
+    if (!error.message.includes('duplicate column name')) {
+        console.log('⚠️ [DB] Error agregando columna client_response_at:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
@@ -543,12 +563,14 @@ function updateTicket(ticketId, updates) {
         SET status = COALESCE(?, status),
             admin_response = COALESCE(?, admin_response),
             client_response = COALESCE(?, client_response),
+            admin_response_at = CASE WHEN ? IS NOT NULL THEN CURRENT_TIMESTAMP ELSE admin_response_at END,
+            client_response_at = CASE WHEN ? IS NOT NULL THEN CURRENT_TIMESTAMP ELSE client_response_at END,
             updated_at = CURRENT_TIMESTAMP,
             closed_at = CASE WHEN ? = 'cerrado' THEN CURRENT_TIMESTAMP ELSE closed_at END
         WHERE id = ?
     `);
     
-    const result = stmt.run(status, admin_response, client_response, status, ticketId);
+    const result = stmt.run(status, admin_response, client_response, admin_response, client_response, status, ticketId);
     console.log('✅ [DB] Ticket actualizado. Changes:', result.changes);
     
     return result;

@@ -2637,7 +2637,7 @@
 
                 let responseSection = '';
                 if (ticket.admin_response && ticket.admin_response.trim() !== '') {
-                    const responseDate = ticket.updated_at ? new Date(ticket.updated_at).toLocaleDateString('es-ES', {
+                    const responseDate = ticket.admin_response_at ? new Date(ticket.admin_response_at).toLocaleDateString('es-ES', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -2651,7 +2651,29 @@
                                 💬 Respuesta del Equipo de Soporte
                             </h4>
                             <p style="margin: 0; color: #1B1B1B; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
-                            ${responseDate ? `<p style="margin: 15px 0 0 0; color: #666; font-size: 0.85rem;">📅 Respondido el ${responseDate}</p>` : ''}
+                            ${responseDate ? `<p style="margin: 15px 0 0 0; color: #666; font-size: 0.85rem;">📅 Enviado el ${responseDate}</p>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Sección de respuesta del cliente (si existe)
+                let clientResponseSection = '';
+                if (ticket.client_response && ticket.client_response.trim() !== '') {
+                    const clientResponseDate = ticket.client_response_at ? new Date(ticket.client_response_at).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
+
+                    clientResponseSection = `
+                        <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 12px; padding: 20px; margin-top: 20px;">
+                            <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                                💬 Tu Respuesta
+                            </h4>
+                            <p style="margin: 0; color: #1B1B1B; line-height: 1.6; white-space: pre-wrap;">${ticket.client_response}</p>
+                            ${clientResponseDate ? `<p style="margin: 15px 0 0 0; color: #666; font-size: 0.85rem;">📅 Enviado el ${clientResponseDate}</p>` : ''}
                         </div>
                     `;
                 }
@@ -2712,6 +2734,7 @@
                     </div>
 
                     ${responseSection}
+                    ${clientResponseSection}
                     ${interactionSection}
                 `;
 
