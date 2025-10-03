@@ -191,13 +191,25 @@ app.post('/api/create-subscription', async (req, res) => {
         const amount = amounts[billingCycle][plan];
 
         // Guardar datos del formulario temporalmente (pending)
-        const submissionId = db.createSubmission({
+        const submissionData = {
             ...formData,
             full_name: fullName,
             plan,
+            billing_cycle: billingCycle,
             status: 'pending',
             amount: amount
+        };
+        
+        console.log('📝 Creando submission con datos:', {
+            email: submissionData.email,
+            business_name: submissionData.business_name,
+            plan,
+            billing_cycle: billingCycle
         });
+        
+        const submissionId = db.createSubmission(submissionData);
+        console.log(`✅ Submission ${submissionId} creada`);
+
 
         // Crear o obtener cliente en Stripe
         const customer = await stripe.customers.create({
@@ -263,7 +275,7 @@ app.post('/api/create-subscription', async (req, res) => {
                     fullName = 'Cliente';
                 }
                 
-                clientId = db.createClient({
+                const clientData = {
                     email: submission.email,
                     password: hashedPassword,
                     full_name: fullName,
@@ -273,9 +285,27 @@ app.post('/api/create-subscription', async (req, res) => {
                     stripe_customer_id: customer.id,
                     stripe_subscription_id: subscription.id,
                     payment_date: new Date().toISOString()
+                };
+                
+                console.log('👤 Creando cliente con datos:', {
+                    email: clientData.email,
+                    business_name: clientData.business_name,
+                    plan: clientData.plan,
+                    submission_id: clientData.submission_id
                 });
+                
+                clientId = db.createClient(clientData);
 
-                console.log('✅ Cliente creado exitosamente:', submission.email, 'ID:', clientId);
+                console.log(`✅ Cliente ${clientId} creado exitosamente:`, submission.email);
+                
+                // Verificar que se creó correctamente
+                const createdClient = db.getClientById(clientId);
+                console.log('🔍 Verificación cliente creado:', {
+                    id: createdClient.id,
+                    email: createdClient.email,
+                    submission_id: createdClient.submission_id,
+                    plan: createdClient.plan
+                });
             } else {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
                 clientId = existingClient.id;
