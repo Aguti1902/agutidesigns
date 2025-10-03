@@ -653,9 +653,10 @@
                     <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
                     <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
                     <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
+                    <li><button onclick="showSection('tickets')"><span class="menu-icon">🎫</span><span>Mis Tickets</span></button></li>
                     <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
                     <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('soporte')"><span class="menu-icon">💬</span><span>Soporte</span></button></li>
+                    <li><button onclick="showSection('soporte')"><span class="menu-icon">💬</span><span>Crear Ticket</span></button></li>
                     <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                 </ul>
             </div>
@@ -1281,6 +1282,28 @@
                     </div>
                 </div>
 
+                <!-- MIS TICKETS -->
+                <div id="tickets" class="content-section">
+                    <div class="section-header">
+                        <h1 class="section-title">🎫 Mis Tickets de Soporte</h1>
+                        <p class="section-subtitle">Historial de conversaciones con el soporte</p>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                        <button class="btn-action" onclick="showSection('soporte')" style="display: flex; align-items: center; gap: 8px;">
+                            ➕ Crear Nuevo Ticket
+                        </button>
+                    </div>
+
+                    <!-- Lista de Tickets -->
+                    <div id="ticketsListContainer">
+                        <div class="loader" style="text-align: center; padding: 40px; color: #666;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🎫</div>
+                            <p>Cargando tus tickets...</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- SEO & MARKETING -->
                 <div id="seo" class="content-section">
                     <div class="section-header">
@@ -1383,6 +1406,14 @@
             </div>
             
             <button style="margin-top: 25px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #666;" onclick="closePlanModal(event)">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Ver Ticket -->
+    <div class="plan-modal" id="viewTicketModal" onclick="closeViewTicketModal(event)">
+        <div class="plan-modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
+            <div id="viewTicketContent"></div>
+            <button style="margin-top: 25px; width: 100%; padding: 12px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #666;" onclick="closeViewTicketModal(event)">Cerrar</button>
         </div>
     </div>
 
@@ -1738,6 +1769,11 @@
 
             // Marcar botón activo
             event.target.closest('button').classList.add('active');
+            
+            // Cargar contenido específico según la sección
+            if (sectionId === 'tickets') {
+                loadClientTickets();
+            }
         }
         // Remover restricciones para usuarios CON plan
         function removeFreePlanRestrictions() {
@@ -2429,6 +2465,220 @@
                 alert('❌ Error al enviar el ticket. Por favor, intenta de nuevo.');
             }
         });
+
+        // =============================================
+        // MIS TICKETS - HISTORIAL Y CONVERSACIONES
+        // =============================================
+
+        // Cargar tickets del cliente
+        async function loadClientTickets() {
+            if (!currentClient || !currentClient.id) {
+                console.error('❌ [CLIENT] No hay cliente logueado');
+                return;
+            }
+
+            console.log('🎫 [CLIENT] Cargando tickets del cliente #', currentClient.id);
+
+            try {
+                const response = await fetch(`${API_URL}/api/tickets/client/${currentClient.id}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const tickets = data.tickets || [];
+                
+                console.log('🎫 [CLIENT] Tickets recibidos:', tickets.length);
+                
+                displayClientTickets(tickets);
+            } catch (error) {
+                console.error('❌ [CLIENT] Error cargando tickets:', error);
+                document.getElementById('ticketsListContainer').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+                        <p>Error al cargar tus tickets</p>
+                        <button class="btn-action secondary" onclick="loadClientTickets()" style="margin-top: 15px;">Reintentar</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Mostrar lista de tickets
+        function displayClientTickets(tickets) {
+            const container = document.getElementById('ticketsListContainer');
+            
+            if (tickets.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #666;">
+                        <div style="font-size: 4rem; margin-bottom: 15px;">🎫</div>
+                        <h3 style="color: #1B1B1B; margin-bottom: 10px;">No tienes tickets aún</h3>
+                        <p style="margin-bottom: 20px;">Crea tu primer ticket de soporte para obtener ayuda</p>
+                        <button class="btn-action" onclick="showSection('soporte')">Crear Mi Primer Ticket</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const ticketsHTML = tickets.map(ticket => {
+                const statusColors = {
+                    'abierto': { bg: '#fff3cd', color: '#856404', text: 'Abierto' },
+                    'en_proceso': { bg: '#d1ecf1', color: '#0c5460', text: 'En Proceso' },
+                    'cerrado': { bg: '#d4edda', color: '#155724', text: 'Cerrado' }
+                };
+
+                const priorityColors = {
+                    'alta': { bg: '#f8d7da', color: '#721c24', text: 'Alta' },
+                    'media': { bg: '#fff3cd', color: '#856404', text: 'Media' },
+                    'baja': { bg: '#d1ecf1', color: '#0c5460', text: 'Baja' }
+                };
+
+                const status = statusColors[ticket.status] || statusColors['abierto'];
+                const priority = priorityColors[ticket.priority] || priorityColors['media'];
+                
+                const createdDate = new Date(ticket.created_at).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const hasResponse = ticket.admin_response && ticket.admin_response.trim() !== '';
+
+                return `
+                    <div class="card" style="cursor: pointer; transition: all 0.3s; border: 2px solid #e8eaed;" onclick="viewClientTicket(${ticket.id})">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <h3 style="color: #0046FE; margin: 0 0 8px 0; font-size: 1.1rem;">Ticket #${ticket.id}</h3>
+                                <p style="margin: 0; font-size: 1rem; font-weight: 600; color: #1B1B1B;">${ticket.subject}</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <span style="padding: 4px 12px; background: ${status.bg}; color: ${status.color}; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    ${status.text}
+                                </span>
+                                <span style="padding: 4px 12px; background: ${priority.bg}; color: ${priority.color}; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    ${priority.text}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <p style="color: #666; margin: 0 0 12px 0; font-size: 0.9rem; line-height: 1.5;">${ticket.description.substring(0, 150)}${ticket.description.length > 150 ? '...' : ''}</p>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e8eaed; padding-top: 12px; margin-top: 12px;">
+                            <span style="color: #999; font-size: 0.85rem;">📅 ${createdDate}</span>
+                            ${hasResponse ? '<span style="color: #009A62; font-size: 0.85rem; font-weight: 600;">💬 Respuesta recibida</span>' : '<span style="color: #999; font-size: 0.85rem;">⏳ Esperando respuesta</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = ticketsHTML;
+        }
+
+        // Ver detalles de un ticket
+        async function viewClientTicket(ticketId) {
+            console.log('🎫 [CLIENT] Viendo ticket #', ticketId);
+
+            try {
+                const response = await fetch(`${API_URL}/api/tickets/${ticketId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const ticket = await response.json();
+                console.log('🎫 [CLIENT] Ticket recibido:', ticket);
+                
+                const statusText = {
+                    'abierto': 'Abierto',
+                    'en_proceso': 'En Proceso',
+                    'cerrado': 'Cerrado'
+                };
+
+                const priorityText = {
+                    'alta': 'Alta',
+                    'media': 'Media',
+                    'baja': 'Baja'
+                };
+
+                const createdDate = new Date(ticket.created_at).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                let responseSection = '';
+                if (ticket.admin_response && ticket.admin_response.trim() !== '') {
+                    const responseDate = ticket.updated_at ? new Date(ticket.updated_at).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
+
+                    responseSection = `
+                        <div style="border: 2px solid #009A62; background: #f0f9f4; border-radius: 12px; padding: 20px; margin-top: 20px;">
+                            <h4 style="color: #009A62; margin: 0 0 12px 0; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                                💬 Respuesta del Equipo de Soporte
+                            </h4>
+                            <p style="margin: 0; color: #1B1B1B; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
+                            ${responseDate ? `<p style="margin: 15px 0 0 0; color: #666; font-size: 0.85rem;">📅 Respondido el ${responseDate}</p>` : ''}
+                        </div>
+                    `;
+                }
+
+                const closedSection = ticket.status === 'cerrado' ? `
+                    <div style="background: #e7f5ff; border: 2px solid #0046FE; border-radius: 12px; padding: 15px; text-align: center; margin-top: 20px;">
+                        <p style="margin: 0; color: #0046FE; font-weight: 600;">✅ Este ticket ha sido cerrado</p>
+                        ${ticket.closed_at ? `<p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">Fecha de cierre: ${new Date(ticket.closed_at).toLocaleDateString('es-ES')}</p>` : ''}
+                    </div>
+                ` : '';
+
+                document.getElementById('viewTicketContent').innerHTML = `
+                    <h2 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1.8rem;">🎫 Ticket #${ticket.id}</h2>
+                    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                        <span style="padding: 6px 14px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+                            ${statusText[ticket.status] || ticket.status}
+                        </span>
+                        <span style="padding: 6px 14px; background: #fff3cd; color: #856404; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+                            Prioridad: ${priorityText[ticket.priority] || ticket.priority}
+                        </span>
+                        <span style="padding: 6px 14px; background: #f0f0f0; color: #666; border-radius: 20px; font-size: 0.9rem;">
+                            ${ticket.category}
+                        </span>
+                    </div>
+
+                    <div style="border: 2px solid #e8eaed; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                        <h4 style="color: #1B1B1B; margin: 0 0 10px 0; font-size: 1.1rem;">Asunto</h4>
+                        <p style="margin: 0; font-weight: 600; color: #0046FE; font-size: 1rem;">${ticket.subject}</p>
+                    </div>
+
+                    <div style="border: 2px solid #e8eaed; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                        <h4 style="color: #1B1B1B; margin: 0 0 10px 0; font-size: 1.1rem;">Tu Consulta</h4>
+                        <p style="margin: 0; color: #666; line-height: 1.6; white-space: pre-wrap;">${ticket.description}</p>
+                        <p style="margin: 15px 0 0 0; color: #999; font-size: 0.85rem;">📅 Creado el ${createdDate}</p>
+                    </div>
+
+                    ${responseSection}
+                    ${closedSection}
+                `;
+
+                document.getElementById('viewTicketModal').style.display = 'flex';
+                console.log('✅ [CLIENT] Modal de ticket abierto');
+                
+            } catch (error) {
+                console.error('❌ [CLIENT] Error cargando detalles del ticket:', error);
+                alert('Error al cargar los detalles del ticket');
+            }
+        }
+
+        // Cerrar modal de ver ticket
+        function closeViewTicketModal(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('viewTicketModal').style.display = 'none';
+        }
 
         // =============================================
         // CHAT WIDGET CON IA
