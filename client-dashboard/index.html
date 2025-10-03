@@ -2338,7 +2338,7 @@
                         // SECCIÓN 1: NEGOCIO
                         document.getElementById('form_business_name').textContent = source.business_name || '-';
                         document.getElementById('form_business_description').textContent = source.business_description || '-';
-                        document.getElementById('form_industry').textContent = source.industry || '-';
+                        document.getElementById('form_industry').textContent = source.industry ? getSectorName(source.industry) : '-';
                         document.getElementById('form_cif_nif').textContent = source.cif_nif || '-';
                         document.getElementById('form_razon_social').textContent = source.razon_social || '-';
                         document.getElementById('form_direccion_fiscal').textContent = source.direccion_fiscal || '-';
@@ -2366,15 +2366,24 @@
                         document.getElementById('form_target_audience').textContent = source.target_audience || '-';
                         
                         // SECCIÓN 3: CONTENIDO
-                        // Páginas
+                        // Páginas (predefinidas + personalizadas)
                         const pagesContainer = document.getElementById('form_pages');
                         let pagesArray = [];
                         if (source.pages) {
                             pagesArray = Array.isArray(source.pages) ? source.pages : JSON.parse(source.pages);
+                        }
+                        
+                        // Agregar páginas personalizadas si existen
+                        if (source.custom_pages) {
+                            const customPagesArray = Array.isArray(source.custom_pages) ? source.custom_pages : JSON.parse(source.custom_pages);
+                            pagesArray = [...pagesArray, ...customPagesArray];
+                        }
+                        
+                        if (pagesArray.length > 0) {
                             const pagesHTML = pagesArray.map(page => 
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
                             ).join('');
-                            pagesContainer.innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
+                            pagesContainer.innerHTML = pagesHTML;
                         } else {
                             pagesContainer.innerHTML = '<span style="color: #999;">No especificadas</span>';
                         }
@@ -2452,7 +2461,12 @@
                         document.getElementById('form_domain_alt2').textContent = source.domain_alt2 || '-';
                         
                         // SECCIÓN 7: LEGAL
-                        renderPrivacyPolicy(source.privacy_policy, source.privacy_text || null);
+                        renderPrivacyPolicy(
+                            source.privacy_policy, 
+                            source.privacy_text || null,
+                            source.privacy_file_name || null,
+                            source.privacy_file_data || null
+                        );
                         
                         // SECCIÓN 8: CUENTA
                         const fullNameParts = source.full_name ? source.full_name.split(' ') : ['', ''];
@@ -3324,8 +3338,23 @@
             showNotification('Cambios cancelados', 'info');
         }
         
+        // ============ HELPER: CONVERTIR SECTOR A NOMBRE LEGIBLE ============
+        function getSectorName(sectorKey) {
+            const sectors = {
+                'tienda': 'Tienda/E-commerce',
+                'restaurantes': 'Restaurante/Bar',
+                'gimnasio': 'Gimnasio/Centro Deportivo',
+                'clinica_dental': 'Dentista/Clínica Dental',
+                'abogados': 'Abogado/Despacho Legal',
+                'inmobiliaria': 'Inmobiliaria',
+                'consultoria': 'Consultoría/Servicios Profesionales',
+                'otro': 'Otro'
+            };
+            return sectors[sectorKey] || sectorKey;
+        }
+        
         // ============ RENDERIZAR POLÍTICA DE PRIVACIDAD ============
-        function renderPrivacyPolicy(policyType, privacyText) {
+        function renderPrivacyPolicy(policyType, privacyText, privacyFileName, privacyFileData) {
             const container = document.getElementById('form_privacy_policy');
             if (!container) return;
             
@@ -3345,23 +3374,56 @@
                         </div>
                     </div>
                 `;
-            } else if (policyType === 'propia' && privacyText) {
-                // Tiene su propia política
-                container.innerHTML = `
-                    <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 10px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <div style="font-size: 2rem;">📄</div>
-                            <div style="font-weight: 700; color: #e65100; font-size: 1.1rem;">
-                                Política Propia Proporcionada
+            } else if (policyType === 'propia') {
+                // Tiene su propia política (archivo o texto)
+                if (privacyFileName && privacyFileData) {
+                    // Archivo subido (PDF/DOC/TXT)
+                    container.innerHTML = `
+                        <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <div style="font-size: 2rem;">📄</div>
+                                <div style="font-weight: 700; color: #e65100; font-size: 1.1rem;">
+                                    Archivo de Política Proporcionado
+                                </div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffcc80;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="font-size: 2rem;">📎</div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #1B1B1B; margin-bottom: 3px;">${privacyFileName}</div>
+                                        <a href="${privacyFileData}" download="${privacyFileName}" style="color: #0046FE; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+                                            ⬇️ Descargar archivo
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div style="background: white; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; border: 1px solid #ffcc80;">
-                            <p style="margin: 0; color: #1B1B1B; line-height: 1.7; white-space: pre-wrap; font-size: 0.9rem;">
-                                ${privacyText}
-                            </p>
+                    `;
+                } else if (privacyText) {
+                    // Texto pegado
+                    container.innerHTML = `
+                        <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <div style="font-size: 2rem;">📄</div>
+                                <div style="font-weight: 700; color: #e65100; font-size: 1.1rem;">
+                                    Texto de Política Proporcionado
+                                </div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; border: 1px solid #ffcc80;">
+                                <p style="margin: 0; color: #1B1B1B; line-height: 1.7; white-space: pre-wrap; font-size: 0.9rem;">
+                                    ${privacyText}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // Seleccionó "propia" pero no subió nada
+                    container.innerHTML = `
+                        <div style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #666;">
+                            Política propia seleccionada, pero sin archivo o texto proporcionado
+                        </div>
+                    `;
+                }
             } else {
                 // Sin información
                 container.innerHTML = `
