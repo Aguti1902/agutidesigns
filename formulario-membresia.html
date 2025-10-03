@@ -1827,6 +1827,10 @@
   - services_list: ${data.services_list || 'NO CAPTURADO'}
 📝 Textos Personalizados:
   - web_texts: ${data.web_texts || 'NO CAPTURADO'}
+🍽️ Campos Dinámicos por Sector:
+  - menu_content (Restaurante/Bar): ${data.menu_content || 'NO CAPTURADO'}
+  - opening_hours (Horarios): ${data.opening_hours || 'NO CAPTURADO'}
+  - portfolio_description (Portfolio): ${data.portfolio_description || 'NO CAPTURADO'}
 🎯 Objetivos:
   - purpose: ${JSON.stringify(data.purpose) || 'NO CAPTURADO'}
   - target_audience: ${data.target_audience || 'NO CAPTURADO'}
@@ -2497,7 +2501,80 @@
             // Agregar animación de entrada
             if (sectorSection.innerHTML !== '') {
                 sectorSection.style.animation = 'slideIn 0.4s ease';
+                
+                // 🆕 Añadir event listeners para marcar páginas automáticamente
+                setTimeout(() => {
+                    // Para campos de menú (restaurantes)
+                    const menuField = document.querySelector('textarea[name="menu_content"]');
+                    if (menuField) {
+                        menuField.addEventListener('input', function() {
+                            if (this.value.trim().length > 20) { // Si escribe algo significativo
+                                addAutoCustomPage('Menú', 'menu');
+                            }
+                        });
+                    }
+                    
+                    // Para campos de servicios (dentistas, spas, etc.)
+                    const servicesField = document.querySelector('textarea[name="services_list"]');
+                    if (servicesField) {
+                        servicesField.addEventListener('input', function() {
+                            if (this.value.trim().length > 20) { // Si escribe algo significativo
+                                // Marcar automáticamente el checkbox de "Servicios"
+                                const servicesCheckbox = document.getElementById('page_services');
+                                if (servicesCheckbox && !servicesCheckbox.checked) {
+                                    servicesCheckbox.checked = true;
+                                    updatePageCounter();
+                                    console.log('✅ Página "Servicios" marcada automáticamente');
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Para campos de portfolio
+                    const portfolioField = document.querySelector('textarea[name="portfolio_description"]');
+                    if (portfolioField) {
+                        portfolioField.addEventListener('input', function() {
+                            if (this.value.trim().length > 20) {
+                                addAutoCustomPage('Portfolio', 'portfolio');
+                            }
+                        });
+                    }
+                }, 100);
             }
+        }
+        
+        // 🆕 Función para añadir páginas personalizadas automáticamente
+        function addAutoCustomPage(pageName, pageId) {
+            // Verificar si ya existe esta página personalizada
+            const existingPage = document.querySelector(`input[name="pages[]"][value="${pageId}"]`);
+            if (existingPage) {
+                if (!existingPage.checked) {
+                    existingPage.checked = true;
+                    updatePageCounter();
+                }
+                return;
+            }
+            
+            // Verificar si ya existe en páginas personalizadas
+            const customPages = document.querySelectorAll('#customPagesContainer input[type="text"]');
+            for (let page of customPages) {
+                if (page.value.toLowerCase() === pageName.toLowerCase()) {
+                    return; // Ya existe
+                }
+            }
+            
+            // Añadir nueva página personalizada
+            addCustomPage();
+            
+            // Esperar un momento y rellenar el valor
+            setTimeout(() => {
+                const customInputs = document.querySelectorAll('#customPagesContainer input[type="text"]');
+                const lastInput = customInputs[customInputs.length - 1];
+                if (lastInput && !lastInput.value) {
+                    lastInput.value = pageName;
+                    console.log(`✅ Página personalizada "${pageName}" añadida automáticamente`);
+                }
+            }, 100);
         }
 
         // Obtener nombre del sector para mostrar

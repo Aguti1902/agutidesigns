@@ -292,6 +292,40 @@ try {
     }
 }
 
+// Agregar columnas para campos dinámicos por sector
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN menu_content TEXT;`);
+    console.log('✅ [DB] Columna menu_content agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna menu_content ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna menu_content:', error.message);
+    }
+}
+
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN opening_hours TEXT;`);
+    console.log('✅ [DB] Columna opening_hours agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna opening_hours ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna opening_hours:', error.message);
+    }
+}
+
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN portfolio_description TEXT;`);
+    console.log('✅ [DB] Columna portfolio_description agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna portfolio_description ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna portfolio_description:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`

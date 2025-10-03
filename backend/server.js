@@ -569,6 +569,11 @@ app.post('/api/submissions/create', (req, res) => {
         console.log('  - twitter:', formData.twitter || 'NO RECIBIDO');
         console.log('💼 Servicios:');
         console.log('  - services:', formData.services || 'NO RECIBIDO');
+        console.log('  - services_list:', formData.services_list || 'NO RECIBIDO');
+        console.log('🍽️ Campos Dinámicos por Sector:');
+        console.log('  - menu_content:', formData.menu_content || 'NO RECIBIDO');
+        console.log('  - opening_hours:', formData.opening_hours || 'NO RECIBIDO');
+        console.log('  - portfolio_description:', formData.portfolio_description || 'NO RECIBIDO');
         console.log('🎯 Objetivos:');
         console.log('  - purpose:', formData.purpose || 'NO RECIBIDO');
         console.log('  - target_audience:', formData.target_audience || 'NO RECIBIDO');
