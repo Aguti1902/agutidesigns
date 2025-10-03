@@ -204,6 +204,30 @@ try {
     }
 }
 
+// Agregar columna admin_unread si no existe (migración)
+try {
+    db.exec(`ALTER TABLE tickets ADD COLUMN admin_unread INTEGER DEFAULT 1;`);
+    console.log('✅ [DB] Columna admin_unread agregada a tickets');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna admin_unread ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna admin_unread:', error.message);
+    }
+}
+
+// Agregar columna client_unread si no existe (migración)
+try {
+    db.exec(`ALTER TABLE tickets ADD COLUMN client_unread INTEGER DEFAULT 0;`);
+    console.log('✅ [DB] Columna client_unread agregada a tickets');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna client_unread ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna client_unread:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
@@ -222,6 +246,8 @@ db.exec(`
         client_response TEXT,
         admin_response_at DATETIME,
         client_response_at DATETIME,
+        admin_unread INTEGER DEFAULT 1,
+        client_unread INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         closed_at DATETIME
@@ -566,10 +592,16 @@ function getTicketById(ticketId) {
 
 // Actualizar ticket (respuesta del admin, del cliente o cambio de estado)
 function updateTicket(ticketId, updates) {
-    const { status, admin_response, client_response } = updates;
+    const { status, admin_response, client_response, admin_unread, client_unread } = updates;
     
     console.log('🔧 [DB] Actualizando ticket #', ticketId);
-    console.log('🔧 [DB] Updates recibidos:', { status, admin_response: admin_response ? 'SÍ' : 'NO', client_response: client_response ? 'SÍ' : 'NO' });
+    console.log('🔧 [DB] Updates recibidos:', { 
+        status, 
+        admin_response: admin_response ? 'SÍ' : 'NO', 
+        client_response: client_response ? 'SÍ' : 'NO',
+        admin_unread,
+        client_unread
+    });
     
     const stmt = db.prepare(`
         UPDATE tickets 
@@ -578,12 +610,24 @@ function updateTicket(ticketId, updates) {
             client_response = COALESCE(?, client_response),
             admin_response_at = CASE WHEN ? IS NOT NULL THEN CURRENT_TIMESTAMP ELSE admin_response_at END,
             client_response_at = CASE WHEN ? IS NOT NULL THEN CURRENT_TIMESTAMP ELSE client_response_at END,
+            admin_unread = COALESCE(?, admin_unread),
+            client_unread = COALESCE(?, client_unread),
             updated_at = CURRENT_TIMESTAMP,
             closed_at = CASE WHEN ? = 'cerrado' THEN CURRENT_TIMESTAMP ELSE closed_at END
         WHERE id = ?
     `);
     
-    const result = stmt.run(status, admin_response, client_response, admin_response, client_response, status, ticketId);
+    const result = stmt.run(
+        status, 
+        admin_response, 
+        client_response, 
+        admin_response, 
+        client_response, 
+        admin_unread !== undefined ? admin_unread : null,
+        client_unread !== undefined ? client_unread : null,
+        status, 
+        ticketId
+    );
     console.log('✅ [DB] Ticket actualizado. Changes:', result.changes);
     
     return result;

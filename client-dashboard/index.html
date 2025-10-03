@@ -2591,9 +2591,27 @@
                 });
 
                 const hasResponse = ticket.admin_response && ticket.admin_response.trim() !== '';
+                const hasUnreadMessage = ticket.client_unread === 1;
+                
+                // Determinar el badge de estado de la conversación
+                let conversationStatus;
+                if (ticket.status === 'cerrado') {
+                    conversationStatus = '<span style="color: #666; font-size: 0.85rem;">✅ Conversación cerrada</span>';
+                } else if (hasUnreadMessage) {
+                    conversationStatus = '<span style="color: #dc3545; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px;"><span style="background: #dc3545; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>Mensaje nuevo sin leer</span>';
+                } else if (hasResponse) {
+                    conversationStatus = '<span style="color: #009A62; font-size: 0.85rem; font-weight: 600;">💬 Respuesta enviada</span>';
+                } else {
+                    conversationStatus = '<span style="color: #999; font-size: 0.85rem;">⏳ Esperando respuesta</span>';
+                }
+                
+                // Highlight del card si hay mensaje sin leer
+                const cardStyle = hasUnreadMessage 
+                    ? 'cursor: pointer; transition: all 0.3s; border: 2px solid #dc3545; background: #fff5f5;' 
+                    : 'cursor: pointer; transition: all 0.3s; border: 2px solid #e8eaed;';
 
                 return `
-                    <div class="card" style="cursor: pointer; transition: all 0.3s; border: 2px solid #e8eaed;" onclick="viewClientTicket(${ticket.id})">
+                    <div class="card" style="${cardStyle}" onclick="viewClientTicket(${ticket.id})">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                             <div style="flex: 1;">
                                 <h3 style="color: #0046FE; margin: 0 0 8px 0; font-size: 1.1rem;">Ticket #${ticket.id}</h3>
@@ -2613,7 +2631,7 @@
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e8eaed; padding-top: 12px; margin-top: 12px;">
                             <span style="color: #999; font-size: 0.85rem;">📅 ${createdDate}</span>
-                            ${hasResponse ? '<span style="color: #009A62; font-size: 0.85rem; font-weight: 600;">💬 Respuesta recibida</span>' : '<span style="color: #999; font-size: 0.85rem;">⏳ Esperando respuesta</span>'}
+                            ${conversationStatus}
                         </div>
                     </div>
                 `;
@@ -2627,7 +2645,8 @@
             console.log('🎫 [CLIENT] Viendo ticket #', ticketId);
 
             try {
-                const response = await fetch(`${API_URL}/api/tickets/${ticketId}`);
+                // Marcar como leído por el cliente
+                const response = await fetch(`${API_URL}/api/tickets/${ticketId}?markAsRead=client`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

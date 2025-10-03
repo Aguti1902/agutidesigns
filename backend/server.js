@@ -1021,13 +1021,25 @@ app.get('/api/tickets', (req, res) => {
 app.get('/api/tickets/:id', (req, res) => {
     try {
         const ticketId = parseInt(req.params.id);
-        console.log('🎫 [BACKEND] Admin solicitando ticket #', ticketId);
+        const { markAsRead } = req.query;
+        console.log('🎫 [BACKEND] Solicitando ticket #', ticketId, 'markAsRead:', markAsRead);
         
         const ticket = db.getTicketById(ticketId);
         
         if (!ticket) {
             console.warn('⚠️ [BACKEND] Ticket no encontrado:', ticketId);
             return res.status(404).json({ error: 'Ticket no encontrado' });
+        }
+        
+        // Si se solicita marcar como leído, actualizar según quién lo lea
+        if (markAsRead === 'admin' && ticket.admin_unread === 1) {
+            console.log('👁️ [BACKEND] Marcando ticket como leído por admin');
+            db.updateTicket(ticketId, { admin_unread: 0 });
+            ticket.admin_unread = 0;
+        } else if (markAsRead === 'client' && ticket.client_unread === 1) {
+            console.log('👁️ [BACKEND] Marcando ticket como leído por cliente');
+            db.updateTicket(ticketId, { client_unread: 0 });
+            ticket.client_unread = 0;
         }
         
         console.log('✅ [BACKEND] Ticket encontrado:', ticket.id);
@@ -1065,7 +1077,9 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         // Actualizar ticket con respuesta del cliente y cambiar estado a "en_proceso"
         db.updateTicket(parseInt(ticketId), { 
             client_response,
-            status: 'en_proceso'
+            status: 'en_proceso',
+            admin_unread: 1,      // Admin tiene mensaje nuevo sin leer
+            client_unread: 0      // Cliente lo acaba de enviar/leer
         });
         
         const ticket = db.getTicketById(parseInt(ticketId));
@@ -1115,8 +1129,13 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         console.log('🎫 [BACKEND] ticketId:', ticketId);
         console.log('🎫 [BACKEND] Body:', { status, admin_response: admin_response ? 'SÍ' : 'NO' });
         
-        // Actualizar ticket
-        const result = db.updateTicket(parseInt(ticketId), { status, admin_response });
+        // Actualizar ticket y marcar como leído por admin, no leído por cliente
+        const result = db.updateTicket(parseInt(ticketId), { 
+            status, 
+            admin_response,
+            admin_unread: 0,      // Admin lo acaba de leer/responder
+            client_unread: 1      // Cliente tiene mensaje nuevo sin leer
+        });
         console.log('🎫 [BACKEND] Ticket actualizado, changes:', result.changes);
         
         const ticket = db.getTicketById(parseInt(ticketId));

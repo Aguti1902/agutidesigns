@@ -1555,18 +1555,40 @@
                     return;
                 }
 
-                tbody.innerHTML = tickets.map(ticket => `
-                    <tr>
-                        <td><strong>#${ticket.id}</strong></td>
-                        <td>${ticket.client_name || 'N/A'}</td>
-                        <td>${ticket.subject}</td>
-                        <td><span class="badge badge-info">${ticket.category}</span></td>
-                        <td><span class="badge badge-${ticket.priority === 'high' ? 'danger' : 'warning'}">${ticket.priority}</span></td>
-                        <td><span class="badge badge-${ticket.status === 'open' ? 'warning' : 'success'}">${ticket.status}</span></td>
-                        <td>${formatDate(ticket.created_at)}</td>
-                        <td><button class="btn-secondary" onclick="viewTicket(${ticket.id})">Ver</button></td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = tickets.map(ticket => {
+                    // Determinar si hay mensaje sin leer del cliente
+                    const hasUnreadMessage = ticket.admin_unread === 1;
+                    const rowStyle = hasUnreadMessage ? 'background: #fff3cd; font-weight: 600;' : '';
+                    
+                    // Badge de prioridad con colores correctos
+                    const priorityColors = {
+                        'alta': 'danger',
+                        'media': 'warning',
+                        'baja': 'info'
+                    };
+                    const priorityBadge = priorityColors[ticket.priority] || 'secondary';
+                    
+                    // Badge de estado con colores correctos
+                    const statusColors = {
+                        'abierto': 'warning',
+                        'en_proceso': 'info',
+                        'cerrado': 'success'
+                    };
+                    const statusBadge = statusColors[ticket.status] || 'secondary';
+                    
+                    return `
+                        <tr style="${rowStyle}">
+                            <td><strong>#${ticket.id}</strong> ${hasUnreadMessage ? '<span style="color: #dc3545; font-size: 1.2rem;">●</span>' : ''}</td>
+                            <td>${ticket.client_name || 'N/A'}</td>
+                            <td>${ticket.subject}</td>
+                            <td><span class="badge badge-info">${ticket.category}</span></td>
+                            <td><span class="badge badge-${priorityBadge}">${ticket.priority}</span></td>
+                            <td><span class="badge badge-${statusBadge}">${ticket.status}</span></td>
+                            <td>${formatDate(ticket.created_at)}</td>
+                            <td><button class="btn-secondary" onclick="viewTicket(${ticket.id})">${hasUnreadMessage ? '🔴 Ver' : 'Ver'}</button></td>
+                        </tr>
+                    `;
+                }).join('');
                 
                 // Actualizar contador en stats
                 const openCount = tickets.filter(t => t.status === 'open').length;
@@ -1579,7 +1601,8 @@
         async function viewTicket(id) {
             try {
                 console.log('🎫 [ADMIN] Cargando detalles del ticket #', id);
-                const response = await fetch(`${API_URL}/api/tickets/${id}`);
+                // Marcar como leído por el admin
+                const response = await fetch(`${API_URL}/api/tickets/${id}?markAsRead=admin`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
