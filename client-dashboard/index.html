@@ -1131,7 +1131,9 @@
                         
                         <div>
                             <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Política de privacidad <span style="color: #F1250E;">*</span></label>
-                            <div id="form_privacy_policy" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                            <div id="form_privacy_policy">
+                                <!-- Se llenará con JavaScript -->
+                            </div>
                         </div>
                     </div>
                     
@@ -2437,9 +2439,7 @@
                         document.getElementById('form_domain_alt2').textContent = source.domain_alt2 || '-';
                         
                         // SECCIÓN 7: LEGAL
-                        const formPrivacyText = source.privacy_policy === 'generar' ? 'Generar automáticamente' : 
-                                          source.privacy_policy === 'propia' ? 'Tengo mi propia política' : '-';
-                        document.getElementById('form_privacy_policy').textContent = formPrivacyText;
+                        renderPrivacyPolicy(source.privacy_policy, source.privacy_text || null);
                         
                         // SECCIÓN 8: CUENTA
                         const fullNameParts = source.full_name ? source.full_name.split(' ') : ['', ''];
@@ -3298,6 +3298,54 @@
             if (actionButtons) actionButtons.style.display = 'none';
             
             showNotification('Cambios cancelados', 'info');
+        }
+        
+        // ============ RENDERIZAR POLÍTICA DE PRIVACIDAD ============
+        function renderPrivacyPolicy(policyType, privacyText) {
+            const container = document.getElementById('form_privacy_policy');
+            if (!container) return;
+            
+            if (policyType === 'generar') {
+                // Generar automáticamente con RGPD
+                container.innerHTML = `
+                    <div style="background: #e8f4ff; border-left: 4px solid #0046FE; padding: 20px; border-radius: 10px; display: flex; align-items: start; gap: 15px;">
+                        <div style="font-size: 2.5rem; line-height: 1;">⚖️</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; color: #0046FE; font-size: 1.1rem; margin-bottom: 8px;">
+                                ✓ Generar Automáticamente (RGPD)
+                            </div>
+                            <p style="margin: 0; color: #1B1B1B; line-height: 1.6; font-size: 0.95rem;">
+                                Generaremos una política de privacidad y aviso legal adaptada al RGPD europeo con tus datos fiscales y de contacto.
+                                Incluye cookies, derechos ARCO, y protección de datos personales.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (policyType === 'propia' && privacyText) {
+                // Tiene su propia política
+                container.innerHTML = `
+                    <div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 20px; border-radius: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <div style="font-size: 2rem;">📄</div>
+                            <div style="font-weight: 700; color: #e65100; font-size: 1.1rem;">
+                                Política Propia Proporcionada
+                            </div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; border: 1px solid #ffcc80;">
+                            <p style="margin: 0; color: #1B1B1B; line-height: 1.7; white-space: pre-wrap; font-size: 0.9rem;">
+                                ${privacyText}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Sin información
+                container.innerHTML = `
+                    <div style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #666;">
+                        No especificado
+                    </div>
+                `;
+            }
         }
         
         // ============ RENDERIZAR ESTILO DE DISEÑO ============
