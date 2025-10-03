@@ -653,10 +653,9 @@
                     <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
                     <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
                     <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
-                    <li><button onclick="showSection('tickets')"><span class="menu-icon">🎫</span><span>Mis Tickets</span></button></li>
                     <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
                     <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('soporte')"><span class="menu-icon">💬</span><span>Crear Ticket</span></button></li>
+                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span></button></li>
                     <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                 </ul>
             </div>
@@ -1176,32 +1175,55 @@
                     </div>
                 </div>
 
-                <!-- SOPORTE -->
-                <div id="soporte" class="content-section">
+                <!-- CONTACTAR -->
+                <div id="contactar" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">💬 Soporte Técnico</h1>
+                        <h1 class="section-title">💬 Contactar con Soporte</h1>
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
 
-                    <!-- Soporte para CLIENTES CON PLAN -->
-                    <div id="supportWithPlan" style="display: none;">
-                        <div class="support-options" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                            <div class="support-option" onclick="openChatWidget()">
-                                <div class="support-icon">💬</div>
-                                <div class="support-title">Chat en Vivo con IA</div>
-                                <div class="support-desc">Obtén respuestas instantáneas a tus preguntas</div>
-                            </div>
+                    <!-- Tabs: Mis Conversaciones / Crear Nueva Consulta -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e8eaed;">
+                        <button id="tabConversaciones" class="tab-button active" onclick="switchContactTab('conversaciones')" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid #0046FE; color: #0046FE; font-weight: 600; cursor: pointer; font-size: 0.95rem;">
+                            🎫 Mis Conversaciones
+                        </button>
+                        <button id="tabCrear" class="tab-button" onclick="switchContactTab('crear')" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; font-size: 0.95rem;">
+                            ➕ Nueva Consulta
+                        </button>
+                    </div>
 
-                            <div class="support-option" onclick="openTicketModal()">
-                                <div class="support-icon">🎫</div>
-                                <div class="support-title">Crear Ticket de Soporte</div>
-                                <div class="support-desc">Envía tu consulta y te responderemos pronto</div>
+                    <!-- TAB: MIS CONVERSACIONES -->
+                    <div id="tabContentConversaciones" class="tab-content">
+                        <!-- Lista de Tickets -->
+                        <div id="ticketsListContainer">
+                            <div class="loader" style="text-align: center; padding: 40px; color: #666;">
+                                <div style="font-size: 3rem; margin-bottom: 10px;">🎫</div>
+                                <p>Cargando tus conversaciones...</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Soporte para USUARIOS SIN PLAN -->
-                    <div id="supportNoPlan" style="display: none;">
+                    <!-- TAB: CREAR NUEVA CONSULTA -->
+                    <div id="tabContentCrear" class="tab-content" style="display: none;">
+                        <!-- Opciones de contacto para CLIENTES CON PLAN -->
+                        <div id="supportWithPlan" style="display: none;">
+                            <div class="support-options" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                                <div class="support-option" onclick="openChatWidget()">
+                                    <div class="support-icon">💬</div>
+                                    <div class="support-title">Chat en Vivo con IA</div>
+                                    <div class="support-desc">Obtén respuestas instantáneas a tus preguntas</div>
+                                </div>
+
+                                <div class="support-option" onclick="openTicketModal()">
+                                    <div class="support-icon">🎫</div>
+                                    <div class="support-title">Crear Ticket de Soporte</div>
+                                    <div class="support-desc">Envía tu consulta y te responderemos pronto</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opciones de contacto para USUARIOS SIN PLAN -->
+                        <div id="supportNoPlan" style="display: none;">
                         <div class="card" style="background: #e8f4ff; border: 2px solid #0046FE; margin-bottom: 30px;">
                             <h3 class="card-title" style="color: #0046FE;">📧 Contáctanos por Email</h3>
                             <p style="margin-bottom: 15px; color: #666;">¿Tienes alguna pregunta antes de contratar? Escríbenos y te responderemos pronto.</p>
@@ -1279,27 +1301,6 @@
                                 </details>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- MIS TICKETS -->
-                <div id="tickets" class="content-section">
-                    <div class="section-header">
-                        <h1 class="section-title">🎫 Mis Tickets de Soporte</h1>
-                        <p class="section-subtitle">Historial de conversaciones con el soporte</p>
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-                        <button class="btn-action" onclick="showSection('soporte')" style="display: flex; align-items: center; gap: 8px;">
-                            ➕ Crear Nuevo Ticket
-                        </button>
-                    </div>
-
-                    <!-- Lista de Tickets -->
-                    <div id="ticketsListContainer">
-                        <div class="loader" style="text-align: center; padding: 40px; color: #666;">
-                            <div style="font-size: 3rem; margin-bottom: 10px;">🎫</div>
-                            <p>Cargando tus tickets...</p>
                         </div>
                     </div>
                 </div>
@@ -1771,8 +1772,34 @@
             event.target.closest('button').classList.add('active');
             
             // Cargar contenido específico según la sección
-            if (sectionId === 'tickets') {
+            if (sectionId === 'contactar') {
                 loadClientTickets();
+            }
+        }
+        
+        // Cambiar entre tabs de la sección Contactar
+        function switchContactTab(tabName) {
+            // Actualizar estilos de tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.style.borderBottom = '3px solid transparent';
+                btn.style.color = '#666';
+            });
+            
+            // Ocultar todos los contenidos de tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Mostrar tab seleccionado
+            if (tabName === 'conversaciones') {
+                document.getElementById('tabConversaciones').style.borderBottom = '3px solid #0046FE';
+                document.getElementById('tabConversaciones').style.color = '#0046FE';
+                document.getElementById('tabContentConversaciones').style.display = 'block';
+                loadClientTickets();
+            } else if (tabName === 'crear') {
+                document.getElementById('tabCrear').style.borderBottom = '3px solid #0046FE';
+                document.getElementById('tabCrear').style.color = '#0046FE';
+                document.getElementById('tabContentCrear').style.display = 'block';
             }
         }
         // Remover restricciones para usuarios CON plan
@@ -2512,9 +2539,9 @@
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; color: #666;">
                         <div style="font-size: 4rem; margin-bottom: 15px;">🎫</div>
-                        <h3 style="color: #1B1B1B; margin-bottom: 10px;">No tienes tickets aún</h3>
-                        <p style="margin-bottom: 20px;">Crea tu primer ticket de soporte para obtener ayuda</p>
-                        <button class="btn-action" onclick="showSection('soporte')">Crear Mi Primer Ticket</button>
+                        <h3 style="color: #1B1B1B; margin-bottom: 10px;">No tienes conversaciones aún</h3>
+                        <p style="margin-bottom: 20px;">Crea tu primera consulta para obtener ayuda de nuestro equipo</p>
+                        <button class="btn-action" onclick="switchContactTab('crear')">Crear Mi Primera Consulta</button>
                     </div>
                 `;
                 return;
@@ -2629,12 +2656,35 @@
                     `;
                 }
 
-                const closedSection = ticket.status === 'cerrado' ? `
-                    <div style="background: #e7f5ff; border: 2px solid #0046FE; border-radius: 12px; padding: 15px; text-align: center; margin-top: 20px;">
-                        <p style="margin: 0; color: #0046FE; font-weight: 600;">✅ Este ticket ha sido cerrado</p>
-                        ${ticket.closed_at ? `<p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">Fecha de cierre: ${new Date(ticket.closed_at).toLocaleDateString('es-ES')}</p>` : ''}
-                    </div>
-                ` : '';
+                // Sección de respuesta o cierre
+                let interactionSection = '';
+                if (ticket.status === 'cerrado') {
+                    interactionSection = `
+                        <div style="background: #e7f5ff; border: 2px solid #0046FE; border-radius: 12px; padding: 15px; text-align: center; margin-top: 20px;">
+                            <p style="margin: 0; color: #0046FE; font-weight: 600;">✅ Esta conversación ha sido cerrada</p>
+                            ${ticket.closed_at ? `<p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">Fecha de cierre: ${new Date(ticket.closed_at).toLocaleDateString('es-ES')}</p>` : ''}
+                        </div>
+                    `;
+                } else if (ticket.admin_response && ticket.admin_response.trim() !== '') {
+                    // Si hay respuesta del admin y no está cerrado, permitir responder
+                    interactionSection = `
+                        <div style="border: 2px solid #0046FE; border-radius: 12px; padding: 20px; margin-top: 20px;">
+                            <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">💬 Responder a la Conversación</h4>
+                            <textarea id="clientResponseText" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: vertical; margin-bottom: 12px;" placeholder="Escribe tu respuesta aquí..."></textarea>
+                            <button onclick="sendClientResponse(${ticket.id})" class="btn-action" style="width: 100%;">
+                                Enviar Respuesta
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    // Si no hay respuesta del admin aún
+                    interactionSection = `
+                        <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 15px; text-align: center; margin-top: 20px;">
+                            <p style="margin: 0; color: #856404; font-weight: 600;">⏳ Esperando respuesta del equipo de soporte</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">Te notificaremos por email cuando recibas una respuesta</p>
+                        </div>
+                    `;
+                }
 
                 document.getElementById('viewTicketContent').innerHTML = `
                     <h2 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1.8rem;">🎫 Ticket #${ticket.id}</h2>
@@ -2662,7 +2712,7 @@
                     </div>
 
                     ${responseSection}
-                    ${closedSection}
+                    ${interactionSection}
                 `;
 
                 document.getElementById('viewTicketModal').style.display = 'flex';
@@ -2674,6 +2724,48 @@
             }
         }
 
+        // Enviar respuesta del cliente al ticket
+        async function sendClientResponse(ticketId) {
+            const responseText = document.getElementById('clientResponseText').value;
+            
+            if (!responseText || responseText.trim() === '') {
+                alert('Por favor, escribe una respuesta antes de enviar.');
+                return;
+            }
+            
+            console.log('💬 [CLIENT] Enviando respuesta al ticket #', ticketId);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/tickets/${ticketId}/client-response`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_response: responseText,
+                        client_id: currentClient.id
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ [CLIENT] Respuesta enviada correctamente:', data);
+                
+                alert('✅ Respuesta enviada correctamente. El equipo de soporte la revisará pronto.');
+                
+                // Cerrar modal y recargar tickets
+                closeViewTicketModal();
+                loadClientTickets();
+                
+            } catch (error) {
+                console.error('❌ [CLIENT] Error enviando respuesta:', error);
+                alert('Error al enviar la respuesta. Por favor, intenta de nuevo.');
+            }
+        }
+        
         // Cerrar modal de ver ticket
         function closeViewTicketModal(event) {
             if (event) event.stopPropagation();

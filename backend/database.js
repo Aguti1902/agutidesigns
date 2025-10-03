@@ -162,6 +162,17 @@ try {
     console.log('⚠️ [DB] Error en migración (probablemente primera ejecución):', error.message);
 }
 
+// Agregar columna client_response si no existe (migración)
+try {
+    db.exec(`ALTER TABLE tickets ADD COLUMN client_response TEXT;`);
+    console.log('✅ [DB] Columna client_response agregada a tickets');
+} catch (error) {
+    // Si la columna ya existe, ignorar el error
+    if (!error.message.includes('duplicate column name')) {
+        console.log('⚠️ [DB] Error agregando columna client_response:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
@@ -177,6 +188,7 @@ db.exec(`
         priority TEXT DEFAULT 'media',
         status TEXT DEFAULT 'abierto',
         admin_response TEXT,
+        client_response TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         closed_at DATETIME

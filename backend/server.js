@@ -1050,6 +1050,58 @@ app.get('/api/tickets/client/:clientId', (req, res) => {
     }
 });
 
+// Cliente responde a un ticket
+app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
+    try {
+        const { ticketId } = req.params;
+        const { client_response, client_id } = req.body;
+        
+        console.log('💬 [BACKEND] Cliente respondiendo al ticket #', ticketId);
+        console.log('💬 [BACKEND] Respuesta del cliente:', client_response.substring(0, 50) + '...');
+        
+        // Actualizar ticket con respuesta del cliente y cambiar estado a "en_proceso"
+        db.updateTicket(parseInt(ticketId), { 
+            client_response,
+            status: 'en_proceso'
+        });
+        
+        const ticket = db.getTicketById(parseInt(ticketId));
+        console.log('✅ [BACKEND] Ticket actualizado con respuesta del cliente');
+        
+        // Enviar email al admin notificando la nueva respuesta
+        try {
+            await emailService.sendEmail({
+                to: 'info@agutidesigns.com',
+                subject: `🔔 Nueva Respuesta del Cliente - Ticket #${ticketId}`,
+                html: `
+                    <h2>El cliente ha respondido</h2>
+                    <p><strong>Ticket #${ticketId}</strong></p>
+                    <p><strong>Cliente:</strong> ${ticket.client_name} (${ticket.client_email})</p>
+                    <p><strong>Asunto:</strong> ${ticket.subject}</p>
+                    <hr>
+                    <h3>Respuesta del Cliente:</h3>
+                    <p>${client_response}</p>
+                    <hr>
+                    <p style="color: #666; font-size: 0.9rem;">Fecha: ${new Date().toLocaleString('es-ES')}</p>
+                `
+            });
+            console.log('✅ [BACKEND] Email de notificación enviado al admin');
+        } catch (emailError) {
+            console.error('❌ [BACKEND] Error enviando email al admin:', emailError);
+        }
+        
+        res.json({
+            success: true,
+            message: 'Respuesta del cliente guardada correctamente',
+            ticket
+        });
+        
+    } catch (error) {
+        console.error('❌ [BACKEND] Error guardando respuesta del cliente:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Actualizar ticket (responder o cambiar estado)
 app.patch('/api/tickets/:ticketId', async (req, res) => {
     try {
