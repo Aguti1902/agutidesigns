@@ -315,6 +315,31 @@ app.post('/webhook', async (req, res) => {
             // Obtener datos completos
             const submission = db.getSubmission(submissionId);
 
+            // Buscar o crear cliente
+            let client = db.getClientByEmail(submission.email);
+            
+            // Crear proyecto automáticamente en "Sin empezar"
+            if (client) {
+                try {
+                    const projectId = db.createProject({
+                        client_id: client.id,
+                        submission_id: submissionId,
+                        project_name: submission.business_name || `Web de ${submission.full_name}`,
+                        business_name: submission.business_name,
+                        client_email: submission.email,
+                        plan: submission.plan,
+                        status: 'sin_empezar',
+                        priority: 'normal',
+                        deadline: null, // Se puede configurar después
+                        progress: 0,
+                        notes: `Proyecto creado automáticamente desde el pago. Plan: ${submission.plan}`
+                    });
+                    console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${client.id}`);
+                } catch (projectError) {
+                    console.error('Error creando proyecto automáticamente:', projectError);
+                }
+            }
+
             // Enviar email al admin
             await emailService.sendAdminNotification(submission);
 
@@ -939,6 +964,113 @@ app.get('/api/tickets/stats', (req, res) => {
         res.json({ stats });
     } catch (error) {
         console.error('Error obteniendo estadísticas de tickets:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// =============================================
+// ENDPOINTS DE PROYECTOS (KANBAN)
+// =============================================
+
+// Crear nuevo proyecto
+app.post('/api/admin/projects', (req, res) => {
+    try {
+        const projectData = req.body;
+        
+        // Validar datos requeridos
+        if (!projectData.client_id || !projectData.project_name) {
+            return res.status(400).json({ error: 'client_id y project_name son requeridos' });
+        }
+        
+        // Obtener info del cliente para autocompletar
+        const client = db.getClientById(projectData.client_id);
+        if (client) {
+            projectData.business_name = projectData.business_name || client.business_name;
+            projectData.client_email = projectData.client_email || client.email;
+            projectData.plan = projectData.plan || client.plan;
+        }
+        
+        const projectId = db.createProject(projectData);
+        const project = db.getProjectById(projectId);
+        
+        res.json({ success: true, project });
+    } catch (error) {
+        console.error('Error creando proyecto:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener todos los proyectos
+app.get('/api/admin/projects', (req, res) => {
+    try {
+        const projects = db.getAllProjects();
+        res.json(projects);
+    } catch (error) {
+        console.error('Error obteniendo proyectos:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener proyectos por estado (para el Kanban)
+app.get('/api/admin/projects/status/:status', (req, res) => {
+    try {
+        const { status } = req.params;
+        const projects = db.getProjectsByStatus(status);
+        res.json(projects);
+    } catch (error) {
+        console.error('Error obteniendo proyectos por estado:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener un proyecto por ID
+app.get('/api/admin/projects/:id', (req, res) => {
+    try {
+        const project = db.getProjectById(req.params.id);
+        if (!project) {
+            return res.status(404).json({ error: 'Proyecto no encontrado' });
+        }
+        res.json(project);
+    } catch (error) {
+        console.error('Error obteniendo proyecto:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Actualizar proyecto
+app.patch('/api/admin/projects/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        
+        db.updateProject(id, updates);
+        const updatedProject = db.getProjectById(id);
+        
+        res.json({ success: true, project: updatedProject });
+    } catch (error) {
+        console.error('Error actualizando proyecto:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Eliminar proyecto
+app.delete('/api/admin/projects/:id', (req, res) => {
+    try {
+        db.deleteProject(req.params.id);
+        res.json({ success: true, message: 'Proyecto eliminado' });
+    } catch (error) {
+        console.error('Error eliminando proyecto:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Estadísticas de proyectos
+app.get('/api/admin/projects/stats', (req, res) => {
+    try {
+        const stats = db.getProjectStats();
+        res.json(stats);
+    } catch (error) {
+        console.error('Error obteniendo estadísticas de proyectos:', error);
         res.status(500).json({ error: error.message });
     }
 });

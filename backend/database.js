@@ -139,6 +139,39 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_ticket_created_at ON tickets(created_at);
 `);
 
+// Crear tabla de proyectos web (Kanban)
+db.exec(`
+    CREATE TABLE IF NOT EXISTS client_projects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        client_id INTEGER NOT NULL,
+        submission_id INTEGER,
+        project_name TEXT NOT NULL,
+        business_name TEXT,
+        client_email TEXT,
+        plan TEXT,
+        status TEXT DEFAULT 'sin_empezar',
+        priority TEXT DEFAULT 'normal',
+        deadline DATE,
+        progress INTEGER DEFAULT 0,
+        assigned_to TEXT,
+        notes TEXT,
+        website_url TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        started_at DATETIME,
+        completed_at DATETIME,
+        FOREIGN KEY (client_id) REFERENCES clients(id),
+        FOREIGN KEY (submission_id) REFERENCES submissions(id)
+    )
+`);
+
+db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_project_client_id ON client_projects(client_id);
+    CREATE INDEX IF NOT EXISTS idx_project_status ON client_projects(status);
+    CREATE INDEX IF NOT EXISTS idx_project_priority ON client_projects(priority);
+    CREATE INDEX IF NOT EXISTS idx_project_deadline ON client_projects(deadline);
+`);
+
 // ===== FUNCIONES DE BASE DE DATOS =====
 
 // Crear nueva solicitud
@@ -465,6 +498,123 @@ function getTicketStats() {
     return stmt.get();
 }
 
+// ===== FUNCIONES DE PROYECTOS (KANBAN) =====
+
+// Crear nuevo proyecto
+function createProject(data) {
+    const stmt = db.prepare(`
+        INSERT INTO client_projects (
+            client_id, submission_id, project_name, business_name, client_email, plan,
+            status, priority, deadline, progress, assigned_to, notes, website_url
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const result = stmt.run(
+        data.client_id,
+        data.submission_id || null,
+        data.project_name,
+        data.business_name || null,
+        data.client_email || null,
+        data.plan || null,
+        data.status || 'sin_empezar',
+        data.priority || 'normal',
+        data.deadline || null,
+        data.progress || 0,
+        data.assigned_to || null,
+        data.notes || null,
+        data.website_url || null
+    );
+    
+    return result.lastInsertRowid;
+}
+
+// Obtener todos los proyectos
+function getAllProjects() {
+    const stmt = db.prepare(`
+        SELECT * FROM client_projects 
+        ORDER BY 
+            CASE status
+                WHEN 'sin_empezar' THEN 1
+                WHEN 'en_desarrollo' THEN 2
+                WHEN 'revision' THEN 3
+                WHEN 'entregada' THEN 4
+            END,
+            deadline ASC NULLS LAST,
+            created_at DESC
+    `);
+    
+    return stmt.all();
+}
+
+// Obtener proyectos por estado
+function getProjectsByStatus(status) {
+    const stmt = db.prepare('SELECT * FROM client_projects WHERE status = ? ORDER BY deadline ASC NULLS LAST, created_at DESC');
+    return stmt.all(status);
+}
+
+// Obtener proyectos por cliente
+function getProjectsByClient(clientId) {
+    const stmt = db.prepare('SELECT * FROM client_projects WHERE client_id = ? ORDER BY created_at DESC');
+    return stmt.all(clientId);
+}
+
+// Obtener un proyecto por ID
+function getProjectById(projectId) {
+    const stmt = db.prepare('SELECT * FROM client_projects WHERE id = ?');
+    return stmt.get(projectId);
+}
+
+// Actualizar proyecto
+function updateProject(projectId, updates) {
+    const fields = [];
+    const values = [];
+    
+    const allowedFields = ['project_name', 'status', 'priority', 'deadline', 'progress', 'assigned_to', 'notes', 'website_url'];
+    
+    for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+            fields.push(`${field} = ?`);
+            values.push(updates[field]);
+        }
+    }
+    
+    // Actualizar timestamps según el estado
+    if (updates.status === 'en_desarrollo' && updates.started_at === undefined) {
+        fields.push('started_at = CURRENT_TIMESTAMP');
+    }
+    if (updates.status === 'entregada' && updates.completed_at === undefined) {
+        fields.push('completed_at = CURRENT_TIMESTAMP');
+    }
+    
+    fields.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(projectId);
+    
+    const stmt = db.prepare(`UPDATE client_projects SET ${fields.join(', ')} WHERE id = ?`);
+    return stmt.run(...values);
+}
+
+// Eliminar proyecto
+function deleteProject(projectId) {
+    const stmt = db.prepare('DELETE FROM client_projects WHERE id = ?');
+    return stmt.run(projectId);
+}
+
+// Estadísticas de proyectos
+function getProjectStats() {
+    const stmt = db.prepare(`
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'sin_empezar' THEN 1 ELSE 0 END) as sin_empezar,
+            SUM(CASE WHEN status = 'en_desarrollo' THEN 1 ELSE 0 END) as en_desarrollo,
+            SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) as revision,
+            SUM(CASE WHEN status = 'entregada' THEN 1 ELSE 0 END) as entregada,
+            AVG(progress) as progreso_promedio
+        FROM client_projects
+    `);
+    
+    return stmt.get();
+}
+
 module.exports = {
     db, // Exportar db para queries directas
     createSubmission,
@@ -485,5 +635,14 @@ module.exports = {
     getTicketsByClient,
     getTicketById,
     updateTicket,
-    getTicketStats
+    getTicketStats,
+    // Proyectos
+    createProject,
+    getAllProjects,
+    getProjectsByStatus,
+    getProjectsByClient,
+    getProjectById,
+    updateProject,
+    deleteProject,
+    getProjectStats
 }; 
