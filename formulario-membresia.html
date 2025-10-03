@@ -944,12 +944,6 @@
                     <input type="text" class="form-input" name="direccion_fiscal" required placeholder="Calle, número, código postal, ciudad, provincia">
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Email de contacto de la empresa <span class="required">*</span></label>
-                    <input type="email" class="form-input" name="business_email" required placeholder="info@tuempresa.com">
-                    <span class="helper-text">Email principal que se mostrará en la web para que los clientes te contacten</span>
-                </div>
-
                 <!-- MÉTODOS DE CONTACTO -->
                 <div class="form-group">
                     <label class="form-label">¿Qué métodos de contacto quieres mostrar en tu web? <span class="required">*</span></label>
@@ -1112,29 +1106,29 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Sube tu logo <span class="required">*</span></label>
+                    <label class="form-label">Sube tu logo (opcional)</label>
                     <div class="file-upload" onclick="document.getElementById('logoUpload').click()">
                         <div class="file-upload-icon">🎨</div>
                         <div class="file-upload-text">
                             <strong>Arrastra tu logo aquí o haz clic</strong><br>
-                            <span style="font-size: 0.85rem; color: #999;">PNG, SVG, JPG (máx. 5MB)</span>
+                            <span style="font-size: 0.85rem; color: #999;">PNG, SVG, JPG (máx. 50MB) - Si no tienes, podemos diseñarlo</span>
                         </div>
-                        <input type="file" id="logoUpload" name="logo" accept="image/*" required>
+                        <input type="file" id="logoUpload" name="logo" accept="image/*">
                     </div>
-                    <span class="helper-text">El logo es fundamental para la identidad de tu web</span>
+                    <span class="helper-text">Si no tienes logo, podemos diseñarlo para ti</span>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Sube tus imágenes <span class="required">*</span></label>
+                    <label class="form-label">Sube tus imágenes (opcional)</label>
                     <div class="file-upload" onclick="document.getElementById('imagesUpload').click()">
                         <div class="file-upload-icon">🖼️</div>
                         <div class="file-upload-text">
                             <strong>Arrastra tus imágenes aquí o haz clic</strong><br>
-                            <span style="font-size: 0.85rem; color: #999;">Puedes seleccionar múltiples archivos (mínimo 3-5 imágenes)</span>
+                            <span style="font-size: 0.85rem; color: #999;">Fotos de productos, instalaciones, equipo, etc. - Si no tienes, usaremos imágenes de stock</span>
                         </div>
-                        <input type="file" id="imagesUpload" name="images[]" accept="image/*" multiple required>
+                        <input type="file" id="imagesUpload" name="images[]" accept="image/*" multiple>
                     </div>
-                    <span class="helper-text">Imágenes de alta calidad son esenciales. Si no tienes suficientes, usaremos imágenes de stock profesionales como complemento</span>
+                    <span class="helper-text">Si no tienes imágenes, usaremos banco de imágenes profesionales</span>
                 </div>
             </div>
 
