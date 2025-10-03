@@ -1514,6 +1514,8 @@
             // Verificar si tiene plan activo
             const hasPlan = currentClient.plan && currentClient.plan !== 'null';
             
+            console.log('🔍 Cliente tiene plan:', hasPlan, 'Plan:', currentClient.plan);
+            
             // Mostrar plan
             if (hasPlan) {
                 document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
@@ -1521,10 +1523,14 @@
                 // Mostrar soporte para clientes con plan
                 document.getElementById('supportWithPlan').style.display = 'block';
                 document.getElementById('supportNoPlan').style.display = 'none';
+                // IMPORTANTE: NO aplicar restricciones si tiene plan
+                removeFreePlanRestrictions();
+                console.log('✅ Todas las secciones desbloqueadas para cliente con plan');
             } else {
                 document.getElementById('userPlan').textContent = 'Sin plan activo';
                 document.getElementById('noPlanBanner').style.display = 'block';
                 applyFreePlanRestrictions();
+                console.log('🔒 Aplicando restricciones de plan gratuito');
             }
             
             const firstName = currentClient.full_name ? currentClient.full_name.split(' ')[0] : 'Usuario';
@@ -1535,8 +1541,23 @@
                 const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
                 const data = await response.json();
 
+                console.log('📊 Dashboard data recibida:', data);
+                console.log('📋 Submission data:', data.submission);
+                console.log('👤 Client data:', {
+                    id: data.client?.id,
+                    email: data.client?.email,
+                    submission_id: data.client?.submission_id,
+                    plan: data.client?.plan
+                });
+
                 if (data.client) {
                     const submission = data.submission;
+                    
+                    // Verificar si submission existe
+                    if (!submission) {
+                        console.warn('⚠️ No se encontró submission para este cliente');
+                        console.warn('⚠️ submission_id en cliente:', data.client.submission_id);
+                    }
                     
                     document.getElementById('businessName').textContent = data.client.business_name || 'No especificado';
                     document.getElementById('domainName').textContent = submission?.domain_name || 'Pendiente';
@@ -1627,46 +1648,55 @@
                     document.getElementById('paginasLimit').textContent = `${pageLimit} páginas`;
 
                     // Llenar datos de la sección "Mi Negocio"
-                    if (submission) {
-                        document.getElementById('negocioEmpresa').textContent = submission.business_name || '-';
-                        document.getElementById('negocioIndustria').textContent = submission.industry || '-';
-                        document.getElementById('negocioDescripcion').textContent = submission.business_description || '-';
-                        document.getElementById('negocioEmailContacto').textContent = submission.email_contact || submission.email || '-';
-                        document.getElementById('negocioTelefono').textContent = submission.phone_number || '-';
-                        document.getElementById('negocioWhatsapp').textContent = submission.whatsapp_number || '-';
-                        document.getElementById('negocioDominio').textContent = submission.domain_name || '-';
-                        document.getElementById('negocioKeywords').textContent = submission.keywords || '-';
-                        document.getElementById('negocioEstilo').textContent = submission.design_style || '-';
-                        document.getElementById('negocioCIF').textContent = submission.cif_nif || '-';
-                        document.getElementById('negocioRazonSocial').textContent = submission.razon_social || '-';
-                        document.getElementById('negocioDireccion').textContent = submission.direccion_fiscal || '-';
+                    console.log('📝 Llenando datos de "Mi Negocio"...');
+                    
+                    // Usar submission o fallback a client
+                    const source = submission || data.client;
+                    
+                    if (source) {
+                        document.getElementById('negocioEmpresa').textContent = source.business_name || '-';
+                        document.getElementById('negocioIndustria').textContent = source.industry || '-';
+                        document.getElementById('negocioDescripcion').textContent = source.business_description || '-';
+                        document.getElementById('negocioEmailContacto').textContent = source.email_contact || source.email || '-';
+                        document.getElementById('negocioTelefono').textContent = source.phone_number || '-';
+                        document.getElementById('negocioWhatsapp').textContent = source.whatsapp_number || '-';
+                        document.getElementById('negocioDominio').textContent = source.domain_name || '-';
+                        document.getElementById('negocioKeywords').textContent = source.keywords || '-';
+                        document.getElementById('negocioEstilo').textContent = source.design_style || '-';
+                        document.getElementById('negocioCIF').textContent = source.cif_nif || '-';
+                        document.getElementById('negocioRazonSocial').textContent = source.razon_social || '-';
+                        document.getElementById('negocioDireccion').textContent = source.direccion_fiscal || '-';
                         
                         // Redes sociales
-                        document.getElementById('negocioInstagram').textContent = submission.instagram || '-';
-                        document.getElementById('negocioFacebook').textContent = submission.facebook || '-';
-                        document.getElementById('negocioLinkedin').textContent = submission.linkedin || '-';
+                        document.getElementById('negocioInstagram').textContent = source.instagram || '-';
+                        document.getElementById('negocioFacebook').textContent = source.facebook || '-';
+                        document.getElementById('negocioLinkedin').textContent = source.linkedin || '-';
                         
                         // Servicios
-                        document.getElementById('negocioServicios').textContent = submission.services || '-';
+                        document.getElementById('negocioServicios').textContent = source.services || '-';
                         
                         // Objetivos
-                        const purposeText = submission.purpose ? (Array.isArray(submission.purpose) ? submission.purpose.join(', ') : submission.purpose) : '-';
+                        const purposeText = source.purpose ? (Array.isArray(source.purpose) ? source.purpose.join(', ') : source.purpose) : '-';
                         document.getElementById('negocioObjetivo').textContent = purposeText;
-                        document.getElementById('negocioPublico').textContent = submission.target_audience || '-';
+                        document.getElementById('negocioPublico').textContent = source.target_audience || '-';
                         
                         // Branding
-                        document.getElementById('negocioColores').textContent = submission.brand_colors || '-';
-                        document.getElementById('negocioReferencias').textContent = submission.reference_websites || '-';
+                        document.getElementById('negocioColores').textContent = source.brand_colors || '-';
+                        document.getElementById('negocioReferencias').textContent = source.reference_websites || '-';
                         
                         // Páginas solicitadas
-                        if (submission.pages) {
-                            const pages = Array.isArray(submission.pages) ? submission.pages : [];
+                        if (source.pages) {
+                            const pages = Array.isArray(source.pages) ? source.pages : (typeof source.pages === 'string' ? JSON.parse(source.pages) : []);
                             currentPages = [...pages];
                             const pagesHTML = pages.map(page => 
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
                             ).join('');
                             document.getElementById('negocioPaginas').innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
                         }
+                        
+                        console.log('✅ Datos cargados desde:', submission ? 'submission' : 'client fallback');
+                    } else {
+                        console.error('❌ No hay datos disponibles (ni submission ni client)');
                     }
                     
                     // Iniciar temporizador de 24h SOLO si tiene plan, payment_date Y web NO está activa
@@ -1709,6 +1739,38 @@
             // Marcar botón activo
             event.target.closest('button').classList.add('active');
         }
+        // Remover restricciones para usuarios CON plan
+        function removeFreePlanRestrictions() {
+            console.log('🔓 Removiendo restricciones - cliente con plan activo');
+            
+            // Ocultar card de comparación de planes
+            const planComparisonCard = document.getElementById('planComparisonCard');
+            if (planComparisonCard) {
+                planComparisonCard.style.display = 'none';
+            }
+            
+            // Remover overlays de bloqueo de todas las secciones
+            const restrictedSections = ['sitio', 'estadisticas', 'tutoriales', 'dominio', 'seo'];
+            restrictedSections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    // Quitar position relative si existe
+                    section.style.position = '';
+                    // Remover todos los overlays
+                    const overlays = section.querySelectorAll('[style*="position: absolute"]');
+                    overlays.forEach(overlay => overlay.remove());
+                }
+            });
+            
+            // Restaurar botón de acciones rápidas
+            const btnEditSite = document.getElementById('btnEditSite');
+            if (btnEditSite) {
+                btnEditSite.innerHTML = '🌐 Editar Mi Sitio';
+            }
+            
+            console.log('✅ Todas las secciones desbloqueadas');
+        }
+        
         // Aplicar restricciones para usuarios sin plan
         function applyFreePlanRestrictions() {
             console.log('🔒 Aplicando restricciones de plan gratuito');
