@@ -1033,18 +1033,27 @@
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">🎨 Editor Visual</h3>
-                        <p style="margin-bottom: 20px; color: #666;">Utiliza nuestro editor visual para hacer cambios en tu sitio web de forma intuitiva.</p>
-                        <button class="btn-action" onclick="alert('Próximamente: Acceso directo al editor Elementor')">Abrir Editor</button>
+                        <h3 class="card-title">🎨 Editor WordPress</h3>
+                        <p style="margin-bottom: 20px; color: #666;">Accede a tu panel de WordPress para gestionar y editar todo el contenido de tu sitio web.</p>
+                        <button class="btn-action" onclick="openWordPressEditor()" id="btnWordPress">
+                            <span>✏️ Editar Sitio Web</span>
+                        </button>
+                        <p id="wordpressMessage" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404;">
+                            ⚠️ El acceso a WordPress estará disponible una vez que tu sitio web sea entregado.
+                        </p>
                     </div>
 
                     <div class="card">
-                        <h3 class="card-title">📁 Subir Contenido</h3>
-                        <p style="margin-bottom: 15px; color: #666;">Agrega nuevas imágenes, textos o videos a tu sitio web.</p>
-                        <div class="quick-actions">
-                            <button class="btn-action secondary">📷 Subir Imágenes</button>
-                            <button class="btn-action secondary">📝 Añadir Texto</button>
-                            <button class="btn-action secondary">🎬 Subir Video</button>
+                        <h3 class="card-title">📊 Estado del Sitio</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estado Actual</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="siteStatusDisplay">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">URL del Sitio</p>
+                                <p style="font-weight: 600; color: #0046FE; word-break: break-all;" id="siteUrlDisplay">-</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1631,6 +1640,38 @@
                     document.getElementById('siteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').className = `status-badge ${status.class}`;
+                    
+                    // 🆕 Actualizar estado del sitio en la sección "Mi Sitio Web"
+                    document.getElementById('siteStatusDisplay').textContent = status.text;
+                    document.getElementById('siteStatusDisplay').style.color = status.class === 'status-active' ? '#28a745' : (status.class === 'status-construction' ? '#ffc107' : '#6c757d');
+                    
+                    const siteUrlDisplay = document.getElementById('siteUrlDisplay');
+                    if (data.client.website_url) {
+                        siteUrlDisplay.innerHTML = `<a href="${data.client.website_url}" target="_blank" style="color: #0046FE; text-decoration: none;">${data.client.website_url} 🔗</a>`;
+                    } else {
+                        siteUrlDisplay.textContent = 'Pendiente de configuración';
+                        siteUrlDisplay.style.color = '#999';
+                    }
+                    
+                    // 🆕 Configurar botón de WordPress
+                    const btnWordPress = document.getElementById('btnWordPress');
+                    const wordpressMessage = document.getElementById('wordpressMessage');
+                    
+                    if (data.client.wordpress_url) {
+                        // Hay URL de WordPress disponible
+                        btnWordPress.disabled = false;
+                        btnWordPress.style.opacity = '1';
+                        btnWordPress.style.cursor = 'pointer';
+                        wordpressMessage.style.display = 'none';
+                        console.log('✅ WordPress URL disponible:', data.client.wordpress_url);
+                    } else {
+                        // No hay URL de WordPress todavía
+                        btnWordPress.disabled = true;
+                        btnWordPress.style.opacity = '0.5';
+                        btnWordPress.style.cursor = 'not-allowed';
+                        wordpressMessage.style.display = 'block';
+                        console.log('⚠️ WordPress URL no configurado aún');
+                    }
 
                     // SI LA WEB YA ESTÁ ACTIVA (ENTREGADA)
                     if (websiteStatus === 'activo') {
@@ -1822,6 +1863,17 @@
             if (sectionId === 'contactar') {
                 loadClientTickets();
             }
+        }
+        
+        // 🆕 Función para abrir el editor de WordPress
+        function openWordPressEditor() {
+            if (!currentClient || !currentClient.wordpress_url) {
+                showNotification('El acceso a WordPress no está disponible aún', 'warning');
+                return;
+            }
+            
+            console.log('🚀 Abriendo WordPress:', currentClient.wordpress_url);
+            window.open(currentClient.wordpress_url, '_blank');
         }
         
         // Cambiar entre tabs de la sección Contactar

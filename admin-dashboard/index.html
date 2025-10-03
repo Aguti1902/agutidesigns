@@ -2154,6 +2154,17 @@
                 
                 return `
                     <div class="web-card">
+                        <!-- Screenshot de la Web -->
+                        <div class="web-screenshot" onclick="window.open('${web.website_url}', '_blank')" style="cursor: pointer;">
+                            ${web.website_screenshot_url ? `
+                                <img src="${web.website_screenshot_url}" alt="Screenshot de ${displayDomain}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px 8px 0 0;">
+                            ` : `
+                                <div style="width: 100%; height: 180px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; color: white; font-size: 3rem;">
+                                    🌐
+                                </div>
+                            `}
+                        </div>
+                        
                         <div class="web-card-header">
                             <div class="web-domain">
                                 <h3 title="${displayDomain}">${displayDomain}</h3>
@@ -2180,17 +2191,22 @@
                                 <span class="web-plan-badge ${planClass}">${planText}</span>
                             </div>
                             <div class="web-info-row">
-                                <span class="web-info-label">Email:</span>
-                                <span class="web-info-value" style="font-size: 0.85rem;">${web.email || 'N/A'}</span>
+                                <span class="web-info-label">WordPress:</span>
+                                <span class="web-info-value" style="font-size: 0.85rem;">${web.wordpress_url ? '✅ Configurado' : '⚠️ Pendiente'}</span>
                             </div>
                         </div>
                         
                         <div class="web-card-actions">
                             <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url}', '_blank')">
-                                🌐 Visitar Sitio
+                                🌐 Visitar
                             </button>
-                            <button class="btn-web-action btn-web-details" onclick="viewWebDetails(${web.id})">
-                                ℹ️ Detalles
+                            ${web.wordpress_url ? `
+                                <button class="btn-web-action" style="background: #21759b;" onclick="window.open('${web.wordpress_url}', '_blank')">
+                                    ✏️ WordPress
+                                </button>
+                            ` : ''}
+                            <button class="btn-web-action btn-web-details" onclick="editWebManagement(${web.id})">
+                                ⚙️ Gestionar
                             </button>
                         </div>
                     </div>
@@ -2234,6 +2250,82 @@
         function viewWebDetails(clientId) {
             // Reutilizamos la función viewClient para mostrar todos los detalles
             viewClient(clientId);
+        }
+        
+        // 🆕 Función para editar gestión de web (WordPress URL y Screenshot)
+        async function editWebManagement(clientId) {
+            try {
+                console.log('⚙️ [ADMIN] Editando gestión de web para cliente #', clientId);
+                
+                // Obtener datos del cliente
+                const response = await fetch(`${API_URL}/api/clients/${clientId}`);
+                const client = await response.json();
+                
+                console.log('📋 [ADMIN] Cliente:', client);
+                
+                // Rellenar el formulario
+                document.getElementById('webManagementClientId').value = client.id;
+                document.getElementById('webManagementInfo').textContent = `${client.full_name} - ${client.business_name || 'N/A'}`;
+                
+                const websiteLink = document.getElementById('webManagementWebsite').querySelector('a');
+                if (client.website_url) {
+                    websiteLink.href = client.website_url;
+                    websiteLink.textContent = client.website_url + ' 🔗';
+                } else {
+                    websiteLink.textContent = 'Pendiente de configuración';
+                }
+                
+                document.getElementById('wordpressUrlInput').value = client.wordpress_url || '';
+                document.getElementById('screenshotUrlInput').value = client.website_screenshot_url || '';
+                
+                // Mostrar modal
+                document.getElementById('webManagementModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando gestión de web:', error);
+                showNotification('Error al cargar la información', 'error');
+            }
+        }
+        
+        function closeWebManagementModal() {
+            document.getElementById('webManagementModal').classList.remove('active');
+            document.getElementById('webManagementForm').reset();
+        }
+        
+        async function saveWebManagement(event) {
+            event.preventDefault();
+            
+            const clientId = document.getElementById('webManagementClientId').value;
+            const wordpress_url = document.getElementById('wordpressUrlInput').value.trim();
+            const website_screenshot_url = document.getElementById('screenshotUrlInput').value.trim();
+            
+            console.log('💾 [ADMIN] Guardando gestión de web:', { clientId, wordpress_url, website_screenshot_url });
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/website-management/${clientId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wordpress_url: wordpress_url || null,
+                        website_screenshot_url: website_screenshot_url || null
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Error al guardar');
+                
+                const result = await response.json();
+                console.log('✅ [ADMIN] Gestión guardada:', result);
+                
+                showNotification('Cambios guardados correctamente', 'success');
+                closeWebManagementModal();
+                
+                // Recargar las webs para mostrar los cambios
+                loadWebsDesplegadas();
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error guardando gestión:', error);
+                showNotification('Error al guardar los cambios', 'error');
+            }
         }
 
         // Event listeners para filtros
@@ -2857,5 +2949,78 @@
             }
         }
     </style>
+
+    <!-- Modal para Gestión de Web -->
+    <div id="webManagementModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="webManagementTitle">⚙️ Gestionar Web</h2>
+                <button class="close-modal" onclick="closeWebManagementModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="webManagementForm" onsubmit="saveWebManagement(event)">
+                    <input type="hidden" id="webManagementClientId">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            📝 Cliente / Empresa
+                        </label>
+                        <p id="webManagementInfo" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin: 0; color: #666;">
+                            -
+                        </p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            🌐 URL del Sitio Web
+                        </label>
+                        <p id="webManagementWebsite" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin: 0;">
+                            <a href="#" target="_blank" style="color: #0046FE; text-decoration: none;">-</a>
+                        </p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label for="wordpressUrlInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            ✏️ URL de WordPress (Admin)
+                        </label>
+                        <input 
+                            type="url" 
+                            id="wordpressUrlInput" 
+                            placeholder="https://tusitio.com/wp-admin" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+                            El cliente usará este link para acceder a su WordPress
+                        </small>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label for="screenshotUrlInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            📸 URL de Captura de Pantalla
+                        </label>
+                        <input 
+                            type="url" 
+                            id="screenshotUrlInput" 
+                            placeholder="https://ejemplo.com/screenshot.jpg" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+                            Opcional: URL de una imagen de captura del sitio web
+                        </small>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                        <button type="button" onclick="closeWebManagementModal()" style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            Cancelar
+                        </button>
+                        <button type="submit" style="padding: 12px 24px; background: #0046FE; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            💾 Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

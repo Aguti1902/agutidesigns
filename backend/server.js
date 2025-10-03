@@ -781,6 +781,34 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
 });
 
 // Actualizar estado del sitio web (cuando se entrega el proyecto)
+// 🆕 Endpoint para actualizar datos de gestión de web (WordPress, Screenshot)
+app.patch('/api/admin/website-management/:clientId', (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { wordpress_url, website_screenshot_url } = req.body;
+        
+        console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`);
+        
+        const stmt = db.db.prepare(`
+            UPDATE clients 
+            SET wordpress_url = COALESCE(?, wordpress_url),
+                website_screenshot_url = COALESCE(?, website_screenshot_url),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+        stmt.run(wordpress_url, website_screenshot_url, clientId);
+        
+        res.json({ 
+            success: true, 
+            message: 'Datos de gestión actualizados correctamente' 
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error actualizando gestión de web:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.patch('/api/client/website-status/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
@@ -863,7 +891,7 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
 // TESTING: Crear cuenta de prueba rápida
 app.post('/api/create-test-account', async (req, res) => {
     try {
-        const { email, password, full_name, plan, submission_data } = req.body;
+        const { email, password, full_name, plan } = req.body;
         
         // Validar que se proporcionen los datos básicos
         const testEmail = email || `test${Date.now()}@agutidesigns.com`;
@@ -874,46 +902,23 @@ app.post('/api/create-test-account', async (req, res) => {
         // Hashear contraseña
         const hashedPassword = await bcrypt.hash(testPassword, 10);
         
-        // Crear submission si se proporcionaron datos
-        let submissionId = null;
-        if (submission_data) {
-            console.log('📝 Creando submission con datos completos...');
-            submissionId = db.createSubmission({
-                ...submission_data,
-                email: testEmail,
-                full_name: testName,
-                password: hashedPassword,
-                plan: testPlan || submission_data.plan,
-                amount: testPlan === 'premium' ? 65 : testPlan === 'avanzado' ? 49 : 35,
-                status: 'paid' // Marcar como pagado para testing
-            });
-            console.log('✅ Submission creada:', submissionId);
-        }
-        
         // Crear cliente
         const clientId = db.createClient({
             email: testEmail,
             password: hashedPassword,
             full_name: testName,
-            business_name: submission_data?.business_name || 'Empresa de Prueba',
+            business_name: 'Empresa de Prueba',
             plan: testPlan,
-            submission_id: submissionId,
+            submission_id: null,
             stripe_customer_id: null,
-            stripe_subscription_id: null,
-            payment_date: new Date().toISOString() // Agregar fecha de pago para testing
+            stripe_subscription_id: null
         });
         
         if (!clientId) {
             return res.status(500).json({ error: 'Error al crear cuenta de prueba' });
         }
         
-        // Actualizar submission con client_id si se creó
-        if (submissionId) {
-            db.updateClient(clientId, { submission_id: submissionId });
-            console.log('✅ Submission vinculada al cliente');
-        }
-        
-        console.log('✅ Cuenta de prueba creada:', { clientId, submissionId, email: testEmail });
+        console.log('✅ Cuenta de prueba creada:', { clientId, email: testEmail });
         
         res.json({
             success: true,

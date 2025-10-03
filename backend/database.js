@@ -100,6 +100,8 @@ db.exec(`
         stripe_customer_id TEXT,
         stripe_subscription_id TEXT,
         website_url TEXT,
+        wordpress_url TEXT,
+        website_screenshot_url TEXT,
         website_status TEXT DEFAULT 'en_construccion',
         payment_date DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -251,6 +253,30 @@ try {
         console.log('ℹ️ [DB] Columna images_data ya existe');
     } else {
         console.log('⚠️ [DB] Error agregando columna images_data:', error.message);
+    }
+}
+
+// Agregar columna wordpress_url si no existe (migración)
+try {
+    db.exec(`ALTER TABLE clients ADD COLUMN wordpress_url TEXT;`);
+    console.log('✅ [DB] Columna wordpress_url agregada a clients');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna wordpress_url ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna wordpress_url:', error.message);
+    }
+}
+
+// Agregar columna website_screenshot_url si no existe (migración)
+try {
+    db.exec(`ALTER TABLE clients ADD COLUMN website_screenshot_url TEXT;`);
+    console.log('✅ [DB] Columna website_screenshot_url agregada a clients');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna website_screenshot_url ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna website_screenshot_url:', error.message);
     }
 }
 
