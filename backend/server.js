@@ -155,10 +155,25 @@ app.post('/api/create-subscription', async (req, res) => {
         const billingCycle = billing_cycle || 'monthly';
         const PRICES = billingCycle === 'annual' ? STRIPE_PRICES_ANNUAL : STRIPE_PRICES_MONTHLY;
         
+        console.log('🔍 Debug checkout:');
+        console.log('- Plan:', plan);
+        console.log('- Billing Cycle:', billingCycle);
+        console.log('- Prices disponibles:', PRICES);
+        
         // Usar Price ID según el plan y billing_cycle
         const priceId = PRICES[plan];
         if (!priceId) {
-            return res.status(400).json({ error: 'Plan inválido o Price ID no configurado' });
+            console.error('❌ Price ID no encontrado para:', plan, billingCycle);
+            console.error('❌ PRICES object:', JSON.stringify(PRICES, null, 2));
+            return res.status(400).json({ 
+                error: 'Plan inválido o Price ID no configurado',
+                debug: {
+                    plan,
+                    billingCycle,
+                    availablePlans: Object.keys(PRICES),
+                    pricesConfig: PRICES
+                }
+            });
         }
 
         console.log(`💳 Creando suscripción ${billingCycle} para plan ${plan} con Price ID:`, priceId);
