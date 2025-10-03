@@ -631,10 +631,29 @@ function updateWebsiteStatus(clientId, status, url = null) {
 
 // Obtener dashboard data del cliente
 function getClientDashboardData(clientId) {
+    console.log('🔍 [DB] getClientDashboardData para cliente:', clientId);
+    
     const client = getClientById(clientId);
-    if (!client) return null;
+    if (!client) {
+        console.error('❌ [DB] Cliente no encontrado:', clientId);
+        return null;
+    }
+    
+    console.log('👤 [DB] Cliente encontrado:', {
+        id: client.id,
+        email: client.email,
+        submission_id: client.submission_id,
+        plan: client.plan
+    });
 
     const submission = client.submission_id ? getSubmission(client.submission_id) : null;
+    
+    console.log('📋 [DB] Submission:', submission ? {
+        id: submission.id,
+        business_name: submission.business_name,
+        email: submission.email,
+        hasAllFields: !!(submission.industry && submission.phone_number && submission.domain_name)
+    } : 'NO ENCONTRADA');
     
     return {
         client,

@@ -790,10 +790,27 @@ app.get('/api/client/dashboard/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
         
+        console.log('📊 [API] Solicitando dashboard para cliente:', clientId);
+        
         const dashboardData = db.getClientDashboardData(parseInt(clientId));
         
+        console.log('📦 [API] Dashboard data obtenida:', {
+            hasClient: !!dashboardData?.client,
+            hasSubmission: !!dashboardData?.submission,
+            clientId: dashboardData?.client?.id,
+            clientEmail: dashboardData?.client?.email,
+            submissionId: dashboardData?.client?.submission_id,
+            submissionExists: !!dashboardData?.submission
+        });
+        
         if (!dashboardData) {
+            console.error('❌ [API] Cliente no encontrado:', clientId);
             return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        if (!dashboardData.submission && dashboardData.client?.submission_id) {
+            console.warn('⚠️ [API] Cliente tiene submission_id pero no se cargó submission');
+            console.warn('⚠️ [API] submission_id:', dashboardData.client.submission_id);
         }
 
         // No enviar contraseña
@@ -804,7 +821,7 @@ app.get('/api/client/dashboard/:clientId', async (req, res) => {
         res.json(dashboardData);
 
     } catch (error) {
-        console.error('Error obteniendo dashboard del cliente:', error);
+        console.error('❌ [API] Error obteniendo dashboard del cliente:', error);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 });
