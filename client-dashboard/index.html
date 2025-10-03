@@ -734,8 +734,8 @@
                             <div class="stat-value" id="visitsCount">0</div>
                             <div class="stat-label">Visitas este mes</div>
                         </div>
-                        <div class="stat-card" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
-                            <div class="stat-value">5 días</div>
+                        <div class="stat-card" id="deliveryTimeCard" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
+                            <div class="stat-value" id="deliveryDays">5 días</div>
                             <div class="stat-label">Tiempo de entrega</div>
                         </div>
                     </div>
@@ -1563,6 +1563,31 @@
                     document.getElementById('websiteStatus').textContent = status.text;
                     document.getElementById('websiteStatus').className = `status-badge ${status.class}`;
 
+                    // SI LA WEB YA ESTÁ ACTIVA (ENTREGADA)
+                    if (websiteStatus === 'activo') {
+                        // Ocultar tiempo de entrega
+                        document.getElementById('deliveryTimeCard').style.display = 'none';
+                        // Ocultar temporizador de 24h
+                        document.getElementById('editTimerBanner').style.display = 'none';
+                        document.getElementById('editExpiredBanner').style.display = 'none';
+                        // Permitir edición ilimitada
+                        canEdit = true;
+                        console.log('✅ Web activa - edición ilimitada habilitada');
+                    } else if (hasPlan && data.client.payment_date) {
+                        // Web en construcción - mostrar tiempo de entrega con cuenta atrás
+                        const paymentDate = new Date(data.client.payment_date);
+                        const now = new Date();
+                        const daysPassed = Math.floor((now - paymentDate) / (1000 * 60 * 60 * 24));
+                        const daysRemaining = Math.max(0, 5 - daysPassed);
+                        
+                        if (daysRemaining > 0) {
+                            document.getElementById('deliveryDays').textContent = `${daysRemaining} día${daysRemaining !== 1 ? 's' : ''}`;
+                        } else {
+                            document.getElementById('deliveryDays').textContent = 'Próximamente';
+                        }
+                        console.log(`📅 Días restantes para entrega: ${daysRemaining}`);
+                    }
+
                     // Plan y precio
                     const planInfo = {
                         'basico': { name: 'Plan Básico', price: '35€/mes + IVA' },
@@ -1644,10 +1669,10 @@
                         }
                     }
                     
-                    // Iniciar temporizador de 24h si tiene plan y payment_date
-                    if (hasPlan && data.client.payment_date) {
+                    // Iniciar temporizador de 24h SOLO si tiene plan, payment_date Y web NO está activa
+                    if (websiteStatus !== 'activo' && hasPlan && data.client.payment_date) {
                         startEditTimer(data.client.payment_date);
-                    } else if (hasPlan) {
+                    } else if (websiteStatus !== 'activo' && hasPlan && !data.client.payment_date) {
                         // Si tiene plan pero no payment_date (datos antiguos), usar created_at
                         startEditTimer(data.client.created_at);
                     }
