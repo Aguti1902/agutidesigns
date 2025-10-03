@@ -538,6 +538,26 @@
                 transform: translateY(0);
             }
         }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* Modal de selección de plan */
         .plan-modal {
@@ -3273,7 +3293,10 @@
             
             // Obtener páginas actuales
             const pagesContainer = document.getElementById('form_pages');
-            const currentPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => span.textContent);
+            const currentPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => {
+                const text = span.childNodes[0]?.textContent?.trim();
+                return text || span.textContent.replace('×', '').trim();
+            }).filter(p => p && p !== '×');
             
             // Límites por plan
             const planLimits = {
@@ -3289,41 +3312,151 @@
                 return;
             }
             
-            // Pedir nombre de la página
-            const pageName = prompt('¿Qué página quieres añadir?\n\nEjemplos: Blog, Galería, Tienda, Testimonios');
+            // Mostrar modal personalizado
+            showAddPageModal(currentPages, limit);
+        }
+        
+        function showAddPageModal(currentPages, limit) {
+            // Crear overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'addPageModal';
+            overlay.style = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s ease;
+            `;
             
-            if (pageName && pageName.trim()) {
-                const pageNameClean = pageName.trim();
+            // Crear modal
+            const modal = document.createElement('div');
+            modal.style = `
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                animation: slideUp 0.3s ease;
+            `;
+            
+            modal.innerHTML = `
+                <h2 style="margin: 0 0 10px 0; font-size: 1.8rem; color: #1B1B1B; font-weight: 800;">📄 Añadir Página</h2>
+                <p style="margin: 0 0 25px 0; color: #666; font-size: 0.95rem;">Páginas actuales: <strong>${currentPages.length}/${limit}</strong></p>
                 
-                // Verificar que no exista ya
-                if (currentPages.includes(pageNameClean)) {
-                    showNotification('Esta página ya existe', 'warning');
-                    return;
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 700; color: #1B1B1B; margin-bottom: 10px; font-size: 1rem;">Nombre de la página</label>
+                    <input 
+                        type="text" 
+                        id="newPageName" 
+                        placeholder="Ej: Blog, Galería, Tienda, Testimonios..." 
+                        style="width: 100%; padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 1rem; font-family: inherit; transition: all 0.3s;"
+                        onkeypress="if(event.key === 'Enter') confirmAddPage()"
+                    >
+                </div>
+                
+                <div style="background: #f0f9ff; border-left: 4px solid #0046FE; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                    <p style="margin: 0; color: #1B1B1B; font-size: 0.9rem; line-height: 1.5;">
+                        <strong>💡 Sugerencias:</strong><br>
+                        Blog, Galería, Tienda, Testimonios, Noticias, Portfolio, Equipo, FAQ
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button 
+                        onclick="closeAddPageModal()" 
+                        style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: all 0.3s;"
+                        onmouseover="this.style.background='#5a6268'" 
+                        onmouseout="this.style.background='#6c757d'">
+                        Cancelar
+                    </button>
+                    <button 
+                        onclick="confirmAddPage()" 
+                        style="padding: 12px 32px; background: #009A62; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 154, 98, 0.3);"
+                        onmouseover="this.style.background='#008855'; this.style.transform='translateY(-2px)'" 
+                        onmouseout="this.style.background='#009A62'; this.style.transform='translateY(0)'">
+                        ✓ Añadir Página
+                    </button>
+                </div>
+            `;
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            
+            // Focus en el input
+            setTimeout(() => document.getElementById('newPageName')?.focus(), 100);
+            
+            // Cerrar con ESC
+            document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                    closeAddPageModal();
+                    document.removeEventListener('keydown', escHandler);
                 }
-                
-                // Añadir la página
-                const pageSpan = document.createElement('span');
-                pageSpan.style = 'padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px;';
-                pageSpan.innerHTML = `
-                    ${pageNameClean}
-                    <button onclick="removePage(this, '${pageNameClean}')" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1.2rem; padding: 0; line-height: 1;">×</button>
-                `;
-                
-                pagesContainer.appendChild(pageSpan);
-                customPages.push(pageNameClean);
-                
-                console.log('✅ Página añadida:', pageNameClean);
-                showNotification(`Página "${pageNameClean}" añadida correctamente`, 'success');
+            });
+        }
+        
+        function closeAddPageModal() {
+            const modal = document.getElementById('addPageModal');
+            if (modal) {
+                modal.style.animation = 'fadeOut 0.2s ease';
+                setTimeout(() => modal.remove(), 200);
             }
         }
         
+        function confirmAddPage() {
+            const input = document.getElementById('newPageName');
+            const pageName = input?.value.trim();
+            
+            if (!pageName) {
+                input.style.borderColor = '#ff4444';
+                input.focus();
+                return;
+            }
+            
+            // Obtener páginas actuales
+            const pagesContainer = document.getElementById('form_pages');
+            const currentPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => {
+                const text = span.childNodes[0]?.textContent?.trim();
+                return text || span.textContent.replace('×', '').trim();
+            }).filter(p => p && p !== '×');
+            
+            // Verificar que no exista ya
+            if (currentPages.some(p => p.toLowerCase() === pageName.toLowerCase())) {
+                showNotification('Esta página ya existe', 'warning');
+                input.style.borderColor = '#ff4444';
+                input.focus();
+                return;
+            }
+            
+            // Añadir la página
+            const pageSpan = document.createElement('span');
+            pageSpan.style = 'padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;';
+            pageSpan.innerHTML = `
+                ${pageName}
+                <button onclick="removePage(this, '${pageName}')" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1.2rem; padding: 0; line-height: 1;">×</button>
+            `;
+            
+            pagesContainer.appendChild(pageSpan);
+            customPages.push(pageName);
+            
+            closeAddPageModal();
+            console.log('✅ Página añadida:', pageName);
+            showNotification(`Página "${pageName}" añadida correctamente`, 'success');
+        }
+        
         function removePage(button, pageName) {
-            if (confirm(`¿Eliminar la página "${pageName}"?`)) {
+            showConfirmation(`¿Eliminar la página "${pageName}"?`, () => {
                 button.parentElement.remove();
                 customPages = customPages.filter(p => p !== pageName);
                 console.log('🗑️ Página eliminada:', pageName);
                 showNotification(`Página "${pageName}" eliminada`, 'info');
-            }
+            });
         }
         
         async function saveAllData() {
