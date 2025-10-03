@@ -616,6 +616,12 @@ function getClientById(id) {
     return stmt.get(id);
 }
 
+// Obtener todos los clientes
+function getAllClients() {
+    const stmt = db.prepare('SELECT * FROM clients ORDER BY created_at DESC');
+    return stmt.all();
+}
+
 // Actualizar estado del sitio web
 function updateWebsiteStatus(clientId, status, url = null) {
     const stmt = db.prepare(`
@@ -891,6 +897,7 @@ module.exports = {
     createClient,
     getClientByEmail,
     getClientById,
+    getAllClients,
     updateWebsiteStatus,
     getClientDashboardData,
     // Tickets
