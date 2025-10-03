@@ -682,8 +682,8 @@
             transition: all 0.3s ease;
             position: relative;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+                flex-direction: column;
+                gap: 15px;
         }
 
         .web-card:hover {
@@ -763,8 +763,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
-        }
+                font-size: 0.9rem;
+            }
 
         .web-info-label {
             color: #666;
@@ -880,8 +880,8 @@
     <div class="login-container" id="loginPage">
         <div class="login-box">
             <div class="login-header">
-                <h1>🔒 Admin Login</h1>
-                <p>Dashboard de agutidesigns</p>
+            <h1>🔒 Admin Login</h1>
+            <p>Dashboard de agutidesigns</p>
             </div>
             <div class="error-message" id="errorMessage">Usuario o contraseña incorrectos</div>
             <form id="loginForm">
@@ -1529,9 +1529,168 @@
             }
         }
 
-        function viewTicket(id) {
-            // TODO: Implementar vista detallada del ticket
-            alert(`Ver ticket #${id} - Implementar próximamente`);
+        async function viewTicket(id) {
+            try {
+                console.log('🎫 [ADMIN] Cargando detalles del ticket #', id);
+                const response = await fetch(`${API_URL}/api/tickets/${id}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const ticket = await response.json();
+                console.log('🎫 [ADMIN] Ticket recibido:', ticket);
+                
+                const detailsDiv = document.getElementById('ticketDetails');
+                
+                // Badge colors
+                const priorityColors = {
+                    'alta': 'danger',
+                    'media': 'warning',
+                    'baja': 'info'
+                };
+                
+                const statusColors = {
+                    'abierto': 'warning',
+                    'en_proceso': 'info',
+                    'cerrado': 'success'
+                };
+                
+                const statusText = {
+                    'abierto': 'Abierto',
+                    'en_proceso': 'En Proceso',
+                    'cerrado': 'Cerrado'
+                };
+                
+                detailsDiv.innerHTML = `
+                    <div style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                        <!-- Encabezado del Ticket -->
+                        <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; color: white; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                <div>
+                                    <h3 style="margin: 0 0 5px 0; font-size: 1.3rem;">Ticket #${ticket.id}</h3>
+                                    <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">${formatDate(ticket.created_at)}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="badge badge-${priorityColors[ticket.priority]}" style="font-size: 0.9rem; padding: 6px 12px;">
+                                        ${ticket.priority.toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div>
+                                    <p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Estado:</p>
+                                    <p style="margin: 5px 0 0 0; font-size: 1rem; font-weight: 600;">${statusText[ticket.status] || ticket.status}</p>
+                                </div>
+                                <div>
+                                    <p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Categoría:</p>
+                                    <p style="margin: 5px 0 0 0; font-size: 1rem; font-weight: 600;">${ticket.category}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Información del Cliente -->
+                        <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">👤 Cliente</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9rem;">
+                                <p style="margin: 0;"><strong>Nombre:</strong> ${ticket.client_name || 'N/A'}</p>
+                                <p style="margin: 0;"><strong>Email:</strong> <a href="mailto:${ticket.client_email}" style="color: #0046FE;">${ticket.client_email}</a></p>
+                                ${ticket.business_name ? `<p style="margin: 0; grid-column: 1/-1;"><strong>Empresa:</strong> ${ticket.business_name}</p>` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Asunto -->
+                        <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">📌 Asunto</h4>
+                            <p style="margin: 0; font-size: 1rem; font-weight: 600;">${ticket.subject}</p>
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">📝 Descripción</h4>
+                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.description}</p>
+                        </div>
+                        
+                        ${ticket.admin_response ? `
+                        <!-- Respuesta del Admin -->
+                        <div style="border: 2px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #28a745; margin: 0 0 10px 0; font-size: 1rem;">💬 Respuesta del Administrador</h4>
+                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
+                            ${ticket.updated_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">Respondido: ${formatDate(ticket.updated_at)}</p>` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Formulario de Respuesta -->
+                        ${ticket.status !== 'cerrado' ? `
+                        <div style="border: 2px solid #0046FE; border-radius: 10px; padding: 15px;">
+                            <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">✉️ Responder al Cliente</h4>
+                            <textarea id="adminResponse" rows="4" style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical;" placeholder="Escribe tu respuesta aquí..."></textarea>
+                            <div style="display: flex; gap: 10px; margin-top: 12px; align-items: center;">
+                                <select id="ticketNewStatus" style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 8px; flex: 1;">
+                                    <option value="en_proceso" ${ticket.status === 'en_proceso' ? 'selected' : ''}>En Proceso</option>
+                                    <option value="cerrado">Cerrado</option>
+                                </select>
+                                <button onclick="sendTicketResponse(${ticket.id})" class="btn-primary" style="padding: 10px 24px;">
+                                    Enviar Respuesta
+                                </button>
+                            </div>
+                        </div>
+                        ` : `
+                        <div style="background: #e7f5ff; border: 2px solid #0046FE; border-radius: 10px; padding: 15px; text-align: center;">
+                            <p style="margin: 0; color: #0046FE; font-weight: 600;">✅ Este ticket ha sido cerrado</p>
+                            ${ticket.closed_at ? `<p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #666;">Fecha de cierre: ${formatDate(ticket.closed_at)}</p>` : ''}
+                        </div>
+                        `}
+                    </div>
+                `;
+                
+                document.getElementById('ticketModal').classList.add('active');
+                console.log('✅ [ADMIN] Modal de ticket abierto correctamente');
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando detalles del ticket:', error);
+                alert('Error cargando detalles del ticket: ' + error.message);
+            }
+        }
+        
+        async function sendTicketResponse(ticketId) {
+            const response = document.getElementById('adminResponse').value;
+            const newStatus = document.getElementById('ticketNewStatus').value;
+            
+            if (!response || response.trim() === '') {
+                alert('Por favor, escribe una respuesta antes de enviar.');
+                return;
+            }
+            
+            console.log('🎫 [ADMIN] Enviando respuesta para ticket #', ticketId);
+            
+            try {
+                const res = await fetch(`${API_URL}/api/tickets/${ticketId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        admin_response: response,
+                        status: newStatus
+                    })
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                
+                const data = await res.json();
+                console.log('✅ [ADMIN] Respuesta enviada correctamente:', data);
+                
+                alert('✅ Respuesta enviada correctamente. El cliente recibirá un email.');
+                closeTicketModal();
+                loadTickets(); // Recargar tabla
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error enviando respuesta:', error);
+                alert('Error enviando respuesta: ' + error.message);
+            }
         }
 
         function closeTicketModal() {

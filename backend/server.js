@@ -1017,6 +1017,27 @@ app.get('/api/tickets', (req, res) => {
     }
 });
 
+// Obtener un ticket individual por ID
+app.get('/api/tickets/:id', (req, res) => {
+    try {
+        const ticketId = parseInt(req.params.id);
+        console.log('🎫 [BACKEND] Admin solicitando ticket #', ticketId);
+        
+        const ticket = db.getTicketById(ticketId);
+        
+        if (!ticket) {
+            console.warn('⚠️ [BACKEND] Ticket no encontrado:', ticketId);
+            return res.status(404).json({ error: 'Ticket no encontrado' });
+        }
+        
+        console.log('✅ [BACKEND] Ticket encontrado:', ticket.id);
+        res.json(ticket);
+    } catch (error) {
+        console.error('❌ [BACKEND] Error obteniendo ticket:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Obtener tickets de un cliente
 app.get('/api/tickets/client/:clientId', (req, res) => {
     try {
