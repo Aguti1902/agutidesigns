@@ -1176,10 +1176,6 @@
                                 <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email de la cuenta</label>
                                 <div id="form_account_email" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
                             </div>
-                            <div>
-                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Teléfono de contacto</label>
-                                <div id="form_account_phone" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
-                            </div>
                         </div>
                     </div>
                     
@@ -2463,7 +2459,6 @@
                         document.getElementById('form_first_name').textContent = fullNameParts[0] || '-';
                         document.getElementById('form_last_name').textContent = fullNameParts.slice(1).join(' ') || '-';
                         document.getElementById('form_account_email').textContent = source.email || '-';
-                        document.getElementById('form_account_phone').textContent = source.phone || '-';
                         
                         console.log('✅ Nueva sección form_* poblada correctamente');
                         

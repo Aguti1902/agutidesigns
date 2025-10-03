@@ -1782,11 +1782,50 @@
                 }
                 
                 console.log('📦 Archivos procesados exitosamente');
+                
+                // Procesar archivo de política de privacidad (si existe)
+                const privacyFile = document.getElementById('privacyUpload').files[0];
+                if (privacyFile) {
+                    try {
+                        console.log('📄 Procesando archivo de política:', privacyFile.name);
+                        
+                        // Validar que sea un archivo válido
+                        const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+                        if (!validTypes.includes(privacyFile.type)) {
+                            alert('❌ El archivo debe ser PDF, DOC, DOCX o TXT');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.style.opacity = '1';
+                            return;
+                        }
+                        
+                        // Convertir archivo a Base64
+                        const privacyFileBase64 = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(privacyFile);
+                        });
+                        
+                        data.privacy_file_data = privacyFileBase64;
+                        data.privacy_file_name = privacyFile.name;
+                        
+                        console.log('✅ Archivo de política procesado:', privacyFile.name);
+                    } catch (error) {
+                        console.error('❌ Error procesando archivo de política:', error);
+                        alert('Error al procesar el archivo de política. Por favor, intenta con otro archivo.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.style.opacity = '1';
+                        return;
+                    }
+                }
+                
                 submitBtn.innerHTML = '⏳ Recopilando datos...';
             
             formData.forEach((value, key) => {
                 // Skip file inputs, we already processed them
-                if (key === 'logo' || key === 'images[]') {
+                if (key === 'logo' || key === 'images[]' || key === 'privacy_file') {
                     return;
                 }
                 
