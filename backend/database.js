@@ -531,19 +531,27 @@ function getTicketById(ticketId) {
     return stmt.get(ticketId);
 }
 
-// Actualizar ticket (respuesta del admin o cambio de estado)
+// Actualizar ticket (respuesta del admin, del cliente o cambio de estado)
 function updateTicket(ticketId, updates) {
-    const { status, admin_response } = updates;
+    const { status, admin_response, client_response } = updates;
+    
+    console.log('🔧 [DB] Actualizando ticket #', ticketId);
+    console.log('🔧 [DB] Updates recibidos:', { status, admin_response: admin_response ? 'SÍ' : 'NO', client_response: client_response ? 'SÍ' : 'NO' });
+    
     const stmt = db.prepare(`
         UPDATE tickets 
         SET status = COALESCE(?, status),
             admin_response = COALESCE(?, admin_response),
+            client_response = COALESCE(?, client_response),
             updated_at = CURRENT_TIMESTAMP,
             closed_at = CASE WHEN ? = 'cerrado' THEN CURRENT_TIMESTAMP ELSE closed_at END
         WHERE id = ?
     `);
     
-    return stmt.run(status, admin_response, status, ticketId);
+    const result = stmt.run(status, admin_response, client_response, status, ticketId);
+    console.log('✅ [DB] Ticket actualizado. Changes:', result.changes);
+    
+    return result;
 }
 
 // Estadísticas de tickets

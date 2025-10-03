@@ -1587,6 +1587,9 @@
                 
                 const ticket = await response.json();
                 console.log('🎫 [ADMIN] Ticket recibido:', ticket);
+                console.log('🔍 [ADMIN] ¿Tiene admin_response?', ticket.admin_response ? 'SÍ' : 'NO');
+                console.log('🔍 [ADMIN] ¿Tiene client_response?', ticket.client_response ? 'SÍ' : 'NO');
+                console.log('🔍 [ADMIN] Valor de client_response:', ticket.client_response);
                 
                 const detailsDiv = document.getElementById('ticketDetails');
                 

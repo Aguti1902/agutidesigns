@@ -1031,6 +1031,9 @@ app.get('/api/tickets/:id', (req, res) => {
         }
         
         console.log('✅ [BACKEND] Ticket encontrado:', ticket.id);
+        console.log('🔍 [BACKEND] ¿Tiene admin_response?', ticket.admin_response ? 'SÍ' : 'NO');
+        console.log('🔍 [BACKEND] ¿Tiene client_response?', ticket.client_response ? 'SÍ' : 'NO');
+        console.log('🔍 [BACKEND] Valor de client_response:', ticket.client_response);
         res.json(ticket);
     } catch (error) {
         console.error('❌ [BACKEND] Error obteniendo ticket:', error);
