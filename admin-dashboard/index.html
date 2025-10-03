@@ -820,7 +820,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Proyectos</h2>
-                            <button class="btn-primary" onclick="openNewProjectModal()">+ Nuevo Proyecto</button>
+                            <span style="color: #666; font-size: 0.9rem;">Los proyectos se crean automáticamente al completar el pago</span>
                         </div>
                         
                         <div class="kanban-board">
@@ -1484,6 +1484,15 @@
                 const projectId = draggedProject.dataset.projectId;
                 draggedProject.style.opacity = '';
                 
+                // Si se mueve a "Entregada", pedir confirmación
+                if (newStatus === 'entregada') {
+                    const confirmed = confirm('🚀 ¿Estás seguro de que quieres marcar este proyecto como ENTREGADO?\n\nEsto notificará al cliente que su web está lista y cambiará el estado de su sitio a "Activo".');
+                    
+                    if (!confirmed) {
+                        return false;
+                    }
+                }
+                
                 try {
                     // Actualizar estado en el backend
                     await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
@@ -1491,6 +1500,26 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: newStatus })
                     });
+                    
+                    // Si se marcó como entregada, actualizar el cliente
+                    if (newStatus === 'entregada') {
+                        const projectResponse = await fetch(`${API_URL}/api/admin/projects/${projectId}`);
+                        const project = await projectResponse.json();
+                        
+                        if (project.client_id) {
+                            // Actualizar estado del sitio web del cliente a "activo"
+                            await fetch(`${API_URL}/api/client/website-status/${project.client_id}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    status: 'activo',
+                                    website_url: project.website_url || null
+                                })
+                            });
+                            
+                            alert('✅ Proyecto marcado como entregado. El cliente ha sido notificado y su sitio está ahora ACTIVO.');
+                        }
+                    }
                     
                     // Recargar proyectos
                     await loadProjects();

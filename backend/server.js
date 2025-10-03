@@ -713,6 +713,86 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
     }
 });
 
+// Actualizar estado del sitio web (cuando se entrega el proyecto)
+app.patch('/api/client/website-status/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { status, website_url } = req.body;
+        
+        // Actualizar estado y URL si se proporciona
+        const stmt = db.db.prepare(`
+            UPDATE clients 
+            SET website_status = ?, 
+                website_url = COALESCE(?, website_url),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+        stmt.run(status, website_url, clientId);
+        
+        // Si se marcó como activo, enviar email de notificación al cliente
+        if (status === 'activo') {
+            const client = db.getClientById(clientId);
+            if (client) {
+                try {
+                    await emailService.sendEmail({
+                        to: client.email,
+                        subject: '🎉 ¡Tu sitio web está listo! - agutidesigns',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h1 style="color: #0046FE; text-align: center;">🎉 ¡Tu Web Está Lista!</h1>
+                                <p>Hola ${client.full_name},</p>
+                                <p>¡Tenemos excelentes noticias! Tu sitio web ha sido completado y está ahora <strong>activo</strong>.</p>
+                                
+                                ${website_url ? `
+                                    <div style="text-align: center; margin: 30px 0;">
+                                        <a href="${website_url}" style="background: #0046FE; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                                            Ver Mi Sitio Web
+                                        </a>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                                    <h3 style="color: #333; margin-top: 0;">Próximos Pasos:</h3>
+                                    <ul style="line-height: 1.8;">
+                                        <li>✓ Revisa tu sitio web y navega por todas las páginas</li>
+                                        <li>✓ Accede a tu <a href="https://agutidesigns.vercel.app/client-dashboard/">Dashboard</a> para ver estadísticas</li>
+                                        <li>✓ Puedes solicitar cambios menores en las próximas 48h sin costo</li>
+                                        <li>✓ Si tienes dudas, crea un ticket de soporte</li>
+                                    </ul>
+                                </div>
+                                
+                                <p>Recuerda que incluimos:</p>
+                                <ul>
+                                    <li>🔒 Certificado SSL (https)</li>
+                                    <li>📱 Diseño responsive</li>
+                                    <li>🚀 Optimización SEO básica</li>
+                                    <li>🎨 Edición ilimitada de contenido</li>
+                                    <li>💬 Soporte técnico continuo</li>
+                                </ul>
+                                
+                                <p>Si necesitas ayuda o tienes alguna pregunta, estamos aquí para ti.</p>
+                                
+                                <p style="margin-top: 30px;">
+                                    <strong>¡Gracias por confiar en agutidesigns!</strong><br>
+                                    <span style="color: #666;">El equipo de agutidesigns</span>
+                                </p>
+                            </div>
+                        `
+                    });
+                    console.log(`📧 Email de entrega enviado a ${client.email}`);
+                } catch (emailError) {
+                    console.error('Error enviando email de notificación:', emailError);
+                }
+            }
+        }
+        
+        res.json({ success: true, message: 'Estado del sitio actualizado' });
+    } catch (error) {
+        console.error('Error actualizando estado del sitio:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // TESTING: Crear cuenta de prueba rápida
 app.post('/api/create-test-account', async (req, res) => {
     try {
