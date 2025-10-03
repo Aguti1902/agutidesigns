@@ -20,30 +20,48 @@
         .login-container {
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #0046FE 0%, #E5FC63 100%);
             padding: 20px;
+            background: #f7f7f7;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo p {
+            color: #666;
+            font-size: 0.9rem;
         }
 
         .login-box {
             background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
 
-        .login-box h1 {
-            color: #0046FE;
-            margin-bottom: 10px;
-            font-size: 2rem;
+        .login-header {
+            background: #0046FE;
+            margin: -40px -40px 30px -40px;
+            padding: 30px 40px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            color: white;
         }
 
-        .login-box p {
-            color: #666;
-            margin-bottom: 30px;
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            opacity: 0.95;
         }
 
         .form-group {
@@ -55,45 +73,53 @@
             margin-bottom: 8px;
             color: #333;
             font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid #e8eaed;
+            border-radius: 10px;
             font-size: 1rem;
             font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fafbfc;
         }
 
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: #0046FE;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 70, 254, 0.1);
         }
 
         .btn-login {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            padding: 16px;
+            background: #0046FE;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .btn-login:hover {
+            background: #0036C8;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.25);
         }
 
         .error-message {
-            background: #ffe0e0;
-            color: #cc0000;
-            padding: 10px;
-            border-radius: 5px;
+            background: #fee;
+            color: #c00;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 15px;
+            font-size: 0.9rem;
             display: none;
         }
 
@@ -852,8 +878,10 @@
     <!-- ===== LOGIN PAGE ===== -->
     <div class="login-container" id="loginPage">
         <div class="login-box">
-            <h1>🔒 Admin Login</h1>
-            <p>Dashboard de agutidesigns</p>
+            <div class="login-header">
+                <h1>🔒 Admin Login</h1>
+                <p>Dashboard de agutidesigns</p>
+            </div>
             <div class="error-message" id="errorMessage">Usuario o contraseña incorrectos</div>
             <form id="loginForm">
                 <div class="form-group">
