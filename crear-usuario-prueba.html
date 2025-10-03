@@ -214,7 +214,7 @@
         <div class="info-box">
             <p><strong>⚡ Atajos:</strong></p>
             <p>• Deja el email vacío para generar uno automático</p>
-            <p>• La contraseña por defecto es: <strong>123456</strong></p>
+            <p>• La contraseña por defecto es: <strong>12345678</strong></p>
         </div>
 
         <form id="createUserForm">
@@ -283,7 +283,7 @@
                 email = `test${randomId}@agutidesigns.com`;
             }
             
-            const password = '123456'; // Contraseña por defecto
+            const password = '12345678'; // Contraseña por defecto (mínimo 8 caracteres)
             
             console.log('📤 Creando usuario:', { email, businessName, plan, websiteStatus });
             
@@ -295,10 +295,11 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        firstName: businessName.split(' ')[0],
-                        lastName: businessName.split(' ').slice(1).join(' ') || 'Test',
+                        full_name: businessName,
+                        business_name: businessName,
                         email: email,
-                        password: password
+                        password: password,
+                        plan: plan || null
                     })
                 });
                 
@@ -309,6 +310,12 @@
                 }
                 
                 console.log('✅ Usuario registrado:', registerData);
+                
+                const clientId = registerData.client?.id || registerData.userId || registerData.clientId;
+                
+                if (!clientId) {
+                    throw new Error('No se pudo obtener el ID del cliente');
+                }
                 
                 // 2. Crear submission básica
                 const submissionResponse = await fetch(`${API_BASE_URL}/api/submissions/create`, {
@@ -358,7 +365,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            clientId: registerData.userId,
+                            clientId: clientId,
                             plan: plan,
                             website_status: websiteStatus,
                             payment_date: new Date().toISOString(),
@@ -374,7 +381,7 @@
                 }
                 
                 // Mostrar resultado exitoso
-                const dashboardUrl = `https://agutidesigns.com/client-dashboard/?client=${registerData.userId}`;
+                const dashboardUrl = `https://agutidesigns.com/client-dashboard/?client=${clientId}`;
                 
                 resultDiv.className = 'result success';
                 resultDiv.innerHTML = `
@@ -384,7 +391,7 @@
                     <p><strong>🏢 Negocio:</strong> ${businessName}</p>
                     <p><strong>📦 Plan:</strong> ${plan || 'Sin plan'}</p>
                     <p><strong>🌐 Estado:</strong> ${websiteStatus}</p>
-                    <p><strong>🆔 Client ID:</strong> ${registerData.userId}</p>
+                    <p><strong>🆔 Client ID:</strong> ${clientId}</p>
                     <button class="copy-btn" onclick="copyCredentials('${email}', '${password}', '${dashboardUrl}')">📋 Copiar credenciales</button>
                     <div style="margin-top: 15px;">
                         <a href="${dashboardUrl}" target="_blank" style="display: inline-block; padding: 10px 20px; background: #0046FE; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
