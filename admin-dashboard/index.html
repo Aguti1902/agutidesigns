@@ -1164,7 +1164,10 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Lista de Clientes</h2>
-                            <button class="btn-primary" onclick="loadClientes()">🔄 Actualizar</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-primary" onclick="loadClientes()">🔄 Actualizar</button>
+                                <button class="btn-secondary" onclick="fixClientSubmissions()" style="background: #F1250E;">🔧 Arreglar Submissions</button>
+                            </div>
                         </div>
                         <div class="table-container">
                             <table>
@@ -2099,6 +2102,35 @@
         function viewClient(id) {
             // TODO: Implementar vista detallada del cliente
             showNotification(`Ver cliente #${id} - Próximamente`, 'info');
+        }
+
+        // 🆕 Función para arreglar submissions de clientes existentes
+        async function fixClientSubmissions() {
+            if (!confirm('¿Quieres vincular las submissions a los clientes que no tienen submission_id?\n\nEsto buscará submissions por email y las vinculará automáticamente.')) {
+                return;
+            }
+            
+            try {
+                showNotification('🔧 Corrigiendo submissions...', 'info');
+                
+                const response = await fetch(`${API_URL}/api/admin/fix-client-submissions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(`✅ Corrección completada:\n- ${result.fixed} clientes corregidos\n- ${result.notFound} sin submission\n- ${result.total} total`, 'success');
+                    loadClientes(); // Recargar lista
+                } else {
+                    showNotification('Error en la corrección', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al corregir submissions', 'error');
+            }
         }
 
         // ===== VIDEOS =====
