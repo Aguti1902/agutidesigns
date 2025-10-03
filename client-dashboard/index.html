@@ -1060,7 +1060,9 @@
                         <div style="display: grid; gap: 25px;">
                             <div>
                                 <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Estilo preferido <span style="color: #F1250E;">*</span></label>
-                                <div id="form_design_style" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                                <div id="form_design_style" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                                    <!-- Se llenará con JavaScript -->
+                                </div>
                             </div>
                             
                             <div>
@@ -2420,7 +2422,7 @@
                         }
                         
                         // SECCIÓN 4: DISEÑO
-                        document.getElementById('form_design_style').textContent = source.design_style || '-';
+                        renderDesignStyle(source.design_style || 'moderno');
                         document.getElementById('form_brand_colors').textContent = source.brand_colors || '-';
                         document.getElementById('form_reference_websites').textContent = source.reference_websites || '-';
                         
@@ -3296,6 +3298,82 @@
             if (actionButtons) actionButtons.style.display = 'none';
             
             showNotification('Cambios cancelados', 'info');
+        }
+        
+        // ============ RENDERIZAR ESTILO DE DISEÑO ============
+        function renderDesignStyle(selectedStyle) {
+            const styles = {
+                'moderno': {
+                    name: 'Moderno y Minimalista',
+                    description: 'Limpio, espacioso, enfocado en contenido',
+                    gradient: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                    preview: `
+                        <div style="width: 80%; height: 70%; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 10px; padding: 20px;">
+                            <div style="width: 60%; height: 8px; background: #0046FE; border-radius: 4px;"></div>
+                            <div style="width: 80%; height: 5px; background: #ddd; border-radius: 4px;"></div>
+                            <div style="width: 70%; height: 5px; background: #ddd; border-radius: 4px;"></div>
+                        </div>
+                    `
+                },
+                'clasico': {
+                    name: 'Clásico y Elegante',
+                    description: 'Sofisticado, atemporal, profesional',
+                    gradient: 'linear-gradient(135deg, #fef5e7 0%, #f9e79f 100%)',
+                    preview: `
+                        <div style="width: 80%; height: 70%; background: white; border-radius: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 2px solid #d4af37;">
+                            <div style="width: 50%; height: 8px; background: #8b4513; border-radius: 2px;"></div>
+                            <div style="width: 75%; height: 4px; background: #ddd; border-radius: 2px;"></div>
+                            <div style="width: 65%; height: 4px; background: #ddd; border-radius: 2px;"></div>
+                        </div>
+                    `
+                },
+                'corporativo': {
+                    name: 'Corporativo',
+                    description: 'Profesional, serio, confiable',
+                    gradient: 'linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%)',
+                    preview: `
+                        <div style="width: 80%; height: 70%; background: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 12px; padding: 20px;">
+                            <div style="width: 55%; height: 10px; background: #1B1B1B; border-radius: 3px;"></div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="width: 30%; height: 30px; background: #0046FE; border-radius: 5px;"></div>
+                                <div style="width: 30%; height: 30px; background: #0046FE; border-radius: 5px;"></div>
+                            </div>
+                        </div>
+                    `
+                },
+                'creativo': {
+                    name: 'Creativo y Audaz',
+                    description: 'Vibrante, único, expresivo',
+                    gradient: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)',
+                    preview: `
+                        <div style="width: 80%; height: 70%; background: white; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 10px; padding: 20px; transform: rotate(-2deg);">
+                            <div style="width: 70%; height: 10px; background: linear-gradient(90deg, #e91e63, #9c27b0); border-radius: 5px;"></div>
+                            <div style="width: 60%; height: 6px; background: #ddd; border-radius: 3px;"></div>
+                            <div style="width: 80%; height: 6px; background: #ddd; border-radius: 3px;"></div>
+                        </div>
+                    `
+                }
+            };
+            
+            const container = document.getElementById('form_design_style');
+            if (!container) return;
+            
+            const styleData = styles[selectedStyle.toLowerCase()] || styles['moderno'];
+            
+            container.innerHTML = `
+                <div style="background: white; border: 3px solid #009A62; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,154,98,0.2); position: relative;">
+                    <div style="position: absolute; top: 10px; right: 10px; background: #009A62; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                        ✓ SELECCIONADO
+                    </div>
+                    <div style="background: ${styleData.gradient}; border-radius: 10px; padding: 30px; display: flex; align-items: center; justify-content: center; min-height: 150px; margin-bottom: 15px;">
+                        ${styleData.preview}
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 700; color: #1B1B1B; font-size: 1.1rem; margin-bottom: 5px;">${styleData.name}</div>
+                        <div style="color: #666; font-size: 0.85rem;">${styleData.description}</div>
+                    </div>
+                </div>
+            `;
         }
         
         // ============ GESTIÓN DE PÁGINAS ============
