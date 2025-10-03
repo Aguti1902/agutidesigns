@@ -640,6 +640,189 @@
             gap: 8px;
         }
 
+        /* ===== WEBS DESPLEGADAS GRID (ManageWP Style) ===== */
+        .webs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .web-card {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .web-card:hover {
+            box-shadow: 0 6px 20px rgba(0,70,254,0.12);
+            border-color: #0046FE;
+            transform: translateY(-2px);
+        }
+
+        .web-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .web-domain {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .web-domain h3 {
+            font-size: 1.1rem;
+            color: #1B1B1B;
+            margin: 0 0 5px 0;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .web-url {
+            font-size: 0.85rem;
+            color: #0046FE;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .web-url:hover {
+            text-decoration: underline;
+        }
+
+        .web-status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .web-status-activo {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .web-status-inactivo {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .web-status-mantenimiento {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .web-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px 0;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .web-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .web-info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .web-info-value {
+            color: #1B1B1B;
+            font-weight: 600;
+        }
+
+        .web-plan-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .plan-basico {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .plan-avanzado {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .plan-premium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .web-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-web-action {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-web-visit {
+            background: #0046FE;
+            color: white;
+        }
+
+        .btn-web-visit:hover {
+            background: #0036C8;
+        }
+
+        .btn-web-manage {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-web-manage:hover {
+            background: #e9ecef;
+            border-color: #999;
+        }
+
+        .btn-web-details {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-web-details:hover {
+            background: #5a6268;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .kanban-board {
@@ -721,6 +904,10 @@
                     <div class="nav-item" onclick="showSection('videos')">
                         <span class="icon">🎥</span>
                         <span>Videos</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('webs-desplegadas')">
+                        <span class="icon">🚀</span>
+                        <span>Webs Desplegadas</span>
                     </div>
                 </div>
 
@@ -999,6 +1186,62 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SECCIÓN: WEBS DESPLEGADAS (ManageWP Style) -->
+                <div class="section" id="section-webs-desplegadas">
+                    <div class="content-header">
+                        <h1>🚀 Webs Desplegadas</h1>
+                        <p>Gestiona todos los sitios web en producción</p>
+                    </div>
+
+                    <!-- Filtros y Búsqueda -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="padding: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                            <!-- Búsqueda -->
+                            <div style="flex: 1; min-width: 250px;">
+                                <input type="text" id="searchWebsInput" placeholder="🔍 Buscar por dominio, cliente o empresa..." style="width: 100%; padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;">
+                            </div>
+                            
+                            <!-- Filtro Estado -->
+                            <div>
+                                <select id="filterStatusWebs" style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; min-width: 150px;">
+                                    <option value="">Todos los estados</option>
+                                    <option value="activo">✅ Activo</option>
+                                    <option value="inactivo">⚠️ Inactivo</option>
+                                    <option value="mantenimiento">🔧 Mantenimiento</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Filtro Plan -->
+                            <div>
+                                <select id="filterPlanWebs" style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; min-width: 150px;">
+                                    <option value="">Todos los planes</option>
+                                    <option value="basico">Plan Básico</option>
+                                    <option value="avanzado">Plan Avanzado</option>
+                                    <option value="premium">Plan Premium</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Botón Reset -->
+                            <button onclick="resetWebsFilters()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                🔄 Limpiar
+                            </button>
+                            
+                            <!-- Contador -->
+                            <div style="margin-left: auto; padding: 10px 20px; background: #f8f9fa; border-radius: 8px; font-weight: 600; color: #333;">
+                                <span id="websCounter">0</span> sitios
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid de Sitios Web -->
+                    <div class="webs-grid" id="websGrid">
+                        <div class="loader">
+                            <div class="spinner"></div>
+                            <p>Cargando sitios web...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1181,6 +1424,9 @@
                     break;
                 case 'webs':
                     loadProjects();
+                    break;
+                case 'webs-desplegadas':
+                    loadWebsDesplegadas();
                     break;
             }
         }
@@ -1484,6 +1730,169 @@
             // TODO: Implementar guardado de video
             alert('Sistema de videos - Implementar próximamente');
             closeVideoModal();
+        });
+
+        // ===== WEBS DESPLEGADAS =====
+        let allWebsData = []; // Cache para filtrado rápido
+
+        async function loadWebsDesplegadas() {
+            try {
+                // Obtenemos todos los clientes con websites activas
+                const response = await fetch(`${API_URL}/api/clients`);
+                const clients = await response.json();
+                
+                // Filtramos solo los que tienen web activa o en mantenimiento
+                allWebsData = clients.filter(client => 
+                    client.website_status && 
+                    (client.website_status === 'activo' || client.website_status === 'mantenimiento') &&
+                    client.website_url
+                );
+                
+                renderWebsGrid(allWebsData);
+                
+            } catch (error) {
+                console.error('Error cargando webs:', error);
+                document.getElementById('websGrid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                        <p>Error cargando sitios web</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderWebsGrid(webs) {
+            const websGrid = document.getElementById('websGrid');
+            const counter = document.getElementById('websCounter');
+            
+            counter.textContent = webs.length;
+            
+            if (webs.length === 0) {
+                websGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #999;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🌐</div>
+                        <h3 style="color: #666; margin-bottom: 10px;">No hay sitios web desplegados</h3>
+                        <p>Los sitios aparecerán aquí cuando los proyectos sean entregados</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            websGrid.innerHTML = webs.map(web => {
+                const statusClass = `web-status-${web.website_status || 'inactivo'}`;
+                const statusEmoji = web.website_status === 'activo' ? '✅' : '🔧';
+                const statusText = web.website_status === 'activo' ? 'Activo' : 'Mantenimiento';
+                
+                const planClass = `plan-${web.plan || 'basico'}`;
+                const planText = formatPlan(web.plan);
+                
+                // Extraer dominio limpio de la URL
+                let displayDomain = web.website_url || 'Sin dominio';
+                try {
+                    const url = new URL(web.website_url);
+                    displayDomain = url.hostname.replace('www.', '');
+                } catch (e) {
+                    displayDomain = web.website_url;
+                }
+                
+                return `
+                    <div class="web-card">
+                        <div class="web-card-header">
+                            <div class="web-domain">
+                                <h3 title="${displayDomain}">${displayDomain}</h3>
+                                <a href="${web.website_url}" target="_blank" class="web-url">
+                                    ${web.website_url} 🔗
+                                </a>
+                            </div>
+                            <div class="web-status-badge ${statusClass}">
+                                ${statusEmoji} ${statusText}
+                            </div>
+                        </div>
+                        
+                        <div class="web-card-info">
+                            <div class="web-info-row">
+                                <span class="web-info-label">Cliente:</span>
+                                <span class="web-info-value">${web.full_name || 'N/A'}</span>
+                            </div>
+                            <div class="web-info-row">
+                                <span class="web-info-label">Empresa:</span>
+                                <span class="web-info-value">${web.business_name || 'N/A'}</span>
+                            </div>
+                            <div class="web-info-row">
+                                <span class="web-info-label">Plan:</span>
+                                <span class="web-plan-badge ${planClass}">${planText}</span>
+                            </div>
+                            <div class="web-info-row">
+                                <span class="web-info-label">Email:</span>
+                                <span class="web-info-value" style="font-size: 0.85rem;">${web.email || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="web-card-actions">
+                            <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url}', '_blank')">
+                                🌐 Visitar Sitio
+                            </button>
+                            <button class="btn-web-action btn-web-details" onclick="viewWebDetails(${web.id})">
+                                ℹ️ Detalles
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filtros y búsqueda
+        function filterWebs() {
+            const searchTerm = document.getElementById('searchWebsInput').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatusWebs').value;
+            const planFilter = document.getElementById('filterPlanWebs').value;
+            
+            let filtered = allWebsData.filter(web => {
+                // Búsqueda por texto
+                const matchesSearch = !searchTerm || 
+                    (web.website_url && web.website_url.toLowerCase().includes(searchTerm)) ||
+                    (web.full_name && web.full_name.toLowerCase().includes(searchTerm)) ||
+                    (web.business_name && web.business_name.toLowerCase().includes(searchTerm)) ||
+                    (web.email && web.email.toLowerCase().includes(searchTerm));
+                
+                // Filtro por estado
+                const matchesStatus = !statusFilter || web.website_status === statusFilter;
+                
+                // Filtro por plan
+                const matchesPlan = !planFilter || web.plan === planFilter;
+                
+                return matchesSearch && matchesStatus && matchesPlan;
+            });
+            
+            renderWebsGrid(filtered);
+        }
+
+        function resetWebsFilters() {
+            document.getElementById('searchWebsInput').value = '';
+            document.getElementById('filterStatusWebs').value = '';
+            document.getElementById('filterPlanWebs').value = '';
+            renderWebsGrid(allWebsData);
+        }
+
+        function viewWebDetails(clientId) {
+            // Reutilizamos la función viewClient para mostrar todos los detalles
+            viewClient(clientId);
+        }
+
+        // Event listeners para filtros
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchWebsInput');
+            const statusFilter = document.getElementById('filterStatusWebs');
+            const planFilter = document.getElementById('filterPlanWebs');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', filterWebs);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', filterWebs);
+            }
+            if (planFilter) {
+                planFilter.addEventListener('change', filterWebs);
+            }
         });
 
         // ===== PROYECTOS (KANBAN) =====
