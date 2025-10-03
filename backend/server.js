@@ -996,6 +996,7 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
                     purpose = COALESCE(?, purpose),
                     target_audience = COALESCE(?, target_audience),
                     pages = COALESCE(?, pages),
+                    custom_pages = COALESCE(?, custom_pages),
                     services = COALESCE(?, services),
                     web_texts = COALESCE(?, web_texts),
                     menu_content = COALESCE(?, menu_content),
@@ -1009,6 +1010,9 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
                     domain_name = COALESCE(?, domain_name),
                     domain_alt1 = COALESCE(?, domain_alt1),
                     domain_alt2 = COALESCE(?, domain_alt2),
+                    privacy_text = COALESCE(?, privacy_text),
+                    privacy_file_data = COALESCE(?, privacy_file_data),
+                    privacy_file_name = COALESCE(?, privacy_file_name),
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             `);
@@ -1033,6 +1037,7 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
                 updatedData.purpose || null,
                 updatedData.target_audience || null,
                 updatedData.pages || null,
+                updatedData.custom_pages || null,
                 updatedData.services_list || updatedData.services || null,
                 updatedData.web_texts || null,
                 updatedData.menu_content || null,
@@ -1046,6 +1051,9 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
                 updatedData.domain_name || null,
                 updatedData.domain_alt1 || null,
                 updatedData.domain_alt2 || null,
+                updatedData.privacy_text || null,
+                updatedData.privacy_file_data || null,
+                updatedData.privacy_file_name || null,
                 client.submission_id
             );
             

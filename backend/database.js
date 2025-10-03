@@ -57,6 +57,12 @@ db.exec(`
         
         -- Legal
         privacy_policy TEXT,
+        privacy_text TEXT,
+        privacy_file_data TEXT,
+        privacy_file_name TEXT,
+        
+        -- Páginas personalizadas
+        custom_pages TEXT,
         
         -- Cuenta del cliente
         full_name TEXT,
@@ -326,6 +332,52 @@ try {
     }
 }
 
+// Migración: Agregar columnas de textos legales
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN privacy_text TEXT;`);
+    console.log('✅ [DB] Columna privacy_text agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna privacy_text ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna privacy_text:', error.message);
+    }
+}
+
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN privacy_file_data TEXT;`);
+    console.log('✅ [DB] Columna privacy_file_data agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna privacy_file_data ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna privacy_file_data:', error.message);
+    }
+}
+
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN privacy_file_name TEXT;`);
+    console.log('✅ [DB] Columna privacy_file_name agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna privacy_file_name ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna privacy_file_name:', error.message);
+    }
+}
+
+// Migración: Agregar columna de páginas personalizadas
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN custom_pages TEXT;`);
+    console.log('✅ [DB] Columna custom_pages agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna custom_pages ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna custom_pages:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
@@ -401,11 +453,11 @@ function createSubmission(data) {
             business_name, business_description, industry, cif_nif, razon_social, direccion_fiscal, business_email,
             contact_methods, phone_number, email_contact, whatsapp_number, form_email, physical_address,
             instagram, facebook, linkedin, twitter,
-            services, purpose, target_audience, pages,
+            services, purpose, target_audience, pages, custom_pages,
             design_style, brand_colors, reference_websites, logo_data, images_data,
             keywords, has_analytics,
             domain_name, domain_alt1, domain_alt2,
-            privacy_policy,
+            privacy_policy, privacy_text, privacy_file_data, privacy_file_name,
             web_texts, menu_content, opening_hours, portfolio_description,
             full_name, email, phone, address, password,
             plan, amount, status
@@ -413,11 +465,11 @@ function createSubmission(data) {
             ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
-            ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?,
             ?, ?, ?,
-            ?,
+            ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?
@@ -446,6 +498,7 @@ function createSubmission(data) {
         JSON.stringify(data.purpose) || null,
         data.target_audience || null,
         JSON.stringify(data.pages) || null,
+        JSON.stringify(data.custom_pages) || null,  // 🆕 Páginas personalizadas
         data.design_style || null,
         data.brand_colors || null,
         data.reference_websites || null,
@@ -457,6 +510,9 @@ function createSubmission(data) {
         data.domain_alt1 || null,
         data.domain_alt2 || null,
         data.privacy_policy || null,
+        data.privacy_text || null,  // 🆕 Texto de política personalizada
+        data.privacy_file_data || null,  // 🆕 Archivo PDF en base64
+        data.privacy_file_name || null,  // 🆕 Nombre del archivo PDF
         data.web_texts || null,
         data.menu_content || null,
         data.opening_hours || null,
@@ -484,6 +540,7 @@ function getSubmission(id) {
         if (submission.contact_methods) submission.contact_methods = JSON.parse(submission.contact_methods);
         if (submission.purpose) submission.purpose = JSON.parse(submission.purpose);
         if (submission.pages) submission.pages = JSON.parse(submission.pages);
+        if (submission.custom_pages) submission.custom_pages = JSON.parse(submission.custom_pages);  // 🆕 Páginas personalizadas
         if (submission.images_data) {
             try {
                 submission.images_data = JSON.parse(submission.images_data);
