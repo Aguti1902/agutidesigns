@@ -111,11 +111,63 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_client_status ON clients(status);
 `);
 
-// Crear tabla de tickets de soporte
+// MIGRACIÓN: Recrear tabla de tickets sin FOREIGN KEY constraint
+// Esto es necesario porque SQLite no permite eliminar constraints
+try {
+    // Verificar si la tabla existe con la constraint antigua
+    const tableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='tickets'").get();
+    
+    if (tableInfo && tableInfo.sql.includes('FOREIGN KEY')) {
+        console.log('🔧 [DB] Migrando tabla tickets para remover FOREIGN KEY constraint...');
+        
+        // Backup de datos existentes
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS tickets_backup AS SELECT * FROM tickets;
+        `);
+        
+        // Eliminar tabla antigua
+        db.exec(`DROP TABLE IF EXISTS tickets;`);
+        
+        // Crear nueva tabla sin constraint
+        db.exec(`
+            CREATE TABLE tickets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                client_id INTEGER,
+                client_email TEXT NOT NULL,
+                client_name TEXT,
+                business_name TEXT,
+                subject TEXT NOT NULL,
+                category TEXT NOT NULL,
+                description TEXT NOT NULL,
+                priority TEXT DEFAULT 'media',
+                status TEXT DEFAULT 'abierto',
+                admin_response TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                closed_at DATETIME
+            )
+        `);
+        
+        // Restaurar datos
+        db.exec(`
+            INSERT INTO tickets SELECT * FROM tickets_backup;
+        `);
+        
+        // Eliminar backup
+        db.exec(`DROP TABLE tickets_backup;`);
+        
+        console.log('✅ [DB] Migración de tickets completada exitosamente');
+    }
+} catch (error) {
+    console.log('⚠️ [DB] Error en migración (probablemente primera ejecución):', error.message);
+}
+
+// Crear tabla de tickets de soporte (si no existe)
+// NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`
     CREATE TABLE IF NOT EXISTS tickets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        client_id INTEGER NOT NULL,
+        client_id INTEGER,
         client_email TEXT NOT NULL,
         client_name TEXT,
         business_name TEXT,
@@ -127,8 +179,7 @@ db.exec(`
         admin_response TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        closed_at DATETIME,
-        FOREIGN KEY (client_id) REFERENCES clients(id)
+        closed_at DATETIME
     )
 `);
 
