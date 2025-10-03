@@ -2084,7 +2084,7 @@
                 console.error('❌ Error:', error);
                 const loading = document.getElementById('checkoutLoading');
                 if (loading) document.body.removeChild(loading);
-                alert('Hubo un error al preparar el checkout. Por favor, intenta de nuevo.');
+                showNotification('Hubo un error al preparar el checkout. Por favor, intenta de nuevo.', 'error');
             }
         }
         
@@ -2150,7 +2150,7 @@
 
         function addPageField() {
             if (currentPages.length >= pageLimit) {
-                alert(`Has alcanzado el límite de ${pageLimit} páginas para tu plan`);
+                showNotification(`Has alcanzado el límite de ${pageLimit} páginas para tu plan`, 'warning');
                 return;
             }
             
@@ -2221,7 +2221,7 @@
                     
                     const loadingEl = document.getElementById('saveLoading');
                     if (loadingEl) document.body.removeChild(loadingEl);
-                    alert('✅ Cambios guardados correctamente');
+                    showNotification('Cambios guardados correctamente', 'success');
                 } else {
                     const errorData = await response.json();
                     const loadingEl = document.getElementById('saveLoading');
@@ -2236,13 +2236,13 @@
                         if (countdownInterval) clearInterval(countdownInterval);
                     }
                     
-                    alert('❌ ' + (errorData.error || 'Error al guardar. Por favor, intenta de nuevo.'));
+                    showNotification(errorData.error || 'Error al guardar. Por favor, intenta de nuevo.', 'error');
                 }
             } catch (error) {
                 console.error('Error guardando:', error);
                 const loadingEl = document.getElementById('saveLoading');
                 if (loadingEl) document.body.removeChild(loadingEl);
-                alert('❌ Error al guardar. Por favor, intenta de nuevo.');
+                showNotification('Error al guardar. Por favor, intenta de nuevo.', 'error');
             }
         }
 
@@ -2340,14 +2340,14 @@
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
-                btn.onclick = () => alert('⏰ El período de edición ha finalizado. Contacta a soporte para hacer cambios.');
+                btn.onclick = () => showNotification('El período de edición ha finalizado. Contacta a soporte para hacer cambios.', 'warning');
             });
         }
 
         // Verificar si puede editar
         function toggleEditSection(section) {
             if (!canEdit) {
-                alert('⏰ El período de edición (24h) ha finalizado. Contacta a soporte para hacer cambios.');
+                showNotification('El período de edición (24h) ha finalizado. Contacta a soporte para hacer cambios.', 'warning');
                 return;
             }
             
@@ -2481,15 +2481,15 @@
                 
                 if (response.ok) {
                     console.log('✅ [CLIENT] Ticket creado correctamente, ID:', data.ticketId);
-                    alert('✅ Ticket creado correctamente. Te responderemos pronto a tu email.');
+                    showNotification('Ticket creado correctamente. Te responderemos pronto a tu email.', 'success');
                     closeTicketModal(e);
                 } else {
                     console.error('❌ [CLIENT] Error del servidor:', data);
-                    alert('❌ Error al crear el ticket: ' + (data.error || 'Error desconocido'));
+                    showNotification('Error al crear el ticket: ' + (data.error || 'Error desconocido'), 'error');
                 }
             } catch (error) {
                 console.error('❌ [CLIENT] Error de red al enviar ticket:', error);
-                alert('❌ Error al enviar el ticket. Por favor, intenta de nuevo.');
+                showNotification('Error al enviar el ticket. Por favor, intenta de nuevo.', 'error');
             }
         });
 
@@ -2743,7 +2743,7 @@
                 
             } catch (error) {
                 console.error('❌ [CLIENT] Error cargando detalles del ticket:', error);
-                alert('Error al cargar los detalles del ticket');
+                showNotification('Error al cargar los detalles del ticket', 'error');
             }
         }
 
@@ -2752,7 +2752,7 @@
             const responseText = document.getElementById('clientResponseText').value;
             
             if (!responseText || responseText.trim() === '') {
-                alert('Por favor, escribe una respuesta antes de enviar.');
+                showNotification('Por favor, escribe una respuesta antes de enviar.', 'warning');
                 return;
             }
             
@@ -2777,7 +2777,7 @@
                 const data = await response.json();
                 console.log('✅ [CLIENT] Respuesta enviada correctamente:', data);
                 
-                alert('✅ Respuesta enviada correctamente. El equipo de soporte la revisará pronto.');
+                showNotification('Respuesta enviada correctamente. El equipo de soporte la revisará pronto.', 'success');
                 
                 // Cerrar modal y recargar tickets
                 closeViewTicketModal();
@@ -2785,7 +2785,7 @@
                 
             } catch (error) {
                 console.error('❌ [CLIENT] Error enviando respuesta:', error);
-                alert('Error al enviar la respuesta. Por favor, intenta de nuevo.');
+                showNotification('Error al enviar la respuesta. Por favor, intenta de nuevo.', 'error');
             }
         }
         
@@ -2929,6 +2929,165 @@
         if (currentClient && currentClient.plan && currentClient.plan !== 'null') {
             document.getElementById('chatWidget').style.display = 'block';
         }
+
+        // ===== SISTEMA DE NOTIFICACIONES =====
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('customNotification');
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+            const progressBar = document.getElementById('notificationProgress');
+            
+            // Iconos y colores según tipo
+            const config = {
+                success: { icon: '✅', color: '#009A62', bg: '#f0f9f4', border: '#009A62' },
+                error: { icon: '❌', color: '#dc3545', bg: '#ffe6e6', border: '#dc3545' },
+                info: { icon: 'ℹ️', color: '#0046FE', bg: '#e8f4ff', border: '#0046FE' },
+                warning: { icon: '⚠️', color: '#ffc107', bg: '#fff3cd', border: '#ffc107' }
+            };
+            
+            const style = config[type] || config.info;
+            
+            icon.textContent = style.icon;
+            text.textContent = message;
+            notification.style.borderColor = style.border;
+            notification.style.background = style.bg;
+            notification.style.color = style.color;
+            progressBar.style.background = style.color;
+            
+            // Mostrar notificación
+            notification.classList.add('show');
+            progressBar.style.animation = 'none';
+            setTimeout(() => {
+                progressBar.style.animation = 'progress 3s linear';
+            }, 10);
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function showConfirmation(message, onConfirm, onCancel) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const messageEl = document.getElementById('confirmMessage');
+                const confirmBtn = document.getElementById('confirmYes');
+                const cancelBtn = document.getElementById('confirmNo');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                confirmBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    if (onConfirm) onConfirm();
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    if (onCancel) onCancel();
+                    resolve(false);
+                };
+            });
+        }
     </script>
+
+    <!-- Sistema de Notificaciones -->
+    <div id="customNotification" class="custom-notification">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="notificationIcon" style="font-size: 1.5rem;"></span>
+            <span id="notificationText" style="font-weight: 600; flex: 1;"></span>
+            <button onclick="document.getElementById('customNotification').classList.remove('show')" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.6; color: inherit;">×</button>
+        </div>
+        <div id="notificationProgress" class="notification-progress"></div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="customConfirmModal" class="custom-confirm-modal">
+        <div class="custom-confirm-content">
+            <div style="font-size: 3rem; text-align: center; margin-bottom: 20px;">🤔</div>
+            <p id="confirmMessage" style="font-size: 1.1rem; color: #1B1B1B; text-align: center; margin-bottom: 30px; line-height: 1.6;"></p>
+            <div style="display: flex; gap: 15px;">
+                <button id="confirmNo" class="btn-secondary" style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; background: white; color: #666; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button id="confirmYes" class="btn-action" style="flex: 1; padding: 12px; background: #0046FE; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform: translateX(calc(100% + 40px));
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100000;
+            overflow: hidden;
+        }
+
+        .custom-notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .custom-confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .custom-confirm-content {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalZoom 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes modalZoom {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 </body>
 </html> 

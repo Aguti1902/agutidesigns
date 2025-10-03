@@ -1455,7 +1455,7 @@
                 }
             } catch (error) {
                 console.error('❌ [ADMIN] Error de conexión:', error);
-                alert('Error de conexión');
+                showNotification('Error de conexión', 'error');
             }
         });
 
@@ -1709,7 +1709,7 @@
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando detalles del ticket:', error);
-                alert('Error cargando detalles del ticket: ' + error.message);
+                showNotification('Error cargando detalles del ticket', 'error');
             }
         }
         
@@ -1718,7 +1718,7 @@
             const newStatus = document.getElementById('ticketNewStatus').value;
             
             if (!response || response.trim() === '') {
-                alert('Por favor, escribe una respuesta antes de enviar.');
+                showNotification('Por favor, escribe una respuesta antes de enviar.', 'warning');
                 return;
             }
             
@@ -1743,13 +1743,13 @@
                 const data = await res.json();
                 console.log('✅ [ADMIN] Respuesta enviada correctamente:', data);
                 
-                alert('✅ Respuesta enviada correctamente. El cliente recibirá un email.');
+                showNotification('Respuesta enviada correctamente. El cliente recibirá un email.', 'success');
                 closeTicketModal();
                 loadTickets(); // Recargar tabla
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error enviando respuesta:', error);
-                alert('Error enviando respuesta: ' + error.message);
+                showNotification('Error enviando respuesta', 'error');
             }
         }
 
@@ -1952,7 +1952,7 @@
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando detalles del pedido:', error);
-                alert('Error cargando detalles del pedido');
+                showNotification('Error cargando detalles del pedido', 'error');
             }
         }
 
@@ -1997,7 +1997,7 @@
 
         function viewClient(id) {
             // TODO: Implementar vista detallada del cliente
-            alert(`Ver cliente #${id} - Implementar próximamente`);
+            showNotification(`Ver cliente #${id} - Próximamente`, 'info');
         }
 
         // ===== VIDEOS =====
@@ -2024,7 +2024,7 @@
         document.getElementById('videoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             // TODO: Implementar guardado de video
-            alert('Sistema de videos - Implementar próximamente');
+            showNotification('Sistema de videos - Próximamente', 'info');
             closeVideoModal();
         });
 
@@ -2327,7 +2327,7 @@
                 
                 // Si se mueve a "Entregada", pedir confirmación
                 if (newStatus === 'entregada') {
-                    const confirmed = confirm('🚀 ¿Estás seguro de que quieres marcar este proyecto como ENTREGADO?\n\nEsto notificará al cliente que su web está lista y cambiará el estado de su sitio a "Activo".');
+                    const confirmed = await showConfirmation('¿Estás seguro de que quieres marcar este proyecto como ENTREGADO? Esto notificará al cliente que su web está lista y cambiará el estado de su sitio a "Activo".');
                     
                     if (!confirmed) {
                         return false;
@@ -2358,7 +2358,7 @@
                                 })
                             });
                             
-                            alert('✅ Proyecto marcado como entregado. El cliente ha sido notificado y su sitio está ahora ACTIVO.');
+                            showNotification('Proyecto marcado como entregado. El cliente ha sido notificado y su sitio está ahora ACTIVO.', 'success');
                         }
                     }
                     
@@ -2366,7 +2366,7 @@
                     await loadProjects();
                 } catch (error) {
                     console.error('Error moviendo proyecto:', error);
-                    alert('Error moviendo el proyecto');
+                    showNotification('Error moviendo el proyecto', 'error');
                 }
             }
             
@@ -2399,7 +2399,7 @@
                 document.getElementById('projectModal').classList.add('active');
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error cargando datos del proyecto');
+                showNotification('Error cargando datos del proyecto', 'error');
             }
         }
 
@@ -2455,7 +2455,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(projectData)
                     });
-                    alert('Proyecto actualizado exitosamente');
+                    showNotification('Proyecto actualizado exitosamente', 'success');
                 } else {
                     // Modo creación
                     await fetch(`${API_URL}/api/admin/projects`, {
@@ -2463,14 +2463,14 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(projectData)
                     });
-                    alert('Proyecto creado exitosamente');
+                    showNotification('Proyecto creado exitosamente', 'success');
                 }
                 
                 closeProjectModal();
                 await loadProjects();
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error guardando el proyecto');
+                showNotification('Error guardando el proyecto', 'error');
             }
         });
 
@@ -2500,6 +2500,163 @@
                 day: 'numeric'
             });
         }
+
+        // ===== SISTEMA DE NOTIFICACIONES =====
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('customNotification');
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+            const progressBar = document.getElementById('notificationProgress');
+            
+            // Iconos y colores según tipo
+            const config = {
+                success: { icon: '✅', color: '#009A62', bg: '#f0f9f4', border: '#009A62' },
+                error: { icon: '❌', color: '#dc3545', bg: '#ffe6e6', border: '#dc3545' },
+                info: { icon: 'ℹ️', color: '#0046FE', bg: '#e8f4ff', border: '#0046FE' },
+                warning: { icon: '⚠️', color: '#ffc107', bg: '#fff3cd', border: '#ffc107' }
+            };
+            
+            const style = config[type] || config.info;
+            
+            icon.textContent = style.icon;
+            text.textContent = message;
+            notification.style.borderColor = style.border;
+            notification.style.background = style.bg;
+            notification.style.color = style.color;
+            progressBar.style.background = style.color;
+            
+            // Mostrar notificación
+            notification.classList.add('show');
+            progressBar.style.animation = 'none';
+            setTimeout(() => {
+                progressBar.style.animation = 'progress 3s linear';
+            }, 10);
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function showConfirmation(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const messageEl = document.getElementById('confirmMessage');
+                const confirmBtn = document.getElementById('confirmYes');
+                const cancelBtn = document.getElementById('confirmNo');
+                
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                
+                confirmBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(false);
+                };
+            });
+        }
     </script>
+
+    <!-- Sistema de Notificaciones -->
+    <div id="customNotification" class="custom-notification">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="notificationIcon" style="font-size: 1.5rem;"></span>
+            <span id="notificationText" style="font-weight: 600; flex: 1;"></span>
+            <button onclick="document.getElementById('customNotification').classList.remove('show')" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.6; color: inherit;">×</button>
+        </div>
+        <div id="notificationProgress" class="notification-progress"></div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="customConfirmModal" class="custom-confirm-modal">
+        <div class="custom-confirm-content">
+            <div style="font-size: 3rem; text-align: center; margin-bottom: 20px;">🚀</div>
+            <p id="confirmMessage" style="font-size: 1.1rem; color: #1B1B1B; text-align: center; margin-bottom: 30px; line-height: 1.6;"></p>
+            <div style="display: flex; gap: 15px;">
+                <button id="confirmNo" class="btn-secondary" style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; background: white; color: #666; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    Cancelar
+                </button>
+                <button id="confirmYes" style="flex: 1; padding: 12px; background: #0046FE; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform: translateX(calc(100% + 40px));
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100000;
+            overflow: hidden;
+        }
+
+        .custom-notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .custom-confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .custom-confirm-content {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalZoom 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes modalZoom {
+            from {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 </body>
 </html>
