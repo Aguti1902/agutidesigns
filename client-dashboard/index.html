@@ -2985,6 +2985,71 @@
             document.getElementById('chatWidget').style.display = 'block';
         }
 
+        // ===== ACTUALIZACIÓN AUTOMÁTICA DE TICKETS =====
+        let autoUpdateInterval = null;
+
+        async function updateUnreadBadge() {
+            if (!currentClient || !currentClient.id) return;
+            
+            try {
+                console.log('🔄 [AUTO-UPDATE] Actualizando contador de mensajes...');
+                const response = await fetch(`${API_URL}/api/tickets/client/${currentClient.id}`);
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                const tickets = data.tickets || [];
+                
+                // Contar mensajes sin leer
+                const unreadCount = tickets.filter(t => t.client_unread === 1).length;
+                console.log('🔔 [AUTO-UPDATE] Mensajes sin leer:', unreadCount);
+                
+                // Actualizar badge en el menú
+                const badge = document.getElementById('unreadBadgeMenu');
+                if (badge) {
+                    const previousCount = parseInt(badge.textContent) || 0;
+                    
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'inline-block';
+                        
+                        // Si hay mensajes nuevos que antes no había, mostrar notificación
+                        if (unreadCount > previousCount && previousCount >= 0) {
+                            const newMessages = unreadCount - previousCount;
+                            if (newMessages > 0) {
+                                showNotification(`Tienes ${newMessages} mensaje${newMessages > 1 ? 's' : ''} nuevo${newMessages > 1 ? 's' : ''}`, 'info');
+                            }
+                        }
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                // Si estamos en la sección de contactar, recargar la lista de tickets
+                const currentSection = document.querySelector('.content-section[style*="display: block"]');
+                if (currentSection && currentSection.id === 'contactar') {
+                    const activeTab = document.getElementById('tabConversaciones');
+                    if (activeTab && activeTab.classList.contains('active')) {
+                        displayClientTickets(tickets);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ [AUTO-UPDATE] Error actualizando badge:', error);
+            }
+        }
+
+        // Iniciar actualización automática cada 30 segundos
+        if (currentClient && currentClient.id) {
+            console.log('⏰ [AUTO-UPDATE] Iniciando actualización automática cada 30 segundos');
+            
+            // Primera actualización inmediata
+            updateUnreadBadge();
+            
+            // Actualizaciones periódicas
+            autoUpdateInterval = setInterval(updateUnreadBadge, 30000); // 30 segundos
+        }
+
         // ===== SISTEMA DE NOTIFICACIONES =====
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('customNotification');

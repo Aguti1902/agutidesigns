@@ -2529,6 +2529,67 @@
             }
         });
 
+        // ===== ACTUALIZACIÓN AUTOMÁTICA DE TICKETS =====
+        let autoUpdateIntervalAdmin = null;
+
+        async function updateAdminUnreadBadge() {
+            try {
+                console.log('🔄 [AUTO-UPDATE ADMIN] Actualizando contador de mensajes...');
+                const response = await fetch(`${API_URL}/api/tickets`);
+                
+                if (!response.ok) return;
+                
+                const tickets = await response.json();
+                
+                // Contar mensajes sin leer del admin
+                const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
+                console.log('🔔 [AUTO-UPDATE ADMIN] Mensajes sin leer:', unreadCount);
+                
+                // Actualizar badge en el menú
+                const badge = document.getElementById('unreadBadgeMenuAdmin');
+                if (badge) {
+                    const previousCount = parseInt(badge.textContent) || 0;
+                    
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'inline-block';
+                        
+                        // Si hay mensajes nuevos que antes no había, mostrar notificación
+                        if (unreadCount > previousCount && previousCount >= 0) {
+                            const newMessages = unreadCount - previousCount;
+                            if (newMessages > 0) {
+                                showNotification(`${newMessages} mensaje${newMessages > 1 ? 's' : ''} nuevo${newMessages > 1 ? 's' : ''} del cliente`, 'info');
+                            }
+                        }
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                // Si estamos en la sección de tickets, recargar la tabla
+                const ticketsSection = document.getElementById('tickets');
+                if (ticketsSection && ticketsSection.style.display !== 'none') {
+                    const tbody = document.getElementById('ticketsTable');
+                    if (tbody) {
+                        // Recargar tabla completa
+                        loadTickets();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ [AUTO-UPDATE ADMIN] Error actualizando badge:', error);
+            }
+        }
+
+        // Iniciar actualización automática cada 30 segundos
+        console.log('⏰ [AUTO-UPDATE ADMIN] Iniciando actualización automática cada 30 segundos');
+        
+        // Primera actualización inmediata
+        updateAdminUnreadBadge();
+        
+        // Actualizaciones periódicas
+        autoUpdateIntervalAdmin = setInterval(updateAdminUnreadBadge, 30000); // 30 segundos
+
         // ===== FORMATEADORES =====
         function formatPlan(plan) {
             const names = {
