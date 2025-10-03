@@ -805,18 +805,60 @@
                     </div>
                 </div>
 
-                <!-- ========== NUEVA SECCIÓN: MIS DATOS ========== -->
-                <!-- Esta sección replica TODOS los campos del formulario -->
+                <!-- ========== MIS DATOS - REPLICA DEL FORMULARIO ========== -->
                 <div id="negocio" class="content-section">
-                    <div class="section-header">
-                        <h1 class="section-title">📋 Mis Datos</h1>
-                        <p class="section-subtitle">Toda la información de tu negocio y web. <span id="editTimeInfo"></span></p>
+                    <div style="background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); padding: 40px 30px; border-radius: 15px; margin-bottom: 30px;">
+                        <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">📋 Mis Datos</h1>
+                        <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin: 0;">Toda la información que proporcionaste en el formulario</p>
                     </div>
                 
-                    <!-- Nota informativa -->
-                    <div style="background: #e8f4ff; border: 2px solid #0046FE; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-                        <p style="margin: 0; color: #1B1B1B; font-weight: 600;"><span style="font-size: 1.2rem;">ℹ️</span> Estos son todos los datos que proporcionaste en el formulario</p>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Si necesitas modificar algún dato, contacta con soporte desde la sección <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">Contactar</a></p>
+                    <!-- Banner informativo -->
+                    <div style="background: #e8f4ff; border-left: 5px solid #0046FE; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+                        <p style="margin: 0; color: #1B1B1B; font-weight: 600; font-size: 1rem;"><span style="font-size: 1.3rem;">💡</span> Este es un resumen completo de tu solicitud</p>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95rem; color: #666;">Si necesitas modificar algo, contacta con nosotros desde <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700; text-decoration: underline;">Contactar</a></p>
+                    </div>
+                    
+                    <!-- PASO 1: DETALLES DEL NEGOCIO -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <h2 style="font-size: 1.8rem; font-weight: 700; color: #1B1B1B; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">🏢 Detalles del Negocio</h2>
+                        <p style="color: #666; margin-bottom: 30px; font-size: 1rem;">Información básica de tu empresa o proyecto</p>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <!-- Nombre -->
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Nombre de tu empresa o negocio</label>
+                                <div id="resp_business_name" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600; min-height: 50px; display: flex; align-items: center;">-</div>
+                            </div>
+                            
+                            <!-- Descripción -->
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Descripción general del negocio</label>
+                                <div id="resp_business_description" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 80px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                            </div>
+                            
+                            <!-- Sector -->
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Sector o industria</label>
+                                <div id="resp_industry" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600; min-height: 50px; display: flex; align-items: center;">-</div>
+                            </div>
+                            
+                            <!-- Datos fiscales -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 10px;">
+                                <div>
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">CIF/NIF de la empresa</label>
+                                    <div id="resp_cif_nif" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 0.95rem;">Razón social</label>
+                                    <div id="resp_razon_social" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Dirección fiscal completa</label>
+                                <div id="resp_direccion_fiscal" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card">
