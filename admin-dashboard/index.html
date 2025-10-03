@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
+            background: #f7f7f7;
         }
 
         /* ===== LOGIN PAGE ===== */
@@ -110,7 +110,8 @@
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 260px;
-            background: #1B1B1B;
+            background: white;
+            border-right: 1px solid #e8eaed;
             min-height: 100vh;
             padding: 20px 0;
             position: fixed;
@@ -121,16 +122,16 @@
 
         .sidebar-logo {
             padding: 0 20px 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid #e8eaed;
         }
 
         .sidebar-logo h2 {
-            color: #FEFAF5;
+            color: #1B1B1B;
             font-size: 1.3rem;
         }
 
         .sidebar-logo p {
-            color: #999;
+            color: #666;
             font-size: 0.85rem;
             margin-top: 5px;
         }
@@ -141,29 +142,31 @@
 
         .nav-item {
             padding: 14px 20px;
-            color: #FEFAF5;
+            color: #666;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 0.95rem;
-            border-left: 3px solid transparent;
+            font-weight: 500;
+            margin: 5px 15px;
+            border-radius: 10px;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.05);
-            border-left-color: #0046FE;
+            background: #f5f5f5;
+            color: #0046FE;
         }
 
         .nav-item.active {
-            background: rgba(0,70,254,0.1);
-            border-left-color: #0046FE;
-            color: #E5FC63;
+            background: #e8f4ff;
+            color: #0046FE;
+            font-weight: 600;
         }
 
         .nav-item .icon {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             width: 24px;
             text-align: center;
         }
@@ -179,9 +182,9 @@
         .btn-logout {
             width: 100%;
             padding: 12px;
-            background: rgba(229, 252, 99, 0.1);
-            border: 2px solid #E5FC63;
-            color: #E5FC63;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
@@ -189,8 +192,7 @@
         }
 
         .btn-logout:hover {
-            background: #E5FC63;
-            color: #1B1B1B;
+            background: #e0e0e0;
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -233,11 +235,10 @@
         }
 
         .stat-card {
-            background: white;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            color: white;
             padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #0046FE;
+            border-radius: 12px;
             position: relative;
             overflow: hidden;
         }
@@ -245,54 +246,52 @@
         .stat-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            right: 0;
+            top: -50%;
+            right: -20px;
             width: 100px;
             height: 100px;
-            background: linear-gradient(135deg, rgba(0,70,254,0.05), transparent);
-            border-radius: 0 0 0 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
 
         .stat-card.green {
-            border-left-color: #009A62;
+            background: linear-gradient(135deg, #009A62 0%, #007A4F 100%);
         }
 
         .stat-card.yellow {
-            border-left-color: #E5FC63;
+            background: linear-gradient(135deg, #E5FC63 0%, #D4EB52 100%);
+            color: #1B1B1B;
         }
 
         .stat-card.red {
-            border-left-color: #EC6746;
+            background: linear-gradient(135deg, #EC6746 0%, #D85635 100%);
         }
 
         .stat-label {
-            color: #666;
             font-size: 0.9rem;
+            opacity: 0.9;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .stat-value {
             font-size: 2.2rem;
             font-weight: 700;
-            color: #1B1B1B;
+            margin-bottom: 5px;
         }
 
         .stat-change {
             font-size: 0.85rem;
-            color: #009A62;
+            opacity: 0.85;
             margin-top: 8px;
         }
 
         /* ===== CARDS ===== */
         .card {
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
+            border: 1px solid #e8eaed;
         }
 
         .card-header {
@@ -301,7 +300,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 1px solid #e8eaed;
         }
 
         .card-header h2 {
