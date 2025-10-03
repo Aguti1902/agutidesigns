@@ -1886,6 +1886,7 @@
                 
                 const submissionData = {
                     ...data,
+                    full_name: fullName,  // 🔧 Agregar full_name a la submission
                     plan: plan,
                     billing_cycle: window.selectedBilling || 'monthly'
                 };
