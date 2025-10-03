@@ -938,6 +938,117 @@ app.put('/api/submissions/:submissionId', (req, res) => {
     }
 });
 
+// ====== ENDPOINT: Actualizar datos del cliente (con validación 24h) ======
+app.put('/api/client/update-data/:clientId', (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const updatedData = req.body;
+        
+        console.log(`📝 [CLIENT] Cliente #${clientId} solicita actualizar datos`);
+        console.log('📦 [CLIENT] Datos recibidos:', Object.keys(updatedData));
+        
+        // 1. Obtener información del cliente
+        const clientStmt = db.db.prepare('SELECT * FROM clients WHERE id = ?');
+        const client = clientStmt.get(clientId);
+        
+        if (!client) {
+            console.log('❌ [CLIENT] Cliente no encontrado');
+            return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
+        }
+        
+        // 2. Validar período de 24h
+        const paymentDate = new Date(client.payment_date || client.created_at);
+        const now = new Date();
+        const hoursSincePayment = (now - paymentDate) / (1000 * 60 * 60);
+        
+        console.log('⏰ [CLIENT] Horas desde el pago:', hoursSincePayment.toFixed(2));
+        
+        if (hoursSincePayment > 24) {
+            console.log('❌ [CLIENT] Período de edición expirado');
+            return res.status(403).json({ 
+                success: false, 
+                message: 'El período de edición de 24 horas ha expirado. Contacta a soporte para hacer cambios.' 
+            });
+        }
+        
+        // 3. Actualizar submission (si existe)
+        if (client.submission_id) {
+            console.log(`📝 [CLIENT] Actualizando submission #${client.submission_id}`);
+            
+            const updateStmt = db.db.prepare(`
+                UPDATE submissions 
+                SET business_name = COALESCE(?, business_name),
+                    business_description = COALESCE(?, business_description),
+                    cif_nif = COALESCE(?, cif_nif),
+                    razon_social = COALESCE(?, razon_social),
+                    direccion_fiscal = COALESCE(?, direccion_fiscal),
+                    phone_number = COALESCE(?, phone_number),
+                    email_contact = COALESCE(?, email_contact),
+                    whatsapp_number = COALESCE(?, whatsapp_number),
+                    form_email = COALESCE(?, form_email),
+                    physical_address = COALESCE(?, physical_address),
+                    instagram = COALESCE(?, instagram),
+                    facebook = COALESCE(?, facebook),
+                    linkedin = COALESCE(?, linkedin),
+                    twitter = COALESCE(?, twitter),
+                    target_audience = COALESCE(?, target_audience),
+                    services = COALESCE(?, services),
+                    web_texts = COALESCE(?, web_texts),
+                    brand_colors = COALESCE(?, brand_colors),
+                    reference_websites = COALESCE(?, reference_websites),
+                    keywords = COALESCE(?, keywords),
+                    domain_name = COALESCE(?, domain_name),
+                    domain_alt1 = COALESCE(?, domain_alt1),
+                    domain_alt2 = COALESCE(?, domain_alt2),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `);
+            
+            updateStmt.run(
+                updatedData.business_name || null,
+                updatedData.business_description || null,
+                updatedData.cif_nif || null,
+                updatedData.razon_social || null,
+                updatedData.direccion_fiscal || null,
+                updatedData.phone_number || null,
+                updatedData.email_contact || null,
+                updatedData.whatsapp_number || null,
+                updatedData.form_email || null,
+                updatedData.physical_address || null,
+                updatedData.instagram || null,
+                updatedData.facebook || null,
+                updatedData.linkedin || null,
+                updatedData.twitter || null,
+                updatedData.target_audience || null,
+                updatedData.services_list || null,
+                updatedData.web_texts || null,
+                updatedData.brand_colors || null,
+                updatedData.reference_websites || null,
+                updatedData.keywords || null,
+                updatedData.domain_name || null,
+                updatedData.domain_alt1 || null,
+                updatedData.domain_alt2 || null,
+                client.submission_id
+            );
+            
+            console.log('✅ [CLIENT] Submission actualizada correctamente');
+        } else {
+            console.log('⚠️ [CLIENT] Cliente sin submission_id, no se actualizan datos de formulario');
+        }
+        
+        // 4. Responder éxito
+        res.json({
+            success: true,
+            message: 'Datos actualizados correctamente',
+            hoursRemaining: (24 - hoursSincePayment).toFixed(2)
+        });
+        
+    } catch (error) {
+        console.error('❌ [CLIENT] Error actualizando datos:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // 🆕 ENDPOINT TEMPORAL: Vincular submission_id a clientes existentes
 app.post('/api/admin/fix-client-submissions', (req, res) => {
     try {

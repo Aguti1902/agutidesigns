@@ -813,9 +813,33 @@
                         <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin: 0;">Organizado exactamente como rellenaste el formulario</p>
                     </div>
                 
-                    <!-- Banner -->
-                    <div style="background: #e8f4ff; border-left: 5px solid #0046FE; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+                    <!-- Contador 24h y botón editar (solo visible para clientes con plan) -->
+                    <div id="editCountdownBanner" style="display: none; background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); border: 3px solid #c9e047; padding: 25px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(229,252,99,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                            <div>
+                                <p style="margin: 0; color: #1B1B1B; font-weight: 700; font-size: 1.2rem;"><span style="font-size: 1.5rem;">⏰</span> Tiempo restante para editar</p>
+                                <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #666;">Puedes modificar tus datos durante las primeras 24 horas después del pago</p>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div id="editCountdown" style="background: white; padding: 15px 30px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                                    <p style="margin: 0; font-size: 2rem; font-weight: 800; color: #0046FE; font-family: 'Courier New', monospace; text-align: center;">--:--:--</p>
+                                </div>
+                                <button id="enableEditButton" onclick="enableGlobalEdit()" style="background: #0046FE; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,70,254,0.3);">
+                                    ✏️ Editar Datos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Banner informativo (cuando NO puede editar) -->
+                    <div id="infoOnlyBanner" style="display: none; background: #e8f4ff; border-left: 5px solid #0046FE; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
                         <p style="margin: 0; color: #1B1B1B; font-weight: 600;"><span style="font-size: 1.3rem;">💡</span> Revisa que no falte nada. Si algo falta, <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">contáctanos aquí</a></p>
+                    </div>
+                    
+                    <!-- Banner de período expirado -->
+                    <div id="editExpiredBanner" style="display: none; background: #fff3cd; border: 3px solid #ffc107; padding: 20px; margin-bottom: 30px; border-radius: 12px;">
+                        <p style="margin: 0; color: #856404; font-weight: 700; font-size: 1.1rem;"><span style="font-size: 1.3rem;">⏰</span> El período de edición de 24 horas ha expirado</p>
+                        <p style="margin: 10px 0 0 0; color: #856404;">Si necesitas hacer cambios, <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">contacta con soporte</a></p>
                     </div>
                     
                     <!-- ============ SECCIÓN 1: NEGOCIO ============ -->
@@ -2403,6 +2427,13 @@
                     } else if (websiteStatus !== 'activo' && hasPlan && !data.client.payment_date) {
                         // Si tiene plan pero no payment_date (datos antiguos), usar created_at
                         startEditTimer(data.client.created_at);
+                    } else {
+                        // Si no tiene plan o website está activo, mostrar banner informativo
+                        const editCountdownBanner = document.getElementById('editCountdownBanner');
+                        const infoOnlyBanner = document.getElementById('infoOnlyBanner');
+                        
+                        if (editCountdownBanner) editCountdownBanner.style.display = 'none';
+                        if (infoOnlyBanner) infoOnlyBanner.style.display = 'block';
                     }
                 }
             } catch (error) {
@@ -2966,6 +2997,19 @@
             const createdDate = new Date(createdAt);
             const expirationDate = new Date(createdDate.getTime() + (24 * 60 * 60 * 1000)); // +24 horas
             
+            console.log('⏰ Iniciando contador de edición 24h', {
+                created: createdDate,
+                expires: expirationDate
+            });
+            
+            // Mostrar banner de contador (solo para clientes con plan)
+            const editCountdownBanner = document.getElementById('editCountdownBanner');
+            const infoOnlyBanner = document.getElementById('infoOnlyBanner');
+            const editExpiredBannerNegocio = document.getElementById('editExpiredBanner');
+            
+            if (editCountdownBanner) editCountdownBanner.style.display = 'block';
+            if (infoOnlyBanner) infoOnlyBanner.style.display = 'none';
+            
             function updateCountdown() {
                 const now = new Date();
                 const timeLeft = expirationDate - now;
@@ -2973,8 +3017,17 @@
                 if (timeLeft <= 0) {
                     // Tiempo expirado
                     canEdit = false;
-                    document.getElementById('editTimerBanner').style.display = 'none';
-                    document.getElementById('editExpiredBanner').style.display = 'block';
+                    
+                    // Ocultar contador y mostrar mensaje de expiración
+                    if (editCountdownBanner) editCountdownBanner.style.display = 'none';
+                    if (editExpiredBannerNegocio) editExpiredBannerNegocio.style.display = 'block';
+                    
+                    // También en resumen (si existe)
+                    const editTimerBanner = document.getElementById('editTimerBanner');
+                    const editExpiredBannerResumen = document.getElementById('editExpiredBanner');
+                    if (editTimerBanner) editTimerBanner.style.display = 'none';
+                    if (editExpiredBannerResumen) editExpiredBannerResumen.style.display = 'block';
+                    
                     disableAllEditButtons();
                     if (countdownInterval) clearInterval(countdownInterval);
                     return;
@@ -2988,9 +3041,16 @@
                 // Formatear con ceros
                 const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 
+                // Actualizar ambos contadores
                 const countdownEl = document.getElementById('countdown');
+                const editCountdownEl = document.getElementById('editCountdown');
+                
                 if (countdownEl) {
                     countdownEl.textContent = formatted;
+                }
+                
+                if (editCountdownEl) {
+                    editCountdownEl.querySelector('p').textContent = formatted;
                 }
                 
                 // Cambiar color cuando queda menos de 1 hora
@@ -3019,6 +3079,217 @@
                 btn.style.cursor = 'not-allowed';
                 btn.onclick = () => showNotification('El período de edición ha finalizado. Contacta a soporte para hacer cambios.', 'warning');
             });
+            
+            // También deshabilitar botón de edición global
+            const enableEditButton = document.getElementById('enableEditButton');
+            if (enableEditButton) {
+                enableEditButton.disabled = true;
+                enableEditButton.style.opacity = '0.5';
+                enableEditButton.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // ============ MODO EDICIÓN GLOBAL ============
+        let isEditMode = false;
+        let originalData = {};
+        
+        function enableGlobalEdit() {
+            if (!canEdit) {
+                showNotification('El período de edición (24h) ha finalizado. Contacta a soporte para hacer cambios.', 'warning');
+                return;
+            }
+            
+            console.log('✏️ Habilitando modo edición global');
+            isEditMode = true;
+            
+            // Guardar datos originales
+            originalData = {
+                business_name: document.getElementById('form_business_name').textContent,
+                business_description: document.getElementById('form_business_description').textContent,
+                industry: document.getElementById('form_industry').textContent,
+                cif_nif: document.getElementById('form_cif_nif').textContent,
+                razon_social: document.getElementById('form_razon_social').textContent,
+                direccion_fiscal: document.getElementById('form_direccion_fiscal').textContent,
+                phone_number: document.getElementById('form_phone_number').textContent,
+                email_contact: document.getElementById('form_email_contact').textContent,
+                whatsapp_number: document.getElementById('form_whatsapp_number').textContent,
+                form_email: document.getElementById('form_form_email').textContent,
+                physical_address: document.getElementById('form_physical_address').textContent,
+                instagram: document.getElementById('form_instagram').textContent,
+                facebook: document.getElementById('form_facebook').textContent,
+                linkedin: document.getElementById('form_linkedin').textContent,
+                twitter: document.getElementById('form_twitter').textContent,
+                target_audience: document.getElementById('form_target_audience').textContent,
+                services_list: document.getElementById('form_services_list').textContent,
+                web_texts: document.getElementById('form_web_texts').textContent,
+                brand_colors: document.getElementById('form_brand_colors').textContent,
+                reference_websites: document.getElementById('form_reference_websites').textContent,
+                keywords: document.getElementById('form_keywords').textContent,
+                domain_name: document.getElementById('form_domain_name').textContent,
+                domain_alt1: document.getElementById('form_domain_alt1').textContent,
+                domain_alt2: document.getElementById('form_domain_alt2').textContent
+            };
+            
+            // Convertir divs a inputs editables
+            makeFieldEditable('form_business_name', 'input');
+            makeFieldEditable('form_business_description', 'textarea', {rows: 4});
+            makeFieldEditable('form_cif_nif', 'input');
+            makeFieldEditable('form_razon_social', 'input');
+            makeFieldEditable('form_direccion_fiscal', 'input');
+            makeFieldEditable('form_phone_number', 'input', {type: 'tel'});
+            makeFieldEditable('form_email_contact', 'input', {type: 'email'});
+            makeFieldEditable('form_whatsapp_number', 'input', {type: 'tel'});
+            makeFieldEditable('form_form_email', 'input', {type: 'email'});
+            makeFieldEditable('form_physical_address', 'input');
+            makeFieldEditable('form_instagram', 'input');
+            makeFieldEditable('form_facebook', 'input');
+            makeFieldEditable('form_linkedin', 'input');
+            makeFieldEditable('form_twitter', 'input');
+            makeFieldEditable('form_target_audience', 'textarea', {rows: 3});
+            makeFieldEditable('form_services_list', 'textarea', {rows: 5});
+            makeFieldEditable('form_web_texts', 'textarea', {rows: 6});
+            makeFieldEditable('form_brand_colors', 'input');
+            makeFieldEditable('form_reference_websites', 'textarea', {rows: 4});
+            makeFieldEditable('form_keywords', 'input');
+            makeFieldEditable('form_domain_name', 'input');
+            makeFieldEditable('form_domain_alt1', 'input');
+            makeFieldEditable('form_domain_alt2', 'input');
+            
+            // Ocultar botón "Editar Datos" y mostrar botones de guardar/cancelar
+            document.getElementById('enableEditButton').style.display = 'none';
+            
+            // Crear botones de acción si no existen
+            let actionButtons = document.getElementById('globalActionButtons');
+            if (!actionButtons) {
+                actionButtons = document.createElement('div');
+                actionButtons.id = 'globalActionButtons';
+                actionButtons.style = 'position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.3);';
+                actionButtons.innerHTML = `
+                    <button onclick="cancelGlobalEdit()" style="background: #6c757d; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;">
+                        ❌ Cancelar
+                    </button>
+                    <button onclick="saveAllData()" style="background: #009A62; color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,154,98,0.4);">
+                        💾 Guardar Cambios
+                    </button>
+                `;
+                document.body.appendChild(actionButtons);
+            } else {
+                actionButtons.style.display = 'flex';
+            }
+            
+            showNotification('Modo edición activado. Modifica los campos y haz clic en "Guardar Cambios"', 'success');
+        }
+        
+        function makeFieldEditable(fieldId, type = 'input', options = {}) {
+            const element = document.getElementById(fieldId);
+            if (!element) return;
+            
+            const currentValue = element.textContent.trim();
+            if (currentValue === '-') return; // No hacer editables campos vacíos
+            
+            let inputHTML = '';
+            const baseStyle = 'width: 100%; padding: 12px 18px; border: 2px solid #0046FE; border-radius: 8px; font-family: inherit; font-size: inherit; background: white;';
+            
+            if (type === 'textarea') {
+                const rows = options.rows || 3;
+                inputHTML = `<textarea style="${baseStyle} min-height: ${rows * 30}px; resize: vertical;">${currentValue}</textarea>`;
+            } else {
+                const inputType = options.type || 'text';
+                inputHTML = `<input type="${inputType}" value="${currentValue}" style="${baseStyle}">`;
+            }
+            
+            element.innerHTML = inputHTML;
+        }
+        
+        function cancelGlobalEdit() {
+            console.log('❌ Cancelando modo edición');
+            isEditMode = false;
+            
+            // Restaurar datos originales
+            Object.keys(originalData).forEach(key => {
+                const element = document.getElementById(`form_${key}`) || document.getElementById(key);
+                if (element) {
+                    element.textContent = originalData[key];
+                }
+            });
+            
+            // Mostrar botón editar y ocultar botones de acción
+            document.getElementById('enableEditButton').style.display = 'block';
+            const actionButtons = document.getElementById('globalActionButtons');
+            if (actionButtons) actionButtons.style.display = 'none';
+            
+            showNotification('Cambios cancelados', 'info');
+        }
+        
+        async function saveAllData() {
+            if (!canEdit) {
+                showNotification('El período de edición ha finalizado', 'error');
+                return;
+            }
+            
+            console.log('💾 Guardando todos los cambios...');
+            
+            // Recopilar datos editados
+            const updatedData = {
+                business_name: document.querySelector('#form_business_name input, #form_business_name textarea')?.value || document.getElementById('form_business_name').textContent,
+                business_description: document.querySelector('#form_business_description textarea')?.value || document.getElementById('form_business_description').textContent,
+                cif_nif: document.querySelector('#form_cif_nif input')?.value || document.getElementById('form_cif_nif').textContent,
+                razon_social: document.querySelector('#form_razon_social input')?.value || document.getElementById('form_razon_social').textContent,
+                direccion_fiscal: document.querySelector('#form_direccion_fiscal input')?.value || document.getElementById('form_direccion_fiscal').textContent,
+                phone_number: document.querySelector('#form_phone_number input')?.value || document.getElementById('form_phone_number').textContent,
+                email_contact: document.querySelector('#form_email_contact input')?.value || document.getElementById('form_email_contact').textContent,
+                whatsapp_number: document.querySelector('#form_whatsapp_number input')?.value || document.getElementById('form_whatsapp_number').textContent,
+                form_email: document.querySelector('#form_form_email input')?.value || document.getElementById('form_form_email').textContent,
+                physical_address: document.querySelector('#form_physical_address input')?.value || document.getElementById('form_physical_address').textContent,
+                instagram: document.querySelector('#form_instagram input')?.value || document.getElementById('form_instagram').textContent,
+                facebook: document.querySelector('#form_facebook input')?.value || document.getElementById('form_facebook').textContent,
+                linkedin: document.querySelector('#form_linkedin input')?.value || document.getElementById('form_linkedin').textContent,
+                twitter: document.querySelector('#form_twitter input')?.value || document.getElementById('form_twitter').textContent,
+                target_audience: document.querySelector('#form_target_audience textarea')?.value || document.getElementById('form_target_audience').textContent,
+                services_list: document.querySelector('#form_services_list textarea')?.value || document.getElementById('form_services_list').textContent,
+                web_texts: document.querySelector('#form_web_texts textarea')?.value || document.getElementById('form_web_texts').textContent,
+                brand_colors: document.querySelector('#form_brand_colors input')?.value || document.getElementById('form_brand_colors').textContent,
+                reference_websites: document.querySelector('#form_reference_websites textarea')?.value || document.getElementById('form_reference_websites').textContent,
+                keywords: document.querySelector('#form_keywords input')?.value || document.getElementById('form_keywords').textContent,
+                domain_name: document.querySelector('#form_domain_name input')?.value || document.getElementById('form_domain_name').textContent,
+                domain_alt1: document.querySelector('#form_domain_alt1 input')?.value || document.getElementById('form_domain_alt1').textContent,
+                domain_alt2: document.querySelector('#form_domain_alt2 input')?.value || document.getElementById('form_domain_alt2').textContent
+            };
+            
+            console.log('📤 Datos a enviar:', updatedData);
+            
+            try {
+                const clientId = new URLSearchParams(window.location.search).get('client');
+                const response = await fetch(`${API_BASE_URL}/api/client/update-data/${clientId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification('✅ Cambios guardados exitosamente', 'success');
+                    isEditMode = false;
+                    
+                    // Ocultar botones de acción
+                    const actionButtons = document.getElementById('globalActionButtons');
+                    if (actionButtons) actionButtons.style.display = 'none';
+                    
+                    // Mostrar botón editar
+                    document.getElementById('enableEditButton').style.display = 'block';
+                    
+                    // Recargar datos
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(result.message || 'Error al guardar');
+                }
+            } catch (error) {
+                console.error('❌ Error al guardar:', error);
+                showNotification('Error al guardar los cambios: ' + error.message, 'error');
+            }
         }
 
         // Verificar si puede editar
