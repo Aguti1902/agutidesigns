@@ -918,9 +918,210 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- ============ SECCIÓN 2: OBJETIVOS ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🎯 OBJETIVOS DEL SITIO WEB</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Define qué quieres lograr con tu web</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Cuál es el propósito principal? <span style="color: #F1250E;">*</span></label>
+                                <div id="form_purpose" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿A quién va dirigido tu sitio web? <span style="color: #F1250E;">*</span></label>
+                                <div id="form_target_audience" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 80px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 3: CONTENIDO ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">📝 CONTENIDO Y RECURSOS</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Sube tus textos, imágenes y logo</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Qué páginas necesitas? <span style="color: #F1250E;">*</span></label>
+                                <div id="form_pages" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Lista tus servicios</label>
+                                <div id="form_services_list" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 100px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Textos de tu web</label>
+                                <div id="form_web_texts" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 120px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                            </div>
+                            
+                            <!-- Campos dinámicos por sector -->
+                            <div id="form_dynamic_fields" style="display: none; border-top: 2px dashed #e8eaed; padding-top: 25px;">
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: #1B1B1B; margin-bottom: 20px;">🍽️ Información Específica</h3>
+                                
+                                <div id="form_menu_section" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Menú del restaurante/bar</label>
+                                    <div id="form_menu_content" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 120px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                                </div>
+                                
+                                <div id="form_hours_section" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Horarios de apertura</label>
+                                    <div id="form_opening_hours" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 100px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                                </div>
+                                
+                                <div id="form_portfolio_section" style="display: none;">
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Descripción de portfolio/proyectos</label>
+                                    <div id="form_portfolio_description" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 120px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 2px dashed #e8eaed; padding-top: 25px;">
+                                <h3 style="font-size: 1.2rem; font-weight: 700; color: #1B1B1B; margin-bottom: 20px;">🎨 Logo y Diseño</h3>
+                                
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Logo de tu empresa</label>
+                                    <div id="form_logo" style="padding: 20px; background: #fafbfc; border: 2px dashed #e8eaed; border-radius: 12px; min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                                        <p style="color: #999;">No se ha subido un logo</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Imágenes adicionales</label>
+                                    <div id="form_images" style="padding: 20px; background: #fafbfc; border: 2px dashed #e8eaed; border-radius: 12px; min-height: 150px; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
+                                        <p style="color: #999; grid-column: 1/-1; text-align: center;">No se han subido imágenes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 4: DISEÑO ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🎨 DISEÑO Y ESTILO</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Personaliza el aspecto de tu web</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Estilo preferido <span style="color: #F1250E;">*</span></label>
+                                <div id="form_design_style" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Colores corporativos</label>
+                                <div id="form_brand_colors" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Tienes webs de referencia que te gusten? <span style="color: #F1250E;">*</span></label>
+                                <div id="form_reference_websites" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; min-height: 100px; white-space: pre-wrap; line-height: 1.6;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 5: SEO ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🔍 SEO Y MARKETING</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Optimización para motores de búsqueda</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Palabras clave para SEO <span style="color: #F1250E;">*</span></label>
+                                <div id="form_keywords" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Tienes Google Analytics o Search Console?</label>
+                                <div id="form_has_analytics" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 6: DOMINIO ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🌐 TU DOMINIO</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Elige el nombre de dominio para tu web</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 25px;">
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Qué dominio quieres para tu web? <span style="color: #F1250E;">*</span></label>
+                                <div id="form_domain_name" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Alternativa 1 (por si el principal no está disponible)</label>
+                                <div id="form_domain_alt1" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Alternativa 2</label>
+                                <div id="form_domain_alt2" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 7: LEGAL ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">⚖️ TEXTOS LEGALES</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Política de privacidad y aviso legal</p>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">Política de privacidad <span style="color: #F1250E;">*</span></label>
+                            <div id="form_privacy_policy" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============ SECCIÓN 8: CUENTA ============ -->
+                    <div style="background: white; border: 2px solid #e8eaed; border-radius: 15px; padding: 35px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="border-bottom: 3px solid #0046FE; padding-bottom: 15px; margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem; font-weight: 800; color: #0046FE; margin: 0; text-transform: uppercase; letter-spacing: 1px;">👤 DATOS DE CUENTA</h2>
+                            <p style="color: #666; margin: 8px 0 0 0; font-size: 0.95rem;">Información de tu cuenta de agutidesigns</p>
+                        </div>
+                        
+                        <div style="display: grid; gap: 20px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                <div>
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Nombre</label>
+                                    <div id="form_first_name" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                                </div>
+                                <div>
+                                    <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Apellidos</label>
+                                    <div id="form_last_name" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email de la cuenta</label>
+                                <div id="form_account_email" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B; font-weight: 600;">-</div>
+                            </div>
+                            <div>
+                                <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Teléfono de contacto</label>
+                                <div id="form_account_phone" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
 
+                <!-- ========== FIN NUEVA SECCIÓN MIS DATOS ========== -->
+
+                <!-- TODO: ELIMINAR CONTENIDO VIEJO ABAJO -->
+                <div style="display: none;">
                     <div class="card">
-                        <h3 class="card-title" style="margin-bottom: 15px;">📋 Datos del Negocio</h3>
+                        <h3 class="card-title" style="margin-bottom: 15px;">📋 Datos del Negocio (CONTENIDO VIEJO - ELIMINAR)</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Nombre de la Empresa</p>
