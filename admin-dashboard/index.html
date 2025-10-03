@@ -920,6 +920,7 @@
                     <div class="nav-item" onclick="showSection('tickets')">
                         <span class="icon">🎫</span>
                         <span>Tickets</span>
+                        <span id="unreadBadgeMenuAdmin" style="display: none; background: #0046FE; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: auto;"></span>
                     </div>
                     <div class="nav-item" onclick="showSection('pedidos')">
                         <span class="icon">📋</span>
@@ -1558,7 +1559,7 @@
                 tbody.innerHTML = tickets.map(ticket => {
                     // Determinar si hay mensaje sin leer del cliente
                     const hasUnreadMessage = ticket.admin_unread === 1;
-                    const rowStyle = hasUnreadMessage ? 'background: #fff3cd; font-weight: 600;' : '';
+                    const rowStyle = hasUnreadMessage ? 'background: #e8f4ff; font-weight: 600;' : '';
                     
                     // Badge de prioridad con colores correctos
                     const priorityColors = {
@@ -1578,17 +1579,32 @@
                     
                     return `
                         <tr style="${rowStyle}">
-                            <td><strong>#${ticket.id}</strong> ${hasUnreadMessage ? '<span style="color: #dc3545; font-size: 1.2rem;">●</span>' : ''}</td>
+                            <td><strong>#${ticket.id}</strong> ${hasUnreadMessage ? '<span style="color: #0046FE; font-size: 1.2rem;">●</span>' : ''}</td>
                             <td>${ticket.client_name || 'N/A'}</td>
                             <td>${ticket.subject}</td>
                             <td><span class="badge badge-info">${ticket.category}</span></td>
                             <td><span class="badge badge-${priorityBadge}">${ticket.priority}</span></td>
                             <td><span class="badge badge-${statusBadge}">${ticket.status}</span></td>
                             <td>${formatDate(ticket.created_at)}</td>
-                            <td><button class="btn-secondary" onclick="viewTicket(${ticket.id})">${hasUnreadMessage ? '🔴 Ver' : 'Ver'}</button></td>
+                            <td><button class="btn-secondary" onclick="viewTicket(${ticket.id})" ${hasUnreadMessage ? 'style="background: #0046FE; color: white; font-weight: 600;"' : ''}>Ver${hasUnreadMessage ? ' ●' : ''}</button></td>
                         </tr>
                     `;
                 }).join('');
+                
+                // Contar mensajes sin leer del admin
+                const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
+                console.log('🔔 [ADMIN] Mensajes sin leer:', unreadCount);
+                
+                // Actualizar badge en el menú
+                const badge = document.getElementById('unreadBadgeMenuAdmin');
+                if (badge) {
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
                 
                 // Actualizar contador en stats
                 const openCount = tickets.filter(t => t.status === 'open').length;

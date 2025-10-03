@@ -655,7 +655,7 @@
                     <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
                     <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
                     <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span></button></li>
+                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span><span id="unreadBadgeMenu" style="display: none; background: #0046FE; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 8px;"></span></button></li>
                     <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                 </ul>
             </div>
@@ -2539,6 +2539,21 @@
                 
                 console.log('🎫 [CLIENT] Tickets recibidos:', tickets.length);
                 
+                // Contar mensajes sin leer
+                const unreadCount = tickets.filter(t => t.client_unread === 1).length;
+                console.log('🔔 [CLIENT] Mensajes sin leer:', unreadCount);
+                
+                // Actualizar badge en el menú
+                const badge = document.getElementById('unreadBadgeMenu');
+                if (badge) {
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
                 displayClientTickets(tickets);
             } catch (error) {
                 console.error('❌ [CLIENT] Error cargando tickets:', error);
@@ -2598,7 +2613,7 @@
                 if (ticket.status === 'cerrado') {
                     conversationStatus = '<span style="color: #666; font-size: 0.85rem;">✅ Conversación cerrada</span>';
                 } else if (hasUnreadMessage) {
-                    conversationStatus = '<span style="color: #dc3545; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px;"><span style="background: #dc3545; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>Mensaje nuevo sin leer</span>';
+                    conversationStatus = '<span style="color: #0046FE; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px;"><span style="background: #0046FE; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>Mensaje nuevo sin leer</span>';
                 } else if (hasResponse) {
                     conversationStatus = '<span style="color: #009A62; font-size: 0.85rem; font-weight: 600;">💬 Respuesta enviada</span>';
                 } else {
@@ -2607,7 +2622,7 @@
                 
                 // Highlight del card si hay mensaje sin leer
                 const cardStyle = hasUnreadMessage 
-                    ? 'cursor: pointer; transition: all 0.3s; border: 2px solid #dc3545; background: #fff5f5;' 
+                    ? 'cursor: pointer; transition: all 0.3s; border: 2px solid #0046FE; background: #e8f4ff;' 
                     : 'cursor: pointer; transition: all 0.3s; border: 2px solid #e8eaed;';
 
                 return `
