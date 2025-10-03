@@ -3104,53 +3104,83 @@
             
             // Guardar datos originales
             originalData = {
-                business_name: document.getElementById('form_business_name').textContent,
-                business_description: document.getElementById('form_business_description').textContent,
-                industry: document.getElementById('form_industry').textContent,
-                cif_nif: document.getElementById('form_cif_nif').textContent,
-                razon_social: document.getElementById('form_razon_social').textContent,
-                direccion_fiscal: document.getElementById('form_direccion_fiscal').textContent,
-                phone_number: document.getElementById('form_phone_number').textContent,
-                email_contact: document.getElementById('form_email_contact').textContent,
-                whatsapp_number: document.getElementById('form_whatsapp_number').textContent,
-                form_email: document.getElementById('form_form_email').textContent,
-                physical_address: document.getElementById('form_physical_address').textContent,
-                instagram: document.getElementById('form_instagram').textContent,
-                facebook: document.getElementById('form_facebook').textContent,
-                linkedin: document.getElementById('form_linkedin').textContent,
-                twitter: document.getElementById('form_twitter').textContent,
-                target_audience: document.getElementById('form_target_audience').textContent,
-                services_list: document.getElementById('form_services_list').textContent,
-                web_texts: document.getElementById('form_web_texts').textContent,
-                brand_colors: document.getElementById('form_brand_colors').textContent,
-                reference_websites: document.getElementById('form_reference_websites').textContent,
-                keywords: document.getElementById('form_keywords').textContent,
-                domain_name: document.getElementById('form_domain_name').textContent,
-                domain_alt1: document.getElementById('form_domain_alt1').textContent,
-                domain_alt2: document.getElementById('form_domain_alt2').textContent
+                business_name: document.getElementById('form_business_name')?.textContent || '',
+                business_description: document.getElementById('form_business_description')?.textContent || '',
+                industry: document.getElementById('form_industry')?.textContent || '',
+                cif_nif: document.getElementById('form_cif_nif')?.textContent || '',
+                razon_social: document.getElementById('form_razon_social')?.textContent || '',
+                direccion_fiscal: document.getElementById('form_direccion_fiscal')?.textContent || '',
+                contact_methods: document.getElementById('form_contact_methods')?.textContent || '',
+                phone_number: document.getElementById('form_phone_number')?.textContent || '',
+                email_contact: document.getElementById('form_email_contact')?.textContent || '',
+                whatsapp_number: document.getElementById('form_whatsapp_number')?.textContent || '',
+                form_email: document.getElementById('form_form_email')?.textContent || '',
+                physical_address: document.getElementById('form_physical_address')?.textContent || '',
+                instagram: document.getElementById('form_instagram')?.textContent || '',
+                facebook: document.getElementById('form_facebook')?.textContent || '',
+                linkedin: document.getElementById('form_linkedin')?.textContent || '',
+                twitter: document.getElementById('form_twitter')?.textContent || '',
+                purpose: document.getElementById('form_purpose')?.textContent || '',
+                target_audience: document.getElementById('form_target_audience')?.textContent || '',
+                services_list: document.getElementById('form_services_list')?.textContent || '',
+                web_texts: document.getElementById('form_web_texts')?.textContent || '',
+                menu_content: document.getElementById('form_menu_content')?.textContent || '',
+                opening_hours: document.getElementById('form_opening_hours')?.textContent || '',
+                portfolio_description: document.getElementById('form_portfolio_description')?.textContent || '',
+                design_style: document.getElementById('form_design_style')?.textContent || '',
+                brand_colors: document.getElementById('form_brand_colors')?.textContent || '',
+                reference_websites: document.getElementById('form_reference_websites')?.textContent || '',
+                keywords: document.getElementById('form_keywords')?.textContent || '',
+                has_analytics: document.getElementById('form_has_analytics')?.textContent || '',
+                domain_name: document.getElementById('form_domain_name')?.textContent || '',
+                domain_alt1: document.getElementById('form_domain_alt1')?.textContent || '',
+                domain_alt2: document.getElementById('form_domain_alt2')?.textContent || ''
             };
             
             // Convertir divs a inputs editables
+            // SECCIÓN 1: NEGOCIO
             makeFieldEditable('form_business_name', 'input');
             makeFieldEditable('form_business_description', 'textarea', {rows: 4});
+            makeFieldEditable('form_industry', 'input'); // No editable el sector por ahora
             makeFieldEditable('form_cif_nif', 'input');
             makeFieldEditable('form_razon_social', 'input');
             makeFieldEditable('form_direccion_fiscal', 'input');
+            makeFieldEditable('form_contact_methods', 'input'); // Se mostrará como texto separado por comas
             makeFieldEditable('form_phone_number', 'input', {type: 'tel'});
             makeFieldEditable('form_email_contact', 'input', {type: 'email'});
             makeFieldEditable('form_whatsapp_number', 'input', {type: 'tel'});
             makeFieldEditable('form_form_email', 'input', {type: 'email'});
             makeFieldEditable('form_physical_address', 'input');
+            
+            // Redes sociales
             makeFieldEditable('form_instagram', 'input');
             makeFieldEditable('form_facebook', 'input');
             makeFieldEditable('form_linkedin', 'input');
             makeFieldEditable('form_twitter', 'input');
+            
+            // SECCIÓN 2: OBJETIVOS
+            makeFieldEditable('form_purpose', 'input'); // Se mostrará como texto
             makeFieldEditable('form_target_audience', 'textarea', {rows: 3});
+            
+            // SECCIÓN 3: CONTENIDO
             makeFieldEditable('form_services_list', 'textarea', {rows: 5});
             makeFieldEditable('form_web_texts', 'textarea', {rows: 6});
+            
+            // Campos dinámicos (si existen)
+            makeFieldEditable('form_menu_content', 'textarea', {rows: 6});
+            makeFieldEditable('form_opening_hours', 'textarea', {rows: 4});
+            makeFieldEditable('form_portfolio_description', 'textarea', {rows: 6});
+            
+            // SECCIÓN 4: DISEÑO
+            makeFieldEditable('form_design_style', 'input'); // Se mostrará como texto
             makeFieldEditable('form_brand_colors', 'input');
             makeFieldEditable('form_reference_websites', 'textarea', {rows: 4});
+            
+            // SECCIÓN 5: SEO
             makeFieldEditable('form_keywords', 'input');
+            makeFieldEditable('form_has_analytics', 'input'); // Se mostrará como texto
+            
+            // SECCIÓN 6: DOMINIO
             makeFieldEditable('form_domain_name', 'input');
             makeFieldEditable('form_domain_alt1', 'input');
             makeFieldEditable('form_domain_alt2', 'input');
@@ -3229,32 +3259,55 @@
             
             console.log('💾 Guardando todos los cambios...');
             
+            // Función helper para obtener valor de un campo (input/textarea o texto)
+            const getFieldValue = (fieldId) => {
+                const el = document.getElementById(fieldId);
+                if (!el) return null;
+                const input = el.querySelector('input, textarea');
+                return input ? input.value : el.textContent.trim();
+            };
+            
             // Recopilar datos editados
             const updatedData = {
-                business_name: document.querySelector('#form_business_name input, #form_business_name textarea')?.value || document.getElementById('form_business_name').textContent,
-                business_description: document.querySelector('#form_business_description textarea')?.value || document.getElementById('form_business_description').textContent,
-                cif_nif: document.querySelector('#form_cif_nif input')?.value || document.getElementById('form_cif_nif').textContent,
-                razon_social: document.querySelector('#form_razon_social input')?.value || document.getElementById('form_razon_social').textContent,
-                direccion_fiscal: document.querySelector('#form_direccion_fiscal input')?.value || document.getElementById('form_direccion_fiscal').textContent,
-                phone_number: document.querySelector('#form_phone_number input')?.value || document.getElementById('form_phone_number').textContent,
-                email_contact: document.querySelector('#form_email_contact input')?.value || document.getElementById('form_email_contact').textContent,
-                whatsapp_number: document.querySelector('#form_whatsapp_number input')?.value || document.getElementById('form_whatsapp_number').textContent,
-                form_email: document.querySelector('#form_form_email input')?.value || document.getElementById('form_form_email').textContent,
-                physical_address: document.querySelector('#form_physical_address input')?.value || document.getElementById('form_physical_address').textContent,
-                instagram: document.querySelector('#form_instagram input')?.value || document.getElementById('form_instagram').textContent,
-                facebook: document.querySelector('#form_facebook input')?.value || document.getElementById('form_facebook').textContent,
-                linkedin: document.querySelector('#form_linkedin input')?.value || document.getElementById('form_linkedin').textContent,
-                twitter: document.querySelector('#form_twitter input')?.value || document.getElementById('form_twitter').textContent,
-                target_audience: document.querySelector('#form_target_audience textarea')?.value || document.getElementById('form_target_audience').textContent,
-                services_list: document.querySelector('#form_services_list textarea')?.value || document.getElementById('form_services_list').textContent,
-                web_texts: document.querySelector('#form_web_texts textarea')?.value || document.getElementById('form_web_texts').textContent,
-                brand_colors: document.querySelector('#form_brand_colors input')?.value || document.getElementById('form_brand_colors').textContent,
-                reference_websites: document.querySelector('#form_reference_websites textarea')?.value || document.getElementById('form_reference_websites').textContent,
-                keywords: document.querySelector('#form_keywords input')?.value || document.getElementById('form_keywords').textContent,
-                domain_name: document.querySelector('#form_domain_name input')?.value || document.getElementById('form_domain_name').textContent,
-                domain_alt1: document.querySelector('#form_domain_alt1 input')?.value || document.getElementById('form_domain_alt1').textContent,
-                domain_alt2: document.querySelector('#form_domain_alt2 input')?.value || document.getElementById('form_domain_alt2').textContent
+                business_name: getFieldValue('form_business_name'),
+                business_description: getFieldValue('form_business_description'),
+                industry: getFieldValue('form_industry'),
+                cif_nif: getFieldValue('form_cif_nif'),
+                razon_social: getFieldValue('form_razon_social'),
+                direccion_fiscal: getFieldValue('form_direccion_fiscal'),
+                contact_methods: getFieldValue('form_contact_methods'),
+                phone_number: getFieldValue('form_phone_number'),
+                email_contact: getFieldValue('form_email_contact'),
+                whatsapp_number: getFieldValue('form_whatsapp_number'),
+                form_email: getFieldValue('form_form_email'),
+                physical_address: getFieldValue('form_physical_address'),
+                instagram: getFieldValue('form_instagram'),
+                facebook: getFieldValue('form_facebook'),
+                linkedin: getFieldValue('form_linkedin'),
+                twitter: getFieldValue('form_twitter'),
+                purpose: getFieldValue('form_purpose'),
+                target_audience: getFieldValue('form_target_audience'),
+                services_list: getFieldValue('form_services_list'),
+                web_texts: getFieldValue('form_web_texts'),
+                menu_content: getFieldValue('form_menu_content'),
+                opening_hours: getFieldValue('form_opening_hours'),
+                portfolio_description: getFieldValue('form_portfolio_description'),
+                design_style: getFieldValue('form_design_style'),
+                brand_colors: getFieldValue('form_brand_colors'),
+                reference_websites: getFieldValue('form_reference_websites'),
+                keywords: getFieldValue('form_keywords'),
+                has_analytics: getFieldValue('form_has_analytics'),
+                domain_name: getFieldValue('form_domain_name'),
+                domain_alt1: getFieldValue('form_domain_alt1'),
+                domain_alt2: getFieldValue('form_domain_alt2')
             };
+            
+            // Filtrar solo campos que tienen valor (no null, no vacío, no '-')
+            Object.keys(updatedData).forEach(key => {
+                if (!updatedData[key] || updatedData[key] === '-') {
+                    delete updatedData[key];
+                }
+            });
             
             console.log('📤 Datos a enviar:', updatedData);
             
