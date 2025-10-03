@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Crear Usuario de Prueba - agutidesigns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #1B1B1B;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1B1B1B;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0046FE;
+            box-shadow: 0 0 0 3px rgba(0,70,254,0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #0046FE;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,70,254,0.3);
+        }
+
+        .btn-primary:hover {
+            background: #0036C8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,70,254,0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #e8f4ff;
+            border: 2px solid #0046FE;
+            display: none;
+        }
+
+        .result.error {
+            background: #ffe8e8;
+            border-color: #ff4444;
+        }
+
+        .result.success {
+            background: #e8ffe8;
+            border-color: #00b894;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .result p {
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .result strong {
+            color: #1B1B1B;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #0046FE;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            background: #0036C8;
+        }
+
+        .quick-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #e0e0e0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-links a {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            color: #1B1B1B;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .quick-links a:hover {
+            background: #0046FE;
+            color: white;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #856404;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Crear Usuario de Prueba</h1>
+            <p>Crea cuentas rápidamente sin llenar el formulario completo</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>⚡ Atajos:</strong></p>
+            <p>• Deja el email vacío para generar uno automático</p>
+            <p>• La contraseña por defecto es: <strong>123456</strong></p>
+        </div>
+
+        <form id="createUserForm">
+            <div class="form-group">
+                <label for="email">📧 Email (opcional - se genera automático)</label>
+                <input type="email" id="email" placeholder="test@agutidesigns.com o déjalo vacío">
+            </div>
+
+            <div class="form-group">
+                <label for="businessName">🏢 Nombre del Negocio <span style="color: #ff4444;">*</span></label>
+                <input type="text" id="businessName" placeholder="Mi Empresa S.L." required>
+            </div>
+
+            <div class="form-group">
+                <label for="plan">📦 Plan</label>
+                <select id="plan">
+                    <option value="">Sin plan (usuario no pagador)</option>
+                    <option value="basico">Básico</option>
+                    <option value="avanzado">Avanzado</option>
+                    <option value="premium">Premium</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="websiteStatus">🌐 Estado del sitio web</label>
+                <select id="websiteStatus">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_desarrollo">En Desarrollo</option>
+                    <option value="activo">Activo</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-secondary" onclick="resetForm()">🔄 Limpiar</button>
+                <button type="submit" class="btn-primary">✨ Crear Usuario</button>
+            </div>
+        </form>
+
+        <div id="result" class="result"></div>
+
+        <div class="quick-links">
+            <a href="./client-dashboard/" target="_blank">📊 Dashboard Cliente</a>
+            <a href="./admin-dashboard/" target="_blank">🔐 Dashboard Admin</a>
+            <a href="./formulario-membresia.html" target="_blank">📝 Formulario</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://agutidesigns-production.up.railway.app';
+
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+            
+            // Obtener valores
+            let email = document.getElementById('email').value.trim();
+            const businessName = document.getElementById('businessName').value.trim();
+            const plan = document.getElementById('plan').value;
+            const websiteStatus = document.getElementById('websiteStatus').value;
+            
+            // Generar email aleatorio si está vacío
+            if (!email) {
+                const randomId = Math.random().toString(36).substring(2, 8);
+                email = `test${randomId}@agutidesigns.com`;
+            }
+            
+            const password = '123456'; // Contraseña por defecto
+            
+            console.log('📤 Creando usuario:', { email, businessName, plan, websiteStatus });
+            
+            try {
+                // 1. Crear cuenta de cliente
+                const registerResponse = await fetch(`${API_BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        firstName: businessName.split(' ')[0],
+                        lastName: businessName.split(' ').slice(1).join(' ') || 'Test',
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const registerData = await registerResponse.json();
+                
+                if (!registerResponse.ok) {
+                    throw new Error(registerData.error || 'Error al registrar usuario');
+                }
+                
+                console.log('✅ Usuario registrado:', registerData);
+                
+                // 2. Si tiene plan, actualizar cliente
+                if (plan) {
+                    const updateResponse = await fetch(`${API_BASE_URL}/api/admin/clients/${registerData.userId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            plan: plan,
+                            website_status: websiteStatus,
+                            payment_date: new Date().toISOString()
+                        })
+                    });
+                    
+                    if (!updateResponse.ok) {
+                        console.warn('⚠️ Error al actualizar plan, pero usuario creado');
+                    } else {
+                        console.log('✅ Plan actualizado');
+                    }
+                }
+                
+                // 3. Crear submission básica
+                const submissionResponse = await fetch(`${API_BASE_URL}/api/submissions/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        business_name: businessName,
+                        business_description: 'Descripción de prueba',
+                        industry: 'tecnologia',
+                        email: email,
+                        phone_number: '123456789',
+                        cif_nif: 'B12345678',
+                        razon_social: businessName,
+                        direccion_fiscal: 'Calle Test 123',
+                        purpose: JSON.stringify(['informacion']),
+                        target_audience: 'Público general',
+                        pages: JSON.stringify(['inicio', 'contacto']),
+                        design_style: 'moderno',
+                        brand_colors: '#0046FE',
+                        reference_websites: 'https://ejemplo.com',
+                        keywords: 'test, prueba',
+                        has_analytics: 'no',
+                        domain_name: `${businessName.toLowerCase().replace(/\s+/g, '')}.com`,
+                        privacy_policy: 'generar'
+                    })
+                });
+                
+                const submissionData = await submissionResponse.json();
+                
+                if (submissionResponse.ok) {
+                    console.log('✅ Submission creada:', submissionData);
+                    
+                    // Vincular submission al cliente
+                    if (submissionData.submissionId) {
+                        await fetch(`${API_BASE_URL}/api/admin/clients/${registerData.userId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                submission_id: submissionData.submissionId
+                            })
+                        });
+                    }
+                }
+                
+                // Mostrar resultado exitoso
+                const dashboardUrl = `https://agutidesigns.com/client-dashboard/?client=${registerData.userId}`;
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Usuario creado exitosamente</h3>
+                    <p><strong>📧 Email:</strong> ${email}</p>
+                    <p><strong>🔑 Contraseña:</strong> ${password}</p>
+                    <p><strong>🏢 Negocio:</strong> ${businessName}</p>
+                    <p><strong>📦 Plan:</strong> ${plan || 'Sin plan'}</p>
+                    <p><strong>🌐 Estado:</strong> ${websiteStatus}</p>
+                    <p><strong>🆔 Client ID:</strong> ${registerData.userId}</p>
+                    <button class="copy-btn" onclick="copyCredentials('${email}', '${password}', '${dashboardUrl}')">📋 Copiar credenciales</button>
+                    <div style="margin-top: 15px;">
+                        <a href="${dashboardUrl}" target="_blank" style="display: inline-block; padding: 10px 20px; background: #0046FE; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                            🚀 Abrir Dashboard
+                        </a>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Error al crear usuario</h3>
+                    <p>${error.message}</p>
+                `;
+                resultDiv.style.display = 'block';
+            }
+        });
+        
+        function copyCredentials(email, password, url) {
+            const text = `Email: ${email}\nContraseña: ${password}\nDashboard: ${url}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Credenciales copiadas al portapapeles');
+            });
+        }
+        
+        function resetForm() {
+            document.getElementById('createUserForm').reset();
+            document.getElementById('result').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
