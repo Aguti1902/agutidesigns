@@ -2409,6 +2409,17 @@
                         if (servicesSection) {
                             servicesSection.style.display = hasServicesPage ? 'block' : 'none';
                         }
+                        
+                        // 🔍 DEBUG: Ver qué datos de servicios tenemos
+                        console.log('🔍 DEBUG Servicios y Campos Dinámicos:');
+                        console.log('  - services_list:', source.services_list);
+                        console.log('  - services:', source.services);
+                        console.log('  - menu_content:', source.menu_content);
+                        console.log('  - opening_hours:', source.opening_hours);
+                        console.log('  - portfolio_description:', source.portfolio_description);
+                        console.log('  - web_texts:', source.web_texts);
+                        console.log('  - hasServicesPage:', hasServicesPage);
+                        
                         document.getElementById('form_services_list').textContent = source.services_list || source.services || '-';
                         document.getElementById('form_web_texts').textContent = source.web_texts || '-';
                         
@@ -2417,12 +2428,14 @@
                         let hasDynamicContent = false;
                         
                         if (source.menu_content) {
+                            console.log('✅ Mostrando menú del restaurante');
                             document.getElementById('form_menu_content').textContent = source.menu_content;
                             document.getElementById('form_menu_section').style.display = 'block';
                             hasDynamicContent = true;
                         }
                         
                         if (source.opening_hours) {
+                            console.log('✅ Mostrando horarios de apertura');
                             document.getElementById('form_opening_hours').textContent = source.opening_hours;
                             document.getElementById('form_hours_section').style.display = 'block';
                             hasDynamicContent = true;
