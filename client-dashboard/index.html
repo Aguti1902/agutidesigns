@@ -2296,8 +2296,8 @@
                         document.getElementById('form_twitter').textContent = source.twitter || '-';
                         
                         // SECCIÓN 2: OBJETIVOS
-                        const purposeText = source.purpose ? (Array.isArray(source.purpose) ? source.purpose.join(', ') : source.purpose) : '-';
-                        document.getElementById('form_purpose').textContent = purposeText;
+                        const formPurposeText = source.purpose ? (Array.isArray(source.purpose) ? source.purpose.join(', ') : source.purpose) : '-';
+                        document.getElementById('form_purpose').textContent = formPurposeText;
                         document.getElementById('form_target_audience').textContent = source.target_audience || '-';
                         
                         // SECCIÓN 3: CONTENIDO
@@ -2341,11 +2341,11 @@
                         dynamicFieldsContainer.style.display = hasDynamicContent ? 'block' : 'none';
                         
                         // Logo
-                        const logoContainer = document.getElementById('form_logo');
+                        const formLogoContainer = document.getElementById('form_logo');
                         if (source.logo_data) {
-                            logoContainer.innerHTML = `<img src="${source.logo_data}" alt="Logo" style="max-width: 100%; max-height: 200px; object-fit: contain;">`;
+                            formLogoContainer.innerHTML = `<img src="${source.logo_data}" alt="Logo" style="max-width: 100%; max-height: 200px; object-fit: contain;">`;
                         } else {
-                            logoContainer.innerHTML = '<p style="color: #999;">No se ha subido un logo</p>';
+                            formLogoContainer.innerHTML = '<p style="color: #999;">No se ha subido un logo</p>';
                         }
                         
                         // Imágenes
@@ -2380,9 +2380,9 @@
                         document.getElementById('form_domain_alt2').textContent = source.domain_alt2 || '-';
                         
                         // SECCIÓN 7: LEGAL
-                        const privacyText = source.privacy_policy === 'generar' ? 'Generar automáticamente' : 
+                        const formPrivacyText = source.privacy_policy === 'generar' ? 'Generar automáticamente' : 
                                           source.privacy_policy === 'propia' ? 'Tengo mi propia política' : '-';
-                        document.getElementById('form_privacy_policy').textContent = privacyText;
+                        document.getElementById('form_privacy_policy').textContent = formPrivacyText;
                         
                         // SECCIÓN 8: CUENTA
                         const fullNameParts = source.full_name ? source.full_name.split(' ') : ['', ''];
