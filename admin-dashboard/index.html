@@ -1393,6 +1393,31 @@
     <script>
         const API_URL = 'https://agutidesigns-production.up.railway.app';
 
+        // ===== VERIFICAR SESIÓN AL CARGAR =====
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🔐 [ADMIN] Verificando sesión...');
+            const adminSession = localStorage.getItem('adminSession');
+            
+            if (adminSession) {
+                try {
+                    const session = JSON.parse(adminSession);
+                    console.log('✅ [ADMIN] Sesión encontrada:', session.username);
+                    
+                    // Mostrar dashboard directamente
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    loadDashboard();
+                } catch (error) {
+                    console.error('❌ [ADMIN] Error parseando sesión:', error);
+                    localStorage.removeItem('adminSession');
+                }
+            } else {
+                console.log('⚠️ [ADMIN] No hay sesión, mostrando login');
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
         // ===== LOGIN =====
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1400,6 +1425,7 @@
             const password = document.getElementById('password').value;
 
             try {
+                console.log('🔐 [ADMIN] Intentando login...');
                 const response = await fetch(`${API_URL}/api/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1407,20 +1433,41 @@
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ [ADMIN] Login exitoso');
+                    
+                    // GUARDAR SESIÓN EN LOCALSTORAGE
+                    const adminSession = {
+                        username: username,
+                        loginTime: new Date().toISOString(),
+                        isAdmin: true
+                    };
+                    localStorage.setItem('adminSession', JSON.stringify(adminSession));
+                    console.log('💾 [ADMIN] Sesión guardada en localStorage');
+                    
+                    // Mostrar dashboard
                     document.getElementById('loginPage').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'block';
                     loadDashboard();
                 } else {
+                    console.error('❌ [ADMIN] Login fallido');
                     document.getElementById('errorMessage').style.display = 'block';
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ [ADMIN] Error de conexión:', error);
                 alert('Error de conexión');
             }
         });
 
         // ===== LOGOUT =====
         function logout() {
+            console.log('🔐 [ADMIN] Cerrando sesión...');
+            
+            // ELIMINAR SESIÓN DE LOCALSTORAGE
+            localStorage.removeItem('adminSession');
+            console.log('💾 [ADMIN] Sesión eliminada de localStorage');
+            
+            // Mostrar login
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('loginForm').reset();
