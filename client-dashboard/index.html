@@ -974,6 +974,10 @@
                             <div>
                                 <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px; font-size: 1rem;">¿Qué páginas necesitas? <span style="color: #F1250E;">*</span></label>
                                 <div id="form_pages" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px;">-</div>
+                                <!-- Botón para añadir página personalizada (solo visible en modo edición) -->
+                                <button id="addPageButton" onclick="addCustomPage()" style="display: none; margin-top: 10px; padding: 8px 16px; background: #009A62; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
+                                    ➕ Añadir Página Personalizada
+                                </button>
                             </div>
                             
                             <div>
@@ -3185,6 +3189,10 @@
             makeFieldEditable('form_domain_alt1', 'input');
             makeFieldEditable('form_domain_alt2', 'input');
             
+            // Mostrar botón para añadir páginas
+            const addPageButton = document.getElementById('addPageButton');
+            if (addPageButton) addPageButton.style.display = 'inline-block';
+            
             // Ocultar botón "Editar Datos" y mostrar botones de guardar/cancelar
             document.getElementById('enableEditButton').style.display = 'none';
             
@@ -3215,17 +3223,18 @@
             if (!element) return;
             
             const currentValue = element.textContent.trim();
-            if (currentValue === '-') return; // No hacer editables campos vacíos
+            // Ahora SÍ hacemos editables los campos vacíos (convertir '-' a cadena vacía)
+            const value = (currentValue === '-' || currentValue === 'N/A') ? '' : currentValue;
             
             let inputHTML = '';
             const baseStyle = 'width: 100%; padding: 12px 18px; border: 2px solid #0046FE; border-radius: 8px; font-family: inherit; font-size: inherit; background: white;';
             
             if (type === 'textarea') {
                 const rows = options.rows || 3;
-                inputHTML = `<textarea style="${baseStyle} min-height: ${rows * 30}px; resize: vertical;">${currentValue}</textarea>`;
+                inputHTML = `<textarea placeholder="Escribe aquí..." style="${baseStyle} min-height: ${rows * 30}px; resize: vertical;">${value}</textarea>`;
             } else {
                 const inputType = options.type || 'text';
-                inputHTML = `<input type="${inputType}" value="${currentValue}" style="${baseStyle}">`;
+                inputHTML = `<input type="${inputType}" value="${value}" placeholder="Añade información..." style="${baseStyle}">`;
             }
             
             element.innerHTML = inputHTML;
@@ -3243,12 +3252,78 @@
                 }
             });
             
+            // Ocultar botón de añadir página
+            const addPageButton = document.getElementById('addPageButton');
+            if (addPageButton) addPageButton.style.display = 'none';
+            
             // Mostrar botón editar y ocultar botones de acción
             document.getElementById('enableEditButton').style.display = 'block';
             const actionButtons = document.getElementById('globalActionButtons');
             if (actionButtons) actionButtons.style.display = 'none';
             
             showNotification('Cambios cancelados', 'info');
+        }
+        
+        // ============ GESTIÓN DE PÁGINAS ============
+        let customPages = [];
+        
+        function addCustomPage() {
+            // Verificar si puede añadir más páginas según su plan
+            const currentPlan = document.getElementById('userPlan')?.textContent.toLowerCase();
+            
+            // Obtener páginas actuales
+            const pagesContainer = document.getElementById('form_pages');
+            const currentPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => span.textContent);
+            
+            // Límites por plan
+            const planLimits = {
+                'básico': 5,
+                'avanzado': 10,
+                'premium': 999
+            };
+            
+            const limit = planLimits[currentPlan] || 5;
+            
+            if (currentPages.length >= limit) {
+                showNotification(`Tu plan ${currentPlan} permite máximo ${limit} páginas. Actualiza tu plan para añadir más.`, 'warning');
+                return;
+            }
+            
+            // Pedir nombre de la página
+            const pageName = prompt('¿Qué página quieres añadir?\n\nEjemplos: Blog, Galería, Tienda, Testimonios');
+            
+            if (pageName && pageName.trim()) {
+                const pageNameClean = pageName.trim();
+                
+                // Verificar que no exista ya
+                if (currentPages.includes(pageNameClean)) {
+                    showNotification('Esta página ya existe', 'warning');
+                    return;
+                }
+                
+                // Añadir la página
+                const pageSpan = document.createElement('span');
+                pageSpan.style = 'padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px;';
+                pageSpan.innerHTML = `
+                    ${pageNameClean}
+                    <button onclick="removePage(this, '${pageNameClean}')" style="background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1.2rem; padding: 0; line-height: 1;">×</button>
+                `;
+                
+                pagesContainer.appendChild(pageSpan);
+                customPages.push(pageNameClean);
+                
+                console.log('✅ Página añadida:', pageNameClean);
+                showNotification(`Página "${pageNameClean}" añadida correctamente`, 'success');
+            }
+        }
+        
+        function removePage(button, pageName) {
+            if (confirm(`¿Eliminar la página "${pageName}"?`)) {
+                button.parentElement.remove();
+                customPages = customPages.filter(p => p !== pageName);
+                console.log('🗑️ Página eliminada:', pageName);
+                showNotification(`Página "${pageName}" eliminada`, 'info');
+            }
         }
         
         async function saveAllData() {
@@ -3266,6 +3341,16 @@
                 const input = el.querySelector('input, textarea');
                 return input ? input.value : el.textContent.trim();
             };
+            
+            // Obtener páginas actuales (incluyendo las añadidas)
+            const pagesContainer = document.getElementById('form_pages');
+            const allPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => {
+                // Extraer solo el texto, sin el botón de eliminar
+                const text = span.childNodes[0]?.textContent?.trim();
+                return text || span.textContent.replace('×', '').trim();
+            }).filter(p => p && p !== '×');
+            
+            console.log('📄 Páginas a guardar:', allPages);
             
             // Recopilar datos editados
             const updatedData = {
@@ -3299,7 +3384,8 @@
                 has_analytics: getFieldValue('form_has_analytics'),
                 domain_name: getFieldValue('form_domain_name'),
                 domain_alt1: getFieldValue('form_domain_alt1'),
-                domain_alt2: getFieldValue('form_domain_alt2')
+                domain_alt2: getFieldValue('form_domain_alt2'),
+                pages: allPages.length > 0 ? JSON.stringify(allPages) : null
             };
             
             // Filtrar solo campos que tienen valor (no null, no vacío, no '-')
