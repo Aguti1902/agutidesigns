@@ -1616,8 +1616,8 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Convertir a base64 con compresión
-                        const compressedBase64 = canvas.toDataURL(file.type || 'image/jpeg', quality);
+                        // Convertir a base64 con compresión (forzar JPEG para mejor compresión)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
                         
                         // Calcular reducción
                         const originalSize = Math.round(e.target.result.length / 1024);
@@ -1700,8 +1700,8 @@
                             return;
                         }
                         
-                        // Redimensionar y comprimir (máx 800x800 para logos)
-                        data.logo_data = await resizeImage(logoFile, 800, 800, 0.85);
+                        // Redimensionar y comprimir AGRESIVAMENTE para logos (máx 400x400, calidad 65%)
+                        data.logo_data = await resizeImage(logoFile, 400, 400, 0.65);
                         data.logo_name = logoFile.name;
                         
                         const finalSize = Math.round(data.logo_data.length / 1024);
