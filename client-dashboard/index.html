@@ -805,11 +805,25 @@
                     </div>
                 </div>
 
-                <!-- MI NEGOCIO (Nueva Sección) -->
+                <!-- ========== NUEVA SECCIÓN: MIS DATOS ========== -->
+                <!-- Esta sección replica TODOS los campos del formulario -->
                 <div id="negocio" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">🏢 Mi Negocio</h1>
-                        <p class="section-subtitle">Toda la información que proporcionaste</p>
+                        <h1 class="section-title">📋 Mis Datos</h1>
+                        <p class="section-subtitle">Toda la información de tu negocio y web. <span id="editTimeInfo"></span></p>
+                    </div>
+                
+                    <!-- Botón de edición global (solo visible durante las 24h) -->
+                    <div id="globalEditButton" style="margin-bottom: 20px; display: none;">
+                        <button class="btn-action" onclick="enableGlobalEdit()">
+                            <span style="font-size: 1.1rem;">✏️</span> Editar Todos Mis Datos
+                        </button>
+                    </div>
+                
+                    <!-- Alerta cuando ya no se pueden editar -->
+                    <div id="editExpiredAlert" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin-bottom: 20px; color: #856404;">
+                        <p style="margin: 0; font-weight: 600;"><span style="font-size: 1.2rem;">⏰</span> El período de edición de 24 horas ha expirado</p>
+                        <p style="margin: 10px 0 0 0; font-size: 0.9rem;">Si necesitas hacer cambios, contacta con soporte desde la sección <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">Contactar</a></p>
                     </div>
 
                     <div class="card">
