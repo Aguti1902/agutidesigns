@@ -2266,6 +2266,133 @@
                         }
                         
                         console.log('✅ Datos cargados desde:', submission ? 'submission' : 'client fallback');
+                        
+                        // ============ POBLAR NUEVA SECCIÓN form_* ============
+                        console.log('🔄 Poblando nueva sección organizada del formulario...');
+                        
+                        // SECCIÓN 1: NEGOCIO
+                        document.getElementById('form_business_name').textContent = source.business_name || '-';
+                        document.getElementById('form_business_description').textContent = source.business_description || '-';
+                        document.getElementById('form_industry').textContent = source.industry || '-';
+                        document.getElementById('form_cif_nif').textContent = source.cif_nif || '-';
+                        document.getElementById('form_razon_social').textContent = source.razon_social || '-';
+                        document.getElementById('form_direccion_fiscal').textContent = source.direccion_fiscal || '-';
+                        
+                        // Métodos de contacto
+                        const contactMethods = source.contact_methods ? 
+                            (Array.isArray(source.contact_methods) ? source.contact_methods.join(', ') : source.contact_methods) : '-';
+                        document.getElementById('form_contact_methods').textContent = contactMethods;
+                        
+                        document.getElementById('form_phone_number').textContent = source.phone_number || '-';
+                        document.getElementById('form_email_contact').textContent = source.email_contact || '-';
+                        document.getElementById('form_whatsapp_number').textContent = source.whatsapp_number || '-';
+                        document.getElementById('form_form_email').textContent = source.form_email || '-';
+                        document.getElementById('form_physical_address').textContent = source.physical_address || '-';
+                        
+                        // Redes sociales
+                        document.getElementById('form_instagram').textContent = source.instagram || '-';
+                        document.getElementById('form_facebook').textContent = source.facebook || '-';
+                        document.getElementById('form_linkedin').textContent = source.linkedin || '-';
+                        document.getElementById('form_twitter').textContent = source.twitter || '-';
+                        
+                        // SECCIÓN 2: OBJETIVOS
+                        const purposeText = source.purpose ? (Array.isArray(source.purpose) ? source.purpose.join(', ') : source.purpose) : '-';
+                        document.getElementById('form_purpose').textContent = purposeText;
+                        document.getElementById('form_target_audience').textContent = source.target_audience || '-';
+                        
+                        // SECCIÓN 3: CONTENIDO
+                        // Páginas
+                        const pagesContainer = document.getElementById('form_pages');
+                        if (source.pages) {
+                            const pages = Array.isArray(source.pages) ? source.pages : JSON.parse(source.pages);
+                            const pagesHTML = pages.map(page => 
+                                `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
+                            ).join('');
+                            pagesContainer.innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
+                        } else {
+                            pagesContainer.innerHTML = '<span style="color: #999;">No especificadas</span>';
+                        }
+                        
+                        document.getElementById('form_services_list').textContent = source.services_list || source.services || '-';
+                        document.getElementById('form_web_texts').textContent = source.web_texts || '-';
+                        
+                        // Campos dinámicos
+                        const dynamicFieldsContainer = document.getElementById('form_dynamic_fields');
+                        let hasDynamicContent = false;
+                        
+                        if (source.menu_content) {
+                            document.getElementById('form_menu_content').textContent = source.menu_content;
+                            document.getElementById('form_menu_section').style.display = 'block';
+                            hasDynamicContent = true;
+                        }
+                        
+                        if (source.opening_hours) {
+                            document.getElementById('form_opening_hours').textContent = source.opening_hours;
+                            document.getElementById('form_hours_section').style.display = 'block';
+                            hasDynamicContent = true;
+                        }
+                        
+                        if (source.portfolio_description) {
+                            document.getElementById('form_portfolio_description').textContent = source.portfolio_description;
+                            document.getElementById('form_portfolio_section').style.display = 'block';
+                            hasDynamicContent = true;
+                        }
+                        
+                        dynamicFieldsContainer.style.display = hasDynamicContent ? 'block' : 'none';
+                        
+                        // Logo
+                        const logoContainer = document.getElementById('form_logo');
+                        if (source.logo_data) {
+                            logoContainer.innerHTML = `<img src="${source.logo_data}" alt="Logo" style="max-width: 100%; max-height: 200px; object-fit: contain;">`;
+                        } else {
+                            logoContainer.innerHTML = '<p style="color: #999;">No se ha subido un logo</p>';
+                        }
+                        
+                        // Imágenes
+                        const imagesContainer = document.getElementById('form_images');
+                        if (source.images_data && Array.isArray(source.images_data) && source.images_data.length > 0) {
+                            const imagesHTML = source.images_data.map((imgData, index) => `
+                                <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e0e0e0; aspect-ratio: 1; cursor: pointer;" onclick="window.open('${imgData}', '_blank')">
+                                    <img src="${imgData}" alt="Imagen ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; text-align: center; font-size: 0.75rem;">
+                                        Imagen ${index + 1}
+                                    </div>
+                                </div>
+                            `).join('');
+                            imagesContainer.innerHTML = imagesHTML;
+                        } else {
+                            imagesContainer.innerHTML = '<p style="color: #999; grid-column: 1/-1; text-align: center;">No se han subido imágenes</p>';
+                        }
+                        
+                        // SECCIÓN 4: DISEÑO
+                        document.getElementById('form_design_style').textContent = source.design_style || '-';
+                        document.getElementById('form_brand_colors').textContent = source.brand_colors || '-';
+                        document.getElementById('form_reference_websites').textContent = source.reference_websites || '-';
+                        
+                        // SECCIÓN 5: SEO
+                        document.getElementById('form_keywords').textContent = source.keywords || '-';
+                        const analyticsText = source.has_analytics === 'yes' || source.has_analytics === 'si' ? 'Sí' : (source.has_analytics === 'no' ? 'No' : '-');
+                        document.getElementById('form_has_analytics').textContent = analyticsText;
+                        
+                        // SECCIÓN 6: DOMINIO
+                        document.getElementById('form_domain_name').textContent = source.domain_name || '-';
+                        document.getElementById('form_domain_alt1').textContent = source.domain_alt1 || '-';
+                        document.getElementById('form_domain_alt2').textContent = source.domain_alt2 || '-';
+                        
+                        // SECCIÓN 7: LEGAL
+                        const privacyText = source.privacy_policy === 'generar' ? 'Generar automáticamente' : 
+                                          source.privacy_policy === 'propia' ? 'Tengo mi propia política' : '-';
+                        document.getElementById('form_privacy_policy').textContent = privacyText;
+                        
+                        // SECCIÓN 8: CUENTA
+                        const fullNameParts = source.full_name ? source.full_name.split(' ') : ['', ''];
+                        document.getElementById('form_first_name').textContent = fullNameParts[0] || '-';
+                        document.getElementById('form_last_name').textContent = fullNameParts.slice(1).join(' ') || '-';
+                        document.getElementById('form_account_email').textContent = source.email || '-';
+                        document.getElementById('form_account_phone').textContent = source.phone || '-';
+                        
+                        console.log('✅ Nueva sección form_* poblada correctamente');
+                        
                     } else {
                         console.error('❌ No hay datos disponibles (ni submission ni client)');
                     }
