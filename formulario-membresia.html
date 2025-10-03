@@ -1801,6 +1801,56 @@
                     data[key] = value;
                 }
             });
+            
+            // 🆕 LOGS EXTENSIVOS para debugging
+            console.log('═══════════════════════════════════════');
+            console.log('📋 DATOS RECOPILADOS DEL FORMULARIO:');
+            console.log('═══════════════════════════════════════');
+            console.log('🏢 Negocio:');
+            console.log('  - business_name:', data.business_name);
+            console.log('  - business_description:', data.business_description);
+            console.log('  - industry:', data.industry);
+            console.log('📞 Contacto Web:');
+            console.log('  - contact_methods:', data.contact_methods);
+            console.log('  - phone_number:', data.phone_number);
+            console.log('  - email_contact:', data.email_contact);
+            console.log('  - whatsapp_number:', data.whatsapp_number);
+            console.log('  - physical_address:', data.physical_address);
+            console.log('📱 Redes Sociales:');
+            console.log('  - instagram:', data.instagram);
+            console.log('  - facebook:', data.facebook);
+            console.log('  - linkedin:', data.linkedin);
+            console.log('  - twitter:', data.twitter);
+            console.log('💼 Servicios:');
+            console.log('  - services:', data.services);
+            console.log('🎯 Objetivos:');
+            console.log('  - purpose:', data.purpose);
+            console.log('  - target_audience:', data.target_audience);
+            console.log('📄 Páginas:');
+            console.log('  - pages:', data.pages);
+            console.log('🎨 Diseño:');
+            console.log('  - design_style:', data.design_style);
+            console.log('  - brand_colors:', data.brand_colors);
+            console.log('  - reference_websites:', data.reference_websites);
+            console.log('🔍 SEO:');
+            console.log('  - keywords:', data.keywords);
+            console.log('  - has_analytics:', data.has_analytics);
+            console.log('🌐 Dominio:');
+            console.log('  - domain_name:', data.domain_name);
+            console.log('  - domain_alt1:', data.domain_alt1);
+            console.log('  - domain_alt2:', data.domain_alt2);
+            console.log('⚖️ Datos Fiscales:');
+            console.log('  - cif_nif:', data.cif_nif);
+            console.log('  - razon_social:', data.razon_social);
+            console.log('  - direccion_fiscal:', data.direccion_fiscal);
+            console.log('  - business_email:', data.business_email);
+            console.log('👤 Cuenta:');
+            console.log('  - first_name:', data.first_name);
+            console.log('  - last_name:', data.last_name);
+            console.log('  - email:', data.email);
+            console.log('  - phone:', data.phone);
+            console.log('  - address:', data.address);
+            console.log('═══════════════════════════════════════');
 
                 // PRIMERO: Registrar al usuario (crear cuenta)
                 submitBtn.innerHTML = '⏳ Creando cuenta...';

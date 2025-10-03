@@ -548,6 +548,50 @@ app.post('/api/submissions/create', (req, res) => {
             return res.status(400).json({ error: 'Email y plan son requeridos' });
         }
         
+        // 🆕 LOGS EXTENSIVOS para debugging
+        console.log('═══════════════════════════════════════');
+        console.log('📋 DATOS RECIBIDOS EN EL BACKEND:');
+        console.log('═══════════════════════════════════════');
+        console.log('🏢 Negocio:');
+        console.log('  - business_name:', formData.business_name || 'NO RECIBIDO');
+        console.log('  - business_description:', formData.business_description || 'NO RECIBIDO');
+        console.log('  - industry:', formData.industry || 'NO RECIBIDO');
+        console.log('📞 Contacto Web:');
+        console.log('  - contact_methods:', formData.contact_methods || 'NO RECIBIDO');
+        console.log('  - phone_number:', formData.phone_number || 'NO RECIBIDO');
+        console.log('  - email_contact:', formData.email_contact || 'NO RECIBIDO');
+        console.log('  - whatsapp_number:', formData.whatsapp_number || 'NO RECIBIDO');
+        console.log('  - physical_address:', formData.physical_address || 'NO RECIBIDO');
+        console.log('📱 Redes Sociales:');
+        console.log('  - instagram:', formData.instagram || 'NO RECIBIDO');
+        console.log('  - facebook:', formData.facebook || 'NO RECIBIDO');
+        console.log('  - linkedin:', formData.linkedin || 'NO RECIBIDO');
+        console.log('  - twitter:', formData.twitter || 'NO RECIBIDO');
+        console.log('💼 Servicios:');
+        console.log('  - services:', formData.services || 'NO RECIBIDO');
+        console.log('🎯 Objetivos:');
+        console.log('  - purpose:', formData.purpose || 'NO RECIBIDO');
+        console.log('  - target_audience:', formData.target_audience || 'NO RECIBIDO');
+        console.log('📄 Páginas:');
+        console.log('  - pages:', formData.pages || 'NO RECIBIDO');
+        console.log('🎨 Diseño:');
+        console.log('  - design_style:', formData.design_style || 'NO RECIBIDO');
+        console.log('  - brand_colors:', formData.brand_colors || 'NO RECIBIDO');
+        console.log('  - reference_websites:', formData.reference_websites || 'NO RECIBIDO');
+        console.log('🔍 SEO:');
+        console.log('  - keywords:', formData.keywords || 'NO RECIBIDO');
+        console.log('  - has_analytics:', formData.has_analytics || 'NO RECIBIDO');
+        console.log('🌐 Dominio:');
+        console.log('  - domain_name:', formData.domain_name || 'NO RECIBIDO');
+        console.log('  - domain_alt1:', formData.domain_alt1 || 'NO RECIBIDO');
+        console.log('  - domain_alt2:', formData.domain_alt2 || 'NO RECIBIDO');
+        console.log('⚖️ Datos Fiscales:');
+        console.log('  - cif_nif:', formData.cif_nif || 'NO RECIBIDO');
+        console.log('  - razon_social:', formData.razon_social || 'NO RECIBIDO');
+        console.log('  - direccion_fiscal:', formData.direccion_fiscal || 'NO RECIBIDO');
+        console.log('  - business_email:', formData.business_email || 'NO RECIBIDO');
+        console.log('═══════════════════════════════════════');
+        
         console.log(`📧 Email: ${formData.email}`);
         console.log(`📋 Plan: ${formData.plan}`);
         console.log(`🎨 Logo: ${formData.logo_data ? 'Sí (' + Math.round(formData.logo_data.length / 1024) + ' KB)' : 'No'}`);
