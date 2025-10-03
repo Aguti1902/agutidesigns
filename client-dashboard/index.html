@@ -1953,6 +1953,21 @@
         let currentClient = null;
         let canEdit = true;
         let countdownInterval = null;
+        
+        // ============ HELPER: CONVERTIR SECTOR A NOMBRE LEGIBLE ============
+        function getSectorName(sectorKey) {
+            const sectors = {
+                'tienda': 'Tienda/E-commerce',
+                'restaurantes': 'Restaurante/Bar',
+                'gimnasio': 'Gimnasio/Centro Deportivo',
+                'clinica_dental': 'Dentista/Clínica Dental',
+                'abogados': 'Abogado/Despacho Legal',
+                'inmobiliaria': 'Inmobiliaria',
+                'consultoria': 'Consultoría/Servicios Profesionales',
+                'otro': 'Otro'
+            };
+            return sectors[sectorKey] || sectorKey;
+        }
 
         // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -3336,21 +3351,6 @@
             if (actionButtons) actionButtons.style.display = 'none';
             
             showNotification('Cambios cancelados', 'info');
-        }
-        
-        // ============ HELPER: CONVERTIR SECTOR A NOMBRE LEGIBLE ============
-        function getSectorName(sectorKey) {
-            const sectors = {
-                'tienda': 'Tienda/E-commerce',
-                'restaurantes': 'Restaurante/Bar',
-                'gimnasio': 'Gimnasio/Centro Deportivo',
-                'clinica_dental': 'Dentista/Clínica Dental',
-                'abogados': 'Abogado/Despacho Legal',
-                'inmobiliaria': 'Inmobiliaria',
-                'consultoria': 'Consultoría/Servicios Profesionales',
-                'otro': 'Otro'
-            };
-            return sectors[sectorKey] || sectorKey;
         }
         
         // ============ RENDERIZAR POLÍTICA DE PRIVACIDAD ============
