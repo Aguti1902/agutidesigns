@@ -2095,21 +2095,29 @@
 
         async function loadWebsDesplegadas() {
             try {
-                // Obtenemos todos los clientes con websites activas
+                console.log('🌐 [ADMIN] Cargando webs desplegadas...');
+                
+                // Obtenemos todos los clientes
                 const response = await fetch(`${API_URL}/api/clients`);
                 const clients = await response.json();
                 
-                // Filtramos solo los que tienen web activa o en mantenimiento
-                allWebsData = clients.filter(client => 
-                    client.website_status && 
-                    (client.website_status === 'activo' || client.website_status === 'mantenimiento') &&
-                    client.website_url
-                );
+                console.log('📊 [ADMIN] Total de clientes:', clients.length);
+                
+                // Filtramos solo los que tienen un plan activo (pagaron)
+                allWebsData = clients.filter(client => {
+                    const hasPlan = client.plan && client.plan !== 'sin_plan';
+                    if (hasPlan) {
+                        console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
+                    }
+                    return hasPlan;
+                });
+                
+                console.log('🎯 [ADMIN] Clientes con plan para gestionar:', allWebsData.length);
                 
                 renderWebsGrid(allWebsData);
                 
             } catch (error) {
-                console.error('Error cargando webs:', error);
+                console.error('❌ [ADMIN] Error cargando webs:', error);
                 document.getElementById('websGrid').innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
                         <p>Error cargando sitios web</p>
@@ -2136,31 +2144,36 @@
             }
             
             websGrid.innerHTML = webs.map(web => {
-                const statusClass = `web-status-${web.website_status || 'inactivo'}`;
-                const statusEmoji = web.website_status === 'activo' ? '✅' : '🔧';
-                const statusText = web.website_status === 'activo' ? 'Activo' : 'Mantenimiento';
+                const statusClass = `web-status-${web.website_status || 'en_construccion'}`;
+                const statusEmoji = web.website_status === 'activo' ? '✅' : (web.website_status === 'mantenimiento' ? '🔧' : '🔨');
+                const statusText = web.website_status === 'activo' ? 'Activo' : (web.website_status === 'mantenimiento' ? 'Mantenimiento' : 'En Construcción');
                 
                 const planClass = `plan-${web.plan || 'basico'}`;
                 const planText = formatPlan(web.plan);
                 
-                // Extraer dominio limpio de la URL
-                let displayDomain = web.website_url || 'Sin dominio';
-                try {
-                    const url = new URL(web.website_url);
-                    displayDomain = url.hostname.replace('www.', '');
-                } catch (e) {
-                    displayDomain = web.website_url;
+                // Extraer dominio limpio de la URL o mostrar empresa
+                let displayDomain = web.business_name || web.full_name || 'Sin nombre';
+                let displayUrl = web.website_url || 'Pendiente de configuración';
+                
+                if (web.website_url) {
+                    try {
+                        const url = new URL(web.website_url);
+                        displayDomain = url.hostname.replace('www.', '');
+                    } catch (e) {
+                        displayDomain = web.website_url;
+                    }
                 }
                 
                 return `
                     <div class="web-card">
                         <!-- Screenshot de la Web -->
-                        <div class="web-screenshot" onclick="window.open('${web.website_url}', '_blank')" style="cursor: pointer;">
+                        <div class="web-screenshot" ${web.website_url ? `onclick="window.open('${web.website_url}', '_blank')" style="cursor: pointer;"` : 'style="cursor: default;"'}>
                             ${web.website_screenshot_url ? `
                                 <img src="${web.website_screenshot_url}" alt="Screenshot de ${displayDomain}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px 8px 0 0;">
                             ` : `
-                                <div style="width: 100%; height: 180px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; color: white; font-size: 3rem;">
-                                    🌐
+                                <div style="width: 100%; height: 180px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px 8px 0 0; color: white;">
+                                    <div style="font-size: 3rem; margin-bottom: 10px;">🌐</div>
+                                    <div style="font-size: 0.9rem; opacity: 0.9;">${statusText}</div>
                                 </div>
                             `}
                         </div>
@@ -2168,9 +2181,15 @@
                         <div class="web-card-header">
                             <div class="web-domain">
                                 <h3 title="${displayDomain}">${displayDomain}</h3>
-                                <a href="${web.website_url}" target="_blank" class="web-url">
-                                    ${web.website_url} 🔗
-                                </a>
+                                ${web.website_url ? `
+                                    <a href="${web.website_url}" target="_blank" class="web-url">
+                                        ${web.website_url} 🔗
+                                    </a>
+                                ` : `
+                                    <span class="web-url" style="color: #999; cursor: default;">
+                                        ${displayUrl}
+                                    </span>
+                                `}
                             </div>
                             <div class="web-status-badge ${statusClass}">
                                 ${statusEmoji} ${statusText}
@@ -2197,15 +2216,21 @@
                         </div>
                         
                         <div class="web-card-actions">
-                            <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url}', '_blank')">
-                                🌐 Visitar
-                            </button>
+                            ${web.website_url ? `
+                                <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url}', '_blank')">
+                                    🌐 Visitar
+                                </button>
+                            ` : `
+                                <button class="btn-web-action" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                                    🌐 Visitar
+                                </button>
+                            `}
                             ${web.wordpress_url ? `
                                 <button class="btn-web-action" style="background: #21759b;" onclick="window.open('${web.wordpress_url}', '_blank')">
                                     ✏️ WordPress
                                 </button>
                             ` : ''}
-                            <button class="btn-web-action btn-web-details" onclick="editWebManagement(${web.id})">
+                            <button class="btn-web-action btn-web-details" onclick="editWebManagement(${web.id})" style="background: #0046FE;">
                                 ⚙️ Gestionar
                             </button>
                         </div>
