@@ -2400,6 +2400,8 @@
                 created_at: new Date().toISOString()
             };
             
+            console.log('🎫 [CLIENT] Enviando ticket...', ticketData);
+            
             try {
                 const response = await fetch(`${API_URL}/api/tickets`, {
                     method: 'POST',
@@ -2409,16 +2411,21 @@
                     body: JSON.stringify(ticketData)
                 });
                 
+                console.log('🎫 [CLIENT] Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('🎫 [CLIENT] Response data:', data);
                 
                 if (response.ok) {
+                    console.log('✅ [CLIENT] Ticket creado correctamente, ID:', data.ticketId);
                     alert('✅ Ticket creado correctamente. Te responderemos pronto a tu email.');
                     closeTicketModal(e);
                 } else {
+                    console.error('❌ [CLIENT] Error del servidor:', data);
                     alert('❌ Error al crear el ticket: ' + (data.error || 'Error desconocido'));
                 }
             } catch (error) {
-                console.error('Error al enviar ticket:', error);
+                console.error('❌ [CLIENT] Error de red al enviar ticket:', error);
                 alert('❌ Error al enviar el ticket. Por favor, intenta de nuevo.');
             }
         });

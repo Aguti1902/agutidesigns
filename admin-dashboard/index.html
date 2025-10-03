@@ -1468,8 +1468,11 @@
         // ===== CARGAR ESTADÍSTICAS =====
         async function loadStats() {
             try {
+                console.log('📊 [ADMIN] Cargando estadísticas...');
                 const response = await fetch(`${API_URL}/api/admin/stats`);
                 const stats = await response.json();
+                
+                console.log('📊 [ADMIN] Estadísticas recibidas:', stats);
 
                 document.getElementById('totalSubmissions').textContent = stats.total || 0;
                 document.getElementById('activeClients').textContent = stats.paid || 0;
@@ -1480,21 +1483,28 @@
                 document.getElementById('planBasico').textContent = stats.byPlan?.basico || 0;
                 document.getElementById('planAvanzado').textContent = stats.byPlan?.avanzado || 0;
                 document.getElementById('planPremium').textContent = stats.byPlan?.premium || 0;
+                
+                console.log('✅ [ADMIN] Estadísticas cargadas correctamente');
             } catch (error) {
-                console.error('Error cargando stats:', error);
+                console.error('❌ [ADMIN] Error cargando stats:', error);
             }
         }
 
         // ===== TICKETS =====
         async function loadTickets() {
             try {
+                console.log('🎫 [ADMIN] Cargando tickets...');
                 const response = await fetch(`${API_URL}/api/tickets`);
                 const tickets = await response.json();
+                
+                console.log('🎫 [ADMIN] Tickets recibidos:', tickets.length, 'tickets');
+                console.log('🎫 [ADMIN] Datos:', tickets);
 
                 const tbody = document.getElementById('ticketsTable');
                 
                 if (tickets.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No hay tickets</td></tr>';
+                    console.warn('⚠️ [ADMIN] No hay tickets en la base de datos');
                     return;
                 }
 
@@ -1700,13 +1710,18 @@
         // ===== CLIENTES =====
         async function loadClientes() {
             try {
+                console.log('👥 [ADMIN] Cargando clientes...');
                 const response = await fetch(`${API_URL}/api/clients`);
                 const clientes = await response.json();
+                
+                console.log('👥 [ADMIN] Clientes recibidos:', clientes.length, 'clientes');
+                console.log('👥 [ADMIN] Datos:', clientes);
 
                 const tbody = document.getElementById('clientesTable');
                 
                 if (clientes.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No hay clientes</td></tr>';
+                    console.warn('⚠️ [ADMIN] No hay clientes en la base de datos');
                     return;
                 }
 
@@ -1926,8 +1941,12 @@
         // ===== PROYECTOS (KANBAN) =====
         async function loadProjects() {
             try {
+                console.log('📋 [ADMIN] Cargando proyectos para Kanban...');
                 const response = await fetch(`${API_URL}/api/admin/projects`);
                 const projects = await response.json();
+                
+                console.log('📋 [ADMIN] Proyectos recibidos:', projects.length, 'proyectos');
+                console.log('📋 [ADMIN] Datos:', projects);
                 
                 // Limpiar columnas
                 const statuses = ['sin_empezar', 'desarrollo', 'revision', 'entregada'];
@@ -2020,8 +2039,10 @@
                     document.getElementById('websInProgress').textContent = stats.en_desarrollo || 0;
                 }
                 
+                console.log('✅ [ADMIN] Proyectos cargados correctamente en Kanban');
+                
             } catch (error) {
-                console.error('Error cargando proyectos:', error);
+                console.error('❌ [ADMIN] Error cargando proyectos:', error);
             }
         }
         

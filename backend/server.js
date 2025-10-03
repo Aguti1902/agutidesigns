@@ -923,10 +923,17 @@ app.post('/api/tickets', async (req, res) => {
     try {
         const ticketData = req.body;
         
-        console.log('📩 Nuevo ticket recibido:', ticketData);
+        console.log('🎫 [BACKEND] Nuevo ticket recibido del cliente:', ticketData.client_name);
+        console.log('🎫 [BACKEND] Datos del ticket:', {
+            subject: ticketData.subject,
+            category: ticketData.category,
+            priority: ticketData.priority,
+            client_id: ticketData.client_id
+        });
         
         // Crear ticket en la BD
         const ticket = db.createTicket(ticketData);
+        console.log('✅ [BACKEND] Ticket creado en BD, ID:', ticket.id);
         
         // Enviar email al admin notificando del nuevo ticket
         try {
@@ -948,8 +955,9 @@ app.post('/api/tickets', async (req, res) => {
                     <p style="color: #666; font-size: 0.9rem;">Fecha: ${new Date().toLocaleString('es-ES')}</p>
                 `
             });
+            console.log('✅ [BACKEND] Email de notificación enviado al admin');
         } catch (emailError) {
-            console.error('Error enviando email de notificación:', emailError);
+            console.error('❌ [BACKEND] Error enviando email de notificación al admin:', emailError);
         }
         
         // Enviar confirmación al cliente
@@ -976,18 +984,22 @@ app.post('/api/tickets', async (req, res) => {
                     <p>Gracias,<br>El equipo de agutidesigns</p>
                 `
             });
+            console.log('✅ [BACKEND] Email de confirmación enviado al cliente');
         } catch (emailError) {
-            console.error('Error enviando confirmación al cliente:', emailError);
+            console.error('❌ [BACKEND] Error enviando confirmación al cliente:', emailError);
         }
+        
+        console.log('✅ [BACKEND] Ticket procesado completamente, ID:', ticket.id);
         
         res.json({
             success: true,
+            ticketId: ticket.id,
             ticket: ticket,
             message: 'Ticket creado correctamente'
         });
         
     } catch (error) {
-        console.error('Error creando ticket:', error);
+        console.error('❌ [BACKEND] Error crítico creando ticket:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -995,10 +1007,12 @@ app.post('/api/tickets', async (req, res) => {
 // Obtener todos los tickets (para admin)
 app.get('/api/tickets', (req, res) => {
     try {
+        console.log('🎫 [BACKEND] Admin solicitando todos los tickets...');
         const tickets = db.getAllTickets();
-        res.json({ tickets });
+        console.log('✅ [BACKEND] Tickets encontrados:', tickets.length);
+        res.json(tickets);
     } catch (error) {
-        console.error('Error obteniendo tickets:', error);
+        console.error('❌ [BACKEND] Error obteniendo tickets:', error);
         res.status(500).json({ error: error.message });
     }
 });
