@@ -149,7 +149,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
 // 2B. CREAR SUSCRIPCIÓN CON STRIPE ELEMENTS (checkout personalizado)
 app.post('/api/create-subscription', async (req, res) => {
     try {
-        const { paymentMethodId, plan, billing_cycle, formData, billingDetails } = req.body;
+        const { paymentMethodId, plan, billing_cycle, submissionId, formData, billingDetails } = req.body;
 
         // Determinar qué Price IDs usar según billing_cycle
         const billingCycle = billing_cycle || 'monthly';
@@ -158,6 +158,7 @@ app.post('/api/create-subscription', async (req, res) => {
         console.log('🔍 Debug checkout:');
         console.log('- Plan:', plan);
         console.log('- Billing Cycle:', billingCycle);
+        console.log('- Submission ID:', submissionId);
         console.log('- Prices disponibles:', PRICES);
         
         // Usar Price ID según el plan y billing_cycle
@@ -178,50 +179,66 @@ app.post('/api/create-subscription', async (req, res) => {
 
         console.log(`💳 Creando suscripción ${billingCycle} para plan ${plan} con Price ID:`, priceId);
 
-        // Construir full_name desde first_name y last_name
-        const fullName = formData.first_name && formData.last_name 
-            ? `${formData.first_name} ${formData.last_name}`.trim()
-            : (formData.full_name || 'Cliente');
-
-        // Calcular amount según plan y billing_cycle
-        const amounts = {
-            monthly: { basico: 35, avanzado: 49, premium: 65 },
-            annual: { basico: 336, avanzado: 468, premium: 624 }
-        };
-        const amount = amounts[billingCycle][plan];
-
-        // Guardar datos del formulario temporalmente (pending)
-        const submissionData = {
-            ...formData,
-            full_name: fullName,
-            plan,
-            billing_cycle: billingCycle,
-            status: 'pending',
-            amount: amount
-        };
+        // 🆕 Si tenemos submissionId, obtener datos de la base de datos
+        let finalSubmissionId;
+        let submissionData;
         
-        console.log('📝 Creando submission con datos:', {
-            email: submissionData.email,
-            business_name: submissionData.business_name,
-            plan,
-            billing_cycle: billingCycle
-        });
-        
-        const submissionId = db.createSubmission(submissionData);
-        console.log(`✅ Submission ${submissionId} creada`);
+        if (submissionId) {
+            console.log('📦 Obteniendo submission existente #', submissionId);
+            submissionData = db.getSubmission(submissionId);
+            
+            if (!submissionData) {
+                console.error('❌ Submission no encontrada:', submissionId);
+                return res.status(404).json({ error: 'Submission no encontrada' });
+            }
+            
+            console.log('✅ Submission encontrada:', {
+                email: submissionData.email,
+                business_name: submissionData.business_name,
+                plan: submissionData.plan
+            });
+            
+            finalSubmissionId = submissionId;
+            
+        } else {
+            // Flujo anterior: crear submission desde formData (para compatibilidad)
+            console.log('⚠️ Creando submission desde formData (flujo antiguo)');
+            
+            const fullName = formData.first_name && formData.last_name 
+                ? `${formData.first_name} ${formData.last_name}`.trim()
+                : (formData.full_name || 'Cliente');
+
+            const amounts = {
+                monthly: { basico: 35, avanzado: 49, premium: 65 },
+                annual: { basico: 336, avanzado: 468, premium: 624 }
+            };
+            const amount = amounts[billingCycle][plan];
+
+            submissionData = {
+                ...formData,
+                full_name: fullName,
+                plan,
+                billing_cycle: billingCycle,
+                status: 'pending',
+                amount: amount
+            };
+            
+            finalSubmissionId = db.createSubmission(submissionData);
+            console.log(`✅ Submission ${finalSubmissionId} creada`);
+        }
 
 
         // Crear o obtener cliente en Stripe
         const customer = await stripe.customers.create({
             payment_method: paymentMethodId,
-            email: billingDetails.email,
-            name: billingDetails.name,
+            email: billingDetails.email || submissionData.email,
+            name: billingDetails.name || submissionData.full_name,
             invoice_settings: {
                 default_payment_method: paymentMethodId,
             },
             metadata: {
-                submission_id: String(submissionId),
-                business_name: formData.business_name || ''
+                submission_id: String(finalSubmissionId),
+                business_name: submissionData.business_name || ''
             }
         });
 
@@ -231,10 +248,10 @@ app.post('/api/create-subscription', async (req, res) => {
             items: [{ price: priceId }],
             expand: ['latest_invoice.payment_intent'],
             metadata: {
-                submission_id: String(submissionId),
+                submission_id: String(finalSubmissionId),
                 plan: plan,
                 billing_cycle: billingCycle,
-                business_name: formData.business_name || ''
+                business_name: submissionData.business_name || ''
             }
         });
 
@@ -253,10 +270,10 @@ app.post('/api/create-subscription', async (req, res) => {
         // Pago exitoso
         if (paymentIntent.status === 'succeeded') {
             // Actualizar estado a "paid"
-            db.updateSubmissionStatus(submissionId, 'paid', subscription.id);
+            db.updateSubmissionStatus(finalSubmissionId, 'paid', subscription.id);
 
-            // Obtener datos completos
-            const submission = db.getSubmission(submissionId);
+            // Obtener datos completos (actualizado)
+            const submission = db.getSubmission(finalSubmissionId);
 
             // Crear cliente/usuario con contraseña hasheada (si no existe ya)
             const existingClient = db.getClientByEmail(submission.email);
@@ -264,16 +281,11 @@ app.post('/api/create-subscription', async (req, res) => {
             let clientId;
             if (!existingClient) {
                 // Hashear la contraseña desde la submission
-                const passwordToHash = submission.password || formData.password || 'temp123';
+                const passwordToHash = submission.password || 'temp123';
                 const hashedPassword = await bcrypt.hash(passwordToHash, 10);
                 
                 // Construir full_name correctamente
-                let fullName = submission.full_name;
-                if (!fullName && formData.first_name && formData.last_name) {
-                    fullName = `${formData.first_name} ${formData.last_name}`;
-                } else if (!fullName) {
-                    fullName = 'Cliente';
-                }
+                let fullName = submission.full_name || 'Cliente';
                 
                 const clientData = {
                     email: submission.email,
@@ -281,7 +293,7 @@ app.post('/api/create-subscription', async (req, res) => {
                     full_name: fullName,
                     business_name: submission.business_name,
                     plan: plan,
-                    submission_id: submissionId,
+                    submission_id: finalSubmissionId,
                     stripe_customer_id: customer.id,
                     stripe_subscription_id: subscription.id,
                     payment_date: new Date().toISOString()
@@ -320,7 +332,7 @@ app.post('/api/create-subscription', async (req, res) => {
             try {
                 const projectId = db.createProject({
                     client_id: clientId,
-                    submission_id: submissionId,
+                    submission_id: finalSubmissionId,
                     project_name: submission.business_name || `Web de ${submission.full_name}`,
                     business_name: submission.business_name,
                     client_email: submission.email,
@@ -523,6 +535,66 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
 });
 
 // ===== ENDPOINTS DE CLIENTES =====
+
+// Endpoint para crear submission desde formulario (con imágenes en base64)
+app.post('/api/submissions/create', (req, res) => {
+    try {
+        console.log('📝 [SUBMISSION] Creando nueva submission desde formulario');
+        const formData = req.body;
+        
+        // Validar datos requeridos
+        if (!formData.email || !formData.plan) {
+            return res.status(400).json({ error: 'Email y plan son requeridos' });
+        }
+        
+        console.log(`📧 Email: ${formData.email}`);
+        console.log(`📋 Plan: ${formData.plan}`);
+        console.log(`🎨 Logo: ${formData.logo_data ? 'Sí (' + Math.round(formData.logo_data.length / 1024) + ' KB)' : 'No'}`);
+        
+        if (formData.images_data) {
+            try {
+                const images = JSON.parse(formData.images_data);
+                const totalSize = images.reduce((sum, img) => sum + img.length, 0);
+                console.log(`🖼️ Imágenes: ${images.length} archivos (${Math.round(totalSize / 1024)} KB total)`);
+            } catch (e) {
+                console.log(`🖼️ Imágenes: Sí`);
+            }
+        }
+        
+        // Calcular monto según plan y ciclo de facturación
+        let amount;
+        const billing_cycle = formData.billing_cycle || 'monthly';
+        
+        if (billing_cycle === 'annual') {
+            amount = formData.plan === 'basico' ? 350 : 
+                     formData.plan === 'avanzado' ? 490 : 650;
+        } else {
+            amount = formData.plan === 'basico' ? 35 : 
+                     formData.plan === 'avanzado' ? 49 : 65;
+        }
+        
+        console.log(`💰 Monto calculado: ${amount}€ (${billing_cycle})`);
+        
+        // Crear submission con todos los datos (incluyendo imágenes en base64)
+        const submissionId = db.createSubmission({
+            ...formData,
+            amount,
+            status: 'pending'
+        });
+        
+        console.log(`✅ [SUBMISSION] Submission #${submissionId} creada exitosamente`);
+        
+        res.json({ 
+            success: true, 
+            submissionId,
+            message: 'Submission creada correctamente'
+        });
+        
+    } catch (error) {
+        console.error('❌ [SUBMISSION] Error creando submission:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Registro de cliente (sin pagar)
 app.post('/api/client/register', async (req, res) => {

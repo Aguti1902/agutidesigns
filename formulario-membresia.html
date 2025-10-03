@@ -1744,14 +1744,46 @@
 
                 console.log('✅ Cuenta creada/verificada:', registerResult);
                 
-                // Guardar datos en sessionStorage para la página de checkout
+                // Crear submission en el backend (con las imágenes)
+                submitBtn.innerHTML = '⏳ Guardando información...';
+                
+                console.log('💾 Creando submission en el backend...');
+                
+                const submissionData = {
+                    ...data,
+                    plan: plan,
+                    billing_cycle: window.selectedBilling || 'monthly'
+                };
+                
+                const submissionResponse = await fetch('https://agutidesigns-production.up.railway.app/api/submissions/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submissionData)
+                });
+                
+                if (!submissionResponse.ok) {
+                    const errorData = await submissionResponse.json();
+                    console.error('❌ Error creando submission:', errorData);
+                    alert('Error al guardar tu información: ' + (errorData.error || 'Error desconocido'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.style.opacity = '1';
+                    return;
+                }
+                
+                const submissionResult = await submissionResponse.json();
+                console.log('✅ Submission creada:', submissionResult);
+                
+                // Guardar solo el submission_id y datos básicos en sessionStorage
                 submitBtn.innerHTML = '⏳ Preparando pago...';
                 
-                console.log('💾 Guardando datos en sessionStorage...');
+                console.log('💾 Guardando referencia en sessionStorage...');
                 sessionStorage.setItem('orderData', JSON.stringify({
+                    submissionId: submissionResult.submissionId,
                     plan: plan,
                     billing_cycle: window.selectedBilling || 'monthly',
-                    formData: data
+                    email: data.email,
+                    business_name: data.business_name
                 }));
                 
                 console.log('✅ Datos guardados correctamente');
