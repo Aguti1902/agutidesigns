@@ -1649,9 +1649,6 @@
             });
         }
 
-        // Variable global para controlar el debug mode
-        window.debugModeSeen = false;
-        
         document.getElementById('membershipForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1803,145 +1800,19 @@
                 }
             });
             
-            // 🆕 LOGS EXTENSIVOS para debugging
-            const debugLog = `
-═══════════════════════════════════════
-📋 DATOS RECOPILADOS DEL FORMULARIO:
-═══════════════════════════════════════
-🏢 Negocio:
-  - business_name: ${data.business_name || 'NO CAPTURADO'}
-  - business_description: ${data.business_description || 'NO CAPTURADO'}
-  - industry: ${data.industry || 'NO CAPTURADO'}
-📞 Contacto Web:
-  - contact_methods: ${JSON.stringify(data.contact_methods) || 'NO CAPTURADO'}
-  - phone_number: ${data.phone_number || 'NO CAPTURADO'}
-  - email_contact: ${data.email_contact || 'NO CAPTURADO'}
-  - whatsapp_number: ${data.whatsapp_number || 'NO CAPTURADO'}
-  - physical_address: ${data.physical_address || 'NO CAPTURADO'}
-📱 Redes Sociales:
-  - instagram: ${data.instagram || 'NO CAPTURADO'}
-  - facebook: ${data.facebook || 'NO CAPTURADO'}
-  - linkedin: ${data.linkedin || 'NO CAPTURADO'}
-  - twitter: ${data.twitter || 'NO CAPTURADO'}
-💼 Servicios:
-  - services_list: ${data.services_list || 'NO CAPTURADO'}
-📝 Textos Personalizados:
-  - web_texts: ${data.web_texts || 'NO CAPTURADO'}
-🍽️ Campos Dinámicos por Sector:
-  - menu_content (Restaurante/Bar): ${data.menu_content || 'NO CAPTURADO'}
-  - opening_hours (Horarios): ${data.opening_hours || 'NO CAPTURADO'}
-  - portfolio_description (Portfolio): ${data.portfolio_description || 'NO CAPTURADO'}
-🎯 Objetivos:
-  - purpose: ${JSON.stringify(data.purpose) || 'NO CAPTURADO'}
-  - target_audience: ${data.target_audience || 'NO CAPTURADO'}
-📄 Páginas:
-  - pages: ${JSON.stringify(data.pages) || 'NO CAPTURADO'}
-🎨 Diseño:
-  - design_style: ${data.design_style || 'NO CAPTURADO'}
-  - brand_colors: ${data.brand_colors || 'NO CAPTURADO'}
-  - reference_websites: ${data.reference_websites || 'NO CAPTURADO'}
-🔍 SEO:
-  - keywords: ${data.keywords || 'NO CAPTURADO'}
-  - has_analytics: ${data.has_analytics || 'NO CAPTURADO'}
-🌐 Dominio:
-  - domain_name: ${data.domain_name || 'NO CAPTURADO'}
-  - domain_alt1: ${data.domain_alt1 || 'NO CAPTURADO'}
-  - domain_alt2: ${data.domain_alt2 || 'NO CAPTURADO'}
-⚖️ Datos Fiscales:
-  - cif_nif: ${data.cif_nif || 'NO CAPTURADO'}
-  - razon_social: ${data.razon_social || 'NO CAPTURADO'}
-  - direccion_fiscal: ${data.direccion_fiscal || 'NO CAPTURADO'}
-👤 Cuenta:
-  - first_name: ${data.first_name || 'NO CAPTURADO'}
-  - last_name: ${data.last_name || 'NO CAPTURADO'}
-  - email: ${data.email || 'NO CAPTURADO'}
-  - phone: ${data.phone || 'NO CAPTURADO'}
-  - address: ${data.address || 'NO CAPTURADO'}
-  - password: ${data.password ? '***' : 'NO CAPTURADO'}
-═══════════════════════════════════════
-            `;
-            
-            console.log(debugLog);
-            
-            // Guardar en localStorage para revisión posterior
-            localStorage.setItem('lastFormDebug', debugLog);
-            
-            // 🆕 MOSTRAR LOGS EN LA PÁGINA Y PAUSAR (solo la primera vez)
-            if (!window.debugModeSeen) {
-                window.debugModeSeen = true;
-                
-                // Crear modal de debug que NO se cierra hasta copiar
-                const debugModal = document.createElement('div');
-            debugModal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0,0,0,0.95);
-                z-index: 999999;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            `;
-            
-            debugModal.innerHTML = `
-                <div style="background: white; border-radius: 15px; padding: 30px; max-width: 900px; max-height: 90vh; overflow-y: auto; width: 100%;">
-                    <h2 style="color: #F1250E; margin: 0 0 20px 0; font-size: 1.5rem;">🔍 DEBUG MODE - Datos del Formulario</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Copia estos logs y envíalos para debugging:</p>
-                    <textarea id="debugTextarea" readonly style="width: 100%; height: 400px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: monospace; font-size: 0.85rem; background: #f8f9fa; resize: vertical;">${debugLog}</textarea>
-                    <div style="display: flex; gap: 15px; margin-top: 20px;">
-                        <button onclick="
-                            const textarea = document.getElementById('debugTextarea');
-                            textarea.select();
-                            document.execCommand('copy');
-                            this.textContent = '✅ ¡Copiado!';
-                            this.style.background = '#28a745';
-                            setTimeout(() => {
-                                this.textContent = '📋 Copiar Logs';
-                                this.style.background = '#0046FE';
-                            }, 2000);
-                        " style="flex: 1; padding: 15px 30px; background: #0046FE; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s;">
-                            📋 Copiar Logs
-                        </button>
-                        <button onclick="
-                            this.parentElement.parentElement.parentElement.remove();
-                            document.getElementById('submitBtn').innerHTML = '⏳ Continuando...';
-                            document.getElementById('submitBtn').click();
-                        " style="flex: 1; padding: 15px 30px; background: #28a745; color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s;">
-                            ✅ Ya copié, continuar
-                        </button>
-                    </div>
-                    <p style="color: #999; font-size: 0.85rem; margin-top: 15px; text-align: center;">⚠️ Copia los logs antes de continuar</p>
-                </div>
-            `;
-            
-            document.body.appendChild(debugModal);
-            
-                // Seleccionar todo el textarea automáticamente
-                setTimeout(() => {
-                    document.getElementById('debugTextarea').select();
-                }, 100);
-                
-                // Rehabilitar botón para que se pueda hacer click de nuevo
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-                
-                // PAUSAR aquí - el formulario NO continúa hasta que el usuario haga click en "continuar"
-                return;
-            }
-            
-            // Si llegamos aquí, ya se mostró el debug mode y el usuario hizo click en "continuar"
+            // Logs simples para consola
+            console.log('📋 Datos del formulario:', data);
+            console.log('💼 Plan seleccionado:', plan);
+            console.log('💳 Ciclo de facturación:', window.selectedBilling || 'monthly');
             
             // PRIMERO: Registrar al usuario (crear cuenta)
-                submitBtn.innerHTML = '⏳ Creando cuenta...';
-                
-                const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
-                
-                console.log('👤 Creando cuenta para:', data.email);
-                
-                const registerResponse = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
+            submitBtn.innerHTML = '⏳ Creando cuenta...';
+            
+            const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+            
+            console.log('👤 Creando cuenta para:', data.email);
+            
+            const registerResponse = await fetch('https://agutidesigns-production.up.railway.app/api/client/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
