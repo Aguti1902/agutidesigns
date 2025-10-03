@@ -826,45 +826,114 @@ app.get('/api/client/dashboard/:clientId', async (req, res) => {
     }
 });
 
-// 🆕 ENDPOINT TEMPORAL: Actualizar campos faltantes de una submission
-app.patch('/api/admin/update-submission/:submissionId', (req, res) => {
+// 🆕 ENDPOINT: Actualizar submission completa (para re-edición)
+app.put('/api/submissions/:submissionId', (req, res) => {
     try {
         const { submissionId } = req.params;
-        const { web_texts, menu_content, opening_hours, portfolio_description, services_list, images_data } = req.body;
+        const data = req.body;
         
-        console.log('📝 [ADMIN] Actualizando submission #', submissionId);
+        console.log('📝 [API] Actualizando submission #', submissionId);
+        console.log('📦 [API] Datos recibidos:', Object.keys(data));
+        
+        // Mapear services_list a services
+        const mappedData = {
+            ...data,
+            services: data.services_list || data.services
+        };
+        delete mappedData.services_list;
         
         const stmt = db.db.prepare(`
             UPDATE submissions 
-            SET web_texts = COALESCE(?, web_texts),
-                menu_content = COALESCE(?, menu_content),
-                opening_hours = COALESCE(?, opening_hours),
-                portfolio_description = COALESCE(?, portfolio_description),
-                services = COALESCE(?, services),
+            SET business_name = ?,
+                business_description = ?,
+                industry = ?,
+                cif_nif = ?,
+                razon_social = ?,
+                direccion_fiscal = ?,
+                business_email = ?,
+                contact_methods = ?,
+                phone_number = ?,
+                email_contact = ?,
+                whatsapp_number = ?,
+                form_email = ?,
+                physical_address = ?,
+                instagram = ?,
+                facebook = ?,
+                linkedin = ?,
+                twitter = ?,
+                services = ?,
+                purpose = ?,
+                target_audience = ?,
+                pages = ?,
+                design_style = ?,
+                brand_colors = ?,
+                reference_websites = ?,
+                logo_data = COALESCE(?, logo_data),
                 images_data = COALESCE(?, images_data),
+                keywords = ?,
+                has_analytics = ?,
+                domain_name = ?,
+                domain_alt1 = ?,
+                domain_alt2 = ?,
+                privacy_policy = ?,
+                web_texts = ?,
+                menu_content = ?,
+                opening_hours = ?,
+                portfolio_description = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `);
         
         stmt.run(
-            web_texts || null,
-            menu_content || null,
-            opening_hours || null,
-            portfolio_description || null,
-            services_list || null,
-            images_data || null,
+            mappedData.business_name || null,
+            mappedData.business_description || null,
+            mappedData.industry || null,
+            mappedData.cif_nif || null,
+            mappedData.razon_social || null,
+            mappedData.direccion_fiscal || null,
+            mappedData.business_email || null,
+            JSON.stringify(mappedData.contact_methods) || null,
+            mappedData.phone_number || null,
+            mappedData.email_contact || null,
+            mappedData.whatsapp_number || null,
+            mappedData.form_email || null,
+            mappedData.physical_address || null,
+            mappedData.instagram || null,
+            mappedData.facebook || null,
+            mappedData.linkedin || null,
+            mappedData.twitter || null,
+            mappedData.services || null,
+            JSON.stringify(mappedData.purpose) || null,
+            mappedData.target_audience || null,
+            JSON.stringify(mappedData.pages) || null,
+            mappedData.design_style || null,
+            mappedData.brand_colors || null,
+            mappedData.reference_websites || null,
+            mappedData.logo_data || null,
+            mappedData.images_data || null,
+            mappedData.keywords || null,
+            mappedData.has_analytics || null,
+            mappedData.domain_name || null,
+            mappedData.domain_alt1 || null,
+            mappedData.domain_alt2 || null,
+            mappedData.privacy_policy || null,
+            mappedData.web_texts || null,
+            mappedData.menu_content || null,
+            mappedData.opening_hours || null,
+            mappedData.portfolio_description || null,
             submissionId
         );
         
-        console.log('✅ [ADMIN] Submission actualizada correctamente');
+        console.log('✅ [API] Submission actualizada correctamente');
         
         res.json({
             success: true,
-            message: 'Submission actualizada correctamente'
+            message: 'Submission actualizada correctamente',
+            submissionId: parseInt(submissionId)
         });
         
     } catch (error) {
-        console.error('❌ [ADMIN] Error actualizando submission:', error);
+        console.error('❌ [API] Error actualizando submission:', error);
         res.status(500).json({ error: error.message });
     }
 });
