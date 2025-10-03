@@ -863,7 +863,7 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
 // TESTING: Crear cuenta de prueba rápida
 app.post('/api/create-test-account', async (req, res) => {
     try {
-        const { email, password, full_name, plan } = req.body;
+        const { email, password, full_name, plan, submission_data } = req.body;
         
         // Validar que se proporcionen los datos básicos
         const testEmail = email || `test${Date.now()}@agutidesigns.com`;
@@ -874,23 +874,46 @@ app.post('/api/create-test-account', async (req, res) => {
         // Hashear contraseña
         const hashedPassword = await bcrypt.hash(testPassword, 10);
         
+        // Crear submission si se proporcionaron datos
+        let submissionId = null;
+        if (submission_data) {
+            console.log('📝 Creando submission con datos completos...');
+            submissionId = db.createSubmission({
+                ...submission_data,
+                email: testEmail,
+                full_name: testName,
+                password: hashedPassword,
+                plan: testPlan || submission_data.plan,
+                amount: testPlan === 'premium' ? 65 : testPlan === 'avanzado' ? 49 : 35,
+                status: 'paid' // Marcar como pagado para testing
+            });
+            console.log('✅ Submission creada:', submissionId);
+        }
+        
         // Crear cliente
         const clientId = db.createClient({
             email: testEmail,
             password: hashedPassword,
             full_name: testName,
-            business_name: 'Empresa de Prueba',
+            business_name: submission_data?.business_name || 'Empresa de Prueba',
             plan: testPlan,
-            submission_id: null,
+            submission_id: submissionId,
             stripe_customer_id: null,
-            stripe_subscription_id: null
+            stripe_subscription_id: null,
+            payment_date: new Date().toISOString() // Agregar fecha de pago para testing
         });
         
         if (!clientId) {
             return res.status(500).json({ error: 'Error al crear cuenta de prueba' });
         }
         
-        console.log('✅ Cuenta de prueba creada:', { clientId, email: testEmail });
+        // Actualizar submission con client_id si se creó
+        if (submissionId) {
+            db.updateClient(clientId, { submission_id: submissionId });
+            console.log('✅ Submission vinculada al cliente');
+        }
+        
+        console.log('✅ Cuenta de prueba creada:', { clientId, submissionId, email: testEmail });
         
         res.json({
             success: true,
