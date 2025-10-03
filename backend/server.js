@@ -322,11 +322,22 @@ app.post('/api/create-subscription', async (req, res) => {
             } else {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
                 clientId = existingClient.id;
-                // Actualizar plan y payment_date
+                // Actualizar plan, payment_date Y submission_id
                 const stmt = db.db.prepare(
-                    'UPDATE clients SET plan = ?, stripe_subscription_id = ?, payment_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                    'UPDATE clients SET plan = ?, stripe_subscription_id = ?, payment_date = ?, submission_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
                 );
-                stmt.run(plan, subscription.id, new Date().toISOString(), existingClient.id);
+                stmt.run(plan, subscription.id, new Date().toISOString(), finalSubmissionId, existingClient.id);
+                
+                console.log('✅ Cliente actualizado con submission_id:', finalSubmissionId);
+                
+                // Verificar actualización
+                const updatedClient = db.getClientById(clientId);
+                console.log('🔍 Verificación cliente actualizado:', {
+                    id: updatedClient.id,
+                    email: updatedClient.email,
+                    submission_id: updatedClient.submission_id,
+                    plan: updatedClient.plan
+                });
             }
 
             // CREAR PROYECTO AUTOMÁTICAMENTE en "Sin empezar"
@@ -1014,6 +1025,47 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
         res.json({ success: true, message: 'Estado del sitio actualizado' });
     } catch (error) {
         console.error('Error actualizando estado del sitio:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 🔧 ENDPOINT TEMPORAL: Arreglar submission_id de clientes existentes
+app.post('/api/admin/fix-submission-links', async (req, res) => {
+    try {
+        console.log('🔧 [ADMIN] Arreglando links de submission_id...');
+        
+        // Obtener todos los clientes
+        const allClients = db.getAllClients();
+        let fixed = 0;
+        
+        for (const client of allClients) {
+            // Si el cliente no tiene submission_id pero tiene email
+            if (!client.submission_id && client.email) {
+                // Buscar submission por email
+                const submissions = db.getAllSubmissions();
+                const matchingSubmission = submissions.find(s => s.email === client.email);
+                
+                if (matchingSubmission) {
+                    // Actualizar cliente con el submission_id
+                    const stmt = db.db.prepare('UPDATE clients SET submission_id = ? WHERE id = ?');
+                    stmt.run(matchingSubmission.id, client.id);
+                    
+                    console.log(`✅ Cliente #${client.id} (${client.email}) vinculado a submission #${matchingSubmission.id}`);
+                    fixed++;
+                } else {
+                    console.log(`⚠️ Cliente #${client.id} (${client.email}) no tiene submission matching`);
+                }
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: `${fixed} clientes arreglados`,
+            fixed: fixed
+        });
+        
+    } catch (error) {
+        console.error('❌ Error arreglando submission links:', error);
         res.status(500).json({ error: error.message });
     }
 });
