@@ -826,6 +826,49 @@ app.get('/api/client/dashboard/:clientId', async (req, res) => {
     }
 });
 
+// 🆕 ENDPOINT TEMPORAL: Actualizar campos faltantes de una submission
+app.patch('/api/admin/update-submission/:submissionId', (req, res) => {
+    try {
+        const { submissionId } = req.params;
+        const { web_texts, menu_content, opening_hours, portfolio_description, services_list, images_data } = req.body;
+        
+        console.log('📝 [ADMIN] Actualizando submission #', submissionId);
+        
+        const stmt = db.db.prepare(`
+            UPDATE submissions 
+            SET web_texts = COALESCE(?, web_texts),
+                menu_content = COALESCE(?, menu_content),
+                opening_hours = COALESCE(?, opening_hours),
+                portfolio_description = COALESCE(?, portfolio_description),
+                services = COALESCE(?, services),
+                images_data = COALESCE(?, images_data),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+        
+        stmt.run(
+            web_texts || null,
+            menu_content || null,
+            opening_hours || null,
+            portfolio_description || null,
+            services_list || null,
+            images_data || null,
+            submissionId
+        );
+        
+        console.log('✅ [ADMIN] Submission actualizada correctamente');
+        
+        res.json({
+            success: true,
+            message: 'Submission actualizada correctamente'
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error actualizando submission:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 🆕 ENDPOINT TEMPORAL: Vincular submission_id a clientes existentes
 app.post('/api/admin/fix-client-submissions', (req, res) => {
     try {
