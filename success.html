@@ -338,6 +338,10 @@
             // Obtener plan
             const plan = data?.plan || submissionData?.plan || 'basico';
             
+            // Obtener billing_cycle
+            const billingCycle = data?.billing_cycle || submissionData?.billing_cycle || 'monthly';
+            const billingText = billingCycle === 'annual' ? 'Anual' : 'Mensual';
+            
             // Obtener nombre de empresa (múltiples fuentes)
             let businessName = 'tu empresa';
             if (submissionData?.business_name) {
@@ -359,7 +363,8 @@
             const planDetails = planInfo[plan];
 
             console.log('🎯 Mostrando success con datos:', { 
-                plan, 
+                plan,
+                billingCycle,
                 businessName, 
                 email, 
                 fullName,
@@ -376,7 +381,7 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Plan:</span>
-                        <span class="detail-value"><span class="plan-badge">${planDetails.name}</span></span>
+                        <span class="detail-value"><span class="plan-badge">${planDetails.name} ${billingText}</span></span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Estado:</span>
@@ -444,28 +449,33 @@
         loadSuccessData();
 
         // Función para acceder al dashboard del cliente
-        function accessDashboard() {
+        async function accessDashboard() {
             const currentData = data || submissionData;
             
-            if (!currentData) {
-                // Si no hay datos, redirigir directamente al dashboard para hacer login manual
+            // Obtener email del cliente
+            const email = currentData?.email || currentData?.formData?.email;
+            
+            if (!email) {
+                console.error('No se encontró email del cliente');
+                alert('Por favor, inicia sesión manualmente con tu email');
                 window.location.href = '/client-dashboard/';
                 return;
             }
 
-            // Guardar credenciales del cliente para auto-login
-            const clientCredentials = {
-                email: currentData.email,
-                password: currentData.password || null,
-                full_name: currentData.full_name || (currentData.nombre && currentData.apellido ? currentData.nombre + ' ' + currentData.apellido : null),
-                business_name: currentData.businessInfo?.businessName || currentData.business_name,
-                plan: currentData.plan
-            };
-
-            sessionStorage.setItem('clientCredentials', JSON.stringify(clientCredentials));
+            console.log('🔐 Intentando auto-login con email:', email);
             
-            // Redirigir al dashboard del cliente
-            window.location.href = '/client-dashboard/';
+            // Intentar hacer login automático
+            try {
+                // Guardar el email para auto-completar el formulario de login
+                sessionStorage.setItem('autoLoginEmail', email);
+                sessionStorage.setItem('redirectToDashboard', 'true');
+                
+                // Redirigir al dashboard del cliente
+                window.location.href = '/client-dashboard/';
+            } catch (error) {
+                console.error('Error en auto-login:', error);
+                window.location.href = '/client-dashboard/';
+            }
         }
 
         // Limpiar sessionStorage después de mostrar

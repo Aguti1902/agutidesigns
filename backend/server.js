@@ -249,6 +249,7 @@ app.post('/api/create-subscription', async (req, res) => {
             // Crear cliente/usuario con contraseña hasheada (si no existe ya)
             const existingClient = db.getClientByEmail(submission.email);
             
+            let clientId;
             if (!existingClient) {
                 // Hashear la contraseña desde la submission
                 const passwordToHash = submission.password || formData.password || 'temp123';
@@ -262,7 +263,7 @@ app.post('/api/create-subscription', async (req, res) => {
                     fullName = 'Cliente';
                 }
                 
-                db.createClient({
+                clientId = db.createClient({
                     email: submission.email,
                     password: hashedPassword,
                     full_name: fullName,
@@ -274,14 +275,35 @@ app.post('/api/create-subscription', async (req, res) => {
                     payment_date: new Date().toISOString()
                 });
 
-                console.log('Cliente creado exitosamente:', submission.email);
+                console.log('✅ Cliente creado exitosamente:', submission.email, 'ID:', clientId);
             } else {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
+                clientId = existingClient.id;
                 // Actualizar plan y payment_date
                 const stmt = db.db.prepare(
                     'UPDATE clients SET plan = ?, stripe_subscription_id = ?, payment_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
                 );
                 stmt.run(plan, subscription.id, new Date().toISOString(), existingClient.id);
+            }
+
+            // CREAR PROYECTO AUTOMÁTICAMENTE en "Sin empezar"
+            try {
+                const projectId = db.createProject({
+                    client_id: clientId,
+                    submission_id: submissionId,
+                    project_name: submission.business_name || `Web de ${submission.full_name}`,
+                    business_name: submission.business_name,
+                    client_email: submission.email,
+                    plan: plan,
+                    status: 'sin_empezar',
+                    priority: 'normal',
+                    deadline: null,
+                    progress: 0,
+                    notes: `Proyecto creado automáticamente. Plan: ${plan} ${billingCycle}. Pago confirmado.`
+                });
+                console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${clientId}`);
+            } catch (projectError) {
+                console.error('❌ Error creando proyecto automáticamente:', projectError);
             }
 
             // Enviar emails
