@@ -1904,10 +1904,12 @@
                             <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
                                 <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📞 Contacto Web</h4>
                                 <div style="font-size: 0.85rem; line-height: 1.6;">
-                                    <p style="margin: 5px 0;"><strong>Email:</strong> ${pedido.email_contact || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Métodos de Contacto:</strong> ${contactMethods.join(', ') || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Email Web:</strong> ${pedido.email_contact || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Email Formulario:</strong> ${pedido.form_email || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>Teléfono:</strong> ${pedido.phone_number || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>WhatsApp:</strong> ${pedido.whatsapp_number || 'N/A'}</p>
-                                    <p style="margin: 5px 0;"><strong>Métodos:</strong> ${contactMethods.join(', ') || 'N/A'}</p>
+                                    <p style="margin: 5px 0;"><strong>Dirección Física:</strong> ${pedido.physical_address || 'N/A'}</p>
                                 </div>
                             </div>
                             
@@ -1919,15 +1921,6 @@
                                     <p style="margin: 5px 0;"><strong>Facebook:</strong> ${pedido.facebook || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>LinkedIn:</strong> ${pedido.linkedin || 'N/A'}</p>
                                     <p style="margin: 5px 0;"><strong>Twitter:</strong> ${pedido.twitter || 'N/A'}</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Más Contacto -->
-                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
-                                <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">📞 Más Contacto</h4>
-                                <div style="font-size: 0.85rem; line-height: 1.6;">
-                                    <p style="margin: 5px 0;"><strong>Dirección:</strong> ${pedido.physical_address || 'N/A'}</p>
-                                    <p style="margin: 5px 0;"><strong>Email Empresa:</strong> ${pedido.business_email || 'N/A'}</p>
                                 </div>
                             </div>
                             
@@ -1965,13 +1958,14 @@
                             </div>
                             
                             <!-- SEO y Dominio -->
-                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px;">
+                            <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; grid-column: 1/-1;">
                                 <h4 style="color: #0046FE; margin: 0 0 12px 0; font-size: 1rem;">🔍 SEO y Dominio</h4>
-                                <div style="font-size: 0.85rem; line-height: 1.6;">
-                                    <p style="margin: 5px 0;"><strong>Dominio:</strong> ${pedido.domain_name || 'N/A'}</p>
-                                    <p style="margin: 5px 0;"><strong>Alt 1:</strong> ${pedido.domain_alt1 || 'N/A'}</p>
-                                    <p style="margin: 5px 0;"><strong>Alt 2:</strong> ${pedido.domain_alt2 || 'N/A'}</p>
-                                    <p style="margin: 5px 0;"><strong>Keywords:</strong> ${pedido.keywords || 'N/A'}</p>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem;">
+                                    <p style="margin: 0;"><strong>Dominio Preferido:</strong> ${pedido.domain_name || 'N/A'}</p>
+                                    <p style="margin: 0;"><strong>Dominio Alt 1:</strong> ${pedido.domain_alt1 || 'N/A'}</p>
+                                    <p style="margin: 0;"><strong>Dominio Alt 2:</strong> ${pedido.domain_alt2 || 'N/A'}</p>
+                                    <p style="margin: 0;"><strong>Google Analytics:</strong> ${pedido.has_analytics === 'yes' ? 'Sí' : (pedido.has_analytics === 'no' ? 'No' : 'N/A')}</p>
+                                    <p style="margin: 0; grid-column: 1/-1;"><strong>Palabras Clave SEO:</strong> ${pedido.keywords || 'N/A'}</p>
                                 </div>
                             </div>
                             

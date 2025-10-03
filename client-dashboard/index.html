@@ -847,7 +847,11 @@
                         </div>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Email de Contacto</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Métodos de Contacto</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioMetodosContacto" class="field-contacto">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Email de Contacto Web</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailContacto" class="field-contacto">-</p>
                                 <input type="email" id="negocioEmailContactoInput" class="form-input input-contacto" style="display: none; margin-top: 5px;" placeholder="email@ejemplo.com">
                             </div>
@@ -894,14 +898,26 @@
                         </div>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Deseado</p>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Preferido</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominio" class="field-dominio">-</p>
                                 <input type="text" id="negocioDominioInput" class="form-input input-dominio" style="display: none; margin-top: 5px;" placeholder="miempresa.com">
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Alternativa 1</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominioAlt1" class="field-dominio">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Alternativa 2</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioDominioAlt2" class="field-dominio">-</p>
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Palabras Clave (SEO)</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioKeywords" class="field-dominio">-</p>
                                 <input type="text" id="negocioKeywordsInput" class="form-input input-dominio" style="display: none; margin-top: 5px;" placeholder="palabra1, palabra2, palabra3">
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">¿Tiene Google Analytics?</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioAnalytics" class="field-dominio">-</p>
                             </div>
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Estilo de Diseño</p>
@@ -1789,11 +1805,20 @@
                         document.getElementById('negocioEmpresa').textContent = source.business_name || '-';
                         document.getElementById('negocioIndustria').textContent = source.industry || '-';
                         document.getElementById('negocioDescripcion').textContent = source.business_description || '-';
+                        
+                        // Métodos de contacto
+                        const metodosContacto = source.contact_methods ? 
+                            (Array.isArray(source.contact_methods) ? source.contact_methods.join(', ') : source.contact_methods) : '-';
+                        document.getElementById('negocioMetodosContacto').textContent = metodosContacto;
+                        
                         document.getElementById('negocioEmailContacto').textContent = source.email_contact || source.email || '-';
                         document.getElementById('negocioTelefono').textContent = source.phone_number || '-';
                         document.getElementById('negocioWhatsapp').textContent = source.whatsapp_number || '-';
                         document.getElementById('negocioDominio').textContent = source.domain_name || '-';
+                        document.getElementById('negocioDominioAlt1').textContent = source.domain_alt1 || '-';
+                        document.getElementById('negocioDominioAlt2').textContent = source.domain_alt2 || '-';
                         document.getElementById('negocioKeywords').textContent = source.keywords || '-';
+                        document.getElementById('negocioAnalytics').textContent = source.has_analytics === 'yes' ? 'Sí' : (source.has_analytics === 'no' ? 'No' : '-');
                         document.getElementById('negocioEstilo').textContent = source.design_style || '-';
                         document.getElementById('negocioCIF').textContent = source.cif_nif || '-';
                         document.getElementById('negocioRazonSocial').textContent = source.razon_social || '-';
