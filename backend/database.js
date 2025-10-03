@@ -406,6 +406,7 @@ function createSubmission(data) {
             keywords, has_analytics,
             domain_name, domain_alt1, domain_alt2,
             privacy_policy,
+            web_texts, menu_content, opening_hours, portfolio_description,
             full_name, email, phone, address, password,
             plan, amount, status
         ) VALUES (
@@ -417,6 +418,7 @@ function createSubmission(data) {
             ?, ?,
             ?, ?, ?,
             ?,
+            ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?
         )
@@ -455,6 +457,10 @@ function createSubmission(data) {
         data.domain_alt1 || null,
         data.domain_alt2 || null,
         data.privacy_policy || null,
+        data.web_texts || null,
+        data.menu_content || null,
+        data.opening_hours || null,
+        data.portfolio_description || null,
         data.full_name || null,
         data.email,
         data.phone || null,
