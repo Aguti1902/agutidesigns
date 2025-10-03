@@ -280,6 +280,18 @@ try {
     }
 }
 
+// Agregar columna web_texts si no existe (migración)
+try {
+    db.exec(`ALTER TABLE submissions ADD COLUMN web_texts TEXT;`);
+    console.log('✅ [DB] Columna web_texts agregada a submissions');
+} catch (error) {
+    if (error.message.includes('duplicate column name')) {
+        console.log('ℹ️ [DB] Columna web_texts ya existe');
+    } else {
+        console.log('⚠️ [DB] Error agregando columna web_texts:', error.message);
+    }
+}
+
 // Crear tabla de tickets de soporte (si no existe)
 // NOTA: NO usar FOREIGN KEY para client_id porque queremos que cualquier cliente pueda crear tickets
 db.exec(`

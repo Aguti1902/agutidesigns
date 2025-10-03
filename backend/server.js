@@ -620,12 +620,20 @@ app.post('/api/submissions/create', (req, res) => {
         
         console.log(`💰 Monto calculado: ${amount}€ (${billing_cycle})`);
         
-        // Crear submission con todos los datos (incluyendo imágenes en base64)
-        const submissionId = db.createSubmission({
+        // Mapear campos del formulario a nombres de la base de datos
+        const mappedData = {
             ...formData,
+            // Mapear services_list a services
+            services: formData.services_list || formData.services,
             amount,
             status: 'pending'
-        });
+        };
+        
+        // Eliminar el campo duplicado
+        delete mappedData.services_list;
+        
+        // Crear submission con todos los datos (incluyendo imágenes en base64)
+        const submissionId = db.createSubmission(mappedData);
         
         console.log(`✅ [SUBMISSION] Submission #${submissionId} creada exitosamente`);
         

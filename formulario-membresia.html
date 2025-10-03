@@ -1072,6 +1072,10 @@
                             <input type="checkbox" id="page_contact" name="pages[]" value="contacto" onchange="updatePageCounter()">
                             <label for="page_contact">Contacto</label>
                         </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="page_blog" name="pages[]" value="blog" onchange="updatePageCounter()">
+                            <label for="page_blog">Blog</label>
+                        </div>
                     </div>
 
                     <!-- Páginas personalizadas -->
@@ -1820,7 +1824,9 @@
   - linkedin: ${data.linkedin || 'NO CAPTURADO'}
   - twitter: ${data.twitter || 'NO CAPTURADO'}
 💼 Servicios:
-  - services: ${data.services || 'NO CAPTURADO'}
+  - services_list: ${data.services_list || 'NO CAPTURADO'}
+📝 Textos Personalizados:
+  - web_texts: ${data.web_texts || 'NO CAPTURADO'}
 🎯 Objetivos:
   - purpose: ${JSON.stringify(data.purpose) || 'NO CAPTURADO'}
   - target_audience: ${data.target_audience || 'NO CAPTURADO'}
