@@ -2351,9 +2351,10 @@
                         // SECCIÓN 3: CONTENIDO
                         // Páginas
                         const pagesContainer = document.getElementById('form_pages');
+                        let pagesArray = [];
                         if (source.pages) {
-                            const pages = Array.isArray(source.pages) ? source.pages : JSON.parse(source.pages);
-                            const pagesHTML = pages.map(page => 
+                            pagesArray = Array.isArray(source.pages) ? source.pages : JSON.parse(source.pages);
+                            const pagesHTML = pagesArray.map(page => 
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
                             ).join('');
                             pagesContainer.innerHTML = pagesHTML || '<span style="color: #999;">No especificadas</span>';
@@ -2361,6 +2362,12 @@
                             pagesContainer.innerHTML = '<span style="color: #999;">No especificadas</span>';
                         }
                         
+                        // Mostrar servicios solo si tiene página "Servicios"
+                        const hasServicesPage = pagesArray.some(p => p.toLowerCase() === 'servicios');
+                        const servicesSection = document.getElementById('form_services_list')?.parentElement;
+                        if (servicesSection) {
+                            servicesSection.style.display = hasServicesPage ? 'block' : 'none';
+                        }
                         document.getElementById('form_services_list').textContent = source.services_list || source.services || '-';
                         document.getElementById('form_web_texts').textContent = source.web_texts || '-';
                         
@@ -3165,11 +3172,11 @@
             // SECCIÓN 1: NEGOCIO
             makeFieldEditable('form_business_name', 'input');
             makeFieldEditable('form_business_description', 'textarea', {rows: 4});
-            makeFieldEditable('form_industry', 'input'); // No editable el sector por ahora
+            // form_industry NO es editable - es un select en el form original
+            // form_contact_methods NO es editable - es un select múltiple en el form original
             makeFieldEditable('form_cif_nif', 'input');
             makeFieldEditable('form_razon_social', 'input');
             makeFieldEditable('form_direccion_fiscal', 'input');
-            makeFieldEditable('form_contact_methods', 'input'); // Se mostrará como texto separado por comas
             makeFieldEditable('form_phone_number', 'input', {type: 'tel'});
             makeFieldEditable('form_email_contact', 'input', {type: 'email'});
             makeFieldEditable('form_whatsapp_number', 'input', {type: 'tel'});
@@ -3183,10 +3190,11 @@
             makeFieldEditable('form_twitter', 'input');
             
             // SECCIÓN 2: OBJETIVOS
-            makeFieldEditable('form_purpose', 'input'); // Se mostrará como texto
+            // form_purpose NO es editable - son checkboxes en el form original
             makeFieldEditable('form_target_audience', 'textarea', {rows: 3});
             
             // SECCIÓN 3: CONTENIDO
+            // form_pages NO es editable - se gestiona con el botón de añadir
             makeFieldEditable('form_services_list', 'textarea', {rows: 5});
             makeFieldEditable('form_web_texts', 'textarea', {rows: 6});
             
@@ -3196,22 +3204,28 @@
             makeFieldEditable('form_portfolio_description', 'textarea', {rows: 6});
             
             // SECCIÓN 4: DISEÑO
-            makeFieldEditable('form_design_style', 'input'); // Se mostrará como texto
+            // form_design_style NO es editable - son opciones visuales en el form original
             makeFieldEditable('form_brand_colors', 'input');
             makeFieldEditable('form_reference_websites', 'textarea', {rows: 4});
             
             // SECCIÓN 5: SEO
             makeFieldEditable('form_keywords', 'input');
-            makeFieldEditable('form_has_analytics', 'input'); // Se mostrará como texto
+            // form_has_analytics NO es editable - es radio en el form original
             
             // SECCIÓN 6: DOMINIO
             makeFieldEditable('form_domain_name', 'input');
             makeFieldEditable('form_domain_alt1', 'input');
             makeFieldEditable('form_domain_alt2', 'input');
             
+            // SECCIÓN 7: LEGAL
+            // form_privacy_policy NO es editable - son opciones radio en el form original
+            
             // Mostrar botón para añadir páginas
             const addPageButton = document.getElementById('addPageButton');
             if (addPageButton) addPageButton.style.display = 'inline-block';
+            
+            // Actualizar visibilidad de servicios
+            updateServicesVisibility();
             
             // Ocultar botón "Editar Datos" y mostrar botones de guardar/cancelar
             document.getElementById('enableEditButton').style.display = 'none';
@@ -3445,6 +3459,9 @@
             pagesContainer.appendChild(pageSpan);
             customPages.push(pageName);
             
+            // Actualizar visibilidad de servicios
+            updateServicesVisibility();
+            
             closeAddPageModal();
             console.log('✅ Página añadida:', pageName);
             showNotification(`Página "${pageName}" añadida correctamente`, 'success');
@@ -3454,9 +3471,38 @@
             showConfirmation(`¿Eliminar la página "${pageName}"?`, () => {
                 button.parentElement.remove();
                 customPages = customPages.filter(p => p !== pageName);
+                
+                // Actualizar visibilidad de servicios
+                updateServicesVisibility();
+                
                 console.log('🗑️ Página eliminada:', pageName);
                 showNotification(`Página "${pageName}" eliminada`, 'info');
             });
+        }
+        
+        function updateServicesVisibility() {
+            // Obtener páginas actuales
+            const pagesContainer = document.getElementById('form_pages');
+            const currentPages = Array.from(pagesContainer.querySelectorAll('span')).map(span => {
+                const text = span.childNodes[0]?.textContent?.trim();
+                return text || span.textContent.replace('×', '').trim();
+            }).filter(p => p && p !== '×');
+            
+            // Verificar si tiene página "Servicios"
+            const hasServicesPage = currentPages.some(p => p.toLowerCase() === 'servicios');
+            
+            // Mostrar u ocultar sección de servicios
+            const servicesSection = document.getElementById('form_services_list')?.parentElement;
+            if (servicesSection) {
+                servicesSection.style.display = hasServicesPage ? 'block' : 'none';
+                
+                if (hasServicesPage && !servicesSection.querySelector('textarea')) {
+                    // Si se acaba de mostrar en modo edición, hacer editable
+                    if (isEditMode) {
+                        makeFieldEditable('form_services_list', 'textarea', {rows: 5});
+                    }
+                }
+            }
         }
         
         async function saveAllData() {
