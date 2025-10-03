@@ -739,6 +739,15 @@
             <h1 class="form-title">Formulario de Membresía</h1>
             <p class="form-subtitle">Completa los datos para crear tu web profesional</p>
             
+            <!-- Toggle Mensual/Anual -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin: 25px 0 15px 0;">
+                <div style="display: flex; align-items: center; gap: 8px; background: #1B1B1B; padding: 6px; border-radius: 50px;">
+                    <button type="button" id="formToggleMonthly" onclick="toggleFormBilling('monthly')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: #FEFAF5; color: #1B1B1B; border: none;">Mensual</button>
+                    <button type="button" id="formToggleAnnual" onclick="toggleFormBilling('annual')" style="padding: 10px 24px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: #FEFAF5; font-size: 0.95rem; background: transparent; border: none;">Anual</button>
+                </div>
+                <span style="background: #EC6746; color: #FEFAF5; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.85rem;">Ahorra hasta 20%</span>
+            </div>
+            
             <!-- Selector de Plan -->
             <input type="hidden" id="selectedPlan" name="selected_plan" value="basico">
             <div id="planDisplay" style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; display: inline-block;">
@@ -1628,10 +1637,49 @@
             window.location.href = '/checkout.html';
         });
 
-        // Abrir modal de selección de plan
-        function openPlanSelector() {
-            // Actualizar precios del modal según billing_cycle
-            const billing = window.selectedBilling || 'monthly';
+        // Toggle de billing en el formulario (header)
+        function toggleFormBilling(cycle) {
+            window.selectedBilling = cycle;
+            
+            const monthlyBtn = document.getElementById('formToggleMonthly');
+            const annualBtn = document.getElementById('formToggleAnnual');
+            
+            // Actualizar estilos de los botones
+            if (cycle === 'monthly') {
+                monthlyBtn.style.background = '#FEFAF5';
+                monthlyBtn.style.color = '#1B1B1B';
+                annualBtn.style.background = 'transparent';
+                annualBtn.style.color = '#FEFAF5';
+            } else {
+                monthlyBtn.style.background = 'transparent';
+                monthlyBtn.style.color = '#FEFAF5';
+                annualBtn.style.background = '#FEFAF5';
+                annualBtn.style.color = '#1B1B1B';
+            }
+            
+            // Actualizar el texto del plan mostrado
+            const plan = document.getElementById('selectedPlan').value;
+            const planPrices = {
+                monthly: {
+                    'basico': 'Básico - 35€/mes',
+                    'avanzado': 'Avanzado - 49€/mes',
+                    'premium': 'Premium - 65€/mes'
+                },
+                annual: {
+                    'basico': 'Básico - 28€/mes (facturado anualmente: 336€/año)',
+                    'avanzado': 'Avanzado - 39€/mes (facturado anualmente: 468€/año)',
+                    'premium': 'Premium - 52€/mes (facturado anualmente: 624€/año)'
+                }
+            };
+            
+            document.getElementById('planDisplayText').textContent = planPrices[cycle][plan];
+            
+            // Actualizar precios del modal también
+            updateModalPrices(cycle);
+        }
+
+        // Actualizar precios del modal
+        function updateModalPrices(billing) {
             const prices = {
                 monthly: {
                     basico: '35€/mes',
@@ -1648,6 +1696,13 @@
             document.getElementById('modal-price-basico').textContent = prices[billing].basico;
             document.getElementById('modal-price-avanzado').textContent = prices[billing].avanzado;
             document.getElementById('modal-price-premium').textContent = prices[billing].premium;
+        }
+
+        // Abrir modal de selección de plan
+        function openPlanSelector() {
+            // Actualizar precios del modal según billing_cycle
+            const billing = window.selectedBilling || 'monthly';
+            updateModalPrices(billing);
             
             document.getElementById('planModal').style.display = 'flex';
         }
@@ -2155,6 +2210,23 @@
                 const displayText = document.getElementById('planDisplayText');
                 if (displayText) {
                     displayText.textContent = planPrices[billing][planParam];
+                }
+                
+                // Actualizar toggle del formulario
+                const monthlyBtn = document.getElementById('formToggleMonthly');
+                const annualBtn = document.getElementById('formToggleAnnual');
+                if (monthlyBtn && annualBtn) {
+                    if (billing === 'annual') {
+                        monthlyBtn.style.background = 'transparent';
+                        monthlyBtn.style.color = '#FEFAF5';
+                        annualBtn.style.background = '#FEFAF5';
+                        annualBtn.style.color = '#1B1B1B';
+                    } else {
+                        monthlyBtn.style.background = '#FEFAF5';
+                        monthlyBtn.style.color = '#1B1B1B';
+                        annualBtn.style.background = 'transparent';
+                        annualBtn.style.color = '#FEFAF5';
+                    }
                 }
                 
                 // Actualizar contador de páginas
