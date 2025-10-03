@@ -813,24 +813,14 @@
                         <p class="section-subtitle">Toda la información de tu negocio y web. <span id="editTimeInfo"></span></p>
                     </div>
                 
-                    <!-- Botón de edición global (solo visible durante las 24h) -->
-                    <div id="globalEditButton" style="margin-bottom: 20px; display: none;">
-                        <button class="btn-action" onclick="enableGlobalEdit()">
-                            <span style="font-size: 1.1rem;">✏️</span> Editar Todos Mis Datos
-                        </button>
-                    </div>
-                
-                    <!-- Alerta cuando ya no se pueden editar -->
-                    <div id="editExpiredAlert" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin-bottom: 20px; color: #856404;">
-                        <p style="margin: 0; font-weight: 600;"><span style="font-size: 1.2rem;">⏰</span> El período de edición de 24 horas ha expirado</p>
-                        <p style="margin: 10px 0 0 0; font-size: 0.9rem;">Si necesitas hacer cambios, contacta con soporte desde la sección <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">Contactar</a></p>
+                    <!-- Nota informativa -->
+                    <div style="background: #e8f4ff; border: 2px solid #0046FE; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <p style="margin: 0; color: #1B1B1B; font-weight: 600;"><span style="font-size: 1.2rem;">ℹ️</span> Estos son todos los datos que proporcionaste en el formulario</p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #666;">Si necesitas modificar algún dato, contacta con soporte desde la sección <a href="#" onclick="showSection('contactar'); return false;" style="color: #0046FE; font-weight: 700;">Contactar</a></p>
                     </div>
 
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 class="card-title" style="margin: 0;">📋 Datos del Negocio</h3>
-                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEdit('negocio')">✏️ Editar</button>
-                        </div>
+                        <h3 class="card-title" style="margin-bottom: 15px;">📋 Datos del Negocio</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Nombre de la Empresa</p>
@@ -855,10 +845,7 @@
                     </div>
 
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 class="card-title" style="margin: 0;">📞 Datos de Contacto</h3>
-                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('contacto')">✏️ Editar</button>
-                        </div>
+                        <h3 class="card-title" style="margin-bottom: 15px;">📞 Datos de Contacto</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Métodos de Contacto</p>
@@ -887,10 +874,7 @@
                     </div>
 
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 class="card-title" style="margin: 0;">📄 Páginas de tu Web</h3>
-                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('paginas')">✏️ Editar</button>
-                        </div>
+                        <h3 class="card-title" style="margin-bottom: 15px;">📄 Páginas de tu Web</h3>
                         <p style="color: #666; margin-bottom: 10px; font-size: 0.9rem;">Límite: <span id="paginasLimit">5 páginas</span></p>
                         <div id="negocioPaginas" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                             <span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">Cargando...</span>
@@ -906,10 +890,7 @@
                     </div>
 
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 class="card-title" style="margin: 0;">🔍 Dominio y SEO</h3>
-                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('dominio')">✏️ Editar</button>
-                        </div>
+                        <h3 class="card-title" style="margin-bottom: 15px;">🔍 Dominio y SEO</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">Dominio Preferido</p>
@@ -954,10 +935,7 @@
                     </div>
 
                     <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 class="card-title" style="margin: 0;">🏛️ Datos Fiscales</h3>
-                            <button class="btn-action secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="toggleEditSection('fiscal')">✏️ Editar</button>
-                        </div>
+                        <h3 class="card-title" style="margin-bottom: 15px;">🏛️ Datos Fiscales</h3>
                         <div style="display: grid; gap: 15px;">
                             <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 8px;">CIF/NIF</p>
@@ -1094,6 +1072,18 @@
                                 <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email Empresarial</p>
                                 <p style="font-weight: 600; color: #1B1B1B;" id="negocioEmailEmpresa">-</p>
                             </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Email para Formulario de Contacto</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="negocioFormEmail">-</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="card" style="cursor: pointer;">
+                        <summary style="font-weight: 700; font-size: 1.1rem; color: #1B1B1B; padding: 10px; cursor: pointer; list-style: none;">⚖️ Textos Legales <span style="float: right;">▼</span></summary>
+                        <div style="margin-top: 15px; padding: 15px; background: #fafbfc; border-radius: 8px;">
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Política de Privacidad</p>
+                            <p style="font-weight: 600; color: #1B1B1B;" id="negocioPrivacyPolicy">-</p>
                         </div>
                     </details>
                 </div>
@@ -1881,6 +1871,12 @@
                         // 🆕 Más datos de contacto
                         document.getElementById('negocioDireccionFisica').textContent = source.physical_address || '-';
                         document.getElementById('negocioEmailEmpresa').textContent = source.business_email || '-';
+                        document.getElementById('negocioFormEmail').textContent = source.form_email || '-';
+                        
+                        // ⚖️ Textos legales
+                        const privacyText = source.privacy_policy === 'generar' ? 'Generar automáticamente' : 
+                                           source.privacy_policy === 'propia' ? 'Política propia del cliente' : '-';
+                        document.getElementById('negocioPrivacyPolicy').textContent = privacyText;
                         
                         // 🆕 Campos dinámicos por sector
                         const menuContentCard = document.getElementById('menuContentCard');
