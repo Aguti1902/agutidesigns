@@ -442,7 +442,7 @@ function createSubmission(data) {
         data.facebook || null,
         data.linkedin || null,
         data.twitter || null,
-        data.services || null,
+        data.services_list || data.services || null,  // 🔧 Mapeo services_list → services
         JSON.stringify(data.purpose) || null,
         data.target_audience || null,
         JSON.stringify(data.pages) || null,
@@ -491,6 +491,9 @@ function getSubmission(id) {
                 console.log('⚠️ Error parsing images_data:', e);
             }
         }
+        
+        // 🔧 Añadir alias services_list para compatibilidad con frontend
+        submission.services_list = submission.services;
     }
     
     return submission;
