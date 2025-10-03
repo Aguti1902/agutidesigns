@@ -289,7 +289,7 @@
             
             try {
                 // 1. Crear cuenta de cliente
-                const registerResponse = await fetch(`${API_BASE_URL}/api/register`, {
+                const registerResponse = await fetch(`${API_BASE_URL}/api/client/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -310,28 +310,7 @@
                 
                 console.log('✅ Usuario registrado:', registerData);
                 
-                // 2. Si tiene plan, actualizar cliente
-                if (plan) {
-                    const updateResponse = await fetch(`${API_BASE_URL}/api/admin/clients/${registerData.userId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            plan: plan,
-                            website_status: websiteStatus,
-                            payment_date: new Date().toISOString()
-                        })
-                    });
-                    
-                    if (!updateResponse.ok) {
-                        console.warn('⚠️ Error al actualizar plan, pero usuario creado');
-                    } else {
-                        console.log('✅ Plan actualizado');
-                    }
-                }
-                
-                // 3. Crear submission básica
+                // 2. Crear submission básica
                 const submissionResponse = await fetch(`${API_BASE_URL}/api/submissions/create`, {
                     method: 'POST',
                     headers: {
@@ -339,42 +318,58 @@
                     },
                     body: JSON.stringify({
                         business_name: businessName,
-                        business_description: 'Descripción de prueba',
+                        business_description: 'Descripción de prueba para testing',
                         industry: 'tecnologia',
                         email: email,
                         phone_number: '123456789',
+                        email_contact: email,
                         cif_nif: 'B12345678',
                         razon_social: businessName,
-                        direccion_fiscal: 'Calle Test 123',
+                        direccion_fiscal: 'Calle Test 123, Madrid',
+                        contact_methods: JSON.stringify(['email', 'telefono']),
                         purpose: JSON.stringify(['informacion']),
-                        target_audience: 'Público general',
-                        pages: JSON.stringify(['inicio', 'contacto']),
+                        target_audience: 'Público general de prueba',
+                        pages: JSON.stringify(['inicio', 'nosotros', 'servicios', 'contacto']),
                         design_style: 'moderno',
-                        brand_colors: '#0046FE',
+                        brand_colors: '#0046FE, #009A62',
                         reference_websites: 'https://ejemplo.com',
-                        keywords: 'test, prueba',
+                        keywords: 'test, prueba, desarrollo',
                         has_analytics: 'no',
-                        domain_name: `${businessName.toLowerCase().replace(/\s+/g, '')}.com`,
-                        privacy_policy: 'generar'
+                        domain_name: `${businessName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}.com`,
+                        privacy_policy: 'generar',
+                        services_list: 'Servicio 1, Servicio 2, Servicio 3',
+                        web_texts: 'Estos son textos de prueba para la web.'
                     })
                 });
                 
                 const submissionData = await submissionResponse.json();
                 
-                if (submissionResponse.ok) {
+                if (!submissionResponse.ok) {
+                    console.warn('⚠️ Error al crear submission:', submissionData);
+                } else {
                     console.log('✅ Submission creada:', submissionData);
+                }
+                
+                // 3. Si tiene plan, actualizar cliente usando endpoint específico
+                if (plan) {
+                    const updateResponse = await fetch(`${API_BASE_URL}/api/test/update-client`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            clientId: registerData.userId,
+                            plan: plan,
+                            website_status: websiteStatus,
+                            payment_date: new Date().toISOString(),
+                            submission_id: submissionData.submissionId || null
+                        })
+                    });
                     
-                    // Vincular submission al cliente
-                    if (submissionData.submissionId) {
-                        await fetch(`${API_BASE_URL}/api/admin/clients/${registerData.userId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                submission_id: submissionData.submissionId
-                            })
-                        });
+                    if (updateResponse.ok) {
+                        console.log('✅ Cliente actualizado con plan y submission');
+                    } else {
+                        console.warn('⚠️ No se pudo actualizar el plan automáticamente');
                     }
                 }
                 

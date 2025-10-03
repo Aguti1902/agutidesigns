@@ -1049,6 +1049,81 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
     }
 });
 
+// ====== ENDPOINT TEMPORAL: Actualizar cliente para testing ======
+app.post('/api/test/update-client', (req, res) => {
+    try {
+        const { clientId, plan, website_status, payment_date, submission_id } = req.body;
+        
+        console.log(`🔧 [TEST] Actualizando cliente #${clientId} para testing`);
+        console.log('📦 [TEST] Datos:', { plan, website_status, payment_date, submission_id });
+        
+        // Construir la query dinámicamente según los campos proporcionados
+        const updates = [];
+        const values = [];
+        
+        if (plan) {
+            updates.push('plan = ?');
+            values.push(plan);
+        }
+        
+        if (website_status) {
+            updates.push('website_status = ?');
+            values.push(website_status);
+        }
+        
+        if (payment_date) {
+            updates.push('payment_date = ?');
+            values.push(payment_date);
+        }
+        
+        if (submission_id) {
+            updates.push('submission_id = ?');
+            values.push(submission_id);
+        }
+        
+        if (updates.length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No hay campos para actualizar' 
+            });
+        }
+        
+        // Añadir clientId al final
+        values.push(clientId);
+        
+        const query = `UPDATE clients SET ${updates.join(', ')} WHERE id = ?`;
+        
+        console.log('🔍 [TEST] Query:', query);
+        console.log('🔍 [TEST] Values:', values);
+        
+        const stmt = db.db.prepare(query);
+        const result = stmt.run(...values);
+        
+        if (result.changes === 0) {
+            console.log('⚠️ [TEST] Cliente no encontrado');
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Cliente no encontrado' 
+            });
+        }
+        
+        console.log('✅ [TEST] Cliente actualizado correctamente');
+        
+        res.json({
+            success: true,
+            message: 'Cliente actualizado correctamente',
+            changes: result.changes
+        });
+        
+    } catch (error) {
+        console.error('❌ [TEST] Error actualizando cliente:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
 // 🆕 ENDPOINT TEMPORAL: Vincular submission_id a clientes existentes
 app.post('/api/admin/fix-client-submissions', (req, res) => {
     try {
