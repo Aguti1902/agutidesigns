@@ -2394,6 +2394,9 @@
                             pagesArray = [...pagesArray, ...customPagesArray];
                         }
                         
+                        // 🔧 FIX: Eliminar duplicados (usar Set para obtener valores únicos)
+                        pagesArray = [...new Set(pagesArray)];
+                        
                         if (pagesArray.length > 0) {
                             const pagesHTML = pagesArray.map(page => 
                                 `<span style="padding: 8px 16px; background: #e8f4ff; color: #0046FE; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">${page}</span>`
@@ -2480,7 +2483,20 @@
                         
                         // SECCIÓN 5: SEO
                         document.getElementById('form_keywords').textContent = source.keywords || '-';
-                        const analyticsText = source.has_analytics === 'yes' || source.has_analytics === 'si' ? 'Sí' : (source.has_analytics === 'no' ? 'No' : '-');
+                        
+                        // Debug has_analytics
+                        console.log('🔍 has_analytics valor:', source.has_analytics, 'tipo:', typeof source.has_analytics);
+                        
+                        // Normalizar has_analytics (puede venir como 'yes', 'si', 'no', 'sí', etc.)
+                        let analyticsText = '-';
+                        if (source.has_analytics) {
+                            const normalizedValue = String(source.has_analytics).toLowerCase().trim();
+                            if (normalizedValue === 'yes' || normalizedValue === 'si' || normalizedValue === 'sí') {
+                                analyticsText = 'Sí';
+                            } else if (normalizedValue === 'no') {
+                                analyticsText = 'No';
+                            }
+                        }
                         document.getElementById('form_has_analytics').textContent = analyticsText;
                         
                         // SECCIÓN 6: DOMINIO
@@ -3266,7 +3282,7 @@
             
             // SECCIÓN 5: SEO
             makeFieldEditable('form_keywords', 'input');
-            // form_has_analytics NO es editable - es radio en el form original
+            makeFieldEditable('form_has_analytics', 'radio');
             
             // SECCIÓN 6: DOMINIO
             makeFieldEditable('form_domain_name', 'input');
@@ -3329,6 +3345,24 @@
             if (type === 'textarea') {
                 const rows = options.rows || 3;
                 inputHTML = `<textarea placeholder="Escribe aquí..." style="${baseStyle} min-height: ${rows * 30}px; resize: vertical;">${value}</textarea>`;
+            } else if (type === 'radio') {
+                // Radio buttons para Sí/No (has_analytics)
+                const isYes = value === 'Sí' || value === 'sí';
+                const isNo = value === 'No' || value === 'no';
+                inputHTML = `
+                    <div style="display: flex; gap: 25px; padding: 12px 0;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                            <input type="radio" name="${fieldId}_radio" value="si" ${isYes ? 'checked' : ''} 
+                                   style="width: 20px; height: 20px; cursor: pointer; accent-color: #0046FE;">
+                            <span>Sí</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                            <input type="radio" name="${fieldId}_radio" value="no" ${isNo ? 'checked' : ''} 
+                                   style="width: 20px; height: 20px; cursor: pointer; accent-color: #0046FE;">
+                            <span>No</span>
+                        </label>
+                    </div>
+                `;
             } else {
                 const inputType = options.type || 'text';
                 inputHTML = `<input type="${inputType}" value="${value}" placeholder="Añade información..." style="${baseStyle}">`;
@@ -3879,6 +3913,14 @@
             const getFieldValue = (fieldId) => {
                 const el = document.getElementById(fieldId);
                 if (!el) return null;
+                
+                // Si hay radio buttons, obtener el valor del seleccionado
+                const radioChecked = el.querySelector('input[type="radio"]:checked');
+                if (radioChecked) {
+                    return radioChecked.value; // Retorna 'si' o 'no'
+                }
+                
+                // Si es un input o textarea normal
                 const input = el.querySelector('input, textarea');
                 return input ? input.value : el.textContent.trim();
             };
