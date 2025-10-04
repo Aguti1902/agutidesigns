@@ -1862,7 +1862,7 @@
                         <td><strong>${pedido.amount}€</strong></td>
                         <td><span class="badge badge-${pedido.status === 'paid' ? 'success' : 'warning'}">${formatStatus(pedido.status)}</span></td>
                         <td>${formatDate(pedido.created_at)}</td>
-                        <td><button class="btn-secondary" onclick="viewPedido(${pedido.id})">Ver</button></td>
+                        <td><button class="btn-secondary" onclick="window.location.href='/admin-dashboard/pedido-detalle.html?id=${pedido.id}'">Ver</button></td>
                     </tr>
                 `).join('');
             } catch (error) {

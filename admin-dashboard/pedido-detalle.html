@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Pedido - agutidesigns Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/images/Logo.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #F8F9FA;
+            color: #1B1B1B;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 20px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: #1B1B1B;
+            font-weight: 700;
+        }
+
+        .badge-upgrade {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-back {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: #0036C8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,70,254,0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        /* Plan Info Card */
+        .plan-card {
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,70,254,0.2);
+        }
+
+        .plan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .plan-item h4 {
+            opacity: 0.9;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .plan-item p {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Form Sections - Replicando "Mi Negocio" */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .form-section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1B1B1B;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #4B5563;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #0046FE;
+            box-shadow: 0 0 0 3px rgba(0,70,254,0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-value {
+            padding: 12px 16px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            border: 2px solid #E5E7EB;
+            color: #1B1B1B;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Pages List */
+        .pages-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-tag {
+            padding: 8px 16px;
+            background: #EBF5FF;
+            color: #0046FE;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Checkbox Group */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Save Indicator */
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #10B981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .save-indicator.show {
+            display: block;
+        }
+
+        /* Loading */
+        .loader {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0046FE;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Images Grid */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .image-card {
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .image-card img {
+            max-width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #F9FAFB;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .image-card-title {
+            font-weight: 600;
+            color: #6B7280;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-download, .btn-view {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download {
+            background: #0046FE;
+            color: white;
+        }
+
+        .btn-view {
+            background: #F3F4F6;
+            color: #1B1B1B;
+        }
+
+        /* Dynamic Fields */
+        .dynamic-section {
+            background: rgba(0, 154, 98, 0.05);
+            border: 2px solid #009A62;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .dynamic-section .form-section-title {
+            color: #009A62;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>📋 Detalles del Pedido <span id="pedidoId"></span></h1>
+                <span id="upgradeBadge" class="badge-upgrade" style="display: none;">🔼 UPGRADE</span>
+            </div>
+            <a href="/admin-dashboard/" class="btn-back">
+                ← Volver al Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- Container -->
+    <div class="container" id="mainContent">
+        <div class="loader">
+            <div class="spinner"></div>
+            <p>Cargando pedido...</p>
+        </div>
+    </div>
+
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">
+        ✓ Cambios guardados
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+        let pedidoData = null;
+        let saveTimeout = null;
+
+        // Obtener ID del pedido de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('id');
+
+        if (!pedidoId) {
+            alert('ID de pedido no especificado');
+            window.location.href = '/admin-dashboard/';
+        }
+
+        // Cargar datos del pedido
+        async function loadPedido() {
+            try {
+                console.log('📋 Cargando pedido #', pedidoId);
+                const response = await fetch(`${API_URL}/api/admin/submissions/${pedidoId}`);
+                if (!response.ok) throw new Error('Error cargando pedido');
+                
+                pedidoData = await response.json();
+                console.log('✅ Pedido cargado:', pedidoData);
+                
+                renderPedido();
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('mainContent').innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <h2 style="color: #EF4444; margin-bottom: 15px;">❌ Error al cargar el pedido</h2>
+                        <p style="color: #6B7280;">${error.message}</p>
+                        <a href="/admin-dashboard/" class="btn-back" style="margin-top: 20px;">Volver al Admin</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar pedido
+        function renderPedido() {
+            const pedido = pedidoData;
+            
+            // Actualizar título
+            document.getElementById('pedidoId').textContent = `#${pedido.id}`;
+            if (pedido.is_upgrade) {
+                document.getElementById('upgradeBadge').style.display = 'inline-block';
+            }
+
+            // Parsear arrays/objetos
+            const pages = pedido.pages ? (typeof pedido.pages === 'string' ? JSON.parse(pedido.pages) : pedido.pages) : [];
+            const contactMethods = pedido.contact_methods ? (typeof pedido.contact_methods === 'string' ? JSON.parse(pedido.contact_methods) : pedido.contact_methods) : [];
+
+            // Renderizar contenido
+            document.getElementById('mainContent').innerHTML = `
+                <!-- Plan Info -->
+                <div class="plan-card">
+                    <h2 style="margin-bottom: 5px;">Plan Contratado</h2>
+                    ${pedido.previous_plan ? `<p style="opacity: 0.8; font-size: 0.9rem;">Anterior: ${formatPlan(pedido.previous_plan)}</p>` : ''}
+                    <div class="plan-grid">
+                        <div class="plan-item">
+                            <h4>Plan</h4>
+                            <p>${formatPlan(pedido.plan)}</p>
+                        </div>
+                        <div class="plan-item">
+                            <h4>Monto</h4>
+                            <p>${pedido.amount}€</p>
+                        </div>
+                        <div class="plan-item">
+                            <h4>Estado</h4>
+                            <p>${formatStatus(pedido.status)}</p>
+                        </div>
+                        <div class="plan-item">
+                            <h4>Fecha</h4>
+                            <p>${formatDate(pedido.created_at)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 1: Datos del Negocio -->
+                <div class="form-section">
+                    <h3 class="form-section-title">🏢 Datos del Negocio</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre del negocio</label>
+                            <input type="text" class="form-input" data-field="business_name" value="${pedido.business_name || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Industria/Sector</label>
+                            <input type="text" class="form-input" data-field="industry" value="${pedido.industry || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción del negocio</label>
+                        <textarea class="form-textarea" data-field="business_description" onchange="saveField(this)">${pedido.business_description || ''}</textarea>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Datos de Contacto del Cliente -->
+                <div class="form-section">
+                    <h3 class="form-section-title">👤 Datos de Contacto del Cliente</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-input" data-field="full_name" value="${pedido.full_name || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" data-field="email" value="${pedido.email || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-input" data-field="phone" value="${pedido.phone || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección</label>
+                            <input type="text" class="form-input" data-field="address" value="${pedido.address || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: Datos de Contacto Web -->
+                <div class="form-section">
+                    <h3 class="form-section-title">📞 Datos de Contacto Web</h3>
+                    <div class="form-group">
+                        <label class="form-label">Métodos de contacto (separados por coma)</label>
+                        <input type="text" class="form-input" data-field="contact_methods" value="${contactMethods.join(', ')}" onchange="saveField(this)">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email de contacto web</label>
+                            <input type="email" class="form-input" data-field="email_contact" value="${pedido.email_contact || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email del formulario</label>
+                            <input type="email" class="form-input" data-field="form_email" value="${pedido.form_email || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Teléfono de contacto</label>
+                            <input type="text" class="form-input" data-field="phone_number" value="${pedido.phone_number || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">WhatsApp</label>
+                            <input type="text" class="form-input" data-field="whatsapp_number" value="${pedido.whatsapp_number || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección física</label>
+                            <input type="text" class="form-input" data-field="physical_address" value="${pedido.physical_address || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 4: Redes Sociales -->
+                <div class="form-section">
+                    <h3 class="form-section-title">📱 Redes Sociales</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Instagram</label>
+                            <input type="text" class="form-input" data-field="instagram" value="${pedido.instagram || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Facebook</label>
+                            <input type="text" class="form-input" data-field="facebook" value="${pedido.facebook || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LinkedIn</label>
+                            <input type="text" class="form-input" data-field="linkedin" value="${pedido.linkedin || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Twitter</label>
+                            <input type="text" class="form-input" data-field="twitter" value="${pedido.twitter || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 5: Contenido de la Web -->
+                <div class="form-section">
+                    <h3 class="form-section-title">📄 Contenido de la Web</h3>
+                    <div class="form-group">
+                        <label class="form-label">Páginas incluidas</label>
+                        <div class="pages-list">
+                            ${pages.map(p => `<span class="page-tag">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Servicios</label>
+                        <textarea class="form-textarea" data-field="services" onchange="saveField(this)">${pedido.services || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Público objetivo</label>
+                        <input type="text" class="form-input" data-field="target_audience" value="${pedido.target_audience || ''}" onchange="saveField(this)">
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 6: Diseño y Branding -->
+                <div class="form-section">
+                    <h3 class="form-section-title">🎨 Diseño y Branding</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Estilo de diseño</label>
+                            <input type="text" class="form-input" data-field="design_style" value="${pedido.design_style || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Colores de marca</label>
+                            <input type="text" class="form-input" data-field="brand_colors" value="${pedido.brand_colors || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sitios web de referencia</label>
+                        <input type="text" class="form-input" data-field="reference_websites" value="${pedido.reference_websites || ''}" onchange="saveField(this)">
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 7: SEO y Dominio -->
+                <div class="form-section">
+                    <h3 class="form-section-title">🔍 SEO y Dominio</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Dominio preferido</label>
+                            <input type="text" class="form-input" data-field="domain_name" value="${pedido.domain_name || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dominio alternativo 1</label>
+                            <input type="text" class="form-input" data-field="domain_alt1" value="${pedido.domain_alt1 || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dominio alternativo 2</label>
+                            <input type="text" class="form-input" data-field="domain_alt2" value="${pedido.domain_alt2 || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Google Analytics</label>
+                            <select class="form-select" data-field="has_analytics" onchange="saveField(this)">
+                                <option value="">Seleccionar...</option>
+                                <option value="yes" ${pedido.has_analytics === 'yes' ? 'selected' : ''}>Sí</option>
+                                <option value="no" ${pedido.has_analytics === 'no' ? 'selected' : ''}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Palabras clave SEO</label>
+                        <textarea class="form-textarea" data-field="keywords" onchange="saveField(this)">${pedido.keywords || ''}</textarea>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 8: Textos Personalizados -->
+                ${pedido.web_texts ? `
+                <div class="form-section">
+                    <h3 class="form-section-title">📝 Textos Personalizados</h3>
+                    <div class="form-group">
+                        <label class="form-label">Textos adicionales para la web</label>
+                        <textarea class="form-textarea" data-field="web_texts" onchange="saveField(this)" style="min-height: 200px;">${pedido.web_texts}</textarea>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Campos Dinámicos por Sector -->
+                ${pedido.menu_content || pedido.opening_hours || pedido.portfolio_description ? `
+                <div class="dynamic-section">
+                    <h3 class="form-section-title">🍽️ Información Específica del Sector</h3>
+                    ${pedido.menu_content ? `
+                    <div class="form-group">
+                        <label class="form-label">📋 Menú (Restaurante/Bar/Cafetería)</label>
+                        <textarea class="form-textarea" data-field="menu_content" onchange="saveField(this)" style="min-height: 200px;">${pedido.menu_content}</textarea>
+                    </div>
+                    ` : ''}
+                    ${pedido.opening_hours ? `
+                    <div class="form-group">
+                        <label class="form-label">🕐 Horarios de Apertura</label>
+                        <textarea class="form-textarea" data-field="opening_hours" onchange="saveField(this)">${pedido.opening_hours}</textarea>
+                    </div>
+                    ` : ''}
+                    ${pedido.portfolio_description ? `
+                    <div class="form-group">
+                        <label class="form-label">📸 Descripción de Portfolio/Proyectos</label>
+                        <textarea class="form-textarea" data-field="portfolio_description" onchange="saveField(this)" style="min-height: 200px;">${pedido.portfolio_description}</textarea>
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <!-- Logo e Imágenes -->
+                ${pedido.logo_data || pedido.images_data ? `
+                <div class="form-section">
+                    <h3 class="form-section-title">🖼️ Logo e Imágenes</h3>
+                    <div class="images-grid">
+                        ${pedido.logo_data ? `
+                        <div class="image-card">
+                            <div class="image-card-title">Logo</div>
+                            <img src="${pedido.logo_data}" alt="Logo">
+                            <div class="image-actions">
+                                <a href="${pedido.logo_data}" download="logo.png" class="btn-download">💾 Descargar</a>
+                                <a href="${pedido.logo_data}" target="_blank" class="btn-view">🔍 Ver</a>
+                            </div>
+                        </div>
+                        ` : ''}
+                        ${pedido.images_data ? (() => {
+                            const images = typeof pedido.images_data === 'string' ? JSON.parse(pedido.images_data) : pedido.images_data;
+                            if (Array.isArray(images) && images.length > 0) {
+                                return images.map((img, index) => `
+                                    <div class="image-card">
+                                        <div class="image-card-title">Imagen ${index + 1}</div>
+                                        <img src="${img}" alt="Imagen ${index + 1}">
+                                        <div class="image-actions">
+                                            <a href="${img}" download="imagen-${index + 1}.png" class="btn-download">💾 Descargar</a>
+                                            <a href="${img}" target="_blank" class="btn-view">🔍 Ver</a>
+                                        </div>
+                                    </div>
+                                `).join('');
+                            }
+                            return '';
+                        })() : ''}
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Datos Fiscales -->
+                <div class="form-section">
+                    <h3 class="form-section-title">⚖️ Datos Fiscales</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">CIF/NIF</label>
+                            <input type="text" class="form-input" data-field="cif_nif" value="${pedido.cif_nif || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Razón social</label>
+                            <input type="text" class="form-input" data-field="razon_social" value="${pedido.razon_social || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección fiscal</label>
+                            <input type="text" class="form-input" data-field="direccion_fiscal" value="${pedido.direccion_fiscal || ''}" onchange="saveField(this)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email de negocio</label>
+                            <input type="email" class="form-input" data-field="business_email" value="${pedido.business_email || ''}" onchange="saveField(this)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Guardar campo
+        async function saveField(element) {
+            const field = element.dataset.field;
+            let value = element.value;
+
+            // Si es contact_methods, convertir a array
+            if (field === 'contact_methods') {
+                value = value.split(',').map(v => v.trim()).filter(v => v);
+            }
+
+            try {
+                console.log(`💾 Guardando ${field}:`, value);
+
+                const response = await fetch(`${API_URL}/api/admin/submissions/${pedidoId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: value })
+                });
+
+                if (!response.ok) throw new Error('Error al guardar');
+
+                // Mostrar indicador de guardado
+                showSaveIndicator();
+                
+                console.log(`✅ Campo ${field} guardado`);
+            } catch (error) {
+                console.error('❌ Error guardando:', error);
+                alert('Error al guardar los cambios');
+            }
+        }
+
+        // Mostrar indicador de guardado
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // Helpers
+        function formatPlan(plan) {
+            const plans = {
+                'basico': 'Básico',
+                'avanzado': 'Avanzado',
+                'premium': 'Premium'
+            };
+            return plans[plan?.toLowerCase()] || plan || 'N/A';
+        }
+
+        function formatStatus(status) {
+            const statuses = {
+                'paid': 'Pagado',
+                'pending': 'Pendiente',
+                'cancelled': 'Cancelado'
+            };
+            return statuses[status?.toLowerCase()] || status || 'N/A';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Cargar pedido al iniciar
+        loadPedido();
+    </script>
+</body>
+</html>
+
