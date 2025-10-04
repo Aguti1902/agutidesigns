@@ -2726,18 +2726,26 @@
                 });
                 
                 // Añadir event listeners para drop zones
-                statuses.forEach(status => {
-                    const columnId = status.replace('_', '-');
-                    const column = document.getElementById(`kanban-${columnId}`).parentElement;
-                    column.addEventListener('dragover', handleDragOver);
-                    column.addEventListener('drop', (e) => handleDrop(e, status));
+                Object.keys(projectsByStatus).forEach(backendStatus => {
+                    const columnId = statusMapping[backendStatus];
+                    const column = document.getElementById(`kanban-${columnId}`)?.parentElement;
+                    if (column) {
+                        column.addEventListener('dragover', handleDragOver);
+                        column.addEventListener('drop', (e) => handleDrop(e, backendStatus));
+                    }
                 });
                 
-                // Actualizar estadísticas
-                const statsResponse = await fetch(`${API_URL}/api/admin/projects/stats`);
-                const stats = await statsResponse.json();
-                if (document.getElementById('websInProgress')) {
-                    document.getElementById('websInProgress').textContent = stats.en_desarrollo || 0;
+                // Actualizar estadísticas (opcional, no bloquea si falla)
+                try {
+                    const statsResponse = await fetch(`${API_URL}/api/admin/projects/stats`);
+                    if (statsResponse.ok) {
+                        const stats = await statsResponse.json();
+                        if (document.getElementById('websInProgress')) {
+                            document.getElementById('websInProgress').textContent = stats.en_desarrollo || 0;
+                        }
+                    }
+                } catch (statsError) {
+                    console.warn('⚠️ [ADMIN] No se pudieron cargar estadísticas de proyectos:', statsError);
                 }
                 
                 console.log('✅ [ADMIN] Proyectos cargados correctamente en Kanban');
