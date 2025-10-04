@@ -2807,59 +2807,101 @@ app.post('/api/client/change-plan', async (req, res) => {
 
 app.post('/api/admin/fix-tracking', async (req, res) => {
     try {
-        console.log('🔧 [ADMIN] Consolidando pedidos duplicados...');
+        console.log('🔧 [ADMIN] Sincronizando pedidos con estado real del cliente...');
         
-        // 1️⃣ Verificar si existe pedido #9 (el upgrade duplicado)
+        // 1️⃣ Obtener el cliente por email
+        const email = 'info@agutidesigns.com';
+        const clientResult = await db.pool.query(`SELECT * FROM clients WHERE email = $1`, [email]);
+        
+        if (clientResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        const client = clientResult.rows[0];
+        console.log(`👤 Cliente #${client.id} - Plan ACTUAL: ${client.plan} - Submission ID: ${client.submission_id}`);
+        
+        // 2️⃣ Verificar pedidos existentes
+        const pedido8Result = await db.pool.query(`SELECT * FROM submissions WHERE id = 8`);
         const pedido9Result = await db.pool.query(`SELECT * FROM submissions WHERE id = 9`);
         
-        if (pedido9Result.rows.length > 0) {
-            const pedido9 = pedido9Result.rows[0];
-            console.log('📋 Pedido #9 encontrado:', pedido9.plan, pedido9.amount);
+        const pedido8 = pedido8Result.rows[0];
+        const pedido9 = pedido9Result.rows.length > 0 ? pedido9Result.rows[0] : null;
+        
+        console.log(`📋 Pedido #8: ${pedido8?.plan} - ${pedido8?.amount}€`);
+        if (pedido9) console.log(`📋 Pedido #9: ${pedido9.plan} - ${pedido9.amount}€`);
+        
+        // 3️⃣ Determinar qué hacer según el plan ACTUAL del cliente
+        const planActual = client.plan;
+        const submissionActual = client.submission_id;
+        
+        if (submissionActual === 8) {
+            // El cliente está vinculado al pedido #8
+            console.log('✅ Cliente vinculado al pedido #8');
             
-            // 2️⃣ Actualizar pedido #8 con los datos del #9 (el upgrade)
+            // Actualizar pedido #8 con el plan actual del cliente
+            const priceMap = {
+                basico: 35,
+                avanzado: 39,
+                premium: 52
+            };
+            
+            await db.pool.query(`
+                UPDATE submissions 
+                SET plan = $1,
+                    amount = $2,
+                    has_modifications = true,
+                    last_modified_at = CURRENT_TIMESTAMP
+                WHERE id = 8
+            `, [planActual, priceMap[planActual]]);
+            
+            console.log(`✅ Pedido #8 actualizado al plan actual: ${planActual}`);
+            
+            // Si existe pedido #9, eliminarlo (es el duplicado)
+            if (pedido9) {
+                await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
+                console.log('✅ Pedido #9 eliminado (duplicado innecesario)');
+            }
+            
+        } else if (submissionActual === 9) {
+            // El cliente está vinculado al pedido #9
+            console.log('✅ Cliente vinculado al pedido #9 - Cambiando a #8');
+            
+            // Actualizar pedido #8 con el plan del cliente
+            const priceMap = {
+                basico: 35,
+                avanzado: 39,
+                premium: 52
+            };
+            
             await db.pool.query(`
                 UPDATE submissions 
                 SET plan = $1,
                     amount = $2,
                     business_name = $3,
-                    previous_plan = 'basico',
-                    has_upgrade = true,
-                    has_modifications = false,
-                    last_modified_at = CURRENT_TIMESTAMP,
-                    updated_at = CURRENT_TIMESTAMP
+                    has_modifications = true,
+                    last_modified_at = CURRENT_TIMESTAMP
                 WHERE id = 8
-            `, [pedido9.plan, pedido9.amount, pedido9.business_name]);
+            `, [planActual, priceMap[planActual], client.business_name]);
             
-            console.log('✅ Pedido #8 actualizado con datos del upgrade');
+            // Vincular cliente al pedido #8
+            await db.pool.query(`UPDATE clients SET submission_id = 8 WHERE id = $1`, [client.id]);
             
-            // 3️⃣ Eliminar pedido #9 (ya no es necesario)
-            await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
-            console.log('✅ Pedido #9 eliminado (duplicado)');
-            
-            // 4️⃣ Actualizar cliente y proyecto si es necesario
-            const clientResult = await db.pool.query(`SELECT id FROM clients WHERE email = $1`, [pedido9.email]);
-            if (clientResult.rows.length > 0) {
-                const clientId = clientResult.rows[0].id;
-                
-                // Asegurarse de que el cliente tenga el submission_id correcto
-                await db.pool.query(`
-                    UPDATE clients 
-                    SET submission_id = 8,
-                        business_name = $1
-                    WHERE id = $2
-                `, [pedido9.business_name, clientId]);
-                
-                console.log(`✅ Cliente #${clientId} vinculado al pedido #8`);
+            // Eliminar pedido #9
+            if (pedido9) {
+                await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
+                console.log('✅ Pedido #9 eliminado y datos transferidos a #8');
             }
-        } else {
-            console.log('ℹ️ No se encontró pedido #9, no hay nada que consolidar');
         }
         
-        console.log('✅ [ADMIN] Consolidación completada - Ahora solo existe el pedido #8 con el upgrade');
-        res.json({ success: true, message: 'Pedidos consolidados correctamente' });
+        console.log(`✅ [ADMIN] Sincronización completada - Pedido #8 refleja el plan actual: ${planActual}`);
+        res.json({ 
+            success: true, 
+            message: `Sincronizado correctamente - Plan actual: ${planActual}`,
+            currentPlan: planActual
+        });
         
     } catch (error) {
-        console.error('❌ [ADMIN] Error consolidando pedidos:', error);
+        console.error('❌ [ADMIN] Error sincronizando:', error);
         res.status(500).json({ error: error.message });
     }
 });

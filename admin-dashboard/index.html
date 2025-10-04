@@ -1839,33 +1839,33 @@
 
         // ===== PEDIDOS =====
         
-        // Función temporal para consolidar pedidos duplicados
+        // Función temporal para sincronizar pedidos con estado real del cliente
         async function fixTracking() {
-            if (!confirm('⚠️ CONSOLIDAR PEDIDOS DUPLICADOS\n\nEsto hará lo siguiente:\n\n1. Eliminará el pedido #9 (duplicado)\n2. Actualizará el pedido #8 con el upgrade a Premium\n3. Mostrará el badge 🔼 UPGRADE en el pedido #8\n\n¿Continuar?')) {
+            if (!confirm('🔄 SINCRONIZAR PEDIDOS\n\nEsto hará lo siguiente:\n\n1. Verificará el plan ACTUAL del cliente\n2. Actualizará el pedido #8 con el plan correcto\n3. Eliminará el pedido #9 (duplicado)\n4. Mostrará los badges correctos\n\n¿Continuar?')) {
                 return;
             }
             
             try {
-                console.log('🔧 [ADMIN] Consolidando pedidos duplicados...');
+                console.log('🔧 [ADMIN] Sincronizando pedidos...');
                 
                 const response = await fetch(`${API_URL}/api/admin/fix-tracking`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 
-                if (!response.ok) throw new Error('Error al consolidar pedidos');
+                if (!response.ok) throw new Error('Error al sincronizar pedidos');
                 
                 const result = await response.json();
-                console.log('✅ [ADMIN] Pedidos consolidados:', result);
+                console.log('✅ [ADMIN] Pedidos sincronizados:', result);
                 
-                alert('✅ ¡Pedidos consolidados!\n\n• Pedido #9 eliminado\n• Pedido #8 actualizado con upgrade\n• Badge 🔼 UPGRADE añadido\n\nRecargando lista...');
+                alert(`✅ ¡Pedidos sincronizados!\n\n• Plan actual detectado: ${result.currentPlan.toUpperCase()}\n• Pedido #8 actualizado\n• Pedido #9 eliminado\n\nRecargando lista...`);
                 
                 // Recargar pedidos
                 await loadPedidos();
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error:', error);
-                alert('❌ Error al consolidar pedidos: ' + error.message);
+                alert('❌ Error al sincronizar pedidos: ' + error.message);
             }
         }
         
