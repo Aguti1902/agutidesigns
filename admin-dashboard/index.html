@@ -1036,7 +1036,10 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Proyectos</h2>
-                            <span style="color: #666; font-size: 0.9rem;">Los proyectos se crean automáticamente al completar el pago</span>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <button class="btn-primary" onclick="loadProjects()" style="font-size: 0.9rem;">🔄 Recargar Proyectos</button>
+                                <span style="color: #666; font-size: 0.85rem;">Los proyectos se crean automáticamente al completar el pago</span>
+                            </div>
                         </div>
                         
                         <div class="kanban-board">
@@ -1519,7 +1522,7 @@
                 console.log('📊 [ADMIN] Cargando estadísticas...');
                 const response = await fetch(`${API_URL}/api/admin/stats`);
                 const stats = await response.json();
-                
+
                 console.log('📊 [ADMIN] Estadísticas recibidas:', stats);
 
                 // Actualizar estadísticas principales
