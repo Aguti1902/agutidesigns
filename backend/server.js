@@ -2818,9 +2818,41 @@ app.post('/api/admin/fix-tracking', async (req, res) => {
         }
         
         const client = clientResult.rows[0];
-        console.log(`👤 Cliente #${client.id} - Plan ACTUAL: ${client.plan} - Submission ID: ${client.submission_id}`);
+        console.log(`👤 Cliente #${client.id}`);
+        console.log(`   Plan ACTUAL: ${client.plan}`);
+        console.log(`   Stripe Subscription: ${client.stripe_subscription_id}`);
+        console.log(`   Submission ID: ${client.submission_id}`);
         
-        // 2️⃣ Verificar pedidos existentes
+        // 2️⃣ Obtener info de Stripe para saber el billing_cycle
+        let billingCycle = 'monthly'; // default
+        let correctAmount = 39; // default para avanzado mensual
+        
+        if (client.stripe_subscription_id) {
+            try {
+                const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+                const interval = subscription.items.data[0].plan.interval;
+                billingCycle = interval === 'year' ? 'annual' : 'monthly';
+                console.log(`   Billing Cycle desde Stripe: ${billingCycle}`);
+            } catch (e) {
+                console.log('   ⚠️ No se pudo obtener billing cycle de Stripe, usando monthly');
+            }
+        }
+        
+        // 3️⃣ Calcular monto correcto
+        const priceMap = billingCycle === 'annual' ? {
+            basico: 420,
+            avanzado: 468,
+            premium: 624
+        } : {
+            basico: 35,
+            avanzado: 39,
+            premium: 52
+        };
+        
+        correctAmount = priceMap[client.plan] || 39;
+        console.log(`   Monto correcto: ${correctAmount}€ (${billingCycle})`);
+        
+        // 4️⃣ Verificar pedidos existentes
         const pedido8Result = await db.pool.query(`SELECT * FROM submissions WHERE id = 8`);
         const pedido9Result = await db.pool.query(`SELECT * FROM submissions WHERE id = 9`);
         
@@ -2828,76 +2860,64 @@ app.post('/api/admin/fix-tracking', async (req, res) => {
         const pedido9 = pedido9Result.rows.length > 0 ? pedido9Result.rows[0] : null;
         
         console.log(`📋 Pedido #8: ${pedido8?.plan} - ${pedido8?.amount}€`);
-        if (pedido9) console.log(`📋 Pedido #9: ${pedido9.plan} - ${pedido9.amount}€`);
+        if (pedido9) console.log(`📋 Pedido #9: ${pedido9?.plan} - ${pedido9?.amount}€`);
         
-        // 3️⃣ Determinar qué hacer según el plan ACTUAL del cliente
-        const planActual = client.plan;
-        const submissionActual = client.submission_id;
+        // 5️⃣ Detectar si hubo upgrade comparando pedido original con actual
+        let hasUpgrade = false;
+        let previousPlan = null;
         
-        if (submissionActual === 8) {
-            // El cliente está vinculado al pedido #8
-            console.log('✅ Cliente vinculado al pedido #8');
-            
-            // Actualizar pedido #8 con el plan actual del cliente
-            const priceMap = {
-                basico: 35,
-                avanzado: 39,
-                premium: 52
-            };
-            
-            await db.pool.query(`
-                UPDATE submissions 
-                SET plan = $1,
-                    amount = $2,
-                    has_modifications = true,
-                    last_modified_at = CURRENT_TIMESTAMP
-                WHERE id = 8
-            `, [planActual, priceMap[planActual]]);
-            
-            console.log(`✅ Pedido #8 actualizado al plan actual: ${planActual}`);
-            
-            // Si existe pedido #9, eliminarlo (es el duplicado)
-            if (pedido9) {
-                await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
-                console.log('✅ Pedido #9 eliminado (duplicado innecesario)');
-            }
-            
-        } else if (submissionActual === 9) {
-            // El cliente está vinculado al pedido #9
-            console.log('✅ Cliente vinculado al pedido #9 - Cambiando a #8');
-            
-            // Actualizar pedido #8 con el plan del cliente
-            const priceMap = {
-                basico: 35,
-                avanzado: 39,
-                premium: 52
-            };
-            
-            await db.pool.query(`
-                UPDATE submissions 
-                SET plan = $1,
-                    amount = $2,
-                    business_name = $3,
-                    has_modifications = true,
-                    last_modified_at = CURRENT_TIMESTAMP
-                WHERE id = 8
-            `, [planActual, priceMap[planActual], client.business_name]);
-            
-            // Vincular cliente al pedido #8
-            await db.pool.query(`UPDATE clients SET submission_id = 8 WHERE id = $1`, [client.id]);
-            
-            // Eliminar pedido #9
-            if (pedido9) {
-                await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
-                console.log('✅ Pedido #9 eliminado y datos transferidos a #8');
+        if (pedido9) {
+            // Si existe #9, significa que hubo un cambio
+            // Comparar plan de #8 original vs plan actual
+            if (pedido8.plan !== client.plan) {
+                hasUpgrade = true;
+                previousPlan = pedido8.plan;
+                console.log(`🔼 UPGRADE detectado: ${pedido8.plan} → ${client.plan}`);
             }
         }
         
-        console.log(`✅ [ADMIN] Sincronización completada - Pedido #8 refleja el plan actual: ${planActual}`);
+        // 6️⃣ Actualizar pedido #8 con TODA la info correcta
+        await db.pool.query(`
+            UPDATE submissions 
+            SET plan = $1,
+                amount = $2,
+                billing_cycle = $3,
+                business_name = $4,
+                has_upgrade = $5,
+                has_modifications = $6,
+                previous_plan = $7,
+                last_modified_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = 8
+        `, [
+            client.plan,
+            correctAmount,
+            billingCycle,
+            client.business_name,
+            hasUpgrade,
+            true, // always mark as modified since we're fixing
+            previousPlan
+        ]);
+        
+        console.log(`✅ Pedido #8 actualizado completamente`);
+        
+        // 7️⃣ Vincular cliente al pedido #8 y eliminar #9
+        await db.pool.query(`UPDATE clients SET submission_id = 8 WHERE id = $1`, [client.id]);
+        
+        if (pedido9) {
+            await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
+            console.log('✅ Pedido #9 eliminado');
+        }
+        
+        console.log(`✅ [ADMIN] Sincronización completada`);
         res.json({ 
             success: true, 
-            message: `Sincronizado correctamente - Plan actual: ${planActual}`,
-            currentPlan: planActual
+            message: `Sincronizado: ${client.plan.toUpperCase()} (${correctAmount}€)`,
+            currentPlan: client.plan,
+            amount: correctAmount,
+            billingCycle,
+            hasUpgrade,
+            previousPlan
         });
         
     } catch (error) {

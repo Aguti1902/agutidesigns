@@ -207,6 +207,17 @@ async function initializeTables() {
             console.log('⚠️ Migración tracking en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo billing_cycle
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'monthly'
+            `);
+            console.log('✅ Migración: Campo billing_cycle añadido a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración billing_cycle en submissions ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);

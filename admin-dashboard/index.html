@@ -1858,7 +1858,17 @@
                 const result = await response.json();
                 console.log('✅ [ADMIN] Pedidos sincronizados:', result);
                 
-                alert(`✅ ¡Pedidos sincronizados!\n\n• Plan actual detectado: ${result.currentPlan.toUpperCase()}\n• Pedido #8 actualizado\n• Pedido #9 eliminado\n\nRecargando lista...`);
+                let message = `✅ ¡Pedidos sincronizados!\n\n`;
+                message += `• Plan: ${result.currentPlan.toUpperCase()}\n`;
+                message += `• Monto: ${result.amount}€ (${result.billingCycle === 'annual' ? 'Anual' : 'Mensual'})\n`;
+                if (result.hasUpgrade) {
+                    message += `• 🔼 UPGRADE detectado: ${result.previousPlan} → ${result.currentPlan}\n`;
+                }
+                message += `• ✏️ Marcado como MODIFICADO\n`;
+                message += `• Pedido #9 eliminado\n\n`;
+                message += `Recargando lista...`;
+                
+                alert(message);
                 
                 // Recargar pedidos
                 await loadPedidos();
