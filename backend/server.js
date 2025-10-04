@@ -1787,7 +1787,7 @@ app.get('/api/tickets/stats', (req, res) => {
 // =============================================
 
 // Crear nuevo proyecto
-app.post('/api/admin/projects', (req, res) => {
+app.post('/api/admin/projects', async (req, res) => {
     try {
         const projectData = req.body;
         
