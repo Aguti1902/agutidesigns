@@ -2051,6 +2051,12 @@
                     plan: data.client?.plan
                 });
 
+                // IMPORTANTE: Actualizar currentClient con datos frescos del servidor
+                if (data.client) {
+                    currentClient = { ...currentClient, ...data.client };
+                    console.log('✅ currentClient actualizado con plan:', currentClient.plan);
+                }
+
                 // Definir submission FUERA del if para que esté disponible en todo el scope
                 const submission = data.submission;
 
@@ -4226,7 +4232,11 @@
         
         function addCustomPage() {
             // Verificar si puede añadir más páginas según su plan
-            const currentPlan = document.getElementById('userPlan')?.textContent.toLowerCase();
+            // IMPORTANTE: Usar currentClient.plan (actualizado) en lugar del DOM
+            const clientPlan = currentClient?.plan || dashboardData?.client?.plan || 'basico';
+            const currentPlanNormalized = clientPlan.toLowerCase();
+            
+            console.log('📄 [PAGES] Plan del cliente:', currentPlanNormalized);
             
             // Obtener páginas actuales
             const pagesContainer = document.getElementById('form_pages');
@@ -4237,15 +4247,22 @@
             
             // Límites por plan
             const planLimits = {
+                'basico': 5,
                 'básico': 5,
                 'avanzado': 10,
-                'premium': 999
+                'premium': 20
             };
             
-            const limit = planLimits[currentPlan] || 5;
+            const limit = planLimits[currentPlanNormalized] || 5;
+            
+            console.log(`📄 [PAGES] Páginas actuales: ${currentPages.length} / Límite: ${limit}`);
             
             if (currentPages.length >= limit) {
-                showNotification(`Tu plan ${currentPlan} permite máximo ${limit} páginas. Actualiza tu plan para añadir más.`, 'warning');
+                showNotificationModal(
+                    '⚠️ Límite Alcanzado',
+                    `Tu plan ${clientPlan} permite máximo ${limit} páginas.\n\n¿Deseas actualizar tu plan para añadir más páginas?`,
+                    'warning'
+                );
                 return;
             }
             
