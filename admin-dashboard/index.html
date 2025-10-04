@@ -2621,35 +2621,58 @@
                 const projects = await response.json();
                 
                 console.log('📋 [ADMIN] Proyectos recibidos:', projects.length, 'proyectos');
-                console.log('📋 [ADMIN] Datos:', projects);
+                console.log('📋 [ADMIN] Datos completos:', projects);
                 
-                // Limpiar columnas
-                const statuses = ['sin_empezar', 'desarrollo', 'revision', 'entregada'];
-                statuses.forEach(status => {
-                    document.getElementById(`kanban-${status.replace('_', '-')}`).innerHTML = '';
+                // Mapeo de estados del backend al frontend
+                const statusMapping = {
+                    'sin_empezar': 'sin-empezar',
+                    'en_desarrollo': 'desarrollo',
+                    'revision': 'revision',
+                    'entregada': 'entregada'
+                };
+                
+                // Limpiar todas las columnas
+                Object.values(statusMapping).forEach(columnId => {
+                    const column = document.getElementById(`kanban-${columnId}`);
+                    if (column) column.innerHTML = '';
                 });
                 
-                // Agrupar proyectos por estado
+                // Agrupar proyectos por estado (usando estados del backend)
                 const projectsByStatus = {
-                    sin_empezar: [],
-                    en_desarrollo: [],
-                    revision: [],
-                    entregada: []
+                    'sin_empezar': [],
+                    'en_desarrollo': [],
+                    'revision': [],
+                    'entregada': []
                 };
                 
                 projects.forEach(project => {
-                    if (projectsByStatus[project.status]) {
+                    console.log(`📋 [ADMIN] Proyecto #${project.id}: "${project.project_name || project.business_name}" - Estado: ${project.status}`);
+                    if (projectsByStatus[project.status] !== undefined) {
                         projectsByStatus[project.status].push(project);
+                    } else {
+                        console.warn(`⚠️ [ADMIN] Estado desconocido: ${project.status}`);
                     }
                 });
                 
+                console.log('📋 [ADMIN] Proyectos agrupados:', {
+                    sin_empezar: projectsByStatus.sin_empezar.length,
+                    en_desarrollo: projectsByStatus.en_desarrollo.length,
+                    revision: projectsByStatus.revision.length,
+                    entregada: projectsByStatus.entregada.length
+                });
+                
                 // Renderizar proyectos en cada columna
-                statuses.forEach(status => {
-                    const columnId = status.replace('_', '-');
+                Object.keys(projectsByStatus).forEach(backendStatus => {
+                    const columnId = statusMapping[backendStatus];
                     const column = document.getElementById(`kanban-${columnId}`);
                     const count = document.getElementById(`count-${columnId}`);
                     
-                    const projectList = projectsByStatus[status] || [];
+                    if (!column || !count) {
+                        console.error(`❌ [ADMIN] Columna no encontrada: kanban-${columnId}`);
+                        return;
+                    }
+                    
+                    const projectList = projectsByStatus[backendStatus] || [];
                     count.textContent = projectList.length;
                     
                     if (projectList.length === 0) {
@@ -2675,17 +2698,17 @@
                             
                             return `
                                 <div class="kanban-card" draggable="true" data-project-id="${project.id}">
-                                    <div class="kanban-card-title">${project.project_name}</div>
+                                    <div class="kanban-card-title">${project.project_name || project.business_name || 'Proyecto sin nombre'}</div>
                                     <div class="kanban-card-info">👤 ${project.business_name || 'Sin cliente'}</div>
                                     <div class="kanban-card-info">📧 ${project.client_email || 'N/A'}</div>
                                     <div class="kanban-card-info">📦 ${planBadge}</div>
                                     ${project.deadline ? `<div class="kanban-card-info">📅 ${formatDate(project.deadline)}</div>` : ''}
                                     <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${project.progress}%"></div>
+                                        <div class="progress-fill" style="width: ${project.progress || 0}%"></div>
                                     </div>
                                     <div class="kanban-card-footer">
-                                        <span>${priorityEmoji} ${project.priority}</span>
-                                        <span>${project.progress}%</span>
+                                        <span>${priorityEmoji} ${project.priority || 'normal'}</span>
+                                        <span>${project.progress || 0}%</span>
                                     </div>
                                 </div>
                             `;
