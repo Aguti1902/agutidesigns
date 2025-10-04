@@ -569,7 +569,7 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
         
         console.log(`🔧 [ADMIN] Actualizando campos del pedido #${submissionId}:`, Object.keys(updates));
         
-        // Construir query dinámicamente
+        // Construir query dinámicamente para submissions
         const fields = [];
         const values = [];
         let paramCount = 1;
@@ -615,8 +615,83 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
         `;
         
         await db.pool.query(query, values);
+        console.log(`✅ [ADMIN] Submission #${submissionId} actualizada`);
         
-        console.log(`✅ [ADMIN] Pedido #${submissionId} actualizado correctamente`);
+        // ========================================
+        // SINCRONIZAR CON CLIENTS Y PROJECTS
+        // ========================================
+        
+        // Obtener el email de la submission para encontrar el cliente
+        const submissionResult = await db.pool.query('SELECT email FROM submissions WHERE id = $1', [submissionId]);
+        if (submissionResult.rows.length > 0) {
+            const submissionEmail = submissionResult.rows[0].email;
+            
+            // Buscar cliente por email
+            const clientResult = await db.pool.query('SELECT id FROM clients WHERE email = $1', [submissionEmail]);
+            if (clientResult.rows.length > 0) {
+                const clientId = clientResult.rows[0].id;
+                
+                // Actualizar campos relevantes en CLIENTS
+                const clientUpdates = {};
+                if (updates.business_name) clientUpdates.business_name = updates.business_name;
+                if (updates.full_name) clientUpdates.full_name = updates.full_name;
+                if (updates.email) clientUpdates.email = updates.email;
+                
+                if (Object.keys(clientUpdates).length > 0) {
+                    const clientFields = [];
+                    const clientValues = [];
+                    let clientParamCount = 1;
+                    
+                    for (const [key, value] of Object.entries(clientUpdates)) {
+                        clientFields.push(`${key} = $${clientParamCount}`);
+                        clientValues.push(value);
+                        clientParamCount++;
+                    }
+                    
+                    clientValues.push(clientId);
+                    
+                    const clientQuery = `
+                        UPDATE clients 
+                        SET ${clientFields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+                        WHERE id = $${clientParamCount}
+                    `;
+                    
+                    await db.pool.query(clientQuery, clientValues);
+                    console.log(`✅ [ADMIN] Cliente #${clientId} sincronizado`);
+                }
+                
+                // Actualizar campos relevantes en PROJECTS
+                const projectUpdates = {};
+                if (updates.business_name) projectUpdates.business_name = updates.business_name;
+                if (updates.full_name) projectUpdates.client_name = updates.full_name;
+                if (updates.email) projectUpdates.client_email = updates.email;
+                
+                if (Object.keys(projectUpdates).length > 0) {
+                    const projectFields = [];
+                    const projectValues = [];
+                    let projectParamCount = 1;
+                    
+                    for (const [key, value] of Object.entries(projectUpdates)) {
+                        projectFields.push(`${key} = $${projectParamCount}`);
+                        projectValues.push(value);
+                        projectParamCount++;
+                    }
+                    
+                    projectValues.push(clientId);
+                    
+                    const projectQuery = `
+                        UPDATE projects 
+                        SET ${projectFields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+                        WHERE client_id = $${projectParamCount}
+                    `;
+                    
+                    await db.pool.query(projectQuery, projectValues);
+                    console.log(`✅ [ADMIN] Proyectos del cliente #${clientId} sincronizados`);
+                }
+            }
+        }
+        
+        console.log(`✅ [ADMIN] Pedido #${submissionId} y datos relacionados actualizados correctamente`);
         res.json({ success: true });
         
     } catch (error) {
