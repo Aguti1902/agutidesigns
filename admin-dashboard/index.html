@@ -1522,15 +1522,28 @@
                 
                 console.log('📊 [ADMIN] Estadísticas recibidas:', stats);
 
+                // Actualizar estadísticas principales
                 document.getElementById('totalSubmissions').textContent = stats.total || 0;
-                document.getElementById('activeClients').textContent = stats.paid || 0;
-                document.getElementById('inactiveClients').textContent = stats.pending || 0;
+                document.getElementById('activeClients').textContent = stats.activeClients || 0;
+                document.getElementById('inactiveClients').textContent = stats.noPlan || 0;
                 document.getElementById('totalRevenue').textContent = (stats.revenue || 0) + '€';
                 
-                // Distribución de planes
-                document.getElementById('planBasico').textContent = stats.byPlan?.basico || 0;
-                document.getElementById('planAvanzado').textContent = stats.byPlan?.avanzado || 0;
-                document.getElementById('planPremium').textContent = stats.byPlan?.premium || 0;
+                // Webs en desarrollo
+                const websEnDesarrollo = document.getElementById('websEnDesarrollo');
+                if (websEnDesarrollo) {
+                    websEnDesarrollo.textContent = stats.projectsInProgress || 0;
+                }
+                
+                // Distribución de planes (si existen)
+                if (stats.byPlan) {
+                    const planBasico = document.getElementById('planBasico');
+                    const planAvanzado = document.getElementById('planAvanzado');
+                    const planPremium = document.getElementById('planPremium');
+                    
+                    if (planBasico) planBasico.textContent = stats.byPlan.basico || 0;
+                    if (planAvanzado) planAvanzado.textContent = stats.byPlan.avanzado || 0;
+                    if (planPremium) planPremium.textContent = stats.byPlan.premium || 0;
+                }
                 
                 console.log('✅ [ADMIN] Estadísticas cargadas correctamente');
             } catch (error) {

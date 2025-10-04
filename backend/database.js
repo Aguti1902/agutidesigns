@@ -351,16 +351,62 @@ async function updateSubmissionStatus(id, status, stripeSessionId = null) {
 }
 
 async function getStats() {
+    // Total de solicitudes (todas las submissions)
     const totalResult = await pool.query('SELECT COUNT(*) as count FROM submissions');
-    const pendingResult = await pool.query("SELECT COUNT(*) as count FROM submissions WHERE status = 'pending'");
-    const completedResult = await pool.query("SELECT COUNT(*) as count FROM submissions WHERE status = 'completed'");
-    const revenueResult = await pool.query("SELECT COALESCE(SUM(amount), 0) as revenue FROM submissions WHERE status = 'completed'");
+    
+    // Clientes con plan activo (que han pagado)
+    const activeClientsResult = await pool.query(`
+        SELECT COUNT(*) as count FROM clients 
+        WHERE plan IS NOT NULL AND plan != ''
+    `);
+    
+    // Clientes sin plan (oportunidades de venta)
+    const noPlanResult = await pool.query(`
+        SELECT COUNT(*) as count FROM submissions 
+        WHERE status = 'pending' 
+        OR id NOT IN (SELECT submission_id FROM clients WHERE submission_id IS NOT NULL)
+    `);
+    
+    // Revenue total (de submissions con estado 'paid' o 'completed')
+    const revenueResult = await pool.query(`
+        SELECT COALESCE(SUM(amount), 0) as revenue 
+        FROM submissions 
+        WHERE status IN ('paid', 'completed')
+    `);
+    
+    // Proyectos en desarrollo
+    const projectsResult = await pool.query(`
+        SELECT COUNT(*) as count FROM projects 
+        WHERE status = 'en_desarrollo'
+    `);
+    
+    // Distribución por planes
+    const basicoPlanResult = await pool.query(`
+        SELECT COUNT(*) as count FROM clients 
+        WHERE plan = 'basico'
+    `);
+    
+    const avanzadoPlanResult = await pool.query(`
+        SELECT COUNT(*) as count FROM clients 
+        WHERE plan = 'avanzado'
+    `);
+    
+    const premiumPlanResult = await pool.query(`
+        SELECT COUNT(*) as count FROM clients 
+        WHERE plan = 'premium'
+    `);
     
     return {
         total: parseInt(totalResult.rows[0].count),
-        pending: parseInt(pendingResult.rows[0].count),
-        completed: parseInt(completedResult.rows[0].count),
-        revenue: parseFloat(revenueResult.rows[0].revenue)
+        activeClients: parseInt(activeClientsResult.rows[0].count),
+        noPlan: parseInt(noPlanResult.rows[0].count),
+        revenue: parseFloat(revenueResult.rows[0].revenue),
+        projectsInProgress: parseInt(projectsResult.rows[0].count),
+        byPlan: {
+            basico: parseInt(basicoPlanResult.rows[0].count),
+            avanzado: parseInt(avanzadoPlanResult.rows[0].count),
+            premium: parseInt(premiumPlanResult.rows[0].count)
+        }
     };
 }
 
