@@ -2648,14 +2648,26 @@
                     'entregada': []
                 };
                 
-                projects.forEach(project => {
-                    console.log(`📋 [ADMIN] Proyecto #${project.id}: "${project.project_name || project.business_name}" - Estado: ${project.status}`);
+                console.log('🔍 [DEBUG] Iniciando iteración de proyectos...');
+                console.log('🔍 [DEBUG] Array projects:', Array.isArray(projects), 'Length:', projects.length);
+                
+                projects.forEach((project, index) => {
+                    console.log(`\n📋 [ADMIN] === Proyecto ${index + 1}/${projects.length} ===`);
+                    console.log(`📋 [ADMIN] ID: ${project.id}`);
+                    console.log(`📋 [ADMIN] Nombre: "${project.project_name || project.business_name}"`);
+                    console.log(`📋 [ADMIN] Estado: "${project.status}"`);
+                    console.log(`📋 [ADMIN] Cliente: ${project.client_email}`);
+                    
                     if (projectsByStatus[project.status] !== undefined) {
                         projectsByStatus[project.status].push(project);
+                        console.log(`✅ [ADMIN] Proyecto agregado a: ${project.status}`);
                     } else {
-                        console.warn(`⚠️ [ADMIN] Estado desconocido: ${project.status}`);
+                        console.error(`❌ [ADMIN] Estado desconocido: "${project.status}"`);
+                        console.error(`❌ [ADMIN] Estados válidos:`, Object.keys(projectsByStatus));
                     }
                 });
+                
+                console.log('\n🔍 [DEBUG] Iteración completada');
                 
                 console.log('📋 [ADMIN] Proyectos agrupados:', {
                     sin_empezar: projectsByStatus.sin_empezar.length,
