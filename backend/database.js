@@ -194,6 +194,19 @@ async function initializeTables() {
             console.log('⚠️ Migración upgrade en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campos para trackear modificaciones
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS has_upgrade BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS has_modifications BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS last_modified_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campos de tracking de modificaciones añadidos a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración tracking en submissions ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);

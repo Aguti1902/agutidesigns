@@ -1848,20 +1848,26 @@
                 }
 
                 tbody.innerHTML = pedidos.map(pedido => `
-                    <tr>
+                    <tr style="${pedido.has_upgrade || pedido.has_modifications ? 'background: #f0f9ff;' : ''}">
                         <td><strong>#${pedido.id}</strong></td>
                         <td>
                             ${pedido.business_name || 'N/A'}
-                            ${pedido.is_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; margin-left: 8px; font-size: 0.7rem;">🔼 UPGRADE</span>' : ''}
+                            <div style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                ${pedido.has_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
+                                ${pedido.has_modifications ? '<span class="badge" style="background: #0046FE; color: white; font-size: 0.7rem; padding: 3px 8px;">✏️ MODIFICADO</span>' : ''}
+                            </div>
                         </td>
                         <td>${pedido.email}</td>
                         <td>
                             <span class="badge badge-blue">${formatPlan(pedido.plan)}</span>
-                            ${pedido.previous_plan ? `<br><small style="color: #999; font-size: 0.75rem;">De: ${formatPlan(pedido.previous_plan)}</small>` : ''}
+                            ${pedido.previous_plan ? `<br><small style="color: #999; font-size: 0.75rem;">Antes: ${formatPlan(pedido.previous_plan)}</small>` : ''}
                         </td>
                         <td><strong>${pedido.amount}€</strong></td>
                         <td><span class="badge badge-${pedido.status === 'paid' ? 'success' : 'warning'}">${formatStatus(pedido.status)}</span></td>
-                        <td>${formatDate(pedido.created_at)}</td>
+                        <td>
+                            ${formatDate(pedido.created_at)}
+                            ${pedido.last_modified_at ? `<br><small style="color: #666; font-size: 0.75rem;">Mod: ${formatDate(pedido.last_modified_at)}</small>` : ''}
+                        </td>
                         <td><button class="btn-secondary" onclick="window.location.href='/admin-dashboard/pedido-detalle.html?id=${pedido.id}'">Ver</button></td>
                     </tr>
                 `).join('');

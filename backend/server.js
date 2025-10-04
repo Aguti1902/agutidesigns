@@ -610,12 +610,15 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
         
         const query = `
             UPDATE submissions 
-            SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+            SET ${fields.join(', ')}, 
+                has_modifications = true,
+                last_modified_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP 
             WHERE id = $${paramCount}
         `;
         
         await db.pool.query(query, values);
-        console.log(`✅ [ADMIN] Submission #${submissionId} actualizada`);
+        console.log(`✅ [ADMIN] Submission #${submissionId} actualizada y marcada como modificada`);
         
         // ========================================
         // SINCRONIZAR CON CLIENTS Y PROJECTS
@@ -2721,27 +2724,26 @@ app.post('/api/client/change-plan', async (req, res) => {
             );
             console.log(`⏰ [PLAN] Contador de 24h reactivado para edición`);
             
-            // 8️⃣ Crear nuevo pedido (submission) para el upgrade
-            const submission = await db.getSubmission(client.submission_id);
-            if (submission) {
+            // 8️⃣ Actualizar el pedido existente con el nuevo plan (NO crear uno nuevo)
+            if (client.submission_id) {
                 const priceMap = billingCycle === 'annual' ? {
                     basico: 420, avanzado: 468, premium: 624
                 } : {
                     basico: 35, avanzado: 39, premium: 52
                 };
                 
-                const newSubmissionId = await db.createSubmission({
-                    ...submission,
-                    plan: newPlan,
-                    amount: priceMap[newPlan],
-                    billing_cycle: billingCycle,
-                    status: 'paid',
-                    is_upgrade: true,
-                    previous_plan: oldPlan,
-                    created_at: new Date()
-                });
+                await db.pool.query(`
+                    UPDATE submissions 
+                    SET plan = $1, 
+                        amount = $2, 
+                        previous_plan = $3,
+                        has_upgrade = true,
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = $4
+                `, [newPlan, priceMap[newPlan], oldPlan, client.submission_id]);
                 
-                console.log(`📋 [PLAN] Nuevo pedido creado: #${newSubmissionId} (UPGRADE)`);
+                console.log(`📋 [PLAN] Pedido #${client.submission_id} actualizado a ${newPlan} (UPGRADE de ${oldPlan})`);
                 
                 // Actualizar el proyecto para marcarlo como upgrade y reabrirlo si está finalizado
                 const projectResult = await db.pool.query(
