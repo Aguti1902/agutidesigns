@@ -2727,9 +2727,13 @@ app.post('/api/client/change-plan', async (req, res) => {
             // 8️⃣ Actualizar el pedido existente con el nuevo plan (NO crear uno nuevo)
             if (client.submission_id) {
                 const priceMap = billingCycle === 'annual' ? {
-                    basico: 420, avanzado: 468, premium: 624
+                    basico: 420,   // 35€/mes × 12
+                    avanzado: 588, // 49€/mes × 12
+                    premium: 780   // 65€/mes × 12
                 } : {
-                    basico: 35, avanzado: 39, premium: 52
+                    basico: 35,
+                    avanzado: 49,
+                    premium: 65
                 };
                 
                 await db.pool.query(`
@@ -2840,16 +2844,16 @@ app.post('/api/admin/fix-tracking', async (req, res) => {
         
         // 3️⃣ Calcular monto correcto
         const priceMap = billingCycle === 'annual' ? {
-            basico: 420,
-            avanzado: 468,
-            premium: 624
+            basico: 420,   // 35€/mes × 12
+            avanzado: 588, // 49€/mes × 12
+            premium: 780   // 65€/mes × 12
         } : {
             basico: 35,
-            avanzado: 39,
-            premium: 52
+            avanzado: 49,
+            premium: 65
         };
         
-        correctAmount = priceMap[client.plan] || 39;
+        correctAmount = priceMap[client.plan] || 49;
         console.log(`   Monto correcto: ${correctAmount}€ (${billingCycle})`);
         
         // 4️⃣ Verificar pedidos existentes
