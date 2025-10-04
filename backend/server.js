@@ -2513,7 +2513,7 @@ app.post('/api/client/change-plan', async (req, res) => {
                     client_id: clientId,
                     client_email: client.email,
                     subject: `🔽 Downgrade de plan: ${oldPlan} → ${newPlan}`,
-                    message: `El cliente ha bajado de plan.\n\nPáginas eliminadas:\n${pagesToRemove.map(p => `- ${p}`).join('\n')}\n\nPáginas activas:\n${remainingPages.map(p => `- ${p}`).join('\n')}`,
+                    description: `El cliente ha bajado de plan.\n\nPáginas eliminadas:\n${pagesToRemove.map(p => `- ${p}`).join('\n')}\n\nPáginas activas:\n${remainingPages.map(p => `- ${p}`).join('\n')}`,
                     category: 'facturacion',
                     priority: 'normal',
                     status: 'open'
@@ -2576,7 +2576,7 @@ app.post('/api/client/change-plan', async (req, res) => {
                 client_id: clientId,
                 client_email: client.email,
                 subject: `🔼 Upgrade de plan: ${oldPlan} → ${newPlan}`,
-                message: `El cliente ha mejorado su plan. Ahora tiene 24 horas para añadir hasta ${planLimits[newPlan]} páginas.`,
+                description: `El cliente ha mejorado su plan. Ahora tiene 24 horas para añadir hasta ${planLimits[newPlan]} páginas.`,
                 category: 'facturacion',
                 priority: 'low',
                 status: 'open'
