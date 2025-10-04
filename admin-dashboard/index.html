@@ -2081,13 +2081,22 @@
         async function loadClientes() {
             try {
                 console.log('👥 [ADMIN] Cargando clientes...');
+                console.log('👥 [ADMIN] URL:', `${API_URL}/api/clients`);
+                
                 const response = await fetch(`${API_URL}/api/clients`);
+                console.log('👥 [ADMIN] Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const clientes = await response.json();
                 
                 console.log('👥 [ADMIN] Clientes recibidos:', clientes.length, 'clientes');
-                console.log('👥 [ADMIN] Datos:', clientes);
+                console.log('👥 [ADMIN] Datos completos:', clientes);
 
                 const tbody = document.getElementById('clientesTable');
+                console.log('👥 [ADMIN] Tbody encontrado:', !!tbody);
                 
                 if (clientes.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No hay clientes</td></tr>';
@@ -2095,7 +2104,17 @@
                     return;
                 }
 
-                tbody.innerHTML = clientes.map(client => `
+                const html = clientes.map((client, index) => {
+                    console.log(`👥 [ADMIN] Cliente ${index + 1}:`, {
+                        id: client.id,
+                        name: client.full_name,
+                        email: client.email,
+                        business: client.business_name,
+                        plan: client.plan,
+                        created_at: client.created_at
+                    });
+                    
+                    return `
                     <tr>
                         <td><strong>#${client.id}</strong></td>
                         <td>${client.full_name || 'N/A'}</td>
@@ -2106,9 +2125,15 @@
                         <td>${formatDate(client.created_at)}</td>
                         <td><button class="btn-secondary" onclick="viewClient(${client.id})">Ver</button></td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
+                
+                console.log('👥 [ADMIN] HTML generado (primeros 200 caracteres):', html.substring(0, 200));
+                tbody.innerHTML = html;
+                console.log('✅ [ADMIN] Tabla de clientes actualizada correctamente');
             } catch (error) {
-                console.error('Error cargando clientes:', error);
+                console.error('❌ [ADMIN] Error cargando clientes:', error);
+                showNotification('Error al cargar clientes: ' + error.message, 'error');
             }
         }
 
