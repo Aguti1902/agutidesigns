@@ -2872,28 +2872,166 @@
         async function selectPlanAndCheckout(plan) {
             console.log('💳 Seleccionando plan:', plan, 'Billing:', modalBillingCycle);
             
-            // Mostrar loading
-            const loadingMsg = document.createElement('div');
-            loadingMsg.id = 'checkoutLoading';
-            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 10000; text-align: center;';
-            loadingMsg.innerHTML = '<div style="font-size: 2rem; margin-bottom: 10px;">⏳</div><p>Preparando tu checkout...</p>';
-            document.body.appendChild(loadingMsg);
+            // Cerrar modal de selección de planes
+            document.getElementById('planModal').classList.remove('active');
             
             try {
                 // Obtener datos del cliente desde el backend
                 const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
                 const dashboardData = await response.json();
                 
-                console.log('📊 Dashboard data recibida:', dashboardData);
+                const client = dashboardData.client || {};
+                const submission = dashboardData.submission || {};
+                const currentPlan = client.plan;
                 
-                // Preparar datos para el checkout
+                console.log(`📊 Plan actual: ${currentPlan} → Nuevo plan: ${plan}`);
+                
+                // Si no tiene plan, redirigir a checkout normal (nuevo cliente)
+                if (!currentPlan) {
+                    console.log('🆕 Cliente sin plan, redirigir a checkout');
+                    await redirectToCheckout(plan, dashboardData);
+                    return;
+                }
+                
+                // Si es el mismo plan, solo mostrar aviso
+                if (currentPlan === plan) {
+                    await showNotificationModal(
+                        '📋 Plan Actual',
+                        'Ya tienes este plan activo.',
+                        'info'
+                    );
+                    return;
+                }
+                
+                // Definir límites de páginas y orden
+                const planLimits = { basico: 5, avanzado: 10, premium: 20 };
+                const planOrder = { basico: 1, avanzado: 2, premium: 3 };
+                const isUpgrade = planOrder[plan] > planOrder[currentPlan];
+                const isDowngrade = planOrder[plan] < planOrder[currentPlan];
+                
+                // Obtener páginas actuales
+                let currentPages = [];
+                if (submission && submission.pages) {
+                    currentPages = Array.isArray(submission.pages) ? submission.pages : JSON.parse(submission.pages || '[]');
+                }
+                
+                console.log(`📄 Páginas actuales: ${currentPages.length}`);
+                
+                // ========================================
+                // 🔼 UPGRADE
+                // ========================================
+                if (isUpgrade) {
+                    const confirmed = await showUpgradeModal(currentPlan, plan, planLimits[plan]);
+                    if (!confirmed) return;
+                    
+                    await processPlanChange(plan, null);
+                    return;
+                }
+                
+                // ========================================
+                // 🔽 DOWNGRADE
+                // ========================================
+                if (isDowngrade) {
+                    const newLimit = planLimits[plan];
+                    
+                    // Si excede el límite, mostrar selector de páginas
+                    if (currentPages.length > newLimit) {
+                        const pagesToRemove = await showPageSelectorModal(currentPages, currentPages.length - newLimit, newLimit);
+                        if (!pagesToRemove) return; // Usuario canceló
+                        
+                        await processPlanChange(plan, pagesToRemove);
+                    } else {
+                        // No excede límite, downgrade directo
+                        const confirmed = await showDowngradeModal(currentPlan, plan);
+                        if (!confirmed) return;
+                        
+                        await processPlanChange(plan, null);
+                    }
+                    return;
+                }
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                await showNotificationModal(
+                    '❌ Error',
+                    'Hubo un problema al procesar tu solicitud. Por favor, inténtalo de nuevo.',
+                    'error'
+                );
+            }
+        }
+        
+        // Función helper para procesar cambio de plan
+        async function processPlanChange(newPlan, pagesToRemove) {
+            try {
+                showLoading('Procesando cambio de plan...');
+                
+                const response = await fetch(`${API_URL}/api/client/change-plan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clientId: currentClient.id,
+                        newPlan,
+                        billingCycle: modalBillingCycle,
+                        pagesToRemove
+                    })
+                });
+                
+                hideLoading();
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al cambiar plan');
+                }
+                
+                const result = await response.json();
+                console.log('✅ Plan cambiado:', result);
+                
+                if (result.isUpgrade) {
+                    await showNotificationModal(
+                        '🎉 ¡Plan Actualizado!',
+                        `Tu plan se ha actualizado a ${newPlan.toUpperCase()}.\n\n` +
+                        `✅ Ahora tienes 24 horas para personalizar tu web\n` +
+                        `✅ Puedes añadir nuevas páginas desde "Mi Negocio"\n` +
+                        `✅ La facturación se ha actualizado automáticamente`,
+                        'success'
+                    );
+                } else {
+                    await showNotificationModal(
+                        '✅ Plan Actualizado',
+                        `Tu plan se ha cambiado a ${newPlan.toUpperCase()}.\n\n` +
+                        `La nueva facturación se aplicará en tu próximo cobro.`,
+                        'success'
+                    );
+                }
+                
+                // Recargar dashboard después de 2 segundos
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                hideLoading();
+                console.error('❌ Error cambiando plan:', error);
+                await showNotificationModal(
+                    '❌ Error',
+                    error.message || 'No se pudo completar el cambio de plan.',
+                    'error'
+                );
+            }
+        }
+        
+        // Función helper para redirigir a checkout (nuevo cliente sin plan)
+        async function redirectToCheckout(plan, dashboardData) {
+            showLoading('Preparando tu checkout...');
+            
+            try {
                 const submission = dashboardData.submission || {};
                 const client = dashboardData.client || {};
                 
                 const checkoutData = {
                     plan: plan,
-                    billing_cycle: modalBillingCycle, // Añadir billing_cycle
-                    submissionId: client.submission_id, // ⭐ CRÍTICO: Incluir submission_id del cliente
+                    billing_cycle: modalBillingCycle,
+                    submissionId: client.submission_id,
                     formData: {
                         business_name: submission.business_name || client.business_name || 'Mi Empresa',
                         business_description: submission.business_description || '',
@@ -2911,29 +3049,218 @@
                         keywords: submission.keywords || '',
                         design_style: submission.design_style || '',
                         pages: submission.pages || [],
-                        password: 'existing_user' // Indicar que es usuario existente
+                        password: 'existing_user'
                     }
                 };
                 
-                console.log('📌 Submission ID incluido:', client.submission_id);
-                
-                console.log('✅ Datos para checkout:', checkoutData);
-                
-                // Guardar en sessionStorage
                 sessionStorage.setItem('orderData', JSON.stringify(checkoutData));
                 
-                // Pequeño delay para asegurar que se guarda
                 setTimeout(() => {
-                    console.log('🚀 Redirigiendo a checkout...');
                     window.location.href = '/checkout.html';
                 }, 300);
                 
             } catch (error) {
+                hideLoading();
                 console.error('❌ Error:', error);
                 const loading = document.getElementById('checkoutLoading');
                 if (loading) document.body.removeChild(loading);
                 showNotification('Hubo un error al preparar el checkout. Por favor, intenta de nuevo.', 'error');
             }
+        }
+        
+        // ========================================
+        // 🎨 MODALES PERSONALIZADOS PARA CAMBIO DE PLAN
+        // ========================================
+        
+        // Modal de upgrade
+        function showUpgradeModal(oldPlan, newPlan, newLimit) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="font-size: 4rem; margin-bottom: 15px;">🎉</div>
+                        <h2 style="color: #0046FE; margin-bottom: 15px; font-size: 1.8rem;">¡Excelente Elección!</h2>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 25px; font-size: 1.05rem;">
+                            Vas a actualizar tu plan de <strong>${oldPlan.toUpperCase()}</strong> a <strong>${newPlan.toUpperCase()}</strong>.<br><br>
+                            <strong style="color: #009A62;">✓ Ahora podrás crear hasta ${newLimit} páginas</strong><br>
+                            <strong style="color: #009A62;">✓ Tendrás 24 horas para personalizar tu web</strong><br>
+                            <strong style="color: #009A62;">✓ La facturación se actualizará automáticamente</strong>
+                        </p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="upgradeConfirm" style="background: #0046FE; color: white; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05rem;">Confirmar Upgrade</button>
+                            <button id="upgradeCancel" style="background: #f0f0f0; color: #666; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1.05rem;">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                document.getElementById('upgradeConfirm').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(true);
+                };
+                document.getElementById('upgradeCancel').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(false);
+                };
+            });
+        }
+        
+        // Modal de downgrade
+        function showDowngradeModal(oldPlan, newPlan) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">ℹ️</div>
+                        <h2 style="color: #0046FE; margin-bottom: 15px; font-size: 1.8rem;">Cambio de Plan</h2>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 25px; font-size: 1.05rem;">
+                            Vas a cambiar tu plan de <strong>${oldPlan.toUpperCase()}</strong> a <strong>${newPlan.toUpperCase()}</strong>.<br><br>
+                            Tu web actual cumple con los requisitos del nuevo plan.<br><br>
+                            <strong style="color: #0046FE;">La nueva facturación se aplicará en tu próximo cobro.</strong>
+                        </p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="downgradeConfirm" style="background: #0046FE; color: white; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05rem;">Confirmar Cambio</button>
+                            <button id="downgradeCancel" style="background: #f0f0f0; color: #666; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1.05rem;">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                document.getElementById('downgradeConfirm').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(true);
+                };
+                document.getElementById('downgradeCancel').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(false);
+                };
+            });
+        }
+        
+        // Modal de selector de páginas
+        function showPageSelectorModal(pages, toRemove, newLimit) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; overflow-y: auto; padding: 20px;';
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+                        <h2 style="color: #EC6746; margin-bottom: 15px; font-size: 1.8rem;">Selecciona Páginas a Eliminar</h2>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 25px; font-size: 1.05rem;">
+                            Tu web actual tiene <strong>${pages.length} páginas</strong>, pero el nuevo plan permite solo <strong>${newLimit} páginas</strong>.<br><br>
+                            <strong style="color: #EC6746;">Debes seleccionar ${toRemove} página${toRemove > 1 ? 's' : ''} para eliminar:</strong>
+                        </p>
+                        <div id="pageCheckboxes" style="text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 25px; padding: 10px; background: #f8f9fa; border-radius: 10px;">
+                            ${pages.map(page => `
+                                <label style="display: block; padding: 12px; margin-bottom: 8px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid #e8eaed; transition: all 0.2s;" onmouseover="this.style.borderColor='#EC6746'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8eaed'">
+                                    <input type="checkbox" value="${page}" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="this.parentElement.style.borderColor = this.checked ? '#EC6746' : '#e8eaed';">
+                                    <span style="font-size: 1.05rem; color: #1B1B1B;">${page}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <p id="selectionCount" style="color: #EC6746; font-weight: 700; margin-bottom: 20px;">Seleccionadas: 0 de ${toRemove}</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="pagesConfirm" style="background: #EC6746; color: white; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05rem; opacity: 0.5;" disabled>Confirmar</button>
+                            <button id="pagesCancel" style="background: #f0f0f0; color: #666; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1.05rem;">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
+                const confirmBtn = modal.querySelector('#pagesConfirm');
+                const countDisplay = modal.querySelector('#selectionCount');
+                
+                function updateSelection() {
+                    const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                    countDisplay.textContent = `Seleccionadas: ${selected.length} de ${toRemove}`;
+                    countDisplay.style.color = selected.length === toRemove ? '#009A62' : '#EC6746';
+                    
+                    if (selected.length === toRemove) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.style.opacity = '1';
+                        confirmBtn.style.cursor = 'pointer';
+                    } else {
+                        confirmBtn.disabled = true;
+                        confirmBtn.style.opacity = '0.5';
+                        confirmBtn.style.cursor = 'not-allowed';
+                    }
+                }
+                
+                checkboxes.forEach(cb => cb.addEventListener('change', updateSelection));
+                
+                confirmBtn.onclick = () => {
+                    const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+                    if (selected.length === toRemove) {
+                        document.body.removeChild(modal);
+                        resolve(selected);
+                    }
+                };
+                
+                modal.querySelector('#pagesCancel').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(null);
+                };
+            });
+        }
+        
+        // Modal de notificación genérica
+        function showNotificationModal(title, message, type = 'info') {
+            return new Promise((resolve) => {
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    info: 'ℹ️',
+                    warning: '⚠️'
+                };
+                const colors = {
+                    success: '#009A62',
+                    error: '#EC6746',
+                    info: '#0046FE',
+                    warning: '#FFB800'
+                };
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="font-size: 4rem; margin-bottom: 15px;">${icons[type]}</div>
+                        <h2 style="color: ${colors[type]}; margin-bottom: 15px; font-size: 1.8rem;">${title}</h2>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 25px; font-size: 1.05rem; white-space: pre-line;">${message}</p>
+                        <button id="notifClose" style="background: ${colors[type]}; color: white; padding: 15px 40px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05rem; width: 100%;">Entendido</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                modal.querySelector('#notifClose').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve();
+                };
+            });
+        }
+        
+        // Funciones de loading
+        function showLoading(message = 'Cargando...') {
+            const existing = document.getElementById('globalLoading');
+            if (existing) return;
+            
+            const loading = document.createElement('div');
+            loading.id = 'globalLoading';
+            loading.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+            loading.innerHTML = `
+                <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">⏳</div>
+                    <p style="color: #666; font-size: 1.1rem; font-weight: 600;">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(loading);
+        }
+        
+        function hideLoading() {
+            const loading = document.getElementById('globalLoading');
+            if (loading) document.body.removeChild(loading);
         }
         
         // Abrir modal de selección de plan
