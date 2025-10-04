@@ -111,7 +111,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         }
 
         // Guardar datos del formulario temporalmente (pending)
-        const submissionId = db.createSubmission({
+        const submissionId = await db.createSubmission({
             ...formData,
             plan,
             status: 'pending',
@@ -224,7 +224,7 @@ app.post('/api/create-subscription', async (req, res) => {
                 amount: amount
             };
             
-            finalSubmissionId = db.createSubmission(submissionData);
+            finalSubmissionId = await db.createSubmission(submissionData);
             console.log(`✅ Submission ${finalSubmissionId} creada`);
         }
 
@@ -640,7 +640,7 @@ app.post('/api/submissions/create', (req, res) => {
         delete mappedData.services_list;
         
         // Crear submission con todos los datos (incluyendo imágenes en base64)
-        const submissionId = db.createSubmission(mappedData);
+        const submissionId = await db.createSubmission(mappedData);
         
         console.log(`✅ [SUBMISSION] Submission #${submissionId} creada exitosamente`);
         

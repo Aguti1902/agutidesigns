@@ -168,8 +168,8 @@ initializeTables();
 
 // ===== FUNCIONES DE BASE DE DATOS =====
 
-function createSubmission(data) {
-    return pool.query(`
+async function createSubmission(data) {
+    const result = await pool.query(`
         INSERT INTO submissions (
             business_name, business_description, industry, cif_nif, razon_social, direccion_fiscal, business_email,
             contact_methods, phone_number, email_contact, whatsapp_number, form_email, physical_address,
@@ -233,7 +233,8 @@ function createSubmission(data) {
         data.plan,
         data.amount,
         data.status || 'pending'
-    ]).then(result => result.rows[0].id);
+    ]);
+    return result.rows[0].id;
 }
 
 async function getSubmission(id) {
