@@ -2998,13 +2998,36 @@
 
         async function loadClientsForSelect() {
             try {
+                console.log('🔍 [ADMIN] Cargando clientes para dropdown...');
                 const response = await fetch(`${API_URL}/api/clients`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const clients = await response.json();
+                console.log(`📋 [ADMIN] Clientes recibidos:`, clients);
+                console.log(`📊 [ADMIN] Total de clientes: ${clients.length}`);
+                
                 const select = document.getElementById('projectClient');
+                
+                if (clients.length === 0) {
+                    console.warn('⚠️ [ADMIN] No hay clientes disponibles');
+                    select.innerHTML = '<option value="">No hay clientes disponibles</option>';
+                    return;
+                }
+                
                 select.innerHTML = '<option value="">Selecciona un cliente...</option>' +
-                    clients.map(c => `<option value="${c.id}">${c.business_name || c.full_name} (${c.email})</option>`).join('');
+                    clients.map(c => {
+                        const displayName = c.business_name || c.full_name || 'Sin nombre';
+                        console.log(`➕ [ADMIN] Agregando cliente: ${displayName} (ID: ${c.id}, Email: ${c.email})`);
+                        return `<option value="${c.id}">${displayName} (${c.email})</option>`;
+                    }).join('');
+                    
+                console.log('✅ [ADMIN] Dropdown de clientes cargado correctamente');
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ [ADMIN] Error cargando clientes:', error);
+                showNotification('Error al cargar clientes: ' + error.message, 'error');
             }
         }
 
