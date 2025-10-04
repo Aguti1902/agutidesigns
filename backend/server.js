@@ -1587,12 +1587,12 @@ app.post('/api/tickets', async (req, res) => {
 });
 
 // Obtener todos los tickets (para admin)
-app.get('/api/tickets', (req, res) => {
+app.get('/api/tickets', async (req, res) => {
     try {
         console.log('🎫 [BACKEND] Admin solicitando todos los tickets...');
-        const tickets = db.getAllTickets();
-        console.log('✅ [BACKEND] Tickets encontrados:', tickets.length);
-        res.json(tickets);
+        const tickets = await db.getAllTickets();
+        console.log(`✅ [BACKEND] Tickets encontrados: ${tickets ? tickets.length : 0}`);
+        res.json(tickets || []);
     } catch (error) {
         console.error('❌ [BACKEND] Error obteniendo tickets:', error);
         res.status(500).json({ error: error.message });
@@ -1600,13 +1600,13 @@ app.get('/api/tickets', (req, res) => {
 });
 
 // Obtener un ticket individual por ID
-app.get('/api/tickets/:id', (req, res) => {
+app.get('/api/tickets/:id', async (req, res) => {
     try {
         const ticketId = parseInt(req.params.id);
         const { markAsRead } = req.query;
         console.log('🎫 [BACKEND] Solicitando ticket #', ticketId, 'markAsRead:', markAsRead);
         
-        const ticket = db.getTicketById(ticketId);
+        const ticket = await db.getTicketById(ticketId);
         
         if (!ticket) {
             console.warn('⚠️ [BACKEND] Ticket no encontrado:', ticketId);
@@ -1616,11 +1616,11 @@ app.get('/api/tickets/:id', (req, res) => {
         // Si se solicita marcar como leído, actualizar según quién lo lea
         if (markAsRead === 'admin' && ticket.admin_unread === 1) {
             console.log('👁️ [BACKEND] Marcando ticket como leído por admin');
-            db.updateTicket(ticketId, { admin_unread: 0 });
+            await db.updateTicket(ticketId, { admin_unread: 0 });
             ticket.admin_unread = 0;
         } else if (markAsRead === 'client' && ticket.client_unread === 1) {
             console.log('👁️ [BACKEND] Marcando ticket como leído por cliente');
-            db.updateTicket(ticketId, { client_unread: 0 });
+            await db.updateTicket(ticketId, { client_unread: 0 });
             ticket.client_unread = 0;
         }
         
@@ -1636,13 +1636,15 @@ app.get('/api/tickets/:id', (req, res) => {
 });
 
 // Obtener tickets de un cliente
-app.get('/api/tickets/client/:clientId', (req, res) => {
+app.get('/api/tickets/client/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const tickets = db.getTicketsByClient(parseInt(clientId));
-        res.json({ tickets });
+        console.log(`🎫 [BACKEND] Obteniendo tickets del cliente #${clientId}`);
+        const tickets = await db.getTicketsByClient(parseInt(clientId));
+        console.log(`✅ [BACKEND] Tickets del cliente #${clientId}: ${tickets ? tickets.length : 0}`);
+        res.json({ tickets: tickets || [] });
     } catch (error) {
-        console.error('Error obteniendo tickets del cliente:', error);
+        console.error('❌ [BACKEND] Error obteniendo tickets del cliente:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -1657,14 +1659,14 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         console.log('💬 [BACKEND] Respuesta del cliente:', client_response.substring(0, 50) + '...');
         
         // Actualizar ticket con respuesta del cliente y cambiar estado a "en_proceso"
-        db.updateTicket(parseInt(ticketId), { 
+        await db.updateTicket(parseInt(ticketId), { 
             client_response,
             status: 'en_proceso',
             admin_unread: 1,      // Admin tiene mensaje nuevo sin leer
             client_unread: 0      // Cliente lo acaba de enviar/leer
         });
         
-        const ticket = db.getTicketById(parseInt(ticketId));
+        const ticket = await db.getTicketById(parseInt(ticketId));
         console.log('✅ [BACKEND] Ticket actualizado con respuesta del cliente');
         
         // Enviar email al admin notificando la nueva respuesta
@@ -1712,15 +1714,15 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         console.log('🎫 [BACKEND] Body:', { status, admin_response: admin_response ? 'SÍ' : 'NO' });
         
         // Actualizar ticket y marcar como leído por admin, no leído por cliente
-        const result = db.updateTicket(parseInt(ticketId), { 
+        await db.updateTicket(parseInt(ticketId), { 
             status, 
             admin_response,
             admin_unread: 0,      // Admin lo acaba de leer/responder
             client_unread: 1      // Cliente tiene mensaje nuevo sin leer
         });
-        console.log('🎫 [BACKEND] Ticket actualizado, changes:', result.changes);
+        console.log('🎫 [BACKEND] Ticket actualizado');
         
-        const ticket = db.getTicketById(parseInt(ticketId));
+        const ticket = await db.getTicketById(parseInt(ticketId));
         console.log('🎫 [BACKEND] Ticket obtenido:', ticket ? `#${ticket.id}` : 'NO ENCONTRADO');
         
         // Si hay respuesta del admin, enviar email al cliente
