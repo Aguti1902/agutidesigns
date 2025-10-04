@@ -1983,6 +1983,89 @@ app.get('/api/clients/:clientId', async (req, res) => {
 // ============================================
 // 🔧 ENDPOINT TEMPORAL: Reparar datos corruptos
 // ============================================
+// 🔍 Endpoint de diagnóstico para ver el estado actual
+app.get('/api/admin/diagnose', async (req, res) => {
+    console.log('🔍 [DIAGNÓSTICO] Iniciando diagnóstico completo...');
+    
+    try {
+        // 1. Verificar clientes
+        const clientsResult = await db.pool.query('SELECT * FROM clients ORDER BY created_at DESC');
+        const clients = clientsResult.rows;
+        
+        // 2. Verificar proyectos
+        const projectsResult = await db.pool.query('SELECT * FROM projects ORDER BY created_at DESC');
+        const projects = projectsResult.rows;
+        
+        // 3. Verificar submissions
+        const submissionsResult = await db.pool.query('SELECT id, business_name, email, plan, status FROM submissions ORDER BY created_at DESC');
+        const submissions = submissionsResult.rows;
+        
+        console.log('\n==================================================');
+        console.log('📊 DIAGNÓSTICO COMPLETO:');
+        console.log('==================================================');
+        console.log(`\n👥 CLIENTES: ${clients.length}`);
+        clients.forEach(c => {
+            console.log(`  - Cliente #${c.id}: ${c.email}`);
+            console.log(`    Plan: ${c.plan || 'SIN PLAN'}`);
+            console.log(`    Submission ID: ${c.submission_id || 'NO VINCULADO'}`);
+            console.log(`    Website Status: ${c.website_status || 'N/A'}`);
+        });
+        
+        console.log(`\n📋 PROYECTOS: ${projects.length}`);
+        projects.forEach(p => {
+            console.log(`  - Proyecto #${p.id}: ${p.project_name || p.business_name || 'SIN NOMBRE'}`);
+            console.log(`    Cliente ID: ${p.client_id}`);
+            console.log(`    Estado: ${p.status}`);
+            console.log(`    Plan: ${p.plan}`);
+        });
+        
+        console.log(`\n📄 SUBMISSIONS: ${submissions.length}`);
+        submissions.forEach(s => {
+            console.log(`  - Submission #${s.id}: ${s.business_name || 'SIN NOMBRE'}`);
+            console.log(`    Email: ${s.email}`);
+            console.log(`    Plan: ${s.plan || 'N/A'}`);
+            console.log(`    Status: ${s.status}`);
+        });
+        console.log('==================================================\n');
+        
+        res.json({
+            success: true,
+            counts: {
+                clients: clients.length,
+                projects: projects.length,
+                submissions: submissions.length,
+                clientsWithPlan: clients.filter(c => c.plan).length
+            },
+            clients: clients.map(c => ({
+                id: c.id,
+                email: c.email,
+                plan: c.plan,
+                submission_id: c.submission_id,
+                website_status: c.website_status
+            })),
+            projects: projects.map(p => ({
+                id: p.id,
+                project_name: p.project_name,
+                business_name: p.business_name,
+                client_id: p.client_id,
+                status: p.status,
+                plan: p.plan
+            })),
+            submissions: submissions.map(s => ({
+                id: s.id,
+                business_name: s.business_name,
+                email: s.email,
+                plan: s.plan,
+                status: s.status
+            }))
+        });
+        
+    } catch (error) {
+        console.error('❌ Error en diagnóstico:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // 🔧 Endpoint temporal para verificar y arreglar proyectos
 app.get('/api/admin/fix-projects', async (req, res) => {
     console.log('🔧 [ADMIN] Verificando y arreglando proyectos...');
