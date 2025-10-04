@@ -2921,12 +2921,26 @@
                 }
                 
                 try {
-                    // Actualizar estado en el backend
-                    console.log(`📤 [ADMIN] Enviando PATCH a /api/admin/projects/${projectId} con status: ${newStatus}`);
+                    // Calcular progreso automático según la columna
+                    const progressByStatus = {
+                        'sin_empezar': 0,
+                        'en_desarrollo': 50,
+                        'revision': 75,
+                        'entregada': 100
+                    };
+                    
+                    const autoProgress = progressByStatus[newStatus] !== undefined ? progressByStatus[newStatus] : 0;
+                    console.log(`📊 [ADMIN] Progreso automático para '${newStatus}': ${autoProgress}%`);
+                    
+                    // Actualizar estado Y progreso en el backend
+                    console.log(`📤 [ADMIN] Enviando PATCH a /api/admin/projects/${projectId} con status: ${newStatus} y progress: ${autoProgress}`);
                     const updateResponse = await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: newStatus })
+                        body: JSON.stringify({ 
+                            status: newStatus,
+                            progress: autoProgress
+                        })
                     });
                     
                     if (!updateResponse.ok) {

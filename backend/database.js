@@ -710,6 +710,22 @@ async function updateProject(projectId, updates) {
         fields.push(`notes = $${paramCount++}`);
         values.push(updates.notes);
     }
+    if (updates.progress !== undefined) {
+        fields.push(`progress = $${paramCount++}`);
+        values.push(updates.progress);
+    }
+    if (updates.priority !== undefined) {
+        fields.push(`priority = $${paramCount++}`);
+        values.push(updates.priority);
+    }
+    if (updates.deadline !== undefined) {
+        fields.push(`deadline = $${paramCount++}`);
+        values.push(updates.deadline);
+    }
+    if (updates.project_name !== undefined) {
+        fields.push(`project_name = $${paramCount++}`);
+        values.push(updates.project_name);
+    }
     
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(projectId);
