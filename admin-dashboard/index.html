@@ -1164,10 +1164,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Lista de Clientes</h2>
-                            <div style="display: flex; gap: 10px;">
-                                <button class="btn-primary" onclick="loadClientes()">🔄 Actualizar</button>
-                                <button class="btn-secondary" onclick="fixClientSubmissions()" style="background: #F1250E;">🔧 Arreglar Submissions</button>
-                            </div>
+                            <button class="btn-primary" onclick="loadClientes()">🔄 Actualizar</button>
                         </div>
                         <div class="table-container">
                             <table>
@@ -2099,9 +2096,171 @@
             }
         }
 
-        function viewClient(id) {
-            // TODO: Implementar vista detallada del cliente
-            showNotification(`Ver cliente #${id} - Próximamente`, 'info');
+        async function viewClient(id) {
+            try {
+                console.log(`👁️ [ADMIN] Cargando detalles del cliente #${id}`);
+                
+                // Mostrar modal con loader
+                const modal = document.createElement('div');
+                modal.id = 'clientDetailModal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.7);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: 15px; padding: 40px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+                        <div class="loader">
+                            <div class="spinner"></div>
+                            <p>Cargando datos del cliente...</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Cerrar modal al hacer clic fuera
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                };
+                
+                // Obtener detalles del cliente
+                const response = await fetch(`${API_URL}/api/clients/${id}`);
+                const client = await response.json();
+                
+                console.log('👁️ [ADMIN] Datos del cliente:', client);
+                
+                // Renderizar contenido del modal
+                const content = modal.querySelector('div');
+                content.innerHTML = `
+                    <button onclick="document.getElementById('clientDetailModal').remove()" 
+                            style="position: absolute; top: 20px; right: 20px; background: #f0f0f0; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">
+                        ✕
+                    </button>
+                    
+                    <h2 style="color: #0046FE; margin-bottom: 10px;">👤 Cliente #${client.id}</h2>
+                    <p style="color: #666; margin-bottom: 30px;">${client.full_name}</p>
+                    
+                    <!-- Datos básicos -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 15px; color: #1B1B1B;">📋 Información Básica</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                            <div>
+                                <strong>Email:</strong><br>
+                                <span style="color: #666;">${client.email}</span>
+                            </div>
+                            <div>
+                                <strong>Plan:</strong><br>
+                                <span class="badge badge-blue">${client.plan || 'Sin plan'}</span>
+                            </div>
+                            <div>
+                                <strong>Estado Web:</strong><br>
+                                <span class="badge badge-${client.website_status === 'activo' ? 'success' : 'warning'}">${client.website_status || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <strong>Fecha de pago:</strong><br>
+                                <span style="color: #666;">${client.payment_date ? formatDate(client.payment_date) : 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${client.submission ? `
+                        <!-- Datos del negocio -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #1B1B1B;">🏢 Datos del Negocio</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                <div>
+                                    <strong>Empresa:</strong><br>
+                                    <span style="color: #666;">${client.submission.business_name || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <strong>Sector:</strong><br>
+                                    <span style="color: #666;">${client.submission.industry || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <strong>Dominio:</strong><br>
+                                    <span style="color: #666;">${client.submission.domain_name || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <strong>Teléfono:</strong><br>
+                                    <span style="color: #666;">${client.submission.phone_number || 'N/A'}</span>
+                                </div>
+                            </div>
+                            
+                            ${client.submission.business_description ? `
+                                <div style="margin-top: 15px;">
+                                    <strong>Descripción:</strong><br>
+                                    <p style="color: #666; margin-top: 5px;">${client.submission.business_description}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Redes Sociales -->
+                        ${(client.submission.instagram || client.submission.facebook || client.submission.linkedin) ? `
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                                <h3 style="margin-bottom: 15px; color: #1B1B1B;">📱 Redes Sociales</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                    ${client.submission.instagram ? `<div><strong>Instagram:</strong><br><a href="https://instagram.com/${client.submission.instagram}" target="_blank" style="color: #0046FE;">@${client.submission.instagram}</a></div>` : ''}
+                                    ${client.submission.facebook ? `<div><strong>Facebook:</strong><br><a href="${client.submission.facebook}" target="_blank" style="color: #0046FE;">${client.submission.facebook}</a></div>` : ''}
+                                    ${client.submission.linkedin ? `<div><strong>LinkedIn:</strong><br><a href="${client.submission.linkedin}" target="_blank" style="color: #0046FE;">${client.submission.linkedin}</a></div>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    ` : '<p style="color: #999; text-align: center; padding: 20px;">No hay datos de formulario disponibles</p>'}
+                    
+                    ${client.project ? `
+                        <!-- Datos del proyecto -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #1B1B1B;">🌐 Proyecto Web</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                <div>
+                                    <strong>Nombre:</strong><br>
+                                    <span style="color: #666;">${client.project.project_name || client.project.business_name}</span>
+                                </div>
+                                <div>
+                                    <strong>Estado:</strong><br>
+                                    <span class="badge badge-${client.project.status === 'entregada' ? 'success' : 'warning'}">${client.project.status}</span>
+                                </div>
+                                <div>
+                                    <strong>Progreso:</strong><br>
+                                    <span style="color: #666;">${client.project.progress || 0}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Acciones -->
+                    <div style="display: flex; gap: 10px; margin-top: 30px;">
+                        <button onclick="window.location.href='/admin#section-webs'" class="btn-primary">
+                            Ver en Kanban
+                        </button>
+                        ${client.submission ? `
+                            <button onclick="viewSubmissionDetails(${client.submission.id})" class="btn-secondary">
+                                Ver Pedido Completo
+                            </button>
+                        ` : ''}
+                        <button onclick="document.getElementById('clientDetailModal').remove()" class="btn-secondary" style="background: #999;">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando cliente:', error);
+                showNotification('Error cargando datos del cliente', 'error');
+                document.getElementById('clientDetailModal')?.remove();
+            }
         }
 
         // 🆕 Función para arreglar submissions de clientes existentes
