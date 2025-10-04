@@ -1393,20 +1393,24 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
         const { clientId } = req.params;
         const { status, website_url } = req.body;
         
-        // Actualizar estado y URL si se proporciona
-        const stmt = db.db.prepare(`
+        console.log(`🔄 [CLIENT] Actualizando estado del cliente #${clientId} a: ${status}`);
+        
+        // Actualizar estado y URL si se proporciona (PostgreSQL)
+        await db.pool.query(`
             UPDATE clients 
-            SET website_status = ?, 
-                website_url = COALESCE(?, website_url),
+            SET website_status = $1, 
+                website_url = COALESCE($2, website_url),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-        `);
-        stmt.run(status, website_url, clientId);
+            WHERE id = $3
+        `, [status, website_url, clientId]);
+        
+        console.log(`✅ [CLIENT] Estado del cliente #${clientId} actualizado`);
         
         // Si se marcó como activo, enviar email de notificación al cliente
         if (status === 'activo') {
-            const client = db.getClientById(clientId);
+            const client = await db.getClientById(clientId);
             if (client) {
+                console.log(`📧 [CLIENT] Enviando email de notificación a ${client.email}`);
                 try {
                     await emailService.sendEmail({
                         to: client.email,
