@@ -561,6 +561,70 @@ app.patch('/api/admin/submissions/:id/status', async (req, res) => {
     }
 });
 
+// 8b. DASHBOARD ADMIN - ACTUALIZAR CAMPOS DE SUBMISSION
+app.patch('/api/admin/submissions/:id', async (req, res) => {
+    try {
+        const submissionId = req.params.id;
+        const updates = req.body;
+        
+        console.log(`🔧 [ADMIN] Actualizando campos del pedido #${submissionId}:`, Object.keys(updates));
+        
+        // Construir query dinámicamente
+        const fields = [];
+        const values = [];
+        let paramCount = 1;
+        
+        // Lista de campos permitidos para actualizar
+        const allowedFields = [
+            'business_name', 'business_description', 'industry', 'cif_nif', 'razon_social', 
+            'direccion_fiscal', 'business_email', 'contact_methods', 'phone_number', 
+            'email_contact', 'whatsapp_number', 'form_email', 'physical_address',
+            'instagram', 'facebook', 'linkedin', 'twitter', 'services', 'purpose', 
+            'target_audience', 'pages', 'custom_pages', 'design_style', 'brand_colors', 
+            'reference_websites', 'keywords', 'has_analytics', 'domain_name', 'domain_alt1', 
+            'domain_alt2', 'privacy_policy', 'privacy_text', 'web_texts', 'menu_content', 
+            'opening_hours', 'portfolio_description', 'full_name', 'email', 'phone', 'address'
+        ];
+        
+        for (const [key, value] of Object.entries(updates)) {
+            if (allowedFields.includes(key)) {
+                fields.push(`${key} = $${paramCount}`);
+                
+                // Si es un array, convertir a JSON
+                if (Array.isArray(value)) {
+                    values.push(JSON.stringify(value));
+                } else {
+                    values.push(value);
+                }
+                
+                paramCount++;
+            }
+        }
+        
+        if (fields.length === 0) {
+            return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
+        }
+        
+        // Añadir ID al final
+        values.push(submissionId);
+        
+        const query = `
+            UPDATE submissions 
+            SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+            WHERE id = $${paramCount}
+        `;
+        
+        await db.pool.query(query, values);
+        
+        console.log(`✅ [ADMIN] Pedido #${submissionId} actualizado correctamente`);
+        res.json({ success: true });
+        
+    } catch (error) {
+        console.error(`❌ [ADMIN] Error actualizando pedido #${req.params.id}:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 9. DASHBOARD ADMIN - ESTADÍSTICAS
 app.get('/api/admin/stats', async (req, res) => {
     try {
