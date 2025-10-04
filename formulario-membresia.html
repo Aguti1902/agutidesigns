@@ -1845,6 +1845,31 @@
                 }
             });
             
+            // 🔧 FIX: Capturar manualmente campos dinámicos del sectorSpecificSection
+            const servicesListField = document.querySelector('textarea[name="services_list"]');
+            if (servicesListField && servicesListField.value) {
+                data.services_list = servicesListField.value;
+                console.log('✅ services_list capturado manualmente:', servicesListField.value.substring(0, 50) + '...');
+            }
+            
+            const menuContentField = document.querySelector('textarea[name="menu_content"]');
+            if (menuContentField && menuContentField.value) {
+                data.menu_content = menuContentField.value;
+                console.log('✅ menu_content capturado manualmente');
+            }
+            
+            const openingHoursField = document.querySelector('textarea[name="opening_hours"]');
+            if (openingHoursField && openingHoursField.value) {
+                data.opening_hours = openingHoursField.value;
+                console.log('✅ opening_hours capturado manualmente');
+            }
+            
+            const portfolioDescField = document.querySelector('textarea[name="portfolio_description"]');
+            if (portfolioDescField && portfolioDescField.value) {
+                data.portfolio_description = portfolioDescField.value;
+                console.log('✅ portfolio_description capturado manualmente');
+            }
+            
             // Logs simples para consola
             console.log('📋 Datos del formulario:', data);
             console.log('🔍 Verificar campos críticos:');
