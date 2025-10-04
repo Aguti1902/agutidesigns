@@ -155,6 +155,22 @@ async function initializeTables() {
         await client.query(`CREATE INDEX IF NOT EXISTS idx_projects_client_id ON projects(client_id)`);
         await client.query(`CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status)`);
 
+        // 🆕 MIGRACIÓN: Agregar columnas faltantes a la tabla projects
+        try {
+            await client.query(`
+                ALTER TABLE projects 
+                ADD COLUMN IF NOT EXISTS submission_id INTEGER,
+                ADD COLUMN IF NOT EXISTS project_name TEXT,
+                ADD COLUMN IF NOT EXISTS client_email TEXT,
+                ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'normal',
+                ADD COLUMN IF NOT EXISTS deadline TIMESTAMP,
+                ADD COLUMN IF NOT EXISTS progress INTEGER DEFAULT 0
+            `);
+            console.log('✅ Migración: Columnas de projects añadidas');
+        } catch (e) {
+            console.log('⚠️ Migración projects ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
@@ -553,20 +569,53 @@ async function getTicketStats() {
 }
 
 async function createProject(data) {
+    console.log('📝 [DB] Creando proyecto con datos:', {
+        client_id: data.client_id,
+        submission_id: data.submission_id,
+        project_name: data.project_name,
+        business_name: data.business_name,
+        client_email: data.client_email,
+        plan: data.plan,
+        status: data.status
+    });
+    
     const result = await pool.query(`
-        INSERT INTO projects (client_id, client_name, business_name, plan, status, delivery_date, notes)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO projects (
+            client_id, 
+            submission_id,
+            project_name, 
+            client_name, 
+            business_name, 
+            client_email,
+            plan, 
+            status, 
+            priority,
+            deadline,
+            progress,
+            delivery_date, 
+            notes
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING id
     `, [
         data.client_id,
+        data.submission_id || null,
+        data.project_name || data.business_name || 'Proyecto sin nombre',
         data.client_name || null,
-        data.business_name,
-        data.plan,
+        data.business_name || 'Sin especificar',
+        data.client_email || null,
+        data.plan || 'basico',
         data.status || 'sin_empezar',
+        data.priority || 'normal',
+        data.deadline || null,
+        data.progress || 0,
         data.delivery_date || null,
         data.notes || null
     ]);
-    return result.rows[0].id;
+    
+    const projectId = result.rows[0].id;
+    console.log(`✅ [DB] Proyecto #${projectId} creado exitosamente`);
+    return projectId;
 }
 
 async function getAllProjects() {

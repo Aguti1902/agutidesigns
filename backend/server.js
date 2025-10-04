@@ -482,36 +482,46 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // 6. DASHBOARD ADMIN - OBTENER TODAS LAS SOLICITUDES
-app.get('/api/admin/submissions', (req, res) => {
+app.get('/api/admin/submissions', async (req, res) => {
     try {
-        const submissions = db.getAllSubmissions();
+        console.log('📋 [ADMIN] Obteniendo todos los pedidos (submissions)...');
+        const submissions = await db.getAllSubmissions();
+        console.log(`✅ [ADMIN] Pedidos encontrados: ${submissions.length}`);
         res.json(submissions);
     } catch (error) {
+        console.error('❌ [ADMIN] Error obteniendo pedidos:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // 7. DASHBOARD ADMIN - OBTENER UNA SOLICITUD
-app.get('/api/admin/submissions/:id', (req, res) => {
+app.get('/api/admin/submissions/:id', async (req, res) => {
     try {
-        const submission = db.getSubmission(req.params.id);
+        console.log(`📋 [ADMIN] Obteniendo pedido #${req.params.id}`);
+        const submission = await db.getSubmission(req.params.id);
         if (submission) {
+            console.log(`✅ [ADMIN] Pedido #${req.params.id} encontrado`);
             res.json(submission);
         } else {
+            console.log(`❌ [ADMIN] Pedido #${req.params.id} no encontrado`);
             res.status(404).json({ error: 'Solicitud no encontrada' });
         }
     } catch (error) {
+        console.error(`❌ [ADMIN] Error obteniendo pedido #${req.params.id}:`, error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // 8. DASHBOARD ADMIN - ACTUALIZAR ESTADO
-app.patch('/api/admin/submissions/:id/status', (req, res) => {
+app.patch('/api/admin/submissions/:id/status', async (req, res) => {
     try {
         const { status } = req.body;
-        db.updateSubmissionStatus(req.params.id, status);
+        console.log(`🔧 [ADMIN] Actualizando estado del pedido #${req.params.id} a: ${status}`);
+        await db.updateSubmissionStatus(req.params.id, status);
+        console.log(`✅ [ADMIN] Estado del pedido #${req.params.id} actualizado`);
         res.json({ success: true });
     } catch (error) {
+        console.error(`❌ [ADMIN] Error actualizando estado del pedido #${req.params.id}:`, error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -1322,21 +1332,25 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
 
 // Actualizar estado del sitio web (cuando se entrega el proyecto)
 // 🆕 Endpoint para actualizar datos de gestión de web (WordPress, Screenshot)
-app.patch('/api/admin/website-management/:clientId', (req, res) => {
+app.patch('/api/admin/website-management/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
         const { wordpress_url, website_screenshot_url } = req.body;
         
-        console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`);
+        console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`, {
+            wordpress_url,
+            website_screenshot_url
+        });
         
-        const stmt = db.db.prepare(`
+        await db.pool.query(`
             UPDATE clients 
-            SET wordpress_url = COALESCE(?, wordpress_url),
-                website_screenshot_url = COALESCE(?, website_screenshot_url),
+            SET wordpress_url = COALESCE($1, wordpress_url),
+                website_screenshot_url = COALESCE($2, website_screenshot_url),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-        `);
-        stmt.run(wordpress_url, website_screenshot_url, clientId);
+            WHERE id = $3
+        `, [wordpress_url, website_screenshot_url, clientId]);
+        
+        console.log(`✅ [ADMIN] Gestión de web actualizada para cliente #${clientId}`);
         
         res.json({ 
             success: true, 
