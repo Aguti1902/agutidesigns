@@ -1910,6 +1910,107 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ============================================
+// 🔧 ENDPOINT TEMPORAL: Reparar datos corruptos
+// ============================================
+app.get('/api/admin/fix-corrupted-data', async (req, res) => {
+    console.log('🔧 [ADMIN] Ejecutando script de reparación de datos...');
+    
+    try {
+        const result = await db.pool.query('SELECT id, contact_methods, purpose, pages, custom_pages FROM submissions');
+        const submissions = result.rows;
+        
+        console.log(`📊 Total de submissions: ${submissions.length}`);
+        
+        let fixedCount = 0;
+        const fixes = [];
+        
+        for (const submission of submissions) {
+            const updates = [];
+            const values = [];
+            let paramCount = 1;
+            let needsUpdate = false;
+            const fixLog = { id: submission.id, fixed: [] };
+            
+            // Verificar y arreglar contact_methods
+            if (submission.contact_methods && typeof submission.contact_methods === 'string') {
+                try {
+                    JSON.parse(submission.contact_methods);
+                } catch (e) {
+                    const fixedValue = JSON.stringify([submission.contact_methods]);
+                    updates.push(`contact_methods = $${paramCount++}`);
+                    values.push(fixedValue);
+                    needsUpdate = true;
+                    fixLog.fixed.push(`contact_methods: "${submission.contact_methods}" → ${fixedValue}`);
+                }
+            }
+            
+            // Verificar y arreglar purpose
+            if (submission.purpose && typeof submission.purpose === 'string') {
+                try {
+                    JSON.parse(submission.purpose);
+                } catch (e) {
+                    const fixedValue = JSON.stringify([submission.purpose]);
+                    updates.push(`purpose = $${paramCount++}`);
+                    values.push(fixedValue);
+                    needsUpdate = true;
+                    fixLog.fixed.push(`purpose: "${submission.purpose}" → ${fixedValue}`);
+                }
+            }
+            
+            // Verificar y arreglar pages
+            if (submission.pages && typeof submission.pages === 'string') {
+                try {
+                    JSON.parse(submission.pages);
+                } catch (e) {
+                    const fixedValue = JSON.stringify([submission.pages]);
+                    updates.push(`pages = $${paramCount++}`);
+                    values.push(fixedValue);
+                    needsUpdate = true;
+                    fixLog.fixed.push(`pages: "${submission.pages}" → ${fixedValue}`);
+                }
+            }
+            
+            // Verificar y arreglar custom_pages
+            if (submission.custom_pages && typeof submission.custom_pages === 'string') {
+                try {
+                    JSON.parse(submission.custom_pages);
+                } catch (e) {
+                    const fixedValue = JSON.stringify([submission.custom_pages]);
+                    updates.push(`custom_pages = $${paramCount++}`);
+                    values.push(fixedValue);
+                    needsUpdate = true;
+                    fixLog.fixed.push(`custom_pages: "${submission.custom_pages}" → ${fixedValue}`);
+                }
+            }
+            
+            // Si hay updates, ejecutar
+            if (needsUpdate) {
+                values.push(submission.id);
+                const query = `UPDATE submissions SET ${updates.join(', ')} WHERE id = $${paramCount}`;
+                
+                await db.pool.query(query, values);
+                fixedCount++;
+                fixes.push(fixLog);
+            }
+        }
+        
+        console.log(`✅ Corrección completada: ${fixedCount}/${submissions.length}`);
+        
+        res.json({
+            success: true,
+            total: submissions.length,
+            fixed: fixedCount,
+            alreadyCorrect: submissions.length - fixedCount,
+            details: fixes
+        });
+        
+    } catch (error) {
+        console.error('❌ Error reparando datos:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
