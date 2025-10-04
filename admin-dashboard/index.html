@@ -2976,10 +2976,19 @@
         // Editar proyecto
         async function editProject(projectId) {
             try {
+                console.log(`📝 [ADMIN] Editando proyecto #${projectId}`);
+                
+                // 1️⃣ Obtener datos del proyecto
                 const response = await fetch(`${API_URL}/api/admin/projects/${projectId}`);
                 const project = await response.json();
+                console.log('📝 [ADMIN] Datos del proyecto:', project);
                 
-                // Pre-llenar modal con datos del proyecto
+                // 2️⃣ Cargar clientes PRIMERO
+                console.log('📝 [ADMIN] Cargando clientes para dropdown...');
+                await loadClientsForSelect();
+                
+                // 3️⃣ AHORA sí, pre-llenar modal con datos del proyecto
+                console.log(`📝 [ADMIN] Asignando cliente #${project.client_id} al dropdown`);
                 document.getElementById('projectClient').value = project.client_id;
                 document.getElementById('projectName').value = project.project_name;
                 document.getElementById('projectStatus').value = project.status;
@@ -2987,6 +2996,14 @@
                 document.getElementById('projectDeadline').value = project.deadline || '';
                 document.getElementById('projectProgress').value = project.progress;
                 document.getElementById('projectNotes').value = project.notes || '';
+                
+                // Verificar si el cliente se asignó correctamente
+                const selectedClientId = document.getElementById('projectClient').value;
+                console.log(`📝 [ADMIN] Cliente seleccionado en dropdown: ${selectedClientId}`);
+                
+                if (selectedClientId != project.client_id) {
+                    console.warn(`⚠️ [ADMIN] El cliente no se asignó correctamente. Esperado: ${project.client_id}, Actual: ${selectedClientId}`);
+                }
                 
                 // Cambiar el formulario a modo edición
                 const form = document.getElementById('projectForm');
@@ -2997,8 +3014,9 @@
                 document.querySelector('#projectModal .modal-header h3').textContent = '✏️ Editar Proyecto';
                 
                 document.getElementById('projectModal').classList.add('active');
+                console.log('✅ [ADMIN] Modal de edición abierto correctamente');
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ [ADMIN] Error cargando datos del proyecto:', error);
                 showNotification('Error cargando datos del proyecto', 'error');
             }
         }
