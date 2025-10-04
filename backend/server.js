@@ -2530,11 +2530,20 @@ app.post('/api/client/change-plan', async (req, res) => {
                 const priceMap = billingCycle === 'annual' ? STRIPE_PRICES_ANNUAL : STRIPE_PRICES_MONTHLY;
                 const newPriceId = priceMap[newPlan];
                 
+                console.log(`💳 [STRIPE] Billing cycle: ${billingCycle}`);
+                console.log(`💳 [STRIPE] Price ID antiguo: ${client.stripe_price_id || 'N/A'}`);
+                console.log(`💳 [STRIPE] Price ID nuevo: ${newPriceId}`);
+                
                 if (!newPriceId) {
                     throw new Error(`Price ID no encontrado para ${newPlan} ${billingCycle}`);
                 }
                 
                 const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+                
+                console.log(`💳 [STRIPE] Suscripción actual en Stripe:`);
+                console.log(`   - Status: ${subscription.status}`);
+                console.log(`   - Plan actual: ${subscription.items.data[0].price.id}`);
+                console.log(`   - Próxima facturación: ${new Date(subscription.current_period_end * 1000).toISOString()}`);
                 
                 await stripe.subscriptions.update(client.stripe_subscription_id, {
                     items: [{
@@ -2544,7 +2553,9 @@ app.post('/api/client/change-plan', async (req, res) => {
                     proration_behavior: 'always_invoice', // Facturar prorrateado inmediatamente
                 });
                 
-                console.log(`✅ [PLAN] Suscripción actualizada en Stripe`);
+                console.log(`✅ [STRIPE] Suscripción actualizada correctamente`);
+                console.log(`✅ [STRIPE] Nuevo plan en Stripe: ${newPlan} (${billingCycle})`);
+                console.log(`✅ [STRIPE] Nuevo Price ID: ${newPriceId}`);
             }
         } catch (stripeError) {
             console.error(`❌ [PLAN] Error actualizando Stripe:`, stripeError);
