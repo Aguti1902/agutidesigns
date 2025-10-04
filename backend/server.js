@@ -957,7 +957,7 @@ app.put('/api/submissions/:submissionId', (req, res) => {
 });
 
 // ====== ENDPOINT: Actualizar datos del cliente (con validación 24h) ======
-app.put('/api/client/update-data/:clientId', (req, res) => {
+app.put('/api/client/update-data/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
         const updatedData = req.body;
@@ -966,8 +966,7 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
         console.log('📦 [CLIENT] Datos recibidos:', Object.keys(updatedData));
         
         // 1. Obtener información del cliente
-        const clientStmt = db.db.prepare('SELECT * FROM clients WHERE id = ?');
-        const client = clientStmt.get(clientId);
+        const client = await db.getClientById(parseInt(clientId));
         
         if (!client) {
             console.log('❌ [CLIENT] Cliente no encontrado');
@@ -993,49 +992,47 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
         if (client.submission_id) {
             console.log(`📝 [CLIENT] Actualizando submission #${client.submission_id}`);
             
-            const updateStmt = db.db.prepare(`
+            await db.pool.query(`
                 UPDATE submissions 
-                SET business_name = COALESCE(?, business_name),
-                    business_description = COALESCE(?, business_description),
-                    industry = COALESCE(?, industry),
-                    cif_nif = COALESCE(?, cif_nif),
-                    razon_social = COALESCE(?, razon_social),
-                    direccion_fiscal = COALESCE(?, direccion_fiscal),
-                    contact_methods = COALESCE(?, contact_methods),
-                    phone_number = COALESCE(?, phone_number),
-                    email_contact = COALESCE(?, email_contact),
-                    whatsapp_number = COALESCE(?, whatsapp_number),
-                    form_email = COALESCE(?, form_email),
-                    physical_address = COALESCE(?, physical_address),
-                    instagram = COALESCE(?, instagram),
-                    facebook = COALESCE(?, facebook),
-                    linkedin = COALESCE(?, linkedin),
-                    twitter = COALESCE(?, twitter),
-                    purpose = COALESCE(?, purpose),
-                    target_audience = COALESCE(?, target_audience),
-                    pages = COALESCE(?, pages),
-                    custom_pages = COALESCE(?, custom_pages),
-                    services = COALESCE(?, services),
-                    web_texts = COALESCE(?, web_texts),
-                    menu_content = COALESCE(?, menu_content),
-                    opening_hours = COALESCE(?, opening_hours),
-                    portfolio_description = COALESCE(?, portfolio_description),
-                    design_style = COALESCE(?, design_style),
-                    brand_colors = COALESCE(?, brand_colors),
-                    reference_websites = COALESCE(?, reference_websites),
-                    keywords = COALESCE(?, keywords),
-                    has_analytics = COALESCE(?, has_analytics),
-                    domain_name = COALESCE(?, domain_name),
-                    domain_alt1 = COALESCE(?, domain_alt1),
-                    domain_alt2 = COALESCE(?, domain_alt2),
-                    privacy_text = COALESCE(?, privacy_text),
-                    privacy_file_data = COALESCE(?, privacy_file_data),
-                    privacy_file_name = COALESCE(?, privacy_file_name),
+                SET business_name = COALESCE($1, business_name),
+                    business_description = COALESCE($2, business_description),
+                    industry = COALESCE($3, industry),
+                    cif_nif = COALESCE($4, cif_nif),
+                    razon_social = COALESCE($5, razon_social),
+                    direccion_fiscal = COALESCE($6, direccion_fiscal),
+                    contact_methods = COALESCE($7, contact_methods),
+                    phone_number = COALESCE($8, phone_number),
+                    email_contact = COALESCE($9, email_contact),
+                    whatsapp_number = COALESCE($10, whatsapp_number),
+                    form_email = COALESCE($11, form_email),
+                    physical_address = COALESCE($12, physical_address),
+                    instagram = COALESCE($13, instagram),
+                    facebook = COALESCE($14, facebook),
+                    linkedin = COALESCE($15, linkedin),
+                    twitter = COALESCE($16, twitter),
+                    purpose = COALESCE($17, purpose),
+                    target_audience = COALESCE($18, target_audience),
+                    pages = COALESCE($19, pages),
+                    custom_pages = COALESCE($20, custom_pages),
+                    services = COALESCE($21, services),
+                    web_texts = COALESCE($22, web_texts),
+                    menu_content = COALESCE($23, menu_content),
+                    opening_hours = COALESCE($24, opening_hours),
+                    portfolio_description = COALESCE($25, portfolio_description),
+                    design_style = COALESCE($26, design_style),
+                    brand_colors = COALESCE($27, brand_colors),
+                    reference_websites = COALESCE($28, reference_websites),
+                    keywords = COALESCE($29, keywords),
+                    has_analytics = COALESCE($30, has_analytics),
+                    domain_name = COALESCE($31, domain_name),
+                    domain_alt1 = COALESCE($32, domain_alt1),
+                    domain_alt2 = COALESCE($33, domain_alt2),
+                    privacy_text = COALESCE($34, privacy_text),
+                    privacy_file_data = COALESCE($35, privacy_file_data),
+                    privacy_file_name = COALESCE($36, privacy_file_name),
                     updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `);
-            
-            updateStmt.run(
+                WHERE id = $37
+            `, [
                 updatedData.business_name || null,
                 updatedData.business_description || null,
                 updatedData.industry || null,
@@ -1073,7 +1070,7 @@ app.put('/api/client/update-data/:clientId', (req, res) => {
                 updatedData.privacy_file_data || null,
                 updatedData.privacy_file_name || null,
                 client.submission_id
-            );
+            ]);
             
             console.log('✅ [CLIENT] Submission actualizada correctamente');
         } else {
