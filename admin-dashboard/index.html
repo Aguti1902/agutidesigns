@@ -1361,12 +1361,13 @@
                 </div>
                 <div class="form-group">
                     <label>Estado</label>
-                    <select id="projectStatus">
+                    <select id="projectStatus" disabled style="background-color: #f5f5f5; cursor: not-allowed;">
                         <option value="sin_empezar">Sin Empezar</option>
                         <option value="en_desarrollo">En Desarrollo</option>
                         <option value="revision">En Revisión</option>
                         <option value="entregada">Entregada</option>
                     </select>
+                    <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">El estado se cambia arrastrando el proyecto en el Kanban</small>
                 </div>
                 <div class="form-group">
                     <label>Prioridad</label>
@@ -3097,9 +3098,9 @@
                 
                 select.innerHTML = '<option value="">Selecciona un cliente...</option>' +
                     clients.map(c => {
-                        const displayName = c.business_name || c.full_name || 'Sin nombre';
-                        console.log(`➕ [ADMIN] Agregando cliente: ${displayName} (ID: ${c.id}, Email: ${c.email})`);
-                        return `<option value="${c.id}">${displayName} (${c.email})</option>`;
+                        const clientName = c.full_name || c.email || 'Sin nombre';
+                        console.log(`➕ [ADMIN] Agregando cliente: ${clientName} (ID: ${c.id}, Email: ${c.email})`);
+                        return `<option value="${c.id}">${clientName} (${c.email})</option>`;
                     }).join('');
                     
                 console.log('✅ [ADMIN] Dropdown de clientes cargado correctamente');
@@ -3116,7 +3117,7 @@
             const projectData = {
                 client_id: parseInt(document.getElementById('projectClient').value),
                 project_name: document.getElementById('projectName').value,
-                status: document.getElementById('projectStatus').value,
+                // status: No se envía, se cambia solo arrastrando en el Kanban
                 priority: document.getElementById('projectPriority').value,
                 deadline: document.getElementById('projectDeadline').value || null,
                 progress: parseInt(document.getElementById('projectProgress').value),
