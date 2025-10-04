@@ -3028,20 +3028,36 @@
                 const submission = dashboardData.submission || {};
                 const client = dashboardData.client || {};
                 
+                console.log('📋 [CHECKOUT] Dashboard data:', dashboardData);
+                console.log('📋 [CHECKOUT] Client data:', client);
+                console.log('📋 [CHECKOUT] Submission ID:', client.submission_id);
+                
+                // Si no hay submission_id, intentar obtenerlo del cliente directamente
+                const submissionId = client.submission_id || null;
+                console.log('📋 [CHECKOUT] Using submission ID:', submissionId);
+                
+                // Asegurar que siempre haya datos válidos en formData
+                const firstName = currentClient.full_name?.split(' ')[0] || 
+                                 submission.full_name?.split(' ')[0] || 
+                                 currentClient.email?.split('@')[0] || 'Cliente';
+                const lastName = currentClient.full_name?.split(' ').slice(1).join(' ') || 
+                                submission.full_name?.split(' ').slice(1).join(' ') || '';
+                
                 const checkoutData = {
                     plan: plan,
                     billing_cycle: modalBillingCycle,
-                    submissionId: client.submission_id,
+                    submissionId: submissionId,
                     formData: {
-                        business_name: submission.business_name || client.business_name || 'Mi Empresa',
+                        business_name: submission.business_name || client.business_name || currentClient.full_name || 'Mi Empresa',
                         business_description: submission.business_description || '',
                         industry: submission.industry || '',
                         cif_nif: submission.cif_nif || '',
                         razon_social: submission.razon_social || '',
                         direccion_fiscal: submission.direccion_fiscal || '',
                         email: submission.email || currentClient.email || '',
-                        first_name: currentClient.full_name?.split(' ')[0] || 'Cliente',
-                        last_name: currentClient.full_name?.split(' ').slice(1).join(' ') || '',
+                        first_name: firstName,
+                        last_name: lastName,
+                        full_name: currentClient.full_name || `${firstName} ${lastName}`.trim(),
                         phone_number: submission.phone_number || '',
                         email_contact: submission.email_contact || currentClient.email || '',
                         whatsapp_number: submission.whatsapp_number || '',
@@ -3052,6 +3068,8 @@
                         password: 'existing_user'
                     }
                 };
+                
+                console.log('📋 [CHECKOUT] Checkout data preparado:', checkoutData);
                 
                 sessionStorage.setItem('orderData', JSON.stringify(checkoutData));
                 

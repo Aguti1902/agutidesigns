@@ -224,9 +224,18 @@ app.post('/api/create-subscription', async (req, res) => {
             // Flujo anterior: crear submission desde formData (para compatibilidad)
             console.log('⚠️ Creando submission desde formData (flujo antiguo)');
             
+            // Validar que formData existe
+            if (!formData) {
+                console.error('❌ Error: No se recibió formData');
+                return res.status(400).json({ 
+                    error: 'Datos del formulario no encontrados. Por favor, recarga la página e intenta de nuevo.',
+                    details: 'formData is undefined'
+                });
+            }
+            
             const fullName = formData.first_name && formData.last_name 
                 ? `${formData.first_name} ${formData.last_name}`.trim()
-                : (formData.full_name || 'Cliente');
+                : (formData.full_name || formData.email?.split('@')[0] || 'Cliente');
 
             const amounts = {
                 monthly: { basico: 35, avanzado: 49, premium: 65 },
@@ -237,6 +246,7 @@ app.post('/api/create-subscription', async (req, res) => {
             submissionData = {
                 ...formData,
                 full_name: fullName,
+                email: formData.email || billingDetails.email,
                 plan,
                 billing_cycle: billingCycle,
                 status: 'pending',
