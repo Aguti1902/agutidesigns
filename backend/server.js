@@ -1983,6 +1983,175 @@ app.get('/api/clients/:clientId', async (req, res) => {
 // ============================================
 // 🔧 ENDPOINT TEMPORAL: Reparar datos corruptos
 // ============================================
+// 🔧 Endpoint temporal para verificar y arreglar proyectos
+app.get('/api/admin/fix-projects', async (req, res) => {
+    console.log('🔧 [ADMIN] Verificando y arreglando proyectos...');
+    
+    try {
+        // Obtener todos los clientes con plan
+        const clientsResult = await db.pool.query(`
+            SELECT * FROM clients 
+            WHERE plan IS NOT NULL AND plan != ''
+            ORDER BY created_at DESC
+        `);
+        const clients = clientsResult.rows;
+        
+        console.log(`📊 Total de clientes con plan: ${clients.length}`);
+        
+        const report = {
+            clientsWithPlan: clients.length,
+            projectsCreated: 0,
+            projectsUpdated: 0,
+            projectsAlreadyOk: 0,
+            details: []
+        };
+        
+        for (const client of clients) {
+            console.log(`\n👤 [CLIENTE #${client.id}] ${client.email}`);
+            
+            // Verificar si ya tiene proyecto
+            const projectResult = await db.pool.query(
+                'SELECT * FROM projects WHERE client_id = $1',
+                [client.id]
+            );
+            
+            // Obtener submission si existe
+            let submission = null;
+            if (client.submission_id) {
+                const subResult = await db.pool.query(
+                    'SELECT * FROM submissions WHERE id = $1',
+                    [client.submission_id]
+                );
+                submission = subResult.rows[0];
+            }
+            
+            if (projectResult.rows.length === 0) {
+                // No tiene proyecto, crear uno
+                console.log(`🆕 [PROYECTO] Cliente sin proyecto, creando...`);
+                
+                const projectData = {
+                    client_id: client.id,
+                    submission_id: client.submission_id || null,
+                    project_name: submission?.business_name || client.business_name || `Web de ${client.full_name}`,
+                    business_name: submission?.business_name || client.business_name || 'Sin especificar',
+                    client_email: client.email,
+                    plan: client.plan,
+                    status: 'sin_empezar',
+                    priority: 'normal',
+                    progress: 0,
+                    notes: `Proyecto creado automáticamente desde fix-projects. Plan: ${client.plan}`
+                };
+                
+                const projectId = await db.createProject(projectData);
+                console.log(`✅ [PROYECTO] Proyecto #${projectId} creado`);
+                
+                report.projectsCreated++;
+                report.details.push({
+                    clientId: client.id,
+                    action: 'created',
+                    projectId,
+                    projectName: projectData.project_name
+                });
+                
+            } else {
+                // Ya tiene proyecto, verificar que tenga todos los campos
+                const project = projectResult.rows[0];
+                console.log(`📋 [PROYECTO] Ya existe proyecto #${project.id}`);
+                
+                const updates = [];
+                const values = [];
+                let paramCount = 1;
+                let needsUpdate = false;
+                
+                // Verificar project_name
+                if (!project.project_name || project.project_name === 'undefined') {
+                    const newName = submission?.business_name || client.business_name || `Web de ${client.full_name}`;
+                    updates.push(`project_name = $${paramCount++}`);
+                    values.push(newName);
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando project_name: ${newName}`);
+                }
+                
+                // Verificar business_name
+                if (!project.business_name || project.business_name === 'Sin especificar') {
+                    const newBusinessName = submission?.business_name || client.business_name || 'Sin especificar';
+                    updates.push(`business_name = $${paramCount++}`);
+                    values.push(newBusinessName);
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando business_name: ${newBusinessName}`);
+                }
+                
+                // Verificar client_email
+                if (!project.client_email) {
+                    updates.push(`client_email = $${paramCount++}`);
+                    values.push(client.email);
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando client_email: ${client.email}`);
+                }
+                
+                // Verificar submission_id
+                if (!project.submission_id && client.submission_id) {
+                    updates.push(`submission_id = $${paramCount++}`);
+                    values.push(client.submission_id);
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando submission_id: ${client.submission_id}`);
+                }
+                
+                // Verificar priority
+                if (!project.priority) {
+                    updates.push(`priority = $${paramCount++}`);
+                    values.push('normal');
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando priority: normal`);
+                }
+                
+                // Verificar progress
+                if (project.progress === null || project.progress === undefined) {
+                    updates.push(`progress = $${paramCount++}`);
+                    values.push(0);
+                    needsUpdate = true;
+                    console.log(`🔧 Actualizando progress: 0`);
+                }
+                
+                if (needsUpdate) {
+                    values.push(project.id);
+                    const query = `UPDATE projects SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramCount}`;
+                    await db.pool.query(query, values);
+                    console.log(`✅ [PROYECTO] Proyecto #${project.id} actualizado`);
+                    
+                    report.projectsUpdated++;
+                    report.details.push({
+                        clientId: client.id,
+                        action: 'updated',
+                        projectId: project.id,
+                        fields: updates.length
+                    });
+                } else {
+                    console.log(`✅ [PROYECTO] Proyecto #${project.id} ya está correcto`);
+                    report.projectsAlreadyOk++;
+                }
+            }
+        }
+        
+        console.log('\n==================================================');
+        console.log('✅ REPORTE FINAL:');
+        console.log(`📊 Clientes con plan: ${report.clientsWithPlan}`);
+        console.log(`🆕 Proyectos creados: ${report.projectsCreated}`);
+        console.log(`🔧 Proyectos actualizados: ${report.projectsUpdated}`);
+        console.log(`✅ Proyectos ya correctos: ${report.projectsAlreadyOk}`);
+        console.log('==================================================\n');
+        
+        res.json({
+            success: true,
+            ...report
+        });
+        
+    } catch (error) {
+        console.error('❌ Error arreglando proyectos:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 app.get('/api/admin/fix-corrupted-data', async (req, res) => {
     console.log('🔧 [ADMIN] Ejecutando script de reparación de datos...');
     
