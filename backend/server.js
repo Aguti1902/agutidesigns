@@ -47,6 +47,25 @@ const PORT = process.env.PORT || 3000;
 
 console.log(`🚀 Servidor iniciando en modo: ${isTestMode ? 'TEST ⚠️' : 'PRODUCCIÓN ✅'}`);
 
+// ============================================
+// 🕒 FUNCIÓN HELPER: Calcular deadline automático
+// ============================================
+function calculateDeadline(plan, paymentDate = new Date()) {
+    const deadlineDays = {
+        'basico': 5,      // 5 días para plan básico
+        'avanzado': 10,   // 10 días para plan avanzado
+        'premium': 15     // 15 días para plan premium
+    };
+    
+    const days = deadlineDays[plan?.toLowerCase()] || 7; // Default: 7 días
+    const deadline = new Date(paymentDate);
+    deadline.setDate(deadline.getDate() + days);
+    
+    const formattedDeadline = deadline.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+    console.log(`⏰ [DEADLINE] Plan: ${plan} → ${days} días → Deadline: ${formattedDeadline}`);
+    return formattedDeadline;
+}
+
 // Middleware - Configuración CORS mejorada
 const allowedOrigins = [
     'http://localhost:5500',
@@ -350,6 +369,9 @@ app.post('/api/create-subscription', async (req, res) => {
 
             // CREAR PROYECTO AUTOMÁTICAMENTE en "Sin empezar"
             try {
+                const paymentDate = new Date();
+                const autoDeadline = calculateDeadline(plan, paymentDate);
+                
                 const projectId = await db.createProject({
                     client_id: clientId,
                     submission_id: finalSubmissionId,
@@ -359,11 +381,11 @@ app.post('/api/create-subscription', async (req, res) => {
                     plan: plan,
                     status: 'sin_empezar',
                     priority: 'normal',
-                    deadline: null,
+                    deadline: autoDeadline,
                     progress: 0,
                     notes: `Proyecto creado automáticamente. Plan: ${plan} ${billingCycle}. Pago confirmado.`
                 });
-                console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${clientId}`);
+                console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${clientId} con deadline: ${autoDeadline}`);
             } catch (projectError) {
                 console.error('❌ Error creando proyecto automáticamente:', projectError);
             }
@@ -420,6 +442,9 @@ app.post('/webhook', async (req, res) => {
             // Crear proyecto automáticamente en "Sin empezar"
             if (client) {
                 try {
+                    const paymentDate = new Date(client.payment_date || Date.now());
+                    const autoDeadline = calculateDeadline(submission.plan, paymentDate);
+                    
                     const projectId = await db.createProject({
                         client_id: client.id,
                         submission_id: submissionId,
@@ -429,11 +454,11 @@ app.post('/webhook', async (req, res) => {
                         plan: submission.plan,
                         status: 'sin_empezar',
                         priority: 'normal',
-                        deadline: null, // Se puede configurar después
+                        deadline: autoDeadline,
                         progress: 0,
                         notes: `Proyecto creado automáticamente desde el pago. Plan: ${submission.plan}`
                     });
-                    console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${client.id}`);
+                    console.log(`✅ Proyecto ${projectId} creado automáticamente para cliente ${client.id} con deadline: ${autoDeadline}`);
                 } catch (projectError) {
                     console.error('Error creando proyecto automáticamente:', projectError);
                 }
@@ -1942,6 +1967,53 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ⏰ ENDPOINT TEMPORAL: Actualizar deadline de proyectos existentes
+app.get('/api/admin/fix-deadlines', async (req, res) => {
+    try {
+        console.log('⏰ [ADMIN] Actualizando deadlines de proyectos...');
+        
+        // Obtener todos los proyectos
+        const projectsResult = await db.pool.query(`
+            SELECT p.id, p.deadline, p.plan, c.payment_date, c.created_at 
+            FROM projects p
+            LEFT JOIN clients c ON p.client_id = c.id
+        `);
+        
+        const projects = projectsResult.rows;
+        let updated = 0;
+        let skipped = 0;
+        
+        for (const project of projects) {
+            if (project.deadline) {
+                console.log(`⏩ [PROYECTO #${project.id}] Ya tiene deadline: ${project.deadline}`);
+                skipped++;
+                continue;
+            }
+            
+            const paymentDate = new Date(project.payment_date || project.created_at || Date.now());
+            const newDeadline = calculateDeadline(project.plan, paymentDate);
+            
+            await db.pool.query(
+                'UPDATE projects SET deadline = $1 WHERE id = $2',
+                [newDeadline, project.id]
+            );
+            
+            console.log(`✅ [PROYECTO #${project.id}] Deadline actualizado: ${newDeadline}`);
+            updated++;
+        }
+        
+        res.json({
+            success: true,
+            total: projects.length,
+            updated,
+            skipped
+        });
+    } catch (error) {
+        console.error('❌ Error actualizando deadlines:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============================================
 // 📊 ENDPOINTS DE ADMIN - CLIENTES
 // ============================================
@@ -2130,6 +2202,9 @@ app.get('/api/admin/fix-projects', async (req, res) => {
                 // No tiene proyecto, crear uno
                 console.log(`🆕 [PROYECTO] Cliente sin proyecto, creando...`);
                 
+                const paymentDate = new Date(client.payment_date || Date.now());
+                const autoDeadline = calculateDeadline(client.plan, paymentDate);
+                
                 const projectData = {
                     client_id: client.id,
                     submission_id: client.submission_id || null,
@@ -2139,6 +2214,7 @@ app.get('/api/admin/fix-projects', async (req, res) => {
                     plan: client.plan,
                     status: 'sin_empezar',
                     priority: 'normal',
+                    deadline: autoDeadline,
                     progress: 0,
                     notes: `Proyecto creado automáticamente desde fix-projects. Plan: ${client.plan}`
                 };
