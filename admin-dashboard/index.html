@@ -2993,7 +2993,23 @@
                 document.getElementById('projectName').value = project.project_name;
                 document.getElementById('projectStatus').value = project.status;
                 document.getElementById('projectPriority').value = project.priority;
-                document.getElementById('projectDeadline').value = project.deadline || '';
+                
+                // Formatear deadline para input type="date" (YYYY-MM-DD)
+                console.log(`📅 [ADMIN] Deadline original:`, project.deadline);
+                let formattedDeadline = '';
+                if (project.deadline) {
+                    // Si viene como Date object o string, convertir a YYYY-MM-DD
+                    const deadlineDate = new Date(project.deadline);
+                    if (!isNaN(deadlineDate.getTime())) {
+                        formattedDeadline = deadlineDate.toISOString().split('T')[0];
+                        console.log(`📅 [ADMIN] Deadline formateado: ${formattedDeadline}`);
+                    } else {
+                        console.warn(`⚠️ [ADMIN] Deadline inválido: ${project.deadline}`);
+                    }
+                }
+                document.getElementById('projectDeadline').value = formattedDeadline;
+                console.log(`📅 [ADMIN] Deadline asignado al input:`, document.getElementById('projectDeadline').value);
+                
                 document.getElementById('projectProgress').value = project.progress;
                 document.getElementById('projectNotes').value = project.notes || '';
                 
