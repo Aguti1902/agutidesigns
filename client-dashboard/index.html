@@ -3940,7 +3940,7 @@
             
             try {
                 const clientId = new URLSearchParams(window.location.search).get('client');
-                const response = await fetch(`${API_BASE_URL}/api/client/update-data/${clientId}`, {
+                const response = await fetch(`${API_URL}/api/client/update-data/${clientId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
