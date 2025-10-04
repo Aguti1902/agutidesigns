@@ -929,27 +929,25 @@
                                         <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">¿Qué métodos de contacto quieres mostrar en tu web? <span style="color: #F1250E;">*</span></label>
                                         <div id="form_contact_methods" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                    <div id="contact_field_phone" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                                         <div>
                                             <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Número de teléfono</label>
                                             <div id="form_phone_number" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
                                         </div>
-                                        <div>
-                                            <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email de contacto</label>
-                                            <div id="form_email_contact" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
-                                        </div>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                                        <div>
-                                            <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Número de WhatsApp</label>
-                                            <div id="form_whatsapp_number" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
-                                        </div>
-                                        <div>
-                                            <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email del formulario web</label>
-                                            <div id="form_form_email" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
-                                        </div>
+                                    <div id="contact_field_email" style="display: none;">
+                                        <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email de contacto</label>
+                                        <div id="form_email_contact" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
                                     </div>
-                                    <div>
+                                    <div id="contact_field_whatsapp" style="display: none;">
+                                        <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Número de WhatsApp</label>
+                                        <div id="form_whatsapp_number" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                                    </div>
+                                    <div id="contact_field_form" style="display: none;">
+                                        <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Email del formulario web</label>
+                                        <div id="form_form_email" style="padding: 12px 18px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
+                                    </div>
+                                    <div id="contact_field_address" style="display: none;">
                                         <label style="display: block; color: #1B1B1B; font-weight: 700; margin-bottom: 10px;">Dirección del local/oficina</label>
                                         <div id="form_physical_address" style="padding: 15px 20px; background: #fafbfc; border: 2px solid #e8eaed; border-radius: 12px; color: #1B1B1B;">-</div>
                                     </div>
@@ -2359,10 +2357,39 @@
                         document.getElementById('form_direccion_fiscal').textContent = source.direccion_fiscal || '-';
                         
                         // Métodos de contacto
-                        const contactMethods = source.contact_methods ? 
-                            (Array.isArray(source.contact_methods) ? source.contact_methods.join(', ') : source.contact_methods) : '-';
-                        document.getElementById('form_contact_methods').textContent = contactMethods;
+                        let contactMethodsArray = [];
+                        if (source.contact_methods) {
+                            if (Array.isArray(source.contact_methods)) {
+                                contactMethodsArray = source.contact_methods;
+                            } else if (typeof source.contact_methods === 'string') {
+                                try {
+                                    contactMethodsArray = JSON.parse(source.contact_methods);
+                                } catch (e) {
+                                    contactMethodsArray = source.contact_methods.split(',').map(m => m.trim());
+                                }
+                            }
+                        }
                         
+                        const contactMethodsText = contactMethodsArray.length > 0 ? contactMethodsArray.join(', ') : '-';
+                        document.getElementById('form_contact_methods').textContent = contactMethodsText;
+                        
+                        // Mostrar solo los campos de contacto que están seleccionados
+                        const methodMap = {
+                            'telefono': 'contact_field_phone',
+                            'email': 'contact_field_email',
+                            'whatsapp': 'contact_field_whatsapp',
+                            'formulario': 'contact_field_form',
+                            'direccion': 'contact_field_address'
+                        };
+                        
+                        Object.entries(methodMap).forEach(([method, fieldId]) => {
+                            const field = document.getElementById(fieldId);
+                            if (field) {
+                                field.style.display = contactMethodsArray.includes(method) ? 'block' : 'none';
+                            }
+                        });
+                        
+                        // Rellenar valores de campos de contacto
                         document.getElementById('form_phone_number').textContent = source.phone_number || '-';
                         document.getElementById('form_email_contact').textContent = source.email_contact || '-';
                         document.getElementById('form_whatsapp_number').textContent = source.whatsapp_number || '-';
@@ -3245,15 +3272,22 @@
             makeFieldEditable('form_business_name', 'input');
             makeFieldEditable('form_business_description', 'textarea', {rows: 4});
             // form_industry NO es editable - es un select en el form original
-            // form_contact_methods NO es editable - es un select múltiple en el form original
-            makeFieldEditable('form_cif_nif', 'input');
-            makeFieldEditable('form_razon_social', 'input');
-            makeFieldEditable('form_direccion_fiscal', 'input');
+            
+            // Métodos de contacto - renderizar checkboxes editables
+            const currentMethods = currentClient?.submission?.contact_methods || [];
+            renderContactMethodsEditable(currentMethods);
+            
+            // Hacer editables los campos de contacto individuales
             makeFieldEditable('form_phone_number', 'input', {type: 'tel'});
             makeFieldEditable('form_email_contact', 'input', {type: 'email'});
             makeFieldEditable('form_whatsapp_number', 'input', {type: 'tel'});
             makeFieldEditable('form_form_email', 'input', {type: 'email'});
-            makeFieldEditable('form_physical_address', 'input');
+            makeFieldEditable('form_physical_address', 'textarea', {rows: 2});
+            
+            // Datos fiscales
+            makeFieldEditable('form_cif_nif', 'input');
+            makeFieldEditable('form_razon_social', 'input');
+            makeFieldEditable('form_direccion_fiscal', 'input');
             
             // Redes sociales
             makeFieldEditable('form_instagram', 'input');
@@ -3369,6 +3403,94 @@
             }
             
             element.innerHTML = inputHTML;
+        }
+        
+        // Función para renderizar métodos de contacto editables (checkboxes + campos dinámicos)
+        function renderContactMethodsEditable(selectedMethods = []) {
+            const container = document.getElementById('form_contact_methods');
+            if (!container) return;
+            
+            // Normalizar selectedMethods (puede venir como string o array)
+            let methodsArray = [];
+            if (typeof selectedMethods === 'string') {
+                methodsArray = selectedMethods.split(',').map(m => m.trim().toLowerCase());
+            } else if (Array.isArray(selectedMethods)) {
+                methodsArray = selectedMethods.map(m => String(m).trim().toLowerCase());
+            }
+            
+            console.log('🔧 Renderizando métodos de contacto editables:', methodsArray);
+            
+            const checkboxes = [
+                { id: 'telefono', label: '📞 Teléfono', field: 'contact_field_phone' },
+                { id: 'email', label: '📧 Email', field: 'contact_field_email' },
+                { id: 'whatsapp', label: '💬 WhatsApp', field: 'contact_field_whatsapp' },
+                { id: 'formulario', label: '📝 Formulario de contacto', field: 'contact_field_form' },
+                { id: 'direccion', label: '📍 Dirección física', field: 'contact_field_address' },
+                { id: 'redes_sociales', label: '🌐 Redes sociales', field: null } // Las redes están en otra sección
+            ];
+            
+            const checkboxesHTML = checkboxes.map(cb => {
+                const isChecked = methodsArray.includes(cb.id);
+                return `
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: ${isChecked ? '#e8f4ff' : '#fafbfc'}; border: 2px solid ${isChecked ? '#0046FE' : '#e8eaed'}; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="checkbox" 
+                               name="contact_methods_checkbox" 
+                               value="${cb.id}" 
+                               ${isChecked ? 'checked' : ''}
+                               onchange="toggleContactFieldsInDashboard()"
+                               style="width: 20px; height: 20px; cursor: pointer; accent-color: #0046FE;">
+                        <span style="font-weight: 600; color: #1B1B1B;">${cb.label}</span>
+                    </label>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    ${checkboxesHTML}
+                </div>
+            `;
+            
+            // Mostrar/ocultar campos según los checkboxes seleccionados
+            toggleContactFieldsInDashboard();
+        }
+        
+        // Toggle mostrar/ocultar campos de contacto según checkboxes seleccionados
+        function toggleContactFieldsInDashboard() {
+            const checkboxes = document.querySelectorAll('input[name="contact_methods_checkbox"]');
+            const methods = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            
+            console.log('🔄 Métodos de contacto seleccionados:', methods);
+            
+            // Mapeo de métodos a IDs de campos
+            const fieldMap = {
+                'telefono': 'contact_field_phone',
+                'email': 'contact_field_email',
+                'whatsapp': 'contact_field_whatsapp',
+                'formulario': 'contact_field_form',
+                'direccion': 'contact_field_address'
+            };
+            
+            // Mostrar/ocultar campos
+            Object.entries(fieldMap).forEach(([method, fieldId]) => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.style.display = methods.includes(method) ? 'block' : 'none';
+                }
+            });
+            
+            // Actualizar estilo de los checkboxes
+            checkboxes.forEach(cb => {
+                const label = cb.closest('label');
+                if (label) {
+                    if (cb.checked) {
+                        label.style.background = '#e8f4ff';
+                        label.style.borderColor = '#0046FE';
+                    } else {
+                        label.style.background = '#fafbfc';
+                        label.style.borderColor = '#e8eaed';
+                    }
+                }
+            });
         }
         
         function cancelGlobalEdit() {
@@ -3935,6 +4057,11 @@
             
             console.log('📄 Páginas a guardar:', allPages);
             
+            // Obtener métodos de contacto seleccionados (checkboxes)
+            const contactMethodsCheckboxes = document.querySelectorAll('input[name="contact_methods_checkbox"]:checked');
+            const contactMethodsArray = Array.from(contactMethodsCheckboxes).map(cb => cb.value);
+            console.log('📞 Métodos de contacto seleccionados:', contactMethodsArray);
+            
             // Recopilar datos editados
             const updatedData = {
                 business_name: getFieldValue('form_business_name'),
@@ -3943,7 +4070,7 @@
                 cif_nif: getFieldValue('form_cif_nif'),
                 razon_social: getFieldValue('form_razon_social'),
                 direccion_fiscal: getFieldValue('form_direccion_fiscal'),
-                contact_methods: getFieldValue('form_contact_methods'),
+                contact_methods: contactMethodsArray.length > 0 ? JSON.stringify(contactMethodsArray) : null,
                 phone_number: getFieldValue('form_phone_number'),
                 email_contact: getFieldValue('form_email_contact'),
                 whatsapp_number: getFieldValue('form_whatsapp_number'),
