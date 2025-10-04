@@ -810,7 +810,7 @@ app.get('/api/client/dashboard/:clientId', async (req, res) => {
         
         console.log('📊 [API] Solicitando dashboard para cliente:', clientId);
         
-        const dashboardData = db.getClientDashboardData(parseInt(clientId));
+        const dashboardData = await db.getClientDashboardData(parseInt(clientId));
         
         console.log('📦 [API] Dashboard data obtenida:', {
             hasClient: !!dashboardData?.client,
