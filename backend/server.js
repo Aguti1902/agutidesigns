@@ -540,7 +540,7 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
 // ===== ENDPOINTS DE CLIENTES =====
 
 // Endpoint para crear submission desde formulario (con imágenes en base64)
-app.post('/api/submissions/create', (req, res) => {
+app.post('/api/submissions/create', async (req, res) => {
     try {
         console.log('📝 [SUBMISSION] Creando nueva submission desde formulario');
         const formData = req.body;
