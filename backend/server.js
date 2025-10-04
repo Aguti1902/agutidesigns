@@ -758,7 +758,7 @@ app.post('/api/client/login', async (req, res) => {
         }
 
         // Buscar cliente
-        const client = db.getClientByEmail(email);
+        const client = await db.getClientByEmail(email);
         if (!client) {
             console.log('Cliente no encontrado:', email);
             return res.status(401).json({ error: 'No existe una cuenta con este email. Por favor, verifica que hayas completado el pago.' });
