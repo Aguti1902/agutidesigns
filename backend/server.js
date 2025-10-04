@@ -323,10 +323,12 @@ app.post('/api/create-subscription', async (req, res) => {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
                 clientId = existingClient.id;
                 // Actualizar plan, payment_date Y submission_id
-                const stmt = db.db.prepare(
-                    'UPDATE clients SET plan = ?, stripe_subscription_id = ?, payment_date = ?, submission_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-                );
-                stmt.run(plan, subscription.id, new Date().toISOString(), finalSubmissionId, existingClient.id);
+                await db.updateClient(existingClient.id, {
+                    plan: plan,
+                    stripe_subscription_id: subscription.id,
+                    payment_date: new Date().toISOString(),
+                    submission_id: finalSubmissionId
+                });
                 
                 console.log(`✅ Cliente ${clientId} actualizado con submission_id: ${finalSubmissionId}`);
             }

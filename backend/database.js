@@ -333,6 +333,37 @@ async function createClient(data) {
     return result.rows[0].id;
 }
 
+async function updateClient(clientId, updates) {
+    const fields = [];
+    const values = [];
+    let paramCount = 1;
+    
+    if (updates.plan !== undefined) {
+        fields.push(`plan = $${paramCount++}`);
+        values.push(updates.plan);
+    }
+    if (updates.stripe_subscription_id !== undefined) {
+        fields.push(`stripe_subscription_id = $${paramCount++}`);
+        values.push(updates.stripe_subscription_id);
+    }
+    if (updates.payment_date !== undefined) {
+        fields.push(`payment_date = $${paramCount++}`);
+        values.push(updates.payment_date);
+    }
+    if (updates.submission_id !== undefined) {
+        fields.push(`submission_id = $${paramCount++}`);
+        values.push(updates.submission_id);
+    }
+    
+    fields.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(clientId);
+    
+    await pool.query(
+        `UPDATE clients SET ${fields.join(', ')} WHERE id = $${paramCount}`,
+        values
+    );
+}
+
 async function getClientByEmail(email) {
     const result = await pool.query('SELECT * FROM clients WHERE email = $1', [email]);
     return result.rows[0];
@@ -579,6 +610,7 @@ module.exports = {
     getStats,
     searchSubmissions,
     createClient,
+    updateClient,
     getClientByEmail,
     getClientById,
     updateWebsiteStatus,
