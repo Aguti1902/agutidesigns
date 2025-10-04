@@ -3939,7 +3939,9 @@
             console.log('📤 Datos a enviar:', updatedData);
             
             try {
-                const clientId = new URLSearchParams(window.location.search).get('client');
+                const clientId = currentClient.id;
+                console.log('👤 Cliente ID:', clientId);
+                
                 const response = await fetch(`${API_URL}/api/client/update-data/${clientId}`, {
                     method: 'PUT',
                     headers: {
