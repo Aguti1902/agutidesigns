@@ -186,7 +186,7 @@ app.post('/api/create-subscription', async (req, res) => {
         
         if (submissionId) {
             console.log('📦 Obteniendo submission existente #', submissionId);
-            submissionData = db.getSubmission(submissionId);
+            submissionData = await db.getSubmission(submissionId);
             
             if (!submissionData) {
                 console.error('❌ Submission no encontrada:', submissionId);
@@ -335,7 +335,7 @@ app.post('/api/create-subscription', async (req, res) => {
 
             // CREAR PROYECTO AUTOMÁTICAMENTE en "Sin empezar"
             try {
-                const projectId = db.createProject({
+                const projectId = await db.createProject({
                     client_id: clientId,
                     submission_id: finalSubmissionId,
                     project_name: submission.business_name || `Web de ${submission.full_name}`,
@@ -394,18 +394,18 @@ app.post('/webhook', async (req, res) => {
             const submissionId = session.client_reference_id;
 
             // Actualizar estado a "paid"
-            db.updateSubmissionStatus(submissionId, 'paid', session.id);
+            await db.updateSubmissionStatus(submissionId, 'paid', session.id);
 
             // Obtener datos completos
-            const submission = db.getSubmission(submissionId);
+            const submission = await db.getSubmission(submissionId);
 
             // Buscar o crear cliente
-            let client = db.getClientByEmail(submission.email);
+            let client = await db.getClientByEmail(submission.email);
             
             // Crear proyecto automáticamente en "Sin empezar"
             if (client) {
                 try {
-                    const projectId = db.createProject({
+                    const projectId = await db.createProject({
                         client_id: client.id,
                         submission_id: submissionId,
                         project_name: submission.business_name || `Web de ${submission.full_name}`,
@@ -1797,15 +1797,15 @@ app.post('/api/admin/projects', (req, res) => {
         }
         
         // Obtener info del cliente para autocompletar
-        const client = db.getClientById(projectData.client_id);
+        const client = await db.getClientById(projectData.client_id);
         if (client) {
             projectData.business_name = projectData.business_name || client.business_name;
             projectData.client_email = projectData.client_email || client.email;
             projectData.plan = projectData.plan || client.plan;
         }
         
-        const projectId = db.createProject(projectData);
-        const project = db.getProjectById(projectId);
+        const projectId = await db.createProject(projectData);
+        const project = await db.getProjectById(projectId);
         
         res.json({ success: true, project });
     } catch (error) {
