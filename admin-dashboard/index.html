@@ -1850,9 +1850,15 @@
                 tbody.innerHTML = pedidos.map(pedido => `
                     <tr>
                         <td><strong>#${pedido.id}</strong></td>
-                        <td>${pedido.business_name || 'N/A'}</td>
+                        <td>
+                            ${pedido.business_name || 'N/A'}
+                            ${pedido.is_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; margin-left: 8px; font-size: 0.7rem;">🔼 UPGRADE</span>' : ''}
+                        </td>
                         <td>${pedido.email}</td>
-                        <td><span class="badge badge-blue">${formatPlan(pedido.plan)}</span></td>
+                        <td>
+                            <span class="badge badge-blue">${formatPlan(pedido.plan)}</span>
+                            ${pedido.previous_plan ? `<br><small style="color: #999; font-size: 0.75rem;">De: ${formatPlan(pedido.previous_plan)}</small>` : ''}
+                        </td>
                         <td><strong>${pedido.amount}€</strong></td>
                         <td><span class="badge badge-${pedido.status === 'paid' ? 'success' : 'warning'}">${formatStatus(pedido.status)}</span></td>
                         <td>${formatDate(pedido.created_at)}</td>
@@ -2819,8 +2825,11 @@
                         const html = projectList.map((project, idx) => {
                             console.log(`  🎨 [RENDER] Proyecto ${idx + 1}: ${project.project_name || project.business_name}`);
                             return `
-                                <div class="kanban-card" draggable="true" data-project-id="${project.id}">
-                                    <div class="kanban-card-title">${project.project_name || project.business_name || 'Proyecto sin nombre'}</div>
+                                <div class="kanban-card" draggable="true" data-project-id="${project.id}" ${project.is_upgrade ? 'style="border-left: 4px solid #ff6b35;"' : ''}>
+                                    <div class="kanban-card-title">
+                                        ${project.project_name || project.business_name || 'Proyecto sin nombre'}
+                                        ${project.is_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; margin-left: 8px; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
+                                    </div>
                                     <div class="kanban-card-info">👤 ${project.business_name || 'Sin cliente'}</div>
                                     <div class="kanban-card-info">📧 ${project.client_email || 'N/A'}</div>
                                     <div class="kanban-card-info">📦 ${project.plan === 'basico' ? 'Básico' : project.plan === 'avanzado' ? 'Avanzado' : project.plan === 'premium' ? 'Premium' : project.plan}</div>

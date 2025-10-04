@@ -171,6 +171,29 @@ async function initializeTables() {
             console.log('⚠️ Migración projects ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo is_upgrade a projects
+        try {
+            await client.query(`
+                ALTER TABLE projects 
+                ADD COLUMN IF NOT EXISTS is_upgrade BOOLEAN DEFAULT FALSE
+            `);
+            console.log('✅ Migración: Campo is_upgrade añadido a projects');
+        } catch (e) {
+            console.log('⚠️ Migración is_upgrade en projects ya aplicada');
+        }
+
+        // 🆕 MIGRACIÓN: Agregar campos de upgrade a submissions
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS is_upgrade BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS previous_plan TEXT
+            `);
+            console.log('✅ Migración: Campos de upgrade añadidos a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración upgrade en submissions ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
@@ -197,8 +220,8 @@ async function createSubmission(data) {
             privacy_policy, privacy_text, privacy_file_data, privacy_file_name,
             web_texts, menu_content, opening_hours, portfolio_description,
             full_name, email, phone, address, password,
-            plan, amount, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48)
+            plan, amount, status, is_upgrade, previous_plan
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50)
         RETURNING id
     `, [
         data.business_name || null,
@@ -248,7 +271,9 @@ async function createSubmission(data) {
         data.password || null,
         data.plan,
         data.amount,
-        data.status || 'pending'
+        data.status || 'pending',
+        data.is_upgrade || false,
+        data.previous_plan || null
     ]);
     return result.rows[0].id;
 }

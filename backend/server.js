@@ -2582,16 +2582,63 @@ app.post('/api/client/change-plan', async (req, res) => {
             );
             console.log(`⏰ [PLAN] Contador de 24h reactivado para edición`);
             
-            // Crear ticket para el admin
-            await db.createTicket({
-                client_id: clientId,
-                client_email: client.email,
-                subject: `🔼 Upgrade de plan: ${oldPlan} → ${newPlan}`,
-                description: `El cliente ha mejorado su plan. Ahora tiene 24 horas para añadir hasta ${planLimits[newPlan]} páginas.`,
-                category: 'facturacion',
-                priority: 'low',
-                status: 'open'
-            });
+            // 8️⃣ Crear nuevo pedido (submission) para el upgrade
+            const submission = await db.getSubmission(client.submission_id);
+            if (submission) {
+                const priceMap = billingCycle === 'annual' ? {
+                    basico: 420, avanzado: 468, premium: 624
+                } : {
+                    basico: 35, avanzado: 39, premium: 52
+                };
+                
+                const newSubmissionId = await db.createSubmission({
+                    ...submission,
+                    plan: newPlan,
+                    amount: priceMap[newPlan],
+                    billing_cycle: billingCycle,
+                    status: 'paid',
+                    is_upgrade: true,
+                    previous_plan: oldPlan,
+                    created_at: new Date()
+                });
+                
+                console.log(`📋 [PLAN] Nuevo pedido creado: #${newSubmissionId} (UPGRADE)`);
+                
+                // Actualizar el proyecto para marcarlo como upgrade y reabrirlo si está finalizado
+                const projectResult = await db.pool.query(
+                    'SELECT status FROM projects WHERE client_id = $1',
+                    [clientId]
+                );
+                
+                if (projectResult.rows[0]) {
+                    const currentStatus = projectResult.rows[0].status;
+                    const newStatus = currentStatus === 'entregada' ? 'en_desarrollo' : currentStatus;
+                    
+                    if (currentStatus === 'entregada') {
+                        // Si estaba entregada, reabrirla y actualizar progreso
+                        await db.pool.query(
+                            `UPDATE projects 
+                             SET is_upgrade = true, 
+                                 status = $1,
+                                 progress = $2,
+                                 updated_at = CURRENT_TIMESTAMP 
+                             WHERE client_id = $3`,
+                            [newStatus, 50, clientId]
+                        );
+                        console.log(`🔼 [PLAN] Proyecto marcado como UPGRADE y reabierto en "En desarrollo"`);
+                    } else {
+                        // Solo marcar como upgrade
+                        await db.pool.query(
+                            `UPDATE projects 
+                             SET is_upgrade = true,
+                                 updated_at = CURRENT_TIMESTAMP 
+                             WHERE client_id = $1`,
+                            [clientId]
+                        );
+                        console.log(`🔼 [PLAN] Proyecto marcado como UPGRADE`);
+                    }
+                }
+            }
         }
         
         console.log(`✅ [PLAN] Cambio de plan completado: ${oldPlan} → ${newPlan}`);
