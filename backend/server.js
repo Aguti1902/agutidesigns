@@ -271,13 +271,13 @@ app.post('/api/create-subscription', async (req, res) => {
         // Pago exitoso
         if (paymentIntent.status === 'succeeded') {
             // Actualizar estado a "paid"
-            db.updateSubmissionStatus(finalSubmissionId, 'paid', subscription.id);
+            await db.updateSubmissionStatus(finalSubmissionId, 'paid', subscription.id);
 
             // Obtener datos completos (actualizado)
-            const submission = db.getSubmission(finalSubmissionId);
+            const submission = await db.getSubmission(finalSubmissionId);
 
             // Crear cliente/usuario con contraseña hasheada (si no existe ya)
-            const existingClient = db.getClientByEmail(submission.email);
+            const existingClient = await db.getClientByEmail(submission.email);
             
             let clientId;
             if (!existingClient) {
@@ -307,12 +307,12 @@ app.post('/api/create-subscription', async (req, res) => {
                     submission_id: clientData.submission_id
                 });
                 
-                clientId = db.createClient(clientData);
+                clientId = await db.createClient(clientData);
 
                 console.log(`✅ Cliente ${clientId} creado exitosamente:`, submission.email);
                 
                 // Verificar que se creó correctamente
-                const createdClient = db.getClientById(clientId);
+                const createdClient = await db.getClientById(clientId);
                 console.log('🔍 Verificación cliente creado:', {
                     id: createdClient.id,
                     email: createdClient.email,
