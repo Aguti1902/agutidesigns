@@ -643,6 +643,53 @@ async function getProjectStats() {
     };
 }
 
+// Obtener todos los clientes con sus datos de submission
+async function getAllClients() {
+    const result = await pool.query(`
+        SELECT 
+            c.id,
+            c.email,
+            c.full_name,
+            c.plan,
+            c.website_status,
+            c.payment_date,
+            c.stripe_subscription_id,
+            c.submission_id,
+            c.wordpress_url,
+            c.website_screenshot_url,
+            c.created_at,
+            s.business_name,
+            s.industry,
+            s.phone_number,
+            s.domain_name
+        FROM clients c
+        LEFT JOIN submissions s ON c.submission_id = s.id
+        ORDER BY c.created_at DESC
+    `);
+    return result.rows;
+}
+
+// Obtener cliente con detalles completos
+async function getClientWithDetails(clientId) {
+    const clientResult = await pool.query('SELECT * FROM clients WHERE id = $1', [clientId]);
+    if (clientResult.rows.length === 0) return null;
+    
+    const client = clientResult.rows[0];
+    
+    // Obtener submission si existe
+    if (client.submission_id) {
+        client.submission = await getSubmission(client.submission_id);
+    }
+    
+    // Obtener proyecto si existe
+    const projectResult = await pool.query('SELECT * FROM projects WHERE client_id = $1', [clientId]);
+    if (projectResult.rows.length > 0) {
+        client.project = projectResult.rows[0];
+    }
+    
+    return client;
+}
+
 module.exports = {
     pool,
     db: pool, // Alias para compatibilidad
@@ -655,6 +702,8 @@ module.exports = {
     searchSubmissions,
     createClient,
     updateClient,
+    getAllClients,
+    getClientWithDetails,
     getClientByEmail,
     getClientById,
     updateWebsiteStatus,

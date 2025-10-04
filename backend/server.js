@@ -1911,6 +1911,44 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
+// 📊 ENDPOINTS DE ADMIN - CLIENTES
+// ============================================
+
+// Obtener todos los clientes (para admin dashboard)
+app.get('/api/clients', async (req, res) => {
+    try {
+        console.log('📋 [ADMIN] Obteniendo todos los clientes...');
+        const clients = await db.getAllClients();
+        console.log(`✅ [ADMIN] Clientes encontrados: ${clients.length}`);
+        res.json(clients);
+    } catch (error) {
+        console.error('❌ [ADMIN] Error obteniendo clientes:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener un cliente específico con detalles completos
+app.get('/api/clients/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        console.log(`📋 [ADMIN] Obteniendo detalles del cliente #${clientId}...`);
+        
+        const client = await db.getClientWithDetails(parseInt(clientId));
+        
+        if (!client) {
+            console.log(`❌ [ADMIN] Cliente #${clientId} no encontrado`);
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        console.log(`✅ [ADMIN] Detalles del cliente #${clientId} obtenidos`);
+        res.json(client);
+    } catch (error) {
+        console.error(`❌ [ADMIN] Error obteniendo cliente #${req.params.clientId}:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
 // 🔧 ENDPOINT TEMPORAL: Reparar datos corruptos
 // ============================================
 app.get('/api/admin/fix-corrupted-data', async (req, res) => {
