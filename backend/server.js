@@ -2071,7 +2071,24 @@ app.get('/api/admin/fix-projects', async (req, res) => {
     console.log('🔧 [ADMIN] Verificando y arreglando proyectos...');
     
     try {
+        // PRIMERO: Arreglar estados incorrectos de proyectos existentes
+        console.log('🔧 [ADMIN] PASO 1: Corrigiendo estados incorrectos...');
+        const incorrectStates = await db.pool.query(`
+            UPDATE projects 
+            SET status = 'en_desarrollo' 
+            WHERE status = 'desarrollo'
+            RETURNING id, project_name, status
+        `);
+        
+        if (incorrectStates.rows.length > 0) {
+            console.log(`✅ Corregidos ${incorrectStates.rows.length} proyectos con estado 'desarrollo' → 'en_desarrollo'`);
+            incorrectStates.rows.forEach(p => {
+                console.log(`  - Proyecto #${p.id} "${p.project_name}": estado corregido`);
+            });
+        }
+        
         // Obtener todos los clientes con plan
+        console.log('🔧 [ADMIN] PASO 2: Verificando clientes con plan...');
         const clientsResult = await db.pool.query(`
             SELECT * FROM clients 
             WHERE plan IS NOT NULL AND plan != ''
@@ -2082,6 +2099,7 @@ app.get('/api/admin/fix-projects', async (req, res) => {
         console.log(`📊 Total de clientes con plan: ${clients.length}`);
         
         const report = {
+            statesCorrected: incorrectStates.rows.length,
             clientsWithPlan: clients.length,
             projectsCreated: 0,
             projectsUpdated: 0,
@@ -2218,6 +2236,7 @@ app.get('/api/admin/fix-projects', async (req, res) => {
         
         console.log('\n==================================================');
         console.log('✅ REPORTE FINAL:');
+        console.log(`🔄 Estados corregidos (desarrollo → en_desarrollo): ${report.statesCorrected}`);
         console.log(`📊 Clientes con plan: ${report.clientsWithPlan}`);
         console.log(`🆕 Proyectos creados: ${report.projectsCreated}`);
         console.log(`🔧 Proyectos actualizados: ${report.projectsUpdated}`);
