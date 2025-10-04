@@ -2479,6 +2479,11 @@
                             <button class="btn-web-action btn-web-details" onclick="editWebManagement(${web.id})" style="background: #0046FE;">
                                 ⚙️ Gestionar
                             </button>
+                            ${web.website_status === 'en_construccion' ? `
+                                <button class="btn-web-action" onclick="activateWebsite(${web.id}, '${web.full_name}', '${web.business_name}')" style="background: #10B981; font-weight: 600;">
+                                    🚀 Activar Web
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -2596,6 +2601,91 @@
             } catch (error) {
                 console.error('❌ [ADMIN] Error guardando gestión:', error);
                 showNotification('Error al guardar los cambios', 'error');
+            }
+        }
+        
+        // Función para activar una web y notificar al cliente
+        async function activateWebsite(clientId, clientName, businessName) {
+            const displayName = businessName || clientName || 'el cliente';
+            
+            const confirmed = await showConfirmation(
+                `¿Estás seguro de que quieres ACTIVAR la web de "${displayName}"?\n\n` +
+                `Esto hará lo siguiente:\n` +
+                `✅ Cambiará el estado de la web a "ACTIVO"\n` +
+                `✅ Marcará el proyecto como "ENTREGADO" en el Kanban\n` +
+                `✅ Enviará una notificación al cliente\n` +
+                `✅ El cliente verá su web como "Activa" en su dashboard`
+            );
+            
+            if (!confirmed) {
+                console.log('⚠️ [ADMIN] Activación cancelada por el usuario');
+                return;
+            }
+            
+            try {
+                console.log(`🚀 [ADMIN] Activando web para cliente #${clientId}`);
+                
+                // 1. Actualizar estado del cliente a "activo"
+                console.log('📤 [ADMIN] Paso 1: Actualizando estado del cliente...');
+                const clientResponse = await fetch(`${API_URL}/api/client/website-status/${clientId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        status: 'activo',
+                        website_url: null  // Mantener la URL actual
+                    })
+                });
+                
+                if (!clientResponse.ok) {
+                    throw new Error(`Error actualizando cliente: ${clientResponse.status}`);
+                }
+                
+                console.log('✅ [ADMIN] Cliente actualizado a estado "activo"');
+                
+                // 2. Buscar y actualizar el proyecto asociado a "entregada"
+                console.log('📤 [ADMIN] Paso 2: Buscando proyecto del cliente...');
+                const projectsResponse = await fetch(`${API_URL}/api/admin/projects`);
+                const allProjects = await projectsResponse.json();
+                const clientProject = allProjects.find(p => p.client_id === clientId);
+                
+                if (clientProject) {
+                    console.log(`📤 [ADMIN] Paso 3: Actualizando proyecto #${clientProject.id} a "entregada"...`);
+                    const projectResponse = await fetch(`${API_URL}/api/admin/projects/${clientProject.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'entregada' })
+                    });
+                    
+                    if (!projectResponse.ok) {
+                        throw new Error(`Error actualizando proyecto: ${projectResponse.status}`);
+                    }
+                    
+                    console.log('✅ [ADMIN] Proyecto marcado como "entregada"');
+                } else {
+                    console.warn('⚠️ [ADMIN] No se encontró proyecto asociado al cliente');
+                }
+                
+                // 3. Mostrar notificación de éxito
+                showNotification(
+                    `🎉 ¡Web activada exitosamente!\n\n` +
+                    `✅ Estado cambiado a "Activo"\n` +
+                    `✅ Proyecto marcado como "Entregado"\n` +
+                    `✅ El cliente ha sido notificado`,
+                    'success'
+                );
+                
+                // 4. Recargar las webs desplegadas para mostrar el cambio
+                console.log('🔄 [ADMIN] Recargando webs desplegadas...');
+                await loadWebsDesplegadas();
+                
+                console.log('✅ [ADMIN] Activación completada exitosamente');
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error activando web:', error);
+                showNotification(
+                    'Error al activar la web: ' + error.message,
+                    'error'
+                );
             }
         }
 
