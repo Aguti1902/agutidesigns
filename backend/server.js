@@ -517,11 +517,14 @@ app.patch('/api/admin/submissions/:id/status', (req, res) => {
 });
 
 // 9. DASHBOARD ADMIN - ESTADÍSTICAS
-app.get('/api/admin/stats', (req, res) => {
+app.get('/api/admin/stats', async (req, res) => {
     try {
-        const stats = db.getStats();
+        console.log('📊 [ADMIN] Obteniendo estadísticas generales...');
+        const stats = await db.getStats();
+        console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);
         res.json(stats);
     } catch (error) {
+        console.error('❌ [ADMIN] Error obteniendo estadísticas:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -1831,76 +1834,89 @@ app.post('/api/admin/projects', async (req, res) => {
 });
 
 // Obtener todos los proyectos
-app.get('/api/admin/projects', (req, res) => {
+app.get('/api/admin/projects', async (req, res) => {
     try {
-        const projects = db.getAllProjects();
+        console.log('📋 [ADMIN] Obteniendo todos los proyectos...');
+        const projects = await db.getAllProjects();
+        console.log(`✅ [ADMIN] Proyectos encontrados: ${projects.length}`);
         res.json(projects);
     } catch (error) {
-        console.error('Error obteniendo proyectos:', error);
+        console.error('❌ [ADMIN] Error obteniendo proyectos:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Obtener proyectos por estado (para el Kanban)
-app.get('/api/admin/projects/status/:status', (req, res) => {
+app.get('/api/admin/projects/status/:status', async (req, res) => {
     try {
         const { status } = req.params;
-        const projects = db.getProjectsByStatus(status);
+        console.log(`📋 [ADMIN] Obteniendo proyectos con estado: ${status}`);
+        const projects = await db.getProjectsByStatus(status);
+        console.log(`✅ [ADMIN] Proyectos encontrados: ${projects.length}`);
         res.json(projects);
     } catch (error) {
-        console.error('Error obteniendo proyectos por estado:', error);
+        console.error('❌ [ADMIN] Error obteniendo proyectos por estado:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Obtener un proyecto por ID
-app.get('/api/admin/projects/:id', (req, res) => {
+app.get('/api/admin/projects/:id', async (req, res) => {
     try {
-        const project = db.getProjectById(req.params.id);
+        console.log(`📋 [ADMIN] Obteniendo proyecto #${req.params.id}`);
+        const project = await db.getProjectById(req.params.id);
         if (!project) {
+            console.log(`❌ [ADMIN] Proyecto #${req.params.id} no encontrado`);
             return res.status(404).json({ error: 'Proyecto no encontrado' });
         }
+        console.log(`✅ [ADMIN] Proyecto #${req.params.id} encontrado`);
         res.json(project);
     } catch (error) {
-        console.error('Error obteniendo proyecto:', error);
+        console.error('❌ [ADMIN] Error obteniendo proyecto:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Actualizar proyecto
-app.patch('/api/admin/projects/:id', (req, res) => {
+app.patch('/api/admin/projects/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
         
-        db.updateProject(id, updates);
-        const updatedProject = db.getProjectById(id);
+        console.log(`🔧 [ADMIN] Actualizando proyecto #${id}:`, updates);
+        await db.updateProject(id, updates);
+        const updatedProject = await db.getProjectById(id);
         
+        console.log(`✅ [ADMIN] Proyecto #${id} actualizado`);
         res.json({ success: true, project: updatedProject });
     } catch (error) {
-        console.error('Error actualizando proyecto:', error);
+        console.error('❌ [ADMIN] Error actualizando proyecto:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Eliminar proyecto
-app.delete('/api/admin/projects/:id', (req, res) => {
+app.delete('/api/admin/projects/:id', async (req, res) => {
     try {
-        db.deleteProject(req.params.id);
+        console.log(`🗑️ [ADMIN] Eliminando proyecto #${req.params.id}`);
+        await db.deleteProject(req.params.id);
+        console.log(`✅ [ADMIN] Proyecto #${req.params.id} eliminado`);
         res.json({ success: true, message: 'Proyecto eliminado' });
     } catch (error) {
-        console.error('Error eliminando proyecto:', error);
+        console.error('❌ [ADMIN] Error eliminando proyecto:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Estadísticas de proyectos
-app.get('/api/admin/projects/stats', (req, res) => {
+app.get('/api/admin/projects/stats', async (req, res) => {
     try {
-        const stats = db.getProjectStats();
+        console.log('📊 [ADMIN] Obteniendo estadísticas de proyectos...');
+        const stats = await db.getProjectStats();
+        console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);
         res.json(stats);
     } catch (error) {
-        console.error('Error obteniendo estadísticas de proyectos:', error);
+        console.error('❌ [ADMIN] Error obteniendo estadísticas de proyectos:', error);
         res.status(500).json({ error: error.message });
     }
 });
