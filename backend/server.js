@@ -2613,6 +2613,44 @@ app.post('/api/client/change-plan', async (req, res) => {
     }
 });
 
+// ========================================
+// STRIPE CUSTOMER PORTAL
+// ========================================
+
+app.post('/api/create-customer-portal-session', async (req, res) => {
+    try {
+        const { clientId } = req.body;
+        
+        console.log(`💳 [PORTAL] Cliente #${clientId} solicitando portal de Stripe`);
+        
+        // Obtener información del cliente
+        const client = await db.getClientById(clientId);
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        if (!client.stripe_customer_id) {
+            return res.status(400).json({ error: 'Cliente no tiene cuenta en Stripe' });
+        }
+        
+        console.log(`💳 [PORTAL] Stripe Customer ID: ${client.stripe_customer_id}`);
+        
+        // Crear sesión del Customer Portal
+        const session = await stripe.billingPortal.sessions.create({
+            customer: client.stripe_customer_id,
+            return_url: `${process.env.CLIENT_URL || 'https://agutidesigns.vercel.app'}/client-dashboard/`,
+        });
+        
+        console.log(`✅ [PORTAL] Sesión creada: ${session.url}`);
+        
+        res.json({ url: session.url });
+        
+    } catch (error) {
+        console.error('❌ [PORTAL] Error creando sesión:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

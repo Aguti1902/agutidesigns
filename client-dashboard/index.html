@@ -1626,7 +1626,9 @@
                     <div class="card">
                         <h3 class="card-title">💳 Método de Pago</h3>
                         <p style="color: #666; margin-bottom: 15px;">Gestiona tu método de pago con Stripe</p>
-                        <button class="btn-action secondary" onclick="alert('Próximamente: Portal de Stripe para gestionar tu método de pago')">Gestionar en Stripe</button>
+                        <button class="btn-action secondary" onclick="openStripePortal()">
+                            <span style="margin-right: 8px;">💳</span> Gestionar en Stripe
+                        </button>
                     </div>
                 </div>
 
@@ -2867,6 +2869,47 @@
             document.getElementById('comparisonPeriodAvanzado').textContent = prices[cycle].avanzado.period;
             document.getElementById('comparisonPricePremium').textContent = prices[cycle].premium.price;
             document.getElementById('comparisonPeriodPremium').textContent = prices[cycle].premium.period;
+        }
+
+        // Abrir portal de Stripe para gestionar método de pago
+        async function openStripePortal() {
+            try {
+                console.log('💳 [PORTAL] Abriendo portal de Stripe...');
+                
+                if (!currentClient || !currentClient.id) {
+                    throw new Error('Cliente no identificado');
+                }
+                
+                showLoading('Redirigiendo a Stripe...');
+                
+                const response = await fetch(`${API_URL}/api/create-customer-portal-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId: currentClient.id })
+                });
+                
+                hideLoading();
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al crear sesión de Stripe');
+                }
+                
+                const { url } = await response.json();
+                console.log('✅ [PORTAL] URL recibida:', url);
+                
+                // Redirigir al portal de Stripe
+                window.location.href = url;
+                
+            } catch (error) {
+                console.error('❌ [PORTAL] Error:', error);
+                hideLoading();
+                await showNotificationModal(
+                    '❌ Error',
+                    `No se pudo abrir el portal de Stripe:\n${error.message}`,
+                    'error'
+                );
+            }
         }
 
         async function selectPlanAndCheckout(plan) {
