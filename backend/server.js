@@ -1039,7 +1039,8 @@ app.put('/api/client/update-data/:clientId', async (req, res) => {
                 updatedData.cif_nif || null,
                 updatedData.razon_social || null,
                 updatedData.direccion_fiscal || null,
-                updatedData.contact_methods || null,
+                // Arrays que necesitan JSON.stringify
+                updatedData.contact_methods ? (Array.isArray(updatedData.contact_methods) ? JSON.stringify(updatedData.contact_methods) : updatedData.contact_methods) : null,
                 updatedData.phone_number || null,
                 updatedData.email_contact || null,
                 updatedData.whatsapp_number || null,
@@ -1049,10 +1050,12 @@ app.put('/api/client/update-data/:clientId', async (req, res) => {
                 updatedData.facebook || null,
                 updatedData.linkedin || null,
                 updatedData.twitter || null,
-                updatedData.purpose || null,
+                // Arrays que necesitan JSON.stringify
+                updatedData.purpose ? (Array.isArray(updatedData.purpose) ? JSON.stringify(updatedData.purpose) : updatedData.purpose) : null,
                 updatedData.target_audience || null,
-                updatedData.pages || null,
-                updatedData.custom_pages || null,
+                // Arrays que necesitan JSON.stringify
+                updatedData.pages ? (Array.isArray(updatedData.pages) ? JSON.stringify(updatedData.pages) : updatedData.pages) : null,
+                updatedData.custom_pages ? (Array.isArray(updatedData.custom_pages) ? JSON.stringify(updatedData.custom_pages) : updatedData.custom_pages) : null,
                 updatedData.services_list || updatedData.services || null,
                 updatedData.web_texts || null,
                 updatedData.menu_content || null,

@@ -242,18 +242,61 @@ async function getSubmission(id) {
     const submission = result.rows[0];
     
     if (submission) {
-        // Parsear JSON fields
-        if (submission.contact_methods) submission.contact_methods = JSON.parse(submission.contact_methods);
-        if (submission.purpose) submission.purpose = JSON.parse(submission.purpose);
-        if (submission.pages) submission.pages = JSON.parse(submission.pages);
-        if (submission.custom_pages) submission.custom_pages = JSON.parse(submission.custom_pages);
+        // Parsear JSON fields (con protección contra errores)
+        try {
+            if (submission.contact_methods) {
+                submission.contact_methods = typeof submission.contact_methods === 'string' 
+                    ? JSON.parse(submission.contact_methods) 
+                    : submission.contact_methods;
+            }
+        } catch (e) {
+            console.log('⚠️ Error parsing contact_methods:', e.message, '- valor:', submission.contact_methods);
+            submission.contact_methods = [];
+        }
+        
+        try {
+            if (submission.purpose) {
+                submission.purpose = typeof submission.purpose === 'string' 
+                    ? JSON.parse(submission.purpose) 
+                    : submission.purpose;
+            }
+        } catch (e) {
+            console.log('⚠️ Error parsing purpose:', e.message);
+            submission.purpose = [];
+        }
+        
+        try {
+            if (submission.pages) {
+                submission.pages = typeof submission.pages === 'string' 
+                    ? JSON.parse(submission.pages) 
+                    : submission.pages;
+            }
+        } catch (e) {
+            console.log('⚠️ Error parsing pages:', e.message);
+            submission.pages = [];
+        }
+        
+        try {
+            if (submission.custom_pages) {
+                submission.custom_pages = typeof submission.custom_pages === 'string' 
+                    ? JSON.parse(submission.custom_pages) 
+                    : submission.custom_pages;
+            }
+        } catch (e) {
+            console.log('⚠️ Error parsing custom_pages:', e.message);
+            submission.custom_pages = [];
+        }
+        
         if (submission.images_data) {
             try {
-                submission.images_data = JSON.parse(submission.images_data);
+                submission.images_data = typeof submission.images_data === 'string' 
+                    ? JSON.parse(submission.images_data) 
+                    : submission.images_data;
             } catch (e) {
-                console.log('⚠️ Error parsing images_data:', e);
+                console.log('⚠️ Error parsing images_data:', e.message);
             }
         }
+        
         submission.services_list = submission.services;
     }
     
