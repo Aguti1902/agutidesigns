@@ -772,7 +772,7 @@
                             <div class="stat-label">Visitas este mes</div>
                         </div>
                         <div class="stat-card" id="deliveryTimeCard" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
-                            <div class="stat-value" id="deliveryDays">5 días</div>
+                            <div class="stat-value" id="deliveryDays">-</div>
                             <div class="stat-label">Tiempo de entrega</div>
                         </div>
                     </div>
@@ -2132,14 +2132,20 @@
                         const paymentDate = new Date(data.client.payment_date);
                         const now = new Date();
                         const daysPassed = Math.floor((now - paymentDate) / (1000 * 60 * 60 * 24));
-                        const daysRemaining = Math.max(0, 5 - daysPassed);
+                        
+                        // Calcular días totales según el plan
+                        const totalDays = data.client.plan === 'basico' ? 5 : 
+                                         data.client.plan === 'avanzado' ? 7 : 
+                                         data.client.plan === 'premium' ? 10 : 7; // Default: 7 días
+                        
+                        const daysRemaining = Math.max(0, totalDays - daysPassed);
                         
                         if (daysRemaining > 0) {
                             document.getElementById('deliveryDays').textContent = `${daysRemaining} día${daysRemaining !== 1 ? 's' : ''}`;
                         } else {
                             document.getElementById('deliveryDays').textContent = 'Próximamente';
                         }
-                        console.log(`📅 Días restantes para entrega: ${daysRemaining}`);
+                        console.log(`📅 Plan: ${data.client.plan} → Total: ${totalDays} días → Restantes: ${daysRemaining}`);
                     }
 
                     // Plan y precio

@@ -53,8 +53,8 @@ console.log(`🚀 Servidor iniciando en modo: ${isTestMode ? 'TEST ⚠️' : 'PR
 function calculateDeadline(plan, paymentDate = new Date()) {
     const deadlineDays = {
         'basico': 5,      // 5 días para plan básico
-        'avanzado': 10,   // 10 días para plan avanzado
-        'premium': 15     // 15 días para plan premium
+        'avanzado': 7,    // 7 días para plan avanzado
+        'premium': 10     // 10 días para plan premium
     };
     
     const days = deadlineDays[plan?.toLowerCase()] || 7; // Default: 7 días
