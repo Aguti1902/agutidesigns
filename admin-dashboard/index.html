@@ -1126,7 +1126,10 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Lista de Pedidos</h2>
-                            <button class="btn-primary" onclick="loadPedidos()">🔄 Actualizar</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-primary" onclick="loadPedidos()">🔄 Actualizar</button>
+                                <button class="btn-secondary" onclick="fixTracking()" style="background: #FF6B35;">🔧 Arreglar Tracking</button>
+                            </div>
                         </div>
                 <div class="table-container">
                     <table>
@@ -1835,6 +1838,37 @@
         }
 
         // ===== PEDIDOS =====
+        
+        // Función temporal para arreglar tracking de pedidos existentes
+        async function fixTracking() {
+            if (!confirm('¿Estás seguro de que quieres arreglar el tracking de los pedidos?\n\nEsto marcará correctamente los upgrades y modificaciones.')) {
+                return;
+            }
+            
+            try {
+                console.log('🔧 [ADMIN] Ejecutando fix de tracking...');
+                
+                const response = await fetch(`${API_URL}/api/admin/fix-tracking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) throw new Error('Error al arreglar tracking');
+                
+                const result = await response.json();
+                console.log('✅ [ADMIN] Tracking arreglado:', result);
+                
+                alert('✅ Tracking arreglado correctamente!\n\nRecarga la página para ver los cambios.');
+                
+                // Recargar pedidos
+                await loadPedidos();
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error:', error);
+                alert('❌ Error al arreglar tracking: ' + error.message);
+            }
+        }
+        
         async function loadPedidos() {
             try {
                 const response = await fetch(`${API_URL}/api/admin/submissions`);

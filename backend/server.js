@@ -2802,6 +2802,54 @@ app.post('/api/client/change-plan', async (req, res) => {
 });
 
 // ========================================
+// ENDPOINT TEMPORAL: ARREGLAR PEDIDOS EXISTENTES
+// ========================================
+
+app.post('/api/admin/fix-tracking', async (req, res) => {
+    try {
+        console.log('🔧 [ADMIN] Arreglando tracking de pedidos...');
+        
+        // Marcar pedido #8 como básico original (si no ha cambiado)
+        await db.pool.query(`
+            UPDATE submissions 
+            SET has_upgrade = false,
+                has_modifications = false,
+                last_modified_at = NULL,
+                previous_plan = NULL
+            WHERE id = 8 AND plan = 'basico'
+        `);
+        
+        // Marcar pedido #9 como upgrade de #8
+        const result = await db.pool.query(`
+            SELECT * FROM submissions WHERE id = 9
+        `);
+        
+        if (result.rows.length > 0) {
+            const pedido9 = result.rows[0];
+            
+            // Si #9 tiene plan premium y #8 tiene básico, marcar #9 como upgrade
+            if (pedido9.plan === 'premium') {
+                await db.pool.query(`
+                    UPDATE submissions 
+                    SET has_upgrade = true,
+                        previous_plan = 'basico',
+                        last_modified_at = CURRENT_TIMESTAMP
+                    WHERE id = 9
+                `);
+                console.log('✅ Pedido #9 marcado como UPGRADE');
+            }
+        }
+        
+        console.log('✅ [ADMIN] Tracking de pedidos arreglado');
+        res.json({ success: true, message: 'Tracking actualizado' });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error arreglando tracking:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
 // STRIPE CUSTOMER PORTAL
 // ========================================
 
