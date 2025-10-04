@@ -1839,33 +1839,33 @@
 
         // ===== PEDIDOS =====
         
-        // Función temporal para arreglar tracking de pedidos existentes
+        // Función temporal para consolidar pedidos duplicados
         async function fixTracking() {
-            if (!confirm('¿Estás seguro de que quieres arreglar el tracking de los pedidos?\n\nEsto marcará correctamente los upgrades y modificaciones.')) {
+            if (!confirm('⚠️ CONSOLIDAR PEDIDOS DUPLICADOS\n\nEsto hará lo siguiente:\n\n1. Eliminará el pedido #9 (duplicado)\n2. Actualizará el pedido #8 con el upgrade a Premium\n3. Mostrará el badge 🔼 UPGRADE en el pedido #8\n\n¿Continuar?')) {
                 return;
             }
             
             try {
-                console.log('🔧 [ADMIN] Ejecutando fix de tracking...');
+                console.log('🔧 [ADMIN] Consolidando pedidos duplicados...');
                 
                 const response = await fetch(`${API_URL}/api/admin/fix-tracking`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 
-                if (!response.ok) throw new Error('Error al arreglar tracking');
+                if (!response.ok) throw new Error('Error al consolidar pedidos');
                 
                 const result = await response.json();
-                console.log('✅ [ADMIN] Tracking arreglado:', result);
+                console.log('✅ [ADMIN] Pedidos consolidados:', result);
                 
-                alert('✅ Tracking arreglado correctamente!\n\nRecarga la página para ver los cambios.');
+                alert('✅ ¡Pedidos consolidados!\n\n• Pedido #9 eliminado\n• Pedido #8 actualizado con upgrade\n• Badge 🔼 UPGRADE añadido\n\nRecargando lista...');
                 
                 // Recargar pedidos
                 await loadPedidos();
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error:', error);
-                alert('❌ Error al arreglar tracking: ' + error.message);
+                alert('❌ Error al consolidar pedidos: ' + error.message);
             }
         }
         

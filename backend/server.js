@@ -2807,44 +2807,59 @@ app.post('/api/client/change-plan', async (req, res) => {
 
 app.post('/api/admin/fix-tracking', async (req, res) => {
     try {
-        console.log('🔧 [ADMIN] Arreglando tracking de pedidos...');
+        console.log('🔧 [ADMIN] Consolidando pedidos duplicados...');
         
-        // Marcar pedido #8 como básico original (si no ha cambiado)
-        await db.pool.query(`
-            UPDATE submissions 
-            SET has_upgrade = false,
-                has_modifications = false,
-                last_modified_at = NULL,
-                previous_plan = NULL
-            WHERE id = 8 AND plan = 'basico'
-        `);
+        // 1️⃣ Verificar si existe pedido #9 (el upgrade duplicado)
+        const pedido9Result = await db.pool.query(`SELECT * FROM submissions WHERE id = 9`);
         
-        // Marcar pedido #9 como upgrade de #8
-        const result = await db.pool.query(`
-            SELECT * FROM submissions WHERE id = 9
-        `);
-        
-        if (result.rows.length > 0) {
-            const pedido9 = result.rows[0];
+        if (pedido9Result.rows.length > 0) {
+            const pedido9 = pedido9Result.rows[0];
+            console.log('📋 Pedido #9 encontrado:', pedido9.plan, pedido9.amount);
             
-            // Si #9 tiene plan premium y #8 tiene básico, marcar #9 como upgrade
-            if (pedido9.plan === 'premium') {
+            // 2️⃣ Actualizar pedido #8 con los datos del #9 (el upgrade)
+            await db.pool.query(`
+                UPDATE submissions 
+                SET plan = $1,
+                    amount = $2,
+                    business_name = $3,
+                    previous_plan = 'basico',
+                    has_upgrade = true,
+                    has_modifications = false,
+                    last_modified_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = 8
+            `, [pedido9.plan, pedido9.amount, pedido9.business_name]);
+            
+            console.log('✅ Pedido #8 actualizado con datos del upgrade');
+            
+            // 3️⃣ Eliminar pedido #9 (ya no es necesario)
+            await db.pool.query(`DELETE FROM submissions WHERE id = 9`);
+            console.log('✅ Pedido #9 eliminado (duplicado)');
+            
+            // 4️⃣ Actualizar cliente y proyecto si es necesario
+            const clientResult = await db.pool.query(`SELECT id FROM clients WHERE email = $1`, [pedido9.email]);
+            if (clientResult.rows.length > 0) {
+                const clientId = clientResult.rows[0].id;
+                
+                // Asegurarse de que el cliente tenga el submission_id correcto
                 await db.pool.query(`
-                    UPDATE submissions 
-                    SET has_upgrade = true,
-                        previous_plan = 'basico',
-                        last_modified_at = CURRENT_TIMESTAMP
-                    WHERE id = 9
-                `);
-                console.log('✅ Pedido #9 marcado como UPGRADE');
+                    UPDATE clients 
+                    SET submission_id = 8,
+                        business_name = $1
+                    WHERE id = $2
+                `, [pedido9.business_name, clientId]);
+                
+                console.log(`✅ Cliente #${clientId} vinculado al pedido #8`);
             }
+        } else {
+            console.log('ℹ️ No se encontró pedido #9, no hay nada que consolidar');
         }
         
-        console.log('✅ [ADMIN] Tracking de pedidos arreglado');
-        res.json({ success: true, message: 'Tracking actualizado' });
+        console.log('✅ [ADMIN] Consolidación completada - Ahora solo existe el pedido #8 con el upgrade');
+        res.json({ success: true, message: 'Pedidos consolidados correctamente' });
         
     } catch (error) {
-        console.error('❌ [ADMIN] Error arreglando tracking:', error);
+        console.error('❌ [ADMIN] Error consolidando pedidos:', error);
         res.status(500).json({ error: error.message });
     }
 });
