@@ -455,27 +455,16 @@
             // Obtener email del cliente
             const email = currentData?.email || currentData?.formData?.email;
             
-            if (!email) {
-                console.error('No se encontró email del cliente');
-                alert('Por favor, inicia sesión manualmente con tu email');
-                window.location.href = '/client-dashboard/';
-                return;
-            }
-
-            console.log('🔐 Intentando auto-login con email:', email);
+            console.log('🔐 Accediendo al dashboard con email:', email);
             
-            // Intentar hacer login automático
-            try {
-                // Guardar el email para auto-completar el formulario de login
+            // Guardar el email para auto-completar el formulario de login
+            if (email) {
                 sessionStorage.setItem('autoLoginEmail', email);
                 sessionStorage.setItem('redirectToDashboard', 'true');
-                
-                // Redirigir al dashboard del cliente
-                window.location.href = '/client-dashboard/';
-            } catch (error) {
-                console.error('Error en auto-login:', error);
-                window.location.href = '/client-dashboard/';
             }
+            
+            // Redirigir al dashboard del cliente
+            window.location.href = '/client-dashboard/';
         }
 
         // Limpiar sessionStorage después de mostrar

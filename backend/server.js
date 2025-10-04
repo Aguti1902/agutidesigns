@@ -517,7 +517,7 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
         const { subscriptionId } = req.params;
         
         // Buscar la submission por stripe_subscription_id
-        const submission = db.getSubmissionBySubscriptionId(subscriptionId);
+        const submission = await db.getSubmissionBySubscriptionId(subscriptionId);
         
         if (!submission) {
             return res.status(404).json({ error: 'Suscripción no encontrada' });
@@ -526,6 +526,7 @@ app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
         // Devolver datos necesarios para la página de éxito
         res.json({
             plan: submission.plan,
+            billing_cycle: submission.billing_cycle || 'monthly',
             business_name: submission.business_name,
             email: submission.email,
             full_name: submission.full_name,
