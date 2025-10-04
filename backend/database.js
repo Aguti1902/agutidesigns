@@ -316,8 +316,8 @@ async function searchSubmissions(query) {
 
 async function createClient(data) {
     const result = await pool.query(`
-        INSERT INTO clients (email, password, full_name, business_name, plan, submission_id, stripe_customer_id, stripe_subscription_id, payment_date)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO clients (email, password, full_name, business_name, plan, submission_id, stripe_customer_id, stripe_subscription_id, payment_date, website_status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id
     `, [
         data.email,
@@ -328,7 +328,8 @@ async function createClient(data) {
         data.submission_id || null,
         data.stripe_customer_id || null,
         data.stripe_subscription_id || null,
-        data.payment_date || null
+        data.payment_date || null,
+        data.website_status || 'en_construccion'
     ]);
     return result.rows[0].id;
 }

@@ -297,19 +297,22 @@ app.post('/api/create-subscription', async (req, res) => {
                     submission_id: finalSubmissionId,
                     stripe_customer_id: customer.id,
                     stripe_subscription_id: subscription.id,
-                    payment_date: new Date().toISOString()
+                    payment_date: new Date().toISOString(),
+                    website_status: 'en_construccion'
                 };
                 
                 console.log('👤 Creando cliente con datos:', {
                     email: clientData.email,
                     business_name: clientData.business_name,
                     plan: clientData.plan,
-                    submission_id: clientData.submission_id
+                    submission_id: clientData.submission_id,
+                    website_status: clientData.website_status
                 });
                 
                 clientId = await db.createClient(clientData);
 
                 console.log(`✅ Cliente ${clientId} creado exitosamente:`, submission.email);
+                console.log('🔗 submission_id vinculado:', finalSubmissionId);
                 
                 // Verificar que se creó correctamente
                 const createdClient = await db.getClientById(clientId);
@@ -322,6 +325,9 @@ app.post('/api/create-subscription', async (req, res) => {
             } else {
                 console.log('Cliente ya existe, actualizando datos de suscripción');
                 clientId = existingClient.id;
+                console.log('📦 Cliente existente ID:', clientId);
+                console.log('🔗 Vinculando submission_id:', finalSubmissionId);
+                
                 // Actualizar plan, payment_date Y submission_id
                 await db.updateClient(existingClient.id, {
                     plan: plan,
@@ -331,6 +337,15 @@ app.post('/api/create-subscription', async (req, res) => {
                 });
                 
                 console.log(`✅ Cliente ${clientId} actualizado con submission_id: ${finalSubmissionId}`);
+                
+                // Verificar actualización
+                const updatedClient = await db.getClientById(clientId);
+                console.log('🔍 Verificación después de actualizar:', {
+                    id: updatedClient.id,
+                    submission_id: updatedClient.submission_id,
+                    plan: updatedClient.plan,
+                    website_status: updatedClient.website_status
+                });
             }
 
             // CREAR PROYECTO AUTOMÁTICAMENTE en "Sin empezar"
