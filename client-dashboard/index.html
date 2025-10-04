@@ -954,7 +954,7 @@
                                 </div>
                             </div>
                             
-                            <div style="border-top: 2px dashed #e8eaed; padding-top: 25px;">
+                            <div id="contact_field_social" style="border-top: 2px dashed #e8eaed; padding-top: 25px; display: none;">
                                 <h3 style="font-size: 1.2rem; font-weight: 700; color: #1B1B1B; margin-bottom: 20px;">Redes Sociales</h3>
                                 <div style="display: grid; gap: 15px;">
                                     <div>
@@ -2379,7 +2379,8 @@
                             'email': 'contact_field_email',
                             'whatsapp': 'contact_field_whatsapp',
                             'formulario': 'contact_field_form',
-                            'direccion': 'contact_field_address'
+                            'direccion': 'contact_field_address',
+                            'redes_sociales': 'contact_field_social'
                         };
                         
                         Object.entries(methodMap).forEach(([method, fieldId]) => {
@@ -3426,7 +3427,7 @@
                 { id: 'whatsapp', label: '💬 WhatsApp', field: 'contact_field_whatsapp' },
                 { id: 'formulario', label: '📝 Formulario de contacto', field: 'contact_field_form' },
                 { id: 'direccion', label: '📍 Dirección física', field: 'contact_field_address' },
-                { id: 'redes_sociales', label: '🌐 Redes sociales', field: null } // Las redes están en otra sección
+                { id: 'redes_sociales', label: '🌐 Redes sociales', field: 'contact_field_social' }
             ];
             
             const checkboxesHTML = checkboxes.map(cb => {
@@ -3467,7 +3468,8 @@
                 'email': 'contact_field_email',
                 'whatsapp': 'contact_field_whatsapp',
                 'formulario': 'contact_field_form',
-                'direccion': 'contact_field_address'
+                'direccion': 'contact_field_address',
+                'redes_sociales': 'contact_field_social'
             };
             
             // Mostrar/ocultar campos
