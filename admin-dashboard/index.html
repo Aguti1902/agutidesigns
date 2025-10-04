@@ -1889,15 +1889,29 @@
                 
                 detailsDiv.innerHTML = `
                     <div style="max-height: 70vh; overflow-y: auto; padding-right: 10px;">
-                        <!-- Plan Contratado -->
-                        <div style="padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; color: white; margin-bottom: 20px;">
-                            <h3 style="margin: 0 0 15px 0; font-size: 1.3rem;">Plan Contratado</h3>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Plan:</p><p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${formatPlan(pedido.plan)}</p></div>
-                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Monto:</p><p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${pedido.amount}€</p></div>
-                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Estado:</p><p style="margin: 5px 0 0 0;">${formatStatus(pedido.status)}</p></div>
-                                <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Fecha:</p><p style="margin: 5px 0 0 0;">${formatDate(pedido.created_at)}</p></div>
+                        <!-- Header con Plan Contratado y Botón -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+                            <div style="flex: 1; padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; color: white;">
+                                <h3 style="margin: 0 0 15px 0; font-size: 1.3rem;">
+                                    Plan Contratado
+                                    ${pedido.is_upgrade ? '<span style="background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-left: 10px;">🔼 UPGRADE</span>' : ''}
+                                </h3>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                    <div>
+                                        <p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Plan:</p>
+                                        <p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${formatPlan(pedido.plan)}</p>
+                                        ${pedido.previous_plan ? `<p style="margin: 5px 0 0 0; font-size: 0.75rem; opacity: 0.8;">Anterior: ${formatPlan(pedido.previous_plan)}</p>` : ''}
+                                    </div>
+                                    <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Monto:</p><p style="margin: 5px 0 0 0; font-size: 1.2rem; font-weight: 700;">${pedido.amount}€</p></div>
+                                    <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Estado:</p><p style="margin: 5px 0 0 0;">${formatStatus(pedido.status)}</p></div>
+                                    <div><p style="margin: 0; opacity: 0.9; font-size: 0.85rem;">Fecha:</p><p style="margin: 5px 0 0 0;">${formatDate(pedido.created_at)}</p></div>
+                                </div>
                             </div>
+                            <button 
+                                onclick="window.open('/client-dashboard/?email=${encodeURIComponent(pedido.email)}', '_blank')"
+                                style="padding: 15px 20px; background: white; border: 2px solid #0046FE; color: #0046FE; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.9rem; white-space: nowrap; transition: all 0.3s ease;">
+                                👁️ Ver Dashboard<br>del Cliente
+                            </button>
                         </div>
                         
                         <!-- Grid de 2 columnas para el resto -->
