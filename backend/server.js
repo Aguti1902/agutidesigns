@@ -2432,6 +2432,162 @@ app.get('/api/admin/fix-corrupted-data', async (req, res) => {
     }
 });
 
+// ============================================
+// 🔄 CAMBIO DE PLAN
+// ============================================
+
+app.post('/api/client/change-plan', async (req, res) => {
+    try {
+        const { clientId, newPlan, billingCycle, pagesToRemove } = req.body;
+        
+        console.log(`🔄 [PLAN] Cliente #${clientId} solicita cambio a plan: ${newPlan} (${billingCycle})`);
+        
+        // 1️⃣ Obtener información del cliente
+        const client = await db.getClientById(clientId);
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        const oldPlan = client.plan;
+        console.log(`📊 [PLAN] Plan actual: ${oldPlan} → Nuevo plan: ${newPlan}`);
+        
+        // Definir límites de páginas
+        const planLimits = { basico: 5, avanzado: 10, premium: 20 };
+        const planOrder = { basico: 1, avanzado: 2, premium: 3 };
+        
+        const isUpgrade = planOrder[newPlan] > planOrder[oldPlan];
+        const isDowngrade = planOrder[newPlan] < planOrder[oldPlan];
+        
+        console.log(`🎯 [PLAN] Tipo de cambio: ${isUpgrade ? 'UPGRADE' : isDowngrade ? 'DOWNGRADE' : 'MISMO NIVEL'}`);
+        
+        // 2️⃣ Obtener submission y páginas actuales
+        let currentPages = [];
+        if (client.submission_id) {
+            const submission = await db.getSubmission(client.submission_id);
+            if (submission && submission.pages) {
+                currentPages = Array.isArray(submission.pages) ? submission.pages : JSON.parse(submission.pages || '[]');
+            }
+        }
+        
+        console.log(`📄 [PLAN] Páginas actuales: ${currentPages.length}`);
+        
+        // 3️⃣ Si es downgrade, verificar páginas
+        if (isDowngrade) {
+            const newLimit = planLimits[newPlan];
+            if (currentPages.length > newLimit) {
+                console.log(`⚠️ [PLAN] Excede límite: ${currentPages.length} > ${newLimit}`);
+                
+                // Verificar que se proporcionaron páginas a eliminar
+                if (!pagesToRemove || pagesToRemove.length !== (currentPages.length - newLimit)) {
+                    return res.status(400).json({ 
+                        error: 'pages_exceed_limit',
+                        currentPages: currentPages.length,
+                        newLimit,
+                        pagesToRemove: currentPages.length - newLimit,
+                        pages: currentPages
+                    });
+                }
+                
+                // Actualizar páginas en submission
+                const remainingPages = currentPages.filter(p => !pagesToRemove.includes(p));
+                console.log(`🗑️ [PLAN] Eliminando páginas: ${pagesToRemove.join(', ')}`);
+                console.log(`✅ [PLAN] Páginas restantes: ${remainingPages.join(', ')}`);
+                
+                await db.pool.query(
+                    'UPDATE submissions SET pages = $1 WHERE id = $2',
+                    [JSON.stringify(remainingPages), client.submission_id]
+                );
+                
+                // Crear ticket para el admin
+                await db.createTicket({
+                    client_id: clientId,
+                    subject: `🔽 Downgrade de plan: ${oldPlan} → ${newPlan}`,
+                    message: `El cliente ha bajado de plan.\n\nPáginas eliminadas:\n${pagesToRemove.map(p => `- ${p}`).join('\n')}\n\nPáginas activas:\n${remainingPages.map(p => `- ${p}`).join('\n')}`,
+                    priority: 'normal',
+                    status: 'open'
+                });
+            }
+        }
+        
+        // 4️⃣ Actualizar suscripción en Stripe
+        try {
+            if (client.stripe_subscription_id) {
+                console.log(`💳 [PLAN] Actualizando suscripción en Stripe: ${client.stripe_subscription_id}`);
+                
+                // Obtener price ID correcto
+                const priceMap = billingCycle === 'annual' ? STRIPE_PRICES_ANNUAL : STRIPE_PRICES_MONTHLY;
+                const newPriceId = priceMap[newPlan];
+                
+                if (!newPriceId) {
+                    throw new Error(`Price ID no encontrado para ${newPlan} ${billingCycle}`);
+                }
+                
+                const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+                
+                await stripe.subscriptions.update(client.stripe_subscription_id, {
+                    items: [{
+                        id: subscription.items.data[0].id,
+                        price: newPriceId,
+                    }],
+                    proration_behavior: 'always_invoice', // Facturar prorrateado inmediatamente
+                });
+                
+                console.log(`✅ [PLAN] Suscripción actualizada en Stripe`);
+            }
+        } catch (stripeError) {
+            console.error(`❌ [PLAN] Error actualizando Stripe:`, stripeError);
+            // Continuar de todos modos para actualizar en DB
+        }
+        
+        // 5️⃣ Actualizar cliente en base de datos
+        await db.pool.query(
+            'UPDATE clients SET plan = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [newPlan, clientId]
+        );
+        
+        // 6️⃣ Actualizar proyecto relacionado
+        await db.pool.query(
+            'UPDATE projects SET plan = $1 WHERE client_id = $2',
+            [newPlan, clientId]
+        );
+        
+        // 7️⃣ Si es upgrade, resetear payment_date para reactivar 24h
+        if (isUpgrade) {
+            await db.pool.query(
+                'UPDATE clients SET payment_date = CURRENT_TIMESTAMP WHERE id = $1',
+                [clientId]
+            );
+            console.log(`⏰ [PLAN] Contador de 24h reactivado para edición`);
+            
+            // Crear ticket para el admin
+            await db.createTicket({
+                client_id: clientId,
+                subject: `🔼 Upgrade de plan: ${oldPlan} → ${newPlan}`,
+                message: `El cliente ha mejorado su plan. Ahora tiene 24 horas para añadir hasta ${planLimits[newPlan]} páginas.`,
+                priority: 'low',
+                status: 'open'
+            });
+        }
+        
+        console.log(`✅ [PLAN] Cambio de plan completado: ${oldPlan} → ${newPlan}`);
+        
+        res.json({ 
+            success: true, 
+            oldPlan,
+            newPlan,
+            isUpgrade,
+            isDowngrade,
+            message: isUpgrade 
+                ? 'Plan actualizado. Tienes 24 horas para personalizar tu web.' 
+                : 'Plan actualizado correctamente.'
+        });
+        
+    } catch (error) {
+        console.error('❌ [PLAN] Error cambiando plan:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
