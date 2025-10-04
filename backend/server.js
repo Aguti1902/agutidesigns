@@ -561,6 +561,20 @@ app.patch('/api/admin/submissions/:id/status', async (req, res) => {
     }
 });
 
+// 9. DASHBOARD ADMIN - MARCAR MODIFICACIONES COMO VISTAS
+app.post('/api/admin/submissions/:id/mark-viewed', async (req, res) => {
+    try {
+        const submissionId = req.params.id;
+        console.log(`👁️ [ADMIN] Marcando pedido #${submissionId} como visto`);
+        await db.markSubmissionAsViewed(submissionId);
+        console.log(`✅ [ADMIN] Pedido #${submissionId} marcado como visto`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error(`❌ [ADMIN] Error marcando pedido #${req.params.id} como visto:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 8b. DASHBOARD ADMIN - ACTUALIZAR CAMPOS DE SUBMISSION
 app.patch('/api/admin/submissions/:id', async (req, res) => {
     try {

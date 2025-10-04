@@ -1891,14 +1891,20 @@
                     return;
                 }
 
-                tbody.innerHTML = pedidos.map(pedido => `
-                    <tr style="${pedido.has_upgrade || pedido.has_modifications ? 'background: #f0f9ff;' : ''}">
+                tbody.innerHTML = pedidos.map(pedido => {
+                    // Verificar si las modificaciones son NUEVAS (no vistas o vistas antes de la última modificación)
+                    const hasUnviewedModifications = pedido.has_modifications && 
+                        (!pedido.modifications_viewed_at || 
+                         new Date(pedido.modifications_viewed_at) < new Date(pedido.last_modified_at));
+                    
+                    return `
+                    <tr style="${pedido.has_upgrade || hasUnviewedModifications ? 'background: #f0f9ff;' : ''}">
                         <td><strong>#${pedido.id}</strong></td>
                         <td>
                             ${pedido.business_name || 'N/A'}
                             <div style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
                                 ${pedido.has_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
-                                ${pedido.has_modifications ? '<span class="badge" style="background: #0046FE; color: white; font-size: 0.7rem; padding: 3px 8px;">✏️ MODIFICADO</span>' : ''}
+                                ${hasUnviewedModifications ? '<span class="badge" style="background: #0046FE; color: white; font-size: 0.7rem; padding: 3px 8px;">✏️ MODIFICADO</span>' : ''}
                             </div>
                         </td>
                         <td>${pedido.email}</td>
@@ -1912,15 +1918,37 @@
                             ${formatDate(pedido.created_at)}
                             ${pedido.last_modified_at ? `<br><small style="color: #666; font-size: 0.75rem;">Mod: ${formatDate(pedido.last_modified_at)}</small>` : ''}
                         </td>
-                        <td><button class="btn-secondary" onclick="window.location.href='/admin-dashboard/pedido-detalle.html?id=${pedido.id}'">Ver</button></td>
+                        <td><button class="btn-secondary" onclick="viewPedido(${pedido.id})">Ver</button></td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
             } catch (error) {
                 console.error('Error cargando pedidos:', error);
             }
         }
 
         async function viewPedido(id) {
+            try {
+                console.log('👁️ [ADMIN] Marcando pedido #', id, 'como visto y redirigiendo...');
+                
+                // Marcar como visto antes de redirigir
+                await fetch(`${API_URL}/api/admin/submissions/${id}/mark-viewed`, {
+                    method: 'POST'
+                });
+                
+                console.log('✅ [ADMIN] Pedido marcado como visto');
+                
+                // Redirigir a la página de detalles
+                window.location.href = `/admin-dashboard/pedido-detalle.html?id=${id}`;
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error marcando como visto:', error);
+                // Redirigir de todas formas
+                window.location.href = `/admin-dashboard/pedido-detalle.html?id=${id}`;
+            }
+        }
+
+        async function viewPedidoOLD(id) {
             try {
                 console.log('📋 [ADMIN] Cargando detalles del pedido #', id);
                 const response = await fetch(`${API_URL}/api/admin/submissions/${id}`);

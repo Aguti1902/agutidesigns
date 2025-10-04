@@ -218,6 +218,17 @@ async function initializeTables() {
             console.log('⚠️ Migración billing_cycle en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo para marcar modificaciones como vistas
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS modifications_viewed_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campo modifications_viewed_at añadido a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración modifications_viewed_at en submissions ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
@@ -379,7 +390,8 @@ async function getSubmissionBySubscriptionId(subscriptionId) {
 async function getAllSubmissions() {
     const result = await pool.query(`
         SELECT id, business_name, email, plan, amount, status, created_at,
-               has_upgrade, has_modifications, previous_plan, last_modified_at
+               has_upgrade, has_modifications, previous_plan, last_modified_at,
+               modifications_viewed_at
         FROM submissions 
         ORDER BY created_at DESC
     `);
@@ -398,6 +410,13 @@ async function updateSubmissionStatus(id, status, stripeSessionId = null) {
             [status, id]
         );
     }
+}
+
+async function markSubmissionAsViewed(id) {
+    await pool.query(
+        'UPDATE submissions SET modifications_viewed_at = CURRENT_TIMESTAMP WHERE id = $1',
+        [id]
+    );
 }
 
 async function getStats() {
@@ -859,6 +878,7 @@ module.exports = {
     getSubmissionBySubscriptionId,
     getAllSubmissions,
     updateSubmissionStatus,
+    markSubmissionAsViewed,
     getStats,
     searchSubmissions,
     createClient,
