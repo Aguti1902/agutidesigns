@@ -378,7 +378,8 @@ async function getSubmissionBySubscriptionId(subscriptionId) {
 
 async function getAllSubmissions() {
     const result = await pool.query(`
-        SELECT id, business_name, email, plan, amount, status, created_at 
+        SELECT id, business_name, email, plan, amount, status, created_at,
+               has_upgrade, has_modifications, previous_plan, last_modified_at
         FROM submissions 
         ORDER BY created_at DESC
     `);
