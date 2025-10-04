@@ -2634,12 +2634,11 @@
             const displayName = businessName || clientName || 'el cliente';
             
             const confirmed = await showConfirmation(
-                `¿Estás seguro de que quieres ACTIVAR la web de "${displayName}"?\n\n` +
-                `Esto hará lo siguiente:\n` +
-                `✅ Cambiará el estado de la web a "ACTIVO"\n` +
-                `✅ Marcará el proyecto como "ENTREGADO" en el Kanban\n` +
-                `✅ Enviará una notificación al cliente\n` +
-                `✅ El cliente verá su web como "Activa" en su dashboard`
+                `🚀 ¿Activar la web de "${displayName}"?\n\n` +
+                `Al confirmar:\n` +
+                `• El proyecto se marcará como entregado\n` +
+                `• Se notificará al cliente por email\n` +
+                `• La web aparecerá como "Activa" en su dashboard`
             );
             
             if (!confirmed) {
@@ -2912,7 +2911,13 @@
                 
                 // Si se mueve a "Entregada", pedir confirmación
                 if (newStatus === 'entregada') {
-                    const confirmed = await showConfirmation('¿Estás seguro de que quieres marcar este proyecto como ENTREGADO? Esto notificará al cliente que su web está lista y cambiará el estado de su sitio a "Activo".');
+                    const confirmed = await showConfirmation(
+                        '🚀 ¿Marcar como ENTREGADO?\n\n' +
+                        'Al confirmar:\n' +
+                        '• El cliente será notificado\n' +
+                        '• La web aparecerá como "Activa"\n' +
+                        '• El progreso se completará al 100%'
+                    );
                     
                     if (!confirmed) {
                         console.log('⚠️ [ADMIN] Movimiento cancelado por el usuario');
