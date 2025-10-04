@@ -2893,6 +2893,7 @@
                 const checkoutData = {
                     plan: plan,
                     billing_cycle: modalBillingCycle, // Añadir billing_cycle
+                    submissionId: client.submission_id, // ⭐ CRÍTICO: Incluir submission_id del cliente
                     formData: {
                         business_name: submission.business_name || client.business_name || 'Mi Empresa',
                         business_description: submission.business_description || '',
@@ -2913,6 +2914,8 @@
                         password: 'existing_user' // Indicar que es usuario existente
                     }
                 };
+                
+                console.log('📌 Submission ID incluido:', client.submission_id);
                 
                 console.log('✅ Datos para checkout:', checkoutData);
                 
