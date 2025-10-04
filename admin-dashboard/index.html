@@ -2781,22 +2781,33 @@
                 const projectId = draggedProject.dataset.projectId;
                 draggedProject.style.opacity = '';
                 
+                console.log(`🎯 [ADMIN] Moviendo proyecto #${projectId} a estado: ${newStatus}`);
+                
                 // Si se mueve a "Entregada", pedir confirmación
                 if (newStatus === 'entregada') {
                     const confirmed = await showConfirmation('¿Estás seguro de que quieres marcar este proyecto como ENTREGADO? Esto notificará al cliente que su web está lista y cambiará el estado de su sitio a "Activo".');
                     
                     if (!confirmed) {
+                        console.log('⚠️ [ADMIN] Movimiento cancelado por el usuario');
                         return false;
                     }
                 }
                 
                 try {
                     // Actualizar estado en el backend
-                    await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
+                    console.log(`📤 [ADMIN] Enviando PATCH a /api/admin/projects/${projectId} con status: ${newStatus}`);
+                    const updateResponse = await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: newStatus })
                     });
+                    
+                    if (!updateResponse.ok) {
+                        throw new Error(`Error ${updateResponse.status}: ${await updateResponse.text()}`);
+                    }
+                    
+                    const result = await updateResponse.json();
+                    console.log(`✅ [ADMIN] Proyecto actualizado:`, result);
                     
                     // Si se marcó como entregada, actualizar el cliente
                     if (newStatus === 'entregada') {
@@ -2816,13 +2827,19 @@
                             
                             showNotification('Proyecto marcado como entregado. El cliente ha sido notificado y su sitio está ahora ACTIVO.', 'success');
                         }
+                    } else {
+                        showNotification('Proyecto movido exitosamente', 'success');
                     }
                     
                     // Recargar proyectos
+                    console.log('🔄 [ADMIN] Recargando proyectos después de mover...');
                     await loadProjects();
+                    console.log('✅ [ADMIN] Proyectos recargados');
                 } catch (error) {
-                    console.error('Error moviendo proyecto:', error);
-                    showNotification('Error moviendo el proyecto', 'error');
+                    console.error('❌ [ADMIN] Error moviendo proyecto:', error);
+                    showNotification('Error moviendo el proyecto: ' + error.message, 'error');
+                    // Recargar de todos modos para restaurar el estado visual
+                    await loadProjects();
                 }
             }
             
