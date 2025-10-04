@@ -2870,21 +2870,27 @@
         }
 
         async function selectPlanAndCheckout(plan) {
-            console.log('💳 Seleccionando plan:', plan, 'Billing:', modalBillingCycle);
+            console.log('💳 [INICIO] Seleccionando plan:', plan, 'Billing:', modalBillingCycle);
+            console.log('💳 [INICIO] currentClient:', currentClient);
             
             // Cerrar modal de selección de planes
             document.getElementById('planModal').classList.remove('active');
             
             try {
                 // Obtener datos del cliente desde el backend
+                console.log(`💳 [FETCH] Obteniendo datos de: ${API_URL}/api/client/dashboard/${currentClient.id}`);
                 const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
                 const dashboardData = await response.json();
+                
+                console.log('💳 [DATOS] Dashboard data completo:', dashboardData);
                 
                 const client = dashboardData.client || {};
                 const submission = dashboardData.submission || {};
                 const currentPlan = client.plan;
                 
-                console.log(`📊 Plan actual: ${currentPlan} → Nuevo plan: ${plan}`);
+                console.log(`💳 [PLAN] Plan actual del cliente: "${currentPlan}" (type: ${typeof currentPlan})`);
+                console.log(`💳 [PLAN] Plan solicitado: "${plan}"`);
+                console.log(`📊 [RESUMEN] ${currentPlan ? `Plan actual: ${currentPlan}` : 'SIN PLAN'} → Nuevo plan: ${plan}`);
                 
                 // Si no tiene plan, redirigir a checkout normal (nuevo cliente)
                 if (!currentPlan) {
