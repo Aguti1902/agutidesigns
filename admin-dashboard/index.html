@@ -2690,44 +2690,44 @@
                     const projectList = projectsByStatus[backendStatus] || [];
                     count.textContent = projectList.length;
                     
+                    console.log(`🎨 [RENDER] Columna: ${columnId}, Proyectos: ${projectList.length}`);
+                    
                     if (projectList.length === 0) {
+                        console.log(`📭 [RENDER] Columna ${columnId} vacía, mostrando mensaje`);
                         column.innerHTML = `
                             <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9rem;">
                                 Sin proyectos
                             </div>
                         `;
                     } else {
-                        column.innerHTML = projectList.map(project => {
-                            const priorityEmoji = {
-                                'low': '🟢',
-                                'normal': '🔵',
-                                'high': '🟠',
-                                'urgent': '🔴'
-                            }[project.priority] || '⚪';
-                            
-                            const planBadge = {
-                                'basico': 'Básico',
-                                'avanzado': 'Avanzado',
-                                'premium': 'Premium'
-                            }[project.plan] || project.plan;
-                            
+                        console.log(`🎨 [RENDER] Renderizando ${projectList.length} proyecto(s) en ${columnId}`);
+                        const html = projectList.map((project, idx) => {
+                            console.log(`  🎨 [RENDER] Proyecto ${idx + 1}: ${project.project_name || project.business_name}`);
                             return `
                                 <div class="kanban-card" draggable="true" data-project-id="${project.id}">
                                     <div class="kanban-card-title">${project.project_name || project.business_name || 'Proyecto sin nombre'}</div>
                                     <div class="kanban-card-info">👤 ${project.business_name || 'Sin cliente'}</div>
                                     <div class="kanban-card-info">📧 ${project.client_email || 'N/A'}</div>
-                                    <div class="kanban-card-info">📦 ${planBadge}</div>
+                                    <div class="kanban-card-info">📦 ${project.plan === 'basico' ? 'Básico' : project.plan === 'avanzado' ? 'Avanzado' : project.plan === 'premium' ? 'Premium' : project.plan}</div>
                                     ${project.deadline ? `<div class="kanban-card-info">📅 ${formatDate(project.deadline)}</div>` : ''}
                                     <div class="progress-bar">
                                         <div class="progress-fill" style="width: ${project.progress || 0}%"></div>
                                     </div>
                                     <div class="kanban-card-footer">
-                                        <span>${priorityEmoji} ${project.priority || 'normal'}</span>
+                                        <span>${project.priority === 'low' ? '🟢' : project.priority === 'high' ? '🟠' : project.priority === 'urgent' ? '🔴' : '🔵'} ${project.priority || 'normal'}</span>
                                         <span>${project.progress || 0}%</span>
                                     </div>
                                 </div>
                             `;
                         }).join('');
+                        
+                        console.log(`📝 [RENDER] HTML generado (${html.length} caracteres)`);
+                        column.innerHTML = html;
+                        console.log(`✅ [RENDER] innerHTML asignado a columna ${columnId}`);
+                        
+                        // Verificar que realmente se renderizó
+                        const cardsInColumn = column.querySelectorAll('.kanban-card').length;
+                        console.log(`✅ [RENDER] Tarjetas encontradas en ${columnId}: ${cardsInColumn}`);
                         
                         // Añadir event listeners para drag & drop
                         column.querySelectorAll('.kanban-card').forEach(card => {
