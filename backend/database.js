@@ -479,72 +479,117 @@ async function markSubmissionAsViewed(id) {
 async function getStats(dateFilter = {}) {
     // Construir filtro de fechas si existe
     const hasDateFilter = dateFilter.start && dateFilter.end;
-    const dateCondition = hasDateFilter 
-        ? `AND created_at >= $1 AND created_at <= $2` 
-        : '';
-    const dateParams = hasDateFilter ? [dateFilter.start, dateFilter.end] : [];
     
     console.log('📊 [DB] getStats con filtro de fecha:', { hasDateFilter, dateFilter });
     
     // Total de solicitudes (todas las submissions)
-    const totalQuery = `SELECT COUNT(*) as count FROM submissions WHERE 1=1 ${dateCondition}`;
-    const totalResult = await pool.query(totalQuery, dateParams);
+    let totalResult;
+    if (hasDateFilter) {
+        totalResult = await pool.query(
+            'SELECT COUNT(*) as count FROM submissions WHERE created_at >= $1 AND created_at <= $2',
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        totalResult = await pool.query('SELECT COUNT(*) as count FROM submissions');
+    }
     
     // Clientes con plan activo (que han pagado)
-    const activeClientsQuery = `
-        SELECT COUNT(*) as count FROM clients 
-        WHERE plan IS NOT NULL AND plan != ''
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const activeClientsResult = await pool.query(activeClientsQuery, dateParams);
+    let activeClientsResult;
+    if (hasDateFilter) {
+        activeClientsResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients 
+             WHERE plan IS NOT NULL AND plan != '' 
+             AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        activeClientsResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients 
+             WHERE plan IS NOT NULL AND plan != ''`
+        );
+    }
     
     // Clientes sin plan (oportunidades de venta)
-    const noPlanQuery = `
-        SELECT COUNT(*) as count FROM submissions 
-        WHERE (status = 'pending' 
-        OR id NOT IN (SELECT submission_id FROM clients WHERE submission_id IS NOT NULL))
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const noPlanResult = await pool.query(noPlanQuery, dateParams);
+    let noPlanResult;
+    if (hasDateFilter) {
+        noPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM submissions 
+             WHERE (status = 'pending' 
+             OR id NOT IN (SELECT submission_id FROM clients WHERE submission_id IS NOT NULL))
+             AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        noPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM submissions 
+             WHERE status = 'pending' 
+             OR id NOT IN (SELECT submission_id FROM clients WHERE submission_id IS NOT NULL)`
+        );
+    }
     
     // Revenue total (de submissions con estado 'paid' o 'completed')
-    const revenueQuery = `
-        SELECT COALESCE(SUM(amount), 0) as revenue 
-        FROM submissions 
-        WHERE status IN ('paid', 'completed')
-        ${dateCondition}
-    `;
-    const revenueResult = await pool.query(revenueQuery, dateParams);
+    let revenueResult;
+    if (hasDateFilter) {
+        revenueResult = await pool.query(
+            `SELECT COALESCE(SUM(amount), 0) as revenue 
+             FROM submissions 
+             WHERE status IN ('paid', 'completed')
+             AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        revenueResult = await pool.query(
+            `SELECT COALESCE(SUM(amount), 0) as revenue 
+             FROM submissions 
+             WHERE status IN ('paid', 'completed')`
+        );
+    }
     
     // Proyectos en desarrollo
-    const projectsQuery = `
-        SELECT COUNT(*) as count FROM projects 
-        WHERE status = 'en_desarrollo'
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const projectsResult = await pool.query(projectsQuery, dateParams);
+    let projectsResult;
+    if (hasDateFilter) {
+        projectsResult = await pool.query(
+            `SELECT COUNT(*) as count FROM projects 
+             WHERE status = 'en_desarrollo'
+             AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        projectsResult = await pool.query(
+            `SELECT COUNT(*) as count FROM projects 
+             WHERE status = 'en_desarrollo'`
+        );
+    }
     
-    // Distribución por planes (con filtro de fecha en clients)
-    const basicoPlanQuery = `
-        SELECT COUNT(*) as count FROM clients 
-        WHERE plan = 'basico'
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const basicoPlanResult = await pool.query(basicoPlanQuery, dateParams);
-    
-    const avanzadoPlanQuery = `
-        SELECT COUNT(*) as count FROM clients 
-        WHERE plan = 'avanzado'
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const avanzadoPlanResult = await pool.query(avanzadoPlanQuery, dateParams);
-    
-    const premiumPlanQuery = `
-        SELECT COUNT(*) as count FROM clients 
-        WHERE plan = 'premium'
-        ${hasDateFilter ? `AND created_at >= $1 AND created_at <= $2` : ''}
-    `;
-    const premiumPlanResult = await pool.query(premiumPlanQuery, dateParams);
+    // Distribución por planes
+    let basicoPlanResult, avanzadoPlanResult, premiumPlanResult;
+    if (hasDateFilter) {
+        basicoPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients 
+             WHERE plan = 'basico' AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+        avanzadoPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients 
+             WHERE plan = 'avanzado' AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+        premiumPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients 
+             WHERE plan = 'premium' AND created_at >= $1 AND created_at <= $2`,
+            [dateFilter.start, dateFilter.end]
+        );
+    } else {
+        basicoPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients WHERE plan = 'basico'`
+        );
+        avanzadoPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients WHERE plan = 'avanzado'`
+        );
+        premiumPlanResult = await pool.query(
+            `SELECT COUNT(*) as count FROM clients WHERE plan = 'premium'`
+        );
+    }
     
     return {
         total: parseInt(totalResult.rows[0].count),
