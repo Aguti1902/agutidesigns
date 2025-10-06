@@ -2112,7 +2112,7 @@
             return messages;
         }
         
-        // Función auxiliar para parsear fechas del formato "6 oct 2025, 14:30"
+        // Función auxiliar para parsear fechas del formato "6 oct 2025, 14:30:45"
         function parseDateFromString(dateStr) {
             try {
                 // Mapeo de meses en español
@@ -2121,8 +2121,21 @@
                     'jul': 6, 'ago': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'dic': 11
                 };
                 
-                // Formato: "6 oct 2025, 14:30"
-                const match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+),\s+(\d+):(\d+)/);
+                // Formato con segundos: "6 oct 2025, 14:30:45"
+                let match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+),\s+(\d+):(\d+):(\d+)/);
+                if (match) {
+                    const day = parseInt(match[1]);
+                    const month = monthMap[match[2].toLowerCase()];
+                    const year = parseInt(match[3]);
+                    const hours = parseInt(match[4]);
+                    const minutes = parseInt(match[5]);
+                    const seconds = parseInt(match[6]);
+                    
+                    return new Date(year, month, day, hours, minutes, seconds);
+                }
+                
+                // Formato sin segundos (compatibilidad con mensajes antiguos): "6 oct 2025, 14:30"
+                match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+),\s+(\d+):(\d+)/);
                 if (match) {
                     const day = parseInt(match[1]);
                     const month = monthMap[match[2].toLowerCase()];
