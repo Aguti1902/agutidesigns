@@ -234,9 +234,12 @@
         }
 
         .menu-icon {
-            font-size: 1.3rem;
             width: 24px;
-            text-align: center;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 12px;
+            filter: brightness(0) invert(1); /* Hacer los iconos blancos */
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -702,16 +705,16 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <ul class="sidebar-menu">
-                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">🏠</span><span>Resumen</span></button></li>
-                    <li><button onclick="showSection('negocio')"><span class="menu-icon">🏢</span><span>Mi Negocio</span></button></li>
-                    <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
-                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
-                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
-                    <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
-                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span><span id="unreadBadgeMenu" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; animation: pulse 2s infinite;"></span></button></li>
-                    <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
-                    <li><button onclick="showSection('perfil')"><span class="menu-icon">👤</span><span>Mi Perfil</span></button></li>
+                    <li><button class="active" onclick="showSection('resumen')"><img src="../images/ICONOS PNG/24px/01-General/Home.png" class="menu-icon" alt="Resumen"><span>Resumen</span></button></li>
+                    <li><button onclick="showSection('negocio')"><img src="../images/ICONOS PNG/24px/07-Document-media/Project.png" class="menu-icon" alt="Mi Negocio"><span>Mi Negocio</span></button></li>
+                    <li><button onclick="showSection('sitio')"><img src="../images/ICONOS PNG/24px/01-General/Globe.png" class="menu-icon" alt="Mi Sitio Web"><span>Mi Sitio Web</span></button></li>
+                    <li><button onclick="showSection('estadisticas')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Analytics.png" class="menu-icon" alt="Estadísticas"><span>Estadísticas</span></button></li>
+                    <li><button onclick="showSection('tutoriales')"><img src="../images/ICONOS PNG/24px/07-Document-media/Video.png" class="menu-icon" alt="Tutoriales"><span>Tutoriales</span></button></li>
+                    <li><button onclick="showSection('dominio')"><img src="../images/ICONOS PNG/24px/01-General/Link.png" class="menu-icon" alt="Dominio & Hosting"><span>Dominio & Hosting</span></button></li>
+                    <li><button onclick="showSection('facturacion')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Receipt.png" class="menu-icon" alt="Facturación"><span>Facturación</span></button></li>
+                    <li><button onclick="showSection('contactar')"><img src="../images/ICONOS PNG/24px/04-Messaging/Messaging.png" class="menu-icon" alt="Contactar"><span>Contactar</span><span id="unreadBadgeMenu" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; animation: pulse 2s infinite;"></span></button></li>
+                    <li><button onclick="showSection('seo')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Chart Line.png" class="menu-icon" alt="SEO & Marketing"><span>SEO & Marketing</span></button></li>
+                    <li><button onclick="showSection('perfil')"><img src="../images/ICONOS PNG/24px/09-Social-Connection/User.png" class="menu-icon" alt="Mi Perfil"><span>Mi Perfil</span></button></li>
                 </ul>
             </div>
 
