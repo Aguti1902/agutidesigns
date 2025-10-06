@@ -2222,6 +2222,82 @@ app.get('/api/admin/fix-deadlines', async (req, res) => {
     }
 });
 
+// 🔽 Endpoint temporal para corregir downgrades existentes
+app.get('/api/admin/fix-downgrades', async (req, res) => {
+    try {
+        console.log('🔽 [ADMIN] Corrigiendo downgrades existentes...');
+        
+        const planOrder = { basico: 1, avanzado: 2, premium: 3 };
+        
+        // Obtener submissions con previous_plan
+        const submissionsResult = await db.pool.query(`
+            SELECT id, plan, previous_plan, has_upgrade, is_downgrade 
+            FROM submissions 
+            WHERE previous_plan IS NOT NULL
+        `);
+        
+        const submissions = submissionsResult.rows;
+        let fixed = 0;
+        let alreadyCorrect = 0;
+        const details = [];
+        
+        for (const sub of submissions) {
+            const currentPlanOrder = planOrder[sub.plan];
+            const previousPlanOrder = planOrder[sub.previous_plan];
+            
+            const isDowngrade = currentPlanOrder < previousPlanOrder;
+            const isUpgrade = currentPlanOrder > previousPlanOrder;
+            
+            console.log(`📋 [SUBMISSION #${sub.id}] ${sub.previous_plan} → ${sub.plan} = ${isDowngrade ? 'DOWNGRADE' : isUpgrade ? 'UPGRADE' : 'MISMO'}`);
+            
+            // Verificar si necesita corrección
+            const needsFix = (isDowngrade && !sub.is_downgrade) || (isUpgrade && !sub.has_upgrade);
+            
+            if (needsFix) {
+                // Actualizar submission (y resetear has_modifications porque es solo cambio de plan)
+                await db.pool.query(`
+                    UPDATE submissions 
+                    SET is_downgrade = $1, 
+                        has_upgrade = $2,
+                        has_modifications = false
+                    WHERE id = $3
+                `, [isDowngrade, isUpgrade, sub.id]);
+                
+                // Actualizar proyecto correspondiente
+                await db.pool.query(`
+                    UPDATE projects 
+                    SET is_downgrade = $1, 
+                        is_upgrade = $2
+                    WHERE submission_id = $3
+                `, [isDowngrade, isUpgrade, sub.id]);
+                
+                console.log(`✅ [SUBMISSION #${sub.id}] Corregido: is_downgrade=${isDowngrade}, has_upgrade=${isUpgrade}`);
+                fixed++;
+                details.push({
+                    id: sub.id,
+                    change: `${sub.previous_plan} → ${sub.plan}`,
+                    corrected: isDowngrade ? 'DOWNGRADE' : 'UPGRADE'
+                });
+            } else {
+                console.log(`✓ [SUBMISSION #${sub.id}] Ya está correcto`);
+                alreadyCorrect++;
+            }
+        }
+        
+        res.json({
+            success: true,
+            total: submissions.length,
+            fixed,
+            alreadyCorrect,
+            details
+        });
+        
+    } catch (error) {
+        console.error('❌ Error corrigiendo downgrades:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============================================
 // 📊 ENDPOINTS DE ADMIN - CLIENTES
 // ============================================
@@ -2796,6 +2872,7 @@ app.post('/api/client/change-plan', async (req, res) => {
                         previous_plan = $3,
                         has_upgrade = true,
                         is_downgrade = false,
+                        has_modifications = false,
                         last_modified_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = $4
@@ -2868,6 +2945,7 @@ app.post('/api/client/change-plan', async (req, res) => {
                         previous_plan = $3,
                         is_downgrade = true,
                         has_upgrade = false,
+                        has_modifications = false,
                         last_modified_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = $4
