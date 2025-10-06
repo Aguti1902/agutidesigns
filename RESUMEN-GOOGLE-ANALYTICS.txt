@@ -1,0 +1,89 @@
+═══════════════════════════════════════════════════════════════
+📊 RESUMEN: INTEGRACIÓN GOOGLE ANALYTICS
+═══════════════════════════════════════════════════════════════
+
+✅ IMPLEMENTADO:
+- Campo ga_property_id en base de datos
+- Admin puede configurar GA Property ID por cliente
+- Cliente ve estadísticas en su dashboard
+- Backend con endpoints funcionales
+- Datos simulados realistas (para testing/demos)
+
+═══════════════════════════════════════════════════════════════
+🚀 USAR AHORA (DATOS SIMULADOS)
+═══════════════════════════════════════════════════════════════
+
+1. Admin dashboard → Webs Desplegadas → ⚙️ Gestionar
+2. Rellenar: Google Analytics Property ID: 123456789
+3. Guardar
+4. El cliente verá estadísticas en su dashboard
+
+💡 Los datos son simulados pero realistas. Perfecto para demos.
+
+═══════════════════════════════════════════════════════════════
+🔐 IMPLEMENTAR API REAL (FUTURO)
+═══════════════════════════════════════════════════════════════
+
+PASOS RÁPIDOS:
+1. Google Cloud Console → Create Service Account → Download JSON
+2. Google Analytics → Property Access → Add Service Account email
+3. Railway → Add environment variables (GA_PRIVATE_KEY, GA_CLIENT_EMAIL)
+4. Backend → npm install @google-analytics/data
+5. Actualizar código (ver GUIA-GOOGLE-ANALYTICS.md)
+
+DOCUMENTACIÓN COMPLETA:
+→ Ver archivo: GUIA-GOOGLE-ANALYTICS.md
+
+═══════════════════════════════════════════════════════════════
+📈 QUÉ VE EL CLIENTE
+═══════════════════════════════════════════════════════════════
+
+Dashboard → Estadísticas:
+✅ Visitantes únicos (30 días)
+✅ Páginas vistas
+✅ Tiempo promedio
+✅ Tasa de rebote
+✅ Usuarios en tiempo real
+✅ Top páginas más visitadas
+✅ Dispositivos (móvil, escritorio, tablet)
+✅ Fuentes de tráfico
+
+═══════════════════════════════════════════════════════════════
+🎯 FLUJO COMPLETO
+═══════════════════════════════════════════════════════════════
+
+ADMIN:
+1. Cliente paga → Proyecto creado
+2. Web entregada → WordPress configurado
+3. Admin configura Google Analytics Property ID
+4. ✅ Cliente ve estadísticas automáticamente
+
+CLIENTE:
+1. Login → Dashboard
+2. Estadísticas (menú lateral)
+3. Ve métricas en tiempo real
+4. Toma decisiones basadas en datos
+
+═══════════════════════════════════════════════════════════════
+✅ VENTAJAS PARA TI
+═══════════════════════════════════════════════════════════════
+
+✅ TODO desde TU cuenta de Google Analytics
+✅ Control total de todos los proyectos
+✅ Un solo Service Account para todos los clientes
+✅ Fácil de configurar (solo Property ID por cliente)
+✅ Datos profesionales en el dashboard del cliente
+✅ Valor añadido sin esfuerzo
+
+═══════════════════════════════════════════════════════════════
+📞 SOPORTE
+═══════════════════════════════════════════════════════════════
+
+Documentación Google Analytics Data API:
+https://developers.google.com/analytics/devguides/reporting/data/v1
+
+Google Cloud Console:
+https://console.cloud.google.com
+
+═══════════════════════════════════════════════════════════════
+
