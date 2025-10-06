@@ -2207,8 +2207,16 @@
                 console.log('✅ [ADMIN] Respuesta enviada correctamente:', data);
                 
                 showNotification('Respuesta enviada correctamente. El cliente recibirá un email.', 'success');
-                closeTicketModal();
-                loadTickets(); // Recargar tabla
+                
+                // Limpiar el textarea para permitir enviar otro mensaje
+                document.getElementById('adminResponse').value = '';
+                
+                // NO cerrar el modal para permitir conversación continua
+                // Recargar el ticket actual para mostrar la nueva respuesta
+                viewTicket(ticketId);
+                
+                // Recargar tabla en segundo plano
+                loadTickets();
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error enviando respuesta:', error);

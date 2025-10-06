@@ -1930,9 +1930,29 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         console.log('💬 [BACKEND] Cliente respondiendo al ticket #', ticketId);
         console.log('💬 [BACKEND] Respuesta del cliente:', client_response.substring(0, 50) + '...');
         
+        // Obtener el ticket actual para ver si ya tiene respuestas
+        const currentTicket = await db.getTicketById(parseInt(ticketId));
+        
+        // Si hay una nueva respuesta del cliente, concatenarla con las anteriores
+        let updatedClientResponse = client_response;
+        if (client_response && currentTicket && currentTicket.client_response) {
+            // Agregar separador con timestamp para conversación
+            const timestamp = new Date().toLocaleString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            updatedClientResponse = currentTicket.client_response + 
+                `\n\n--- Respuesta adicional (${timestamp}) ---\n\n` + 
+                client_response;
+            console.log('💬 [BACKEND] Concatenando respuesta del cliente con historial anterior');
+        }
+        
         // Actualizar ticket con respuesta del cliente y cambiar estado a "en_proceso"
         await db.updateTicket(parseInt(ticketId), { 
-            client_response,
+            client_response: updatedClientResponse,
             status: 'en_proceso',
             admin_unread: 1,      // Admin tiene mensaje nuevo sin leer
             client_unread: 0      // Cliente lo acaba de enviar/leer
@@ -1985,10 +2005,31 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         console.log('🎫 [BACKEND] ticketId:', ticketId);
         console.log('🎫 [BACKEND] Body:', { status, admin_response: admin_response ? 'SÍ' : 'NO' });
         
+        // Obtener el ticket actual para ver si ya tiene respuestas
+        const currentTicket = await db.getTicketById(parseInt(ticketId));
+        
+        // Si hay una nueva respuesta del admin, concatenarla con las anteriores
+        let updatedAdminResponse = admin_response;
+        if (admin_response && currentTicket && currentTicket.admin_response) {
+            // Agregar separador con timestamp para conversación
+            const timestamp = new Date().toLocaleString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            updatedAdminResponse = currentTicket.admin_response + 
+                `\n\n--- Respuesta adicional (${timestamp}) ---\n\n` + 
+                admin_response;
+            console.log('💬 [BACKEND] Concatenando respuesta con historial anterior');
+        }
+        
         // Actualizar ticket y marcar como leído por admin, no leído por cliente
         await db.updateTicket(parseInt(ticketId), { 
             status, 
-            admin_response,
+            admin_response: updatedAdminResponse,
+            admin_response_at: new Date(),
             admin_unread: 0,      // Admin lo acaba de leer/responder
             client_unread: 1      // Cliente tiene mensaje nuevo sin leer
         });

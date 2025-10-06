@@ -5281,8 +5281,14 @@
                 
                 showNotification('Respuesta enviada correctamente. El equipo de soporte la revisará pronto.', 'success');
                 
-                // Cerrar modal y recargar tickets
-                closeViewTicketModal();
+                // Limpiar el textarea para permitir enviar otro mensaje
+                document.getElementById('clientResponseText').value = '';
+                
+                // NO cerrar el modal para permitir conversación continua
+                // Recargar el ticket actual para mostrar la nueva respuesta
+                viewClientTicket(ticketId);
+                
+                // Recargar lista en segundo plano
                 loadClientTickets();
                 
             } catch (error) {
