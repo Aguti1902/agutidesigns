@@ -2858,19 +2858,27 @@ app.get('/api/client/invoices/:clientId', async (req, res) => {
         
         console.log(`✅ [INVOICES] ${invoices.data.length} facturas encontradas`);
         
-        // Formatear datos
-        const formattedInvoices = invoices.data.map(invoice => ({
-            id: invoice.id,
-            number: invoice.number || `INV-${invoice.id.slice(-8)}`,
-            amount: (invoice.amount_paid / 100).toFixed(2),
-            currency: invoice.currency.toUpperCase(),
-            status: invoice.status,
-            created: new Date(invoice.created * 1000).toISOString(),
-            pdf_url: invoice.invoice_pdf,
-            hosted_invoice_url: invoice.hosted_invoice_url,
-            period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
-            period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
-        }));
+        // Filtrar y formatear datos - SOLO facturas con pago real (excluir ajustes de 0€)
+        const formattedInvoices = invoices.data
+            .filter(invoice => {
+                // Filtrar solo facturas pagadas con monto > 0
+                // O facturas pendientes con monto a pagar > 0
+                const hasRealAmount = (invoice.amount_due > 0 || invoice.amount_paid > 0);
+                const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
+                return hasRealAmount && isNotFullyRefunded;
+            })
+            .map(invoice => ({
+                id: invoice.id,
+                number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+                amount: (invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100).toFixed(2),
+                currency: invoice.currency.toUpperCase(),
+                status: invoice.status,
+                created: new Date(invoice.created * 1000).toISOString(),
+                pdf_url: invoice.invoice_pdf,
+                hosted_invoice_url: invoice.hosted_invoice_url,
+                period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+                period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
+            }));
         
         res.json({ invoices: formattedInvoices });
         
@@ -2901,23 +2909,30 @@ app.get('/api/admin/invoices', async (req, res) => {
                     limit: 100
                 });
                 
-                const formattedInvoices = invoices.data.map(invoice => ({
-                    id: invoice.id,
-                    number: invoice.number || `INV-${invoice.id.slice(-8)}`,
-                    amount: (invoice.amount_paid / 100).toFixed(2),
-                    currency: invoice.currency.toUpperCase(),
-                    status: invoice.status,
-                    created: new Date(invoice.created * 1000).toISOString(),
-                    pdf_url: invoice.invoice_pdf,
-                    hosted_invoice_url: invoice.hosted_invoice_url,
-                    period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
-                    period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
-                    // Datos del cliente
-                    client_id: client.id,
-                    client_name: client.full_name,
-                    client_email: client.email,
-                    client_business: client.business_name
-                }));
+                // Filtrar y formatear - SOLO facturas con pago real
+                const formattedInvoices = invoices.data
+                    .filter(invoice => {
+                        const hasRealAmount = (invoice.amount_due > 0 || invoice.amount_paid > 0);
+                        const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
+                        return hasRealAmount && isNotFullyRefunded;
+                    })
+                    .map(invoice => ({
+                        id: invoice.id,
+                        number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+                        amount: (invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100).toFixed(2),
+                        currency: invoice.currency.toUpperCase(),
+                        status: invoice.status,
+                        created: new Date(invoice.created * 1000).toISOString(),
+                        pdf_url: invoice.invoice_pdf,
+                        hosted_invoice_url: invoice.hosted_invoice_url,
+                        period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+                        period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
+                        // Datos del cliente
+                        client_id: client.id,
+                        client_name: client.full_name,
+                        client_email: client.email,
+                        client_business: client.business_name
+                    }));
                 
                 allInvoices = allInvoices.concat(formattedInvoices);
             } catch (err) {
