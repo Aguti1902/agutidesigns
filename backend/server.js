@@ -42,6 +42,27 @@ const bcrypt = require('bcryptjs');
 const db = require('./database');
 const emailService = require('./email-service');
 
+// Google Analytics Data API
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+
+// Inicializar cliente de Google Analytics (solo si las credenciales están configuradas)
+let analyticsDataClient = null;
+if (process.env.GA_CLIENT_EMAIL && process.env.GA_PRIVATE_KEY) {
+    try {
+        analyticsDataClient = new BetaAnalyticsDataClient({
+            credentials: {
+                client_email: process.env.GA_CLIENT_EMAIL,
+                private_key: process.env.GA_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            },
+        });
+        console.log('✅ Google Analytics Data API inicializada correctamente');
+    } catch (error) {
+        console.error('⚠️ Error inicializando Google Analytics API:', error.message);
+    }
+} else {
+    console.log('⚠️ Google Analytics no configurado (usando datos simulados)');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -3223,7 +3244,6 @@ app.post('/api/admin/google-analytics/config/:clientId', async (req, res) => {
 app.get('/api/client/google-analytics/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { startDate, endDate } = req.query;
         
         console.log(`📊 [GA] Obteniendo datos para cliente #${clientId}`);
         
@@ -3240,27 +3260,106 @@ app.get('/api/client/google-analytics/:clientId', async (req, res) => {
         const { ga_property_id, business_name } = result.rows[0];
         
         if (!ga_property_id) {
-            // Si no está configurado, devolver datos vacíos
             return res.json({
                 configured: false,
                 message: 'Google Analytics no configurado para este cliente'
             });
         }
         
-        // TODO: Implementar Google Analytics Data API real
-        // Requiere: Service Account credentials
-        // Ver: https://developers.google.com/analytics/devguides/reporting/data/v1
-        
-        // Por ahora, devolver datos simulados realistas
-        const mockData = generateMockAnalyticsData(business_name);
-        
-        console.log(`✅ [GA] Datos devueltos (simulados) para Property ID: ${ga_property_id}`);
-        
-        res.json({
-            configured: true,
-            property_id: ga_property_id,
-            data: mockData
-        });
+        // Si el cliente de Analytics está configurado, intentar obtener datos reales
+        if (analyticsDataClient) {
+            try {
+                console.log(`📊 [GA] Consultando API real para Property ID: ${ga_property_id}`);
+                
+                // Obtener datos de resumen
+                const [summaryResponse] = await analyticsDataClient.runReport({
+                    property: `properties/${ga_property_id}`,
+                    dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+                    dimensions: [{ name: 'date' }],
+                    metrics: [
+                        { name: 'activeUsers' },
+                        { name: 'screenPageViews' },
+                        { name: 'bounceRate' },
+                        { name: 'averageSessionDuration' }
+                    ]
+                });
+                
+                // Páginas más visitadas
+                const [pagesResponse] = await analyticsDataClient.runReport({
+                    property: `properties/${ga_property_id}`,
+                    dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+                    dimensions: [{ name: 'pagePath' }, { name: 'pageTitle' }],
+                    metrics: [{ name: 'screenPageViews' }],
+                    limit: 5,
+                    orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }]
+                });
+                
+                // Dispositivos
+                const [devicesResponse] = await analyticsDataClient.runReport({
+                    property: `properties/${ga_property_id}`,
+                    dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+                    dimensions: [{ name: 'deviceCategory' }],
+                    metrics: [{ name: 'activeUsers' }]
+                });
+                
+                // Fuentes de tráfico
+                const [sourcesResponse] = await analyticsDataClient.runReport({
+                    property: `properties/${ga_property_id}`,
+                    dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+                    dimensions: [{ name: 'sessionSource' }],
+                    metrics: [{ name: 'activeUsers' }],
+                    limit: 5,
+                    orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }]
+                });
+                
+                // Usuarios en tiempo real
+                const [realtimeResponse] = await analyticsDataClient.runRealtimeReport({
+                    property: `properties/${ga_property_id}`,
+                    metrics: [{ name: 'activeUsers' }]
+                });
+                
+                // Procesar datos reales
+                const processedData = processGoogleAnalyticsData(
+                    summaryResponse,
+                    pagesResponse,
+                    devicesResponse,
+                    sourcesResponse,
+                    realtimeResponse
+                );
+                
+                console.log(`✅ [GA] Datos reales obtenidos para Property ID: ${ga_property_id}`);
+                
+                return res.json({
+                    configured: true,
+                    property_id: ga_property_id,
+                    data: processedData,
+                    source: 'real'
+                });
+                
+            } catch (gaError) {
+                console.error('⚠️ [GA] Error consultando API real:', gaError.message);
+                console.log('🔄 [GA] Usando datos simulados como fallback');
+                
+                // Si falla la API real, usar datos simulados
+                const mockData = generateMockAnalyticsData(business_name);
+                return res.json({
+                    configured: true,
+                    property_id: ga_property_id,
+                    data: mockData,
+                    source: 'simulated'
+                });
+            }
+        } else {
+            // Si no hay cliente de Analytics, usar datos simulados
+            console.log(`🔄 [GA] API no configurada, usando datos simulados para Property ID: ${ga_property_id}`);
+            const mockData = generateMockAnalyticsData(business_name);
+            return res.json({
+                configured: true,
+                property_id: ga_property_id,
+                data: mockData,
+                source: 'simulated'
+            });
+        }
         
     } catch (error) {
         console.error('❌ [GA] Error:', error);
@@ -3335,6 +3434,103 @@ function generateMockAnalyticsData(businessName) {
         devices,
         trafficSources,
         realTimeUsers: Math.floor(Math.random() * 15) + 1
+    };
+}
+
+// Función para procesar datos reales de Google Analytics
+function processGoogleAnalyticsData(summaryResponse, pagesResponse, devicesResponse, sourcesResponse, realtimeResponse) {
+    // Procesar resumen general
+    const summaryRows = summaryResponse.rows || [];
+    const dailyData = summaryRows.map(row => ({
+        date: row.dimensionValues[0].value,
+        visitors: parseInt(row.metricValues[0].value || 0),
+        pageviews: parseInt(row.metricValues[1].value || 0),
+        bounceRate: parseFloat(row.metricValues[2].value || 0).toFixed(1),
+        avgSessionDuration: parseInt(row.metricValues[3].value || 0)
+    }));
+    
+    // Calcular totales
+    const totalVisitors = dailyData.reduce((sum, day) => sum + day.visitors, 0);
+    const totalPageviews = dailyData.reduce((sum, day) => sum + day.pageviews, 0);
+    const avgBounceRate = dailyData.length > 0 
+        ? (dailyData.reduce((sum, day) => sum + parseFloat(day.bounceRate), 0) / dailyData.length).toFixed(1)
+        : 0;
+    const avgSessionDuration = dailyData.length > 0
+        ? Math.floor(dailyData.reduce((sum, day) => sum + day.avgSessionDuration, 0) / dailyData.length)
+        : 0;
+    
+    // Procesar páginas más visitadas
+    const topPages = (pagesResponse.rows || []).slice(0, 5).map(row => ({
+        path: row.dimensionValues[0].value,
+        title: row.dimensionValues[1].value || 'Sin título',
+        views: parseInt(row.metricValues[0].value || 0)
+    }));
+    
+    // Procesar dispositivos
+    const deviceRows = devicesResponse.rows || [];
+    const totalDeviceUsers = deviceRows.reduce((sum, row) => sum + parseInt(row.metricValues[0].value || 0), 0);
+    const devices = deviceRows.map(row => {
+        const deviceType = row.dimensionValues[0].value.toLowerCase();
+        const users = parseInt(row.metricValues[0].value || 0);
+        return {
+            type: deviceType,
+            percentage: totalDeviceUsers > 0 ? Math.round((users / totalDeviceUsers) * 100) : 0
+        };
+    });
+    
+    // Procesar fuentes de tráfico
+    const sourceRows = sourcesResponse.rows || [];
+    const totalSourceUsers = sourceRows.reduce((sum, row) => sum + parseInt(row.metricValues[0].value || 0), 0);
+    
+    // Mapear nombres de fuentes a español
+    const sourceMap = {
+        'google': 'Búsqueda orgánica',
+        '(direct)': 'Directo',
+        'facebook': 'Redes sociales',
+        'instagram': 'Redes sociales',
+        'twitter': 'Redes sociales',
+        'linkedin': 'Redes sociales',
+        'email': 'Email',
+        '(not set)': 'Directo'
+    };
+    
+    // Agrupar fuentes similares
+    const trafficGroups = {};
+    sourceRows.forEach(row => {
+        const sourceName = row.dimensionValues[0].value.toLowerCase();
+        const users = parseInt(row.metricValues[0].value || 0);
+        const mappedSource = sourceMap[sourceName] || 'Referencias';
+        
+        if (trafficGroups[mappedSource]) {
+            trafficGroups[mappedSource] += users;
+        } else {
+            trafficGroups[mappedSource] = users;
+        }
+    });
+    
+    const trafficSources = Object.entries(trafficGroups).map(([source, users]) => ({
+        source,
+        percentage: totalSourceUsers > 0 ? Math.round((users / totalSourceUsers) * 100) : 0
+    })).sort((a, b) => b.percentage - a.percentage).slice(0, 5);
+    
+    // Usuarios en tiempo real
+    const realtimeUsers = realtimeResponse.rows && realtimeResponse.rows.length > 0
+        ? parseInt(realtimeResponse.rows[0].metricValues[0].value || 0)
+        : 0;
+    
+    return {
+        summary: {
+            totalVisitors,
+            totalPageviews,
+            avgBounceRate: parseFloat(avgBounceRate),
+            avgSessionDuration,
+            period: '30 días'
+        },
+        dailyData,
+        topPages,
+        devices,
+        trafficSources,
+        realTimeUsers: realtimeUsers
     };
 }
 
