@@ -2320,7 +2320,7 @@
             }
         }
 
-        // Animación de salida
+        // Animaciones CSS
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideOut {
@@ -2332,6 +2332,9 @@
                     opacity: 0;
                     transform: translateX(20px);
                 }
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
             }
         `;
         document.head.appendChild(style);
@@ -2649,7 +2652,12 @@
             const domain = domainInput.value.trim();
             
             if (!domain) {
-                showDomainResult('⚠️ Por favor, ingresa un dominio', 'warning');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div style="padding: 16px; background: #fef3c7; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                        <div style="color: #92400e; font-weight: 600;">⚠️ Por favor, ingresa un dominio</div>
+                    </div>
+                `;
                 return;
             }
             
@@ -2736,14 +2744,7 @@
             }
         }
         
-        // CSS para spinner
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
+        // CSS para spinner (ya añadido arriba con slideOut)
     </script>
 </body>
 </html> 
