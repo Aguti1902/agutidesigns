@@ -766,23 +766,33 @@ app.get('/api/admin/stats', async (req, res) => {
             dateFilter.end.setHours(23, 59, 59, 999); // Incluir todo el día
         } else if (filter && filter !== 'all') {
             const now = new Date();
-            dateFilter.end = now;
+            dateFilter.end = new Date(); // Nueva instancia para evitar mutaciones
             
             switch(filter) {
                 case 'today':
-                    dateFilter.start = new Date(now.setHours(0, 0, 0, 0));
+                    dateFilter.start = new Date();
+                    dateFilter.start.setHours(0, 0, 0, 0);
                     break;
                 case 'week':
-                    dateFilter.start = new Date(now.setDate(now.getDate() - 7));
+                    dateFilter.start = new Date();
+                    dateFilter.start.setDate(dateFilter.start.getDate() - 7);
                     break;
                 case 'month':
-                    dateFilter.start = new Date(now.setMonth(now.getMonth() - 1));
+                    dateFilter.start = new Date();
+                    dateFilter.start.setMonth(dateFilter.start.getMonth() - 1);
                     break;
                 case 'year':
-                    dateFilter.start = new Date(now.setFullYear(now.getFullYear() - 1));
+                    dateFilter.start = new Date();
+                    dateFilter.start.setFullYear(dateFilter.start.getFullYear() - 1);
                     break;
             }
         }
+        
+        console.log('📅 [ADMIN] Filtro de fecha calculado:', {
+            hasFilter: Object.keys(dateFilter).length > 0,
+            start: dateFilter.start?.toISOString(),
+            end: dateFilter.end?.toISOString()
+        });
         
         const stats = await db.getStats(dateFilter);
         console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);

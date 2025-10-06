@@ -1070,7 +1070,7 @@
                                 Comisión Diseñador
                             </div>
                             <div class="stat-value" id="designerCommission">0€</div>
-                            <div class="stat-change">0.3% del neto (después de impuestos y comisiones)</div>
+                            <div class="stat-change">30% del neto (después de impuestos y comisiones)</div>
                         </div>
                         <div class="stat-card blue">
                             <div class="stat-label">
@@ -1779,7 +1779,7 @@
                 // Fórmula: Neto = Revenue - (Stripe 1.5% + 0.25€) - IVA (21%) - IRPF (15%)
                 // Simplificado: Neto ≈ Revenue * 0.632 (63.2% del ingreso bruto)
                 const netRevenue = revenue * 0.632;
-                const designerCommission = netRevenue * 0.003; // 0.3% del neto
+                const designerCommission = netRevenue * 0.30; // 30% del neto
                 document.getElementById('designerCommission').textContent = designerCommission.toFixed(2) + '€';
                 
                 console.log('💸 [ADMIN] Comisión diseñador calculada:', {
