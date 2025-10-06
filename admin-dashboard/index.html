@@ -2102,12 +2102,13 @@
                          new Date(pedido.modifications_viewed_at) < new Date(pedido.last_modified_at));
                     
                     return `
-                    <tr style="${pedido.has_upgrade || hasUnviewedModifications ? 'background: #f0f9ff;' : ''}">
+                    <tr style="${pedido.has_upgrade || pedido.is_downgrade || hasUnviewedModifications ? 'background: #f0f9ff;' : ''}">
                         <td><strong>#${pedido.id}</strong></td>
                         <td>
                             ${pedido.business_name || 'N/A'}
                             <div style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
                                 ${pedido.has_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
+                                ${pedido.is_downgrade ? '<span class="badge" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔽 DOWNGRADE</span>' : ''}
                                 ${hasUnviewedModifications ? '<span class="badge" style="background: #0046FE; color: white; font-size: 0.7rem; padding: 3px 8px;">✏️ MODIFICADO</span>' : ''}
                             </div>
                         </td>
@@ -2176,7 +2177,8 @@
                             <div style="flex: 1; padding: 20px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; color: white;">
                                 <h3 style="margin: 0 0 15px 0; font-size: 1.3rem;">
                                     Plan Contratado
-                                    ${pedido.is_upgrade ? '<span style="background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-left: 10px;">🔼 UPGRADE</span>' : ''}
+                                    ${pedido.is_upgrade ? '<span style="background: rgba(255, 107, 53, 0.9); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-left: 10px;">🔼 UPGRADE</span>' : ''}
+                                    ${pedido.is_downgrade ? '<span style="background: rgba(147, 51, 234, 0.9); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-left: 10px;">🔽 DOWNGRADE</span>' : ''}
                                 </h3>
                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                     <div>
@@ -3413,10 +3415,11 @@
                         const html = projectList.map((project, idx) => {
                             console.log(`  🎨 [RENDER] Proyecto ${idx + 1}: ${project.project_name || project.business_name}`);
                             return `
-                                <div class="kanban-card" draggable="true" data-project-id="${project.id}" ${project.is_upgrade ? 'style="border-left: 4px solid #ff6b35;"' : ''}>
+                                <div class="kanban-card" draggable="true" data-project-id="${project.id}" ${project.is_upgrade ? 'style="border-left: 4px solid #ff6b35;"' : project.is_downgrade ? 'style="border-left: 4px solid #9333ea;"' : ''}>
                                     <div class="kanban-card-title">
                                         ${project.project_name || project.business_name || 'Proyecto sin nombre'}
                                         ${project.is_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; margin-left: 8px; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
+                                        ${project.is_downgrade ? '<span class="badge" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); color: white; margin-left: 8px; font-size: 0.7rem; padding: 3px 8px;">🔽 DOWNGRADE</span>' : ''}
                                     </div>
                                     <div class="kanban-card-info">👤 ${project.business_name || 'Sin cliente'}</div>
                                     <div class="kanban-card-info">📧 ${project.client_email || 'N/A'}</div>

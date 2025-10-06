@@ -264,6 +264,28 @@ async function initializeTables() {
             console.log('⚠️ Migración website_url en clients ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo is_downgrade para submissions
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS is_downgrade BOOLEAN DEFAULT FALSE
+            `);
+            console.log('✅ Migración: Campo is_downgrade añadido a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración is_downgrade en submissions ya aplicada');
+        }
+
+        // 🆕 MIGRACIÓN: Agregar campo is_downgrade para projects
+        try {
+            await client.query(`
+                ALTER TABLE projects 
+                ADD COLUMN IF NOT EXISTS is_downgrade BOOLEAN DEFAULT FALSE
+            `);
+            console.log('✅ Migración: Campo is_downgrade añadido a projects');
+        } catch (e) {
+            console.log('⚠️ Migración is_downgrade en projects ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);

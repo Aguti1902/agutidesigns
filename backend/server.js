@@ -2795,6 +2795,7 @@ app.post('/api/client/change-plan', async (req, res) => {
                         amount = $2, 
                         previous_plan = $3,
                         has_upgrade = true,
+                        is_downgrade = false,
                         last_modified_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = $4
@@ -2845,6 +2846,62 @@ app.post('/api/client/change-plan', async (req, res) => {
                         [upgradeNote, clientId]
                     );
                     console.log(`📝 [PLAN] Notas del proyecto actualizadas con info del upgrade`);
+                }
+            }
+        } else if (isDowngrade) {
+            // 🔽 LÓGICA PARA DOWNGRADE
+            if (client.submission_id) {
+                const priceMap = billingCycle === 'annual' ? {
+                    basico: 420,   // 35€/mes × 12
+                    avanzado: 588, // 49€/mes × 12
+                    premium: 780   // 65€/mes × 12
+                } : {
+                    basico: 35,
+                    avanzado: 49,
+                    premium: 65
+                };
+                
+                await db.pool.query(`
+                    UPDATE submissions 
+                    SET plan = $1, 
+                        amount = $2, 
+                        previous_plan = $3,
+                        is_downgrade = true,
+                        has_upgrade = false,
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = $4
+                `, [newPlan, priceMap[newPlan], oldPlan, client.submission_id]);
+                
+                console.log(`📋 [PLAN] Pedido #${client.submission_id} actualizado a ${newPlan} (DOWNGRADE de ${oldPlan})`);
+                
+                // Actualizar el proyecto para marcarlo como downgrade
+                const projectResult = await db.pool.query(
+                    'SELECT status FROM projects WHERE client_id = $1',
+                    [clientId]
+                );
+                
+                if (projectResult.rows[0]) {
+                    // Marcar como downgrade
+                    await db.pool.query(
+                        `UPDATE projects 
+                         SET is_upgrade = false,
+                             is_downgrade = true,
+                             updated_at = CURRENT_TIMESTAMP 
+                         WHERE client_id = $1`,
+                        [clientId]
+                    );
+                    console.log(`🔽 [PLAN] Proyecto marcado como DOWNGRADE`);
+                    
+                    // Actualizar notas del proyecto con info del downgrade
+                    const downgradeNote = `Plan actualizado: ${oldPlan} → ${newPlan} (${billingCycle}). Downgrade confirmado.${pagesToRemove ? ` Páginas eliminadas: ${pagesToRemove.join(', ')}.` : ''}`;
+                    await db.pool.query(
+                        `UPDATE projects 
+                         SET notes = $1 
+                         WHERE client_id = $2`,
+                        [downgradeNote, clientId]
+                    );
+                    console.log(`📝 [PLAN] Notas del proyecto actualizadas con info del downgrade`);
                 }
             }
         }
