@@ -945,11 +945,12 @@
                     <div class="nav-item" onclick="showSection('tickets')">
                         <span class="icon">🎫</span>
                         <span>Tickets</span>
-                        <span id="unreadBadgeMenuAdmin" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
+                        <span id="unreadTicketsBadge" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
                     </div>
                     <div class="nav-item" onclick="showSection('pedidos')">
                         <span class="icon">📋</span>
                         <span>Pedidos</span>
+                        <span id="newOrdersBadge" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
                     </div>
                     <div class="nav-item" onclick="showSection('clientes')">
                         <span class="icon">👥</span>
@@ -1683,6 +1684,12 @@
         async function loadDashboard() {
             await loadStats();
             await loadProjects();
+            // Actualizar badges de notificaciones
+            updateAdminBadges();
+            // Configurar actualización automática cada 15 segundos
+            setInterval(() => {
+                updateAdminBadges();
+            }, 15000);
         }
 
         // ===== CARGAR ESTADÍSTICAS =====
@@ -1720,6 +1727,66 @@
                 console.log('✅ [ADMIN] Estadísticas cargadas correctamente');
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando stats:', error);
+            }
+        }
+
+        // ===== ACTUALIZAR BADGES DE NOTIFICACIONES =====
+        async function updateAdminBadges() {
+            try {
+                console.log('🔔 [ADMIN] Actualizando badges de notificaciones...');
+                
+                // 1. BADGE DE TICKETS SIN LEER
+                try {
+                    const ticketsResponse = await fetch(`${API_URL}/api/tickets`);
+                    const allTickets = await ticketsResponse.json();
+                    
+                    // Filtrar tickets de soporte (excluir facturación) y contar sin leer
+                    const supportTickets = allTickets.filter(t => t.category !== 'facturacion');
+                    const unreadTickets = supportTickets.filter(t => t.admin_unread === 1).length;
+                    
+                    const ticketsBadge = document.getElementById('unreadTicketsBadge');
+                    if (ticketsBadge) {
+                        if (unreadTickets > 0) {
+                            ticketsBadge.textContent = unreadTickets;
+                            ticketsBadge.style.display = 'inline-block';
+                        } else {
+                            ticketsBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    console.log(`🎫 [ADMIN] Tickets sin leer: ${unreadTickets}`);
+                } catch (error) {
+                    console.error('❌ [ADMIN] Error actualizando badge de tickets:', error);
+                }
+                
+                // 2. BADGE DE PEDIDOS MODIFICADOS
+                try {
+                    const ordersResponse = await fetch(`${API_URL}/api/admin/submissions`);
+                    const orders = await ordersResponse.json();
+                    
+                    // Contar pedidos con modificaciones no vistas
+                    const newOrders = orders.filter(o => 
+                        o.has_modifications === true && 
+                        (!o.modifications_viewed_at || o.last_modified_at > o.modifications_viewed_at)
+                    ).length;
+                    
+                    const ordersBadge = document.getElementById('newOrdersBadge');
+                    if (ordersBadge) {
+                        if (newOrders > 0) {
+                            ordersBadge.textContent = newOrders;
+                            ordersBadge.style.display = 'inline-block';
+                        } else {
+                            ordersBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    console.log(`📋 [ADMIN] Pedidos con modificaciones: ${newOrders}`);
+                } catch (error) {
+                    console.error('❌ [ADMIN] Error actualizando badge de pedidos:', error);
+                }
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error general actualizando badges:', error);
             }
         }
 

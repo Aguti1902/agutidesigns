@@ -1725,9 +1725,9 @@
                 <!-- CONTACTAR -->
                 <div id="contactar" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">
+                        <h1 class="section-title" style="display: flex; align-items: center; gap: 12px;">
                             💬 Contactar con Soporte
-                            <span id="unreadBadgeHeader" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-left: 12px; animation: pulse 2s infinite; vertical-align: middle;"></span>
+                            <span id="unreadBadgeHeader" style="display: none; background: #0046FE; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 70, 254, 0.4); animation: pulse 2s infinite;"></span>
                         </h1>
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
@@ -5470,7 +5470,8 @@
                         // Badge del header de la sección
                         if (badgeHeader) {
                             badgeHeader.textContent = unreadCount;
-                            badgeHeader.style.display = 'inline';
+                            badgeHeader.style.display = 'inline-block';
+                            console.log('✅ [CLIENT] Badge header actualizado:', unreadCount);
                         }
                         
                         // Si hay mensajes nuevos que antes no había, mostrar notificación
