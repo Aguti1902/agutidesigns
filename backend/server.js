@@ -3548,6 +3548,107 @@ function processGoogleAnalyticsData(summaryResponse, pagesResponse, devicesRespo
 }
 
 // ========================================
+// DOMAIN AVAILABILITY CHECKER
+// ========================================
+
+// Verificar disponibilidad de dominio
+app.get('/api/check-domain/:domain', async (req, res) => {
+    try {
+        const { domain } = req.params;
+        
+        console.log(`🔍 [DOMAIN] Verificando disponibilidad: ${domain}`);
+        
+        // Limpiar el dominio (eliminar espacios, convertir a minúsculas)
+        const cleanDomain = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '');
+        
+        // Validar formato de dominio
+        const domainRegex = /^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}$/;
+        if (!domainRegex.test(cleanDomain)) {
+            return res.status(400).json({ 
+                error: 'Formato de dominio inválido',
+                available: false 
+            });
+        }
+        
+        // Intentar con RapidAPI primero
+        if (process.env.RAPIDAPI_KEY) {
+            try {
+                console.log('📡 [DOMAIN] Consultando RapidAPI...');
+                
+                const response = await fetch(`https://domains-api.p.rapidapi.com/tlds/${cleanDomain}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+                        'X-RapidAPI-Host': 'domains-api.p.rapidapi.com'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    console.log('✅ [DOMAIN] RapidAPI response:', data);
+                    
+                    return res.json({
+                        domain: cleanDomain,
+                        available: data.available || false,
+                        price: data.price || 'N/A',
+                        currency: data.currency || 'USD',
+                        registrar: data.registrar || 'N/A',
+                        source: 'rapidapi'
+                    });
+                }
+            } catch (rapidError) {
+                console.warn('⚠️ [DOMAIN] RapidAPI falló, usando fallback:', rapidError.message);
+            }
+        }
+        
+        // Fallback: WHOIS público
+        console.log('🔄 [DOMAIN] Usando WHOIS público como fallback...');
+        
+        try {
+            const whoisResponse = await fetch(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_free&domainName=${cleanDomain}&outputFormat=JSON`);
+            
+            if (whoisResponse.ok) {
+                const whoisData = await whoisResponse.json();
+                
+                // Si el dominio está registrado, WhoisRecord existirá
+                const isRegistered = whoisData.WhoisRecord && whoisData.WhoisRecord.registryData;
+                
+                console.log(`✅ [DOMAIN] WHOIS público - Disponible: ${!isRegistered}`);
+                
+                return res.json({
+                    domain: cleanDomain,
+                    available: !isRegistered,
+                    price: !isRegistered ? '12-15 €/año' : 'N/A',
+                    currency: 'EUR',
+                    registrar: isRegistered ? (whoisData.WhoisRecord.registrarName || 'Desconocido') : 'N/A',
+                    source: 'whois'
+                });
+            }
+        } catch (whoisError) {
+            console.warn('⚠️ [DOMAIN] WHOIS público falló:', whoisError.message);
+        }
+        
+        // Si todo falla, devolver respuesta genérica
+        console.log('⚠️ [DOMAIN] Todas las APIs fallaron, respuesta genérica');
+        
+        res.json({
+            domain: cleanDomain,
+            available: null,
+            message: 'No se pudo verificar la disponibilidad. Por favor, intenta más tarde.',
+            source: 'fallback'
+        });
+        
+    } catch (error) {
+        console.error('❌ [DOMAIN] Error:', error);
+        res.status(500).json({ 
+            error: 'Error al verificar dominio',
+            available: false 
+        });
+    }
+});
+
+// ========================================
 // ENDPOINT TEMPORAL: ARREGLAR PEDIDOS EXISTENTES
 // ========================================
 
