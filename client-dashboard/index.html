@@ -558,6 +558,21 @@
                 transform: translateY(0);
             }
         }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.08);
+            }
+        }
+        
+        .notification-badge {
+            box-shadow: 0 0 10px rgba(0, 70, 254, 0.5);
+        }
 
         /* Modal de selección de plan */
         .plan-modal {
@@ -692,7 +707,7 @@
                     <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
                     <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
                     <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span><span id="unreadBadgeMenu" style="display: none; background: #0046FE; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; margin-left: 8px;"></span></button></li>
+                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span><span id="unreadBadgeMenu" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; animation: pulse 2s infinite;"></span></button></li>
                     <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                     <li><button onclick="showSection('perfil')"><span class="menu-icon">👤</span><span>Mi Perfil</span></button></li>
                 </ul>
@@ -5157,6 +5172,13 @@
             currentOpenTicketId = null;
             document.getElementById('viewTicketModal').style.display = 'none';
             console.log('✅ [CLIENT] Modal cerrado - Auto-actualización del ticket desactivada');
+            
+            // 🔥 ACTUALIZAR BADGE inmediatamente después de cerrar el modal
+            // porque el ticket ya fue marcado como leído cuando se abrió
+            setTimeout(() => {
+                loadClientTickets();
+                console.log('🔄 [CLIENT] Badge actualizado después de cerrar ticket');
+            }, 300); // Pequeño delay para dar tiempo a que el backend actualice
         }
 
         // =============================================
