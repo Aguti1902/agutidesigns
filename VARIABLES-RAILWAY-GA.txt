@@ -1,0 +1,71 @@
+═══════════════════════════════════════════════════════════════
+📊 VARIABLES PARA RAILWAY - GOOGLE ANALYTICS
+═══════════════════════════════════════════════════════════════
+
+Copia y pega EXACTAMENTE estas 2 variables en Railway:
+
+─────────────────────────────────────────────────────────────
+VARIABLE 1:
+─────────────────────────────────────────────────────────────
+
+Key:
+GA_CLIENT_EMAIL
+
+Value:
+analytics-api-service@agutidesigns-1693876817847.iam.gserviceaccount.com
+
+─────────────────────────────────────────────────────────────
+VARIABLE 2:
+─────────────────────────────────────────────────────────────
+
+Key:
+GA_PRIVATE_KEY
+
+Value (copia TODO, incluidos los saltos de línea):
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaO5sDNmLozi6v
+dqINTqXHz3Ik7euPw3zsrhdUOtGPVzd+Ee+xYhotQO6D+Pw6ipjw/H4ptSf8gZw1
+oqhFNx3Wv1WUKyMKs9B9y0wuoMJH1Kt9/wVXP2KP5La5/CsIE4nVBhCeEITkr32C
++P1h5WzkMYQHQeawnKIi89kfvAe37Ex+OEKF9sE8TwYp/mwBzGdMIDKUnzfrCxkj
+UNSYeuUYSZo2g6HgcpubrdrCmbAqwX7iust31eZHQIyWJvg2zj6+BQBnhF/XA0eh
+vqb+8f1CESdLDU+l3gZ4TC6ZAXPj90QKFGJc9RTBgSZLWlwSxSNsUFTMQ2XMhJjC
+3n2lb1XHAgMBAAECggEAFVK4oTY5sNyghCV3zQwPt7fFw+T5XMkxliCmh+TdX/+a
+HPfcrzzSKPTMuVllL8UmD3nkS+f2+b2iST1U6rppcHeugXU7jcqnBvuLvIyZnxIh
+FYUK/Qzk8QFcd0yz2ayrDYTzr7YWfg/FmDwC6gNUQfGyoFDonP4Y+4hPAUJKkMZY
+OJ/mqXkmcesokIPqO003sPjKBmk2m9dAoeMbb6a9OMh8K2oJXxqmb5XBmNcxDiqZ
+lS9m1DhIeFsxsDjaq6WlcLqgfxN2yOFYgzi1CEiz8oVir0I0Ek6cmI2OwrR+Lg4z
+KsMuqh+B48mmA6Reu2AH5HuB0YT3RKHDcirW8IpZgQKBgQDyaW9QDx8OXjOqAcSi
+buWZxedb4TouG2FyXegpWG7CsKdNrNn/ay8LWoboF0EAZ/frxStrJJqhpqOU1EIe
+xl8gJPSKmFJ8O469pvhS+7Uv/ZaJzXNsg3+u/FEQoipJWVMrKFcckj+Ubd7M9nst
+Rr9nzwIik7hXX6o0C3EbkdOdRwKBgQDmdzTL80gzUIpHrm7jc3X2/nofg0+6rBuR
++hcpHGt8wSggr429CbOuOoxOIqts7FGHxTBjPRlhBrsRznciOCb0mxm54k5Wz3tH
+kr4pmKBbrj9weDBFlHqR9zo1wr0lH2JsmPcVfGzH0Ngbg4LMYYe2CXhmq88MM9fP
+zPvrvwDDgQKBgBInazqnpz/ANkZJE5zGiVNWytjKqTzCuC2EctqF0OWrrRvYEgta
+z48eHHRNKYUKRDrX7UR83Ue13xJKQxli6cTSf63RcnvzSeFSG867IvqRFzECvd4m
+iu1j3/5K5rfPhLb6smtlWHWZNNJMszTU04jGq/ZC8c85TtnO8Y2LAjoJAoGBAIgl
+y+7gXbrSzZ3jEmcUApBTbVnIfQVOP0tRbvU+cNFWWppUm2sdnCRFOjW+jX7fbJrE
+hv1ZTvDexQyT6BUzDvBZ4CzL4HOwRqfVrLluDO2cVqXemsXAHVi1sJGp5YtUqxR0
+mSL8SlcQrVozqsWKqF2F4rbksIAI8Gk2M2zlfVIBAoGABxNY0kLfUcWgN91cmqZu
+DlSpsyyYOZgEXnjskHgHWD3MtvLH7wjU6o53qTAu/cuE6KNpmGPa0Ocmdu/9rQEA
+FpGm81Nl8LPy1Tjs4rbPHKnr6Xtmccy/w/ycEsXJ27l/KNVLdTWVaubjtH9NtL9r
+kz/j4Dya2YiNZ90opmAWlO8=
+-----END PRIVATE KEY-----
+
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: 
+- Copia la clave COMPLETA con los saltos de línea
+- NO añadas espacios extra al principio o al final
+- Railway detectará automáticamente los saltos de línea
+
+═══════════════════════════════════════════════════════════════
+
+DESPUÉS DE CONFIGURAR LAS VARIABLES:
+
+1. Railway redesplegará automáticamente (2-3 minutos)
+2. Ve a Logs y busca: "✅ Google Analytics Data API inicializada"
+3. Si ves eso = ¡Funciona! 🎉
+4. Si ves "⚠️ Google Analytics no configurado" = Revisa las variables
+
+═══════════════════════════════════════════════════════════════
+
