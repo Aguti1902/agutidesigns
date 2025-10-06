@@ -2049,7 +2049,7 @@
     </div>
 
     <!-- Widget de Chat Flotante -->
-    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none;">
+    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: block;">
         <div id="chatButton" onclick="toggleChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 70, 254, 0.4); transition: all 0.3s ease;">
             <span id="chatButtonIcon" style="font-size: 1.8rem;">💬</span>
         </div>
@@ -2718,6 +2718,38 @@
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
+            
+            // 🔄 Restaurar última sección visitada (si existe)
+            const lastSection = localStorage.getItem('lastSection');
+            if (lastSection && document.getElementById(lastSection)) {
+                console.log('📍 Restaurando última sección visitada:', lastSection);
+                
+                // Ocultar todas las secciones
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Quitar active de todos los botones
+                document.querySelectorAll('.sidebar-menu button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Activar la sección guardada
+                document.getElementById(lastSection).classList.add('active');
+                
+                // Activar el botón correspondiente
+                const sectionButton = document.querySelector(`.sidebar-menu button[onclick="showSection('${lastSection}')"]`);
+                if (sectionButton) {
+                    sectionButton.classList.add('active');
+                }
+                
+                // Cargar contenido específico si es necesario
+                if (lastSection === 'contactar') {
+                    loadClientTickets();
+                } else if (lastSection === 'estadisticas') {
+                    loadGoogleAnalyticsData();
+                }
+            }
         }
 
         // Logout
@@ -2746,6 +2778,9 @@
 
             // Marcar botón activo
             event.target.closest('button').classList.add('active');
+            
+            // 💾 Guardar última sección visitada en localStorage
+            localStorage.setItem('lastSection', sectionId);
             
             // Cargar contenido específico según la sección
             if (sectionId === 'contactar') {
@@ -5287,9 +5322,7 @@
 
         // Abrir chat desde botón de la sección
         function openChatWidget() {
-            // Mostrar el widget si está oculto
-            document.getElementById('chatWidget').style.display = 'block';
-            // Abrir el chat
+            // Abrir el chat (el widget ya está siempre visible)
             if (!chatOpen) {
                 toggleChat();
             }
@@ -5390,10 +5423,7 @@
             }
         });
 
-        // Mostrar widget de chat solo para clientes con plan
-        if (currentClient && currentClient.plan && currentClient.plan !== 'null') {
-            document.getElementById('chatWidget').style.display = 'block';
-        }
+        // Widget de chat siempre visible (se maneja en el HTML con display: block)
 
         // ===== ACTUALIZACIÓN AUTOMÁTICA DE TICKETS =====
         let autoUpdateInterval = null;
