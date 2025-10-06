@@ -2573,6 +2573,7 @@ app.get('/api/admin/fix-corrupted-data', async (req, res) => {
                 try {
                     JSON.parse(submission.purpose);
                 } catch (e) {
+                    console.log(`🔧 [FIX] Corrigiendo purpose: "${submission.purpose}"`);
                     const fixedValue = JSON.stringify([submission.purpose]);
                     updates.push(`purpose = $${paramCount++}`);
                     values.push(fixedValue);
@@ -3602,14 +3603,47 @@ app.get('/api/check-domain/:domain', async (req, res) => {
             }
         }
         
-        // Fallback: WHOIS público
-        console.log('🔄 [DOMAIN] Usando WHOIS público como fallback...');
+        // Fallback 1: DNS Checker (más confiable)
+        console.log('🔄 [DOMAIN] Usando DNS checker como fallback...');
+        
+        try {
+            const dnsResponse = await fetch(`https://dns.google/resolve?name=${cleanDomain}&type=A`);
+            
+            if (dnsResponse.ok) {
+                const dnsData = await dnsResponse.json();
+                
+                console.log('📡 [DOMAIN] DNS response:', dnsData);
+                
+                // Si tiene registros A, el dominio está registrado y activo
+                const isRegistered = dnsData.Answer && dnsData.Answer.length > 0;
+                
+                console.log(`✅ [DOMAIN] DNS check - Registrado: ${isRegistered}`);
+                
+                return res.json({
+                    domain: cleanDomain,
+                    available: !isRegistered,
+                    price: !isRegistered ? '12-15 €/año' : 'N/A',
+                    currency: 'EUR',
+                    registrar: isRegistered ? 'Registrado (activo)' : 'N/A',
+                    source: 'dns'
+                });
+            }
+        } catch (dnsError) {
+            console.warn('⚠️ [DOMAIN] DNS fallback falló:', dnsError.message);
+        }
+        
+        // Fallback 2: WHOIS público
+        console.log('🔄 [DOMAIN] Intentando WHOIS como último recurso...');
         
         try {
             const whoisResponse = await fetch(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=at_free&domainName=${cleanDomain}&outputFormat=JSON`);
             
+            console.log('📡 [DOMAIN] WHOIS status:', whoisResponse.status);
+            
             if (whoisResponse.ok) {
                 const whoisData = await whoisResponse.json();
+                
+                console.log('📡 [DOMAIN] WHOIS data keys:', Object.keys(whoisData));
                 
                 // Si el dominio está registrado, WhoisRecord existirá
                 const isRegistered = whoisData.WhoisRecord && whoisData.WhoisRecord.registryData;
@@ -3624,6 +3658,8 @@ app.get('/api/check-domain/:domain', async (req, res) => {
                     registrar: isRegistered ? (whoisData.WhoisRecord.registrarName || 'Desconocido') : 'N/A',
                     source: 'whois'
                 });
+            } else {
+                console.warn(`⚠️ [DOMAIN] WHOIS HTTP error: ${whoisResponse.status}`);
             }
         } catch (whoisError) {
             console.warn('⚠️ [DOMAIN] WHOIS público falló:', whoisError.message);

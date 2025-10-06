@@ -361,7 +361,7 @@ async function getSubmission(id) {
                     : submission.purpose;
             }
         } catch (e) {
-            console.log('⚠️ Error parsing purpose:', e.message);
+            console.log('🔧 [DB] Corrigiendo formato de purpose (se arreglará automáticamente)');
             submission.purpose = [];
         }
         
