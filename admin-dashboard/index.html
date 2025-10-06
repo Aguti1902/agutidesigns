@@ -1392,7 +1392,12 @@
                     <label>Notas</label>
                     <textarea id="projectNotes" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Crear Proyecto</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Crear Proyecto</button>
+                    <button type="button" id="deployWebButton" class="btn-secondary" style="flex: 1; background: #10B981; display: none;" onclick="deployWebFromProject()">
+                        🚀 Crear en Webs Desplegadas
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -2116,7 +2121,7 @@
                                                     <a href="${img}" download="imagen-${index + 1}.png" style="display: inline-block; margin-top: 8px; color: #0046FE; text-decoration: none; font-size: 0.8rem;">💾 Descargar</a>
                                                     <a href="${img}" target="_blank" style="display: inline-block; margin-top: 8px; margin-left: 8px; color: #0046FE; text-decoration: none; font-size: 0.8rem;">🔍 Ver</a>
                                                 </div>
-                                            `).join('');
+                `).join('');
                                         }
                                         return '<p style="color: #999; font-size: 0.9rem; grid-column: 1/-1;">No se subieron imágenes adicionales</p>';
                                     })() : ''}
@@ -2437,33 +2442,14 @@
                 
                 console.log('📊 [ADMIN] Total de clientes:', clients.length);
                 
-                // Obtenemos todos los proyectos para verificar cuáles ya existen
-                const projectsResponse = await fetch(`${API_URL}/api/admin/projects`);
-                const projects = await projectsResponse.json();
-                console.log('📋 [ADMIN] Total de proyectos:', projects.length);
-                
-                // Crear un mapa de client_id -> project
-                const clientProjectMap = {};
-                projects.forEach(project => {
-                    if (project.client_id) {
-                        clientProjectMap[project.client_id] = project;
+                // Filtramos solo los que tienen un plan activo (pagaron)
+                allWebsData = clients.filter(client => {
+                    const hasPlan = client.plan && client.plan !== 'sin_plan';
+                    if (hasPlan) {
+                        console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
                     }
+                    return hasPlan;
                 });
-                
-                // Filtramos solo los que tienen un plan activo (pagaron) y añadimos info del proyecto
-                allWebsData = clients
-                    .filter(client => {
-                        const hasPlan = client.plan && client.plan !== 'sin_plan';
-                        if (hasPlan) {
-                            console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
-                        }
-                        return hasPlan;
-                    })
-                    .map(client => ({
-                        ...client,
-                        hasProject: !!clientProjectMap[client.id],
-                        projectId: clientProjectMap[client.id]?.id || null
-                    }));
                 
                 console.log('🎯 [ADMIN] Clientes con plan para gestionar:', allWebsData.length);
                 
@@ -2591,15 +2577,6 @@
                                     🚀 Activar Web
                                 </button>
                             ` : ''}
-                            ${web.hasProject ? `
-                                <button class="btn-web-action" style="background: #6c757d; cursor: not-allowed; opacity: 0.6;" disabled title="Proyecto ya creado">
-                                    ✅ Proyecto Creado
-                                </button>
-                            ` : `
-                                <button class="btn-web-action" onclick="createProjectForClient(${web.id}, '${web.business_name || web.full_name}', '${web.plan}')" style="background: #FF6B35; font-weight: 600;">
-                                    ➕ Crear Proyecto
-                                </button>
-                            `}
                         </div>
                     </div>
                 `;
@@ -2804,69 +2781,70 @@
             }
         }
 
-        async function createProjectForClient(clientId, clientName, plan) {
-            const displayName = clientName || 'el cliente';
+        async function deployWebFromProject() {
+            const form = document.getElementById('projectForm');
+            const clientId = form.dataset.clientId;
+            const projectName = document.getElementById('projectName').value;
+            
+            if (!clientId) {
+                showNotification('No se pudo identificar el cliente', 'error');
+                return;
+            }
             
             const confirmed = await showConfirmation(
-                `➕ ¿Crear proyecto para "${displayName}"?\n\n` +
-                `Plan: ${formatPlan(plan)}\n\n` +
-                `El proyecto aparecerá en el Kanban en la columna "Sin empezar".`
+                `🚀 ¿Crear "${projectName}" en Webs Desplegadas?\n\n` +
+                `Esta acción:\n` +
+                `• Creará una entrada en la sección "Webs Desplegadas"\n` +
+                `• Permitirá configurar el enlace de WordPress\n` +
+                `• Solo se puede hacer una vez por proyecto\n\n` +
+                `¿Continuar?`
             );
             
             if (!confirmed) {
-                console.log('⚠️ [ADMIN] Creación de proyecto cancelada');
+                console.log('⚠️ [ADMIN] Despliegue cancelado');
                 return;
             }
             
             try {
-                console.log(`➕ [ADMIN] Creando proyecto para cliente #${clientId}`);
+                console.log(`🚀 [ADMIN] Desplegando web para cliente #${clientId}`);
                 
-                // Calcular deadline automático según el plan
-                const deadlineDays = { basico: 5, avanzado: 7, premium: 10 };
-                const daysToAdd = deadlineDays[plan] || 5;
-                const deadline = new Date();
-                deadline.setDate(deadline.getDate() + daysToAdd);
-                const deadlineFormatted = deadline.toISOString().split('T')[0];
-                
-                // Crear proyecto
-                const response = await fetch(`${API_URL}/api/admin/projects`, {
-                    method: 'POST',
+                // Crear entrada en "Webs Desplegadas" agregando un placeholder en wordpress_url
+                const response = await fetch(`${API_URL}/api/admin/website-management/${clientId}`, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        client_id: clientId,
-                        project_name: displayName,
-                        plan: plan,
-                        status: 'sin_empezar',
-                        priority: 'normal',
-                        deadline: deadlineFormatted,
-                        progress: 0,
-                        notes: `Proyecto creado manualmente desde Webs Desplegadas. Plan: ${plan}. Pago confirmado.`
+                        wordpress_url: 'PENDIENTE', // Marcador para indicar que está en proceso
+                        website_screenshot_url: null
                     })
                 });
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Error creando proyecto');
+                    throw new Error('Error al crear entrada en Webs Desplegadas');
                 }
                 
-                const result = await response.json();
-                console.log('✅ [ADMIN] Proyecto creado:', result);
+                console.log('✅ [ADMIN] Entrada creada en Webs Desplegadas');
                 
                 showNotification(
-                    `🎉 ¡Proyecto creado!\n\n` +
-                    `✅ Proyecto #${result.projectId} añadido al Kanban\n` +
-                    `📅 Fecha límite: ${deadlineFormatted}\n` +
-                    `📋 Estado: Sin empezar`,
+                    `🎉 ¡Web desplegada!\n\n` +
+                    `✅ "${projectName}" ahora aparece en Webs Desplegadas\n` +
+                    `📝 Ve a "Webs Desplegadas" para configurar WordPress`,
                     'success'
                 );
                 
-                // Recargar webs desplegadas
-                await loadWebsDesplegadas();
+                // Actualizar el botón a estado deshabilitado
+                const deployButton = document.getElementById('deployWebButton');
+                deployButton.disabled = true;
+                deployButton.style.opacity = '0.5';
+                deployButton.style.cursor = 'not-allowed';
+                deployButton.textContent = '✅ Ya Desplegado';
+                
+                // Actualizar el clientId en el dataset para reflejar el cambio
+                form.dataset.wordpressConfigured = 'true';
                 
             } catch (error) {
-                console.error('❌ [ADMIN] Error creando proyecto:', error);
+                console.error('❌ [ADMIN] Error desplegando web:', error);
                 showNotification(
-                    'Error al crear proyecto: ' + error.message,
+                    'Error al desplegar la web: ' + error.message,
                     'error'
                 );
             }
@@ -3202,9 +3180,43 @@
                     console.warn(`⚠️ [ADMIN] El cliente no se asignó correctamente. Esperado: ${project.client_id}, Actual: ${selectedClientId}`);
                 }
                 
+                // 4️⃣ Obtener datos del cliente para verificar si ya tiene WordPress configurado
+                let clientHasWordPress = false;
+                if (project.client_id) {
+                    try {
+                        const clientResponse = await fetch(`${API_URL}/api/clients/${project.client_id}`);
+                        const clientData = await clientResponse.json();
+                        clientHasWordPress = !!(clientData.wordpress_url);
+                        console.log(`🔍 [ADMIN] Cliente tiene WordPress configurado: ${clientHasWordPress ? 'SÍ' : 'NO'}`);
+                    } catch (err) {
+                        console.warn('⚠️ [ADMIN] No se pudo obtener datos del cliente:', err);
+                    }
+                }
+                
+                // 5️⃣ Mostrar/ocultar botón "Crear en Webs Desplegadas"
+                const deployButton = document.getElementById('deployWebButton');
+                if (clientHasWordPress) {
+                    // Ya tiene WordPress configurado - botón deshabilitado
+                    deployButton.style.display = 'block';
+                    deployButton.disabled = true;
+                    deployButton.style.opacity = '0.5';
+                    deployButton.style.cursor = 'not-allowed';
+                    deployButton.textContent = '✅ Ya Desplegado';
+                    deployButton.title = 'Este proyecto ya tiene WordPress configurado';
+                } else {
+                    // No tiene WordPress - botón activo
+                    deployButton.style.display = 'block';
+                    deployButton.disabled = false;
+                    deployButton.style.opacity = '1';
+                    deployButton.style.cursor = 'pointer';
+                    deployButton.textContent = '🚀 Crear en Webs Desplegadas';
+                    deployButton.title = 'Configurar WordPress y activar la web';
+                }
+                
                 // Cambiar el formulario a modo edición
                 const form = document.getElementById('projectForm');
                 form.dataset.projectId = projectId;
+                form.dataset.clientId = project.client_id; // Guardar client_id para el botón
                 form.dataset.mode = 'edit';
                 
                 // Cambiar título del modal
@@ -3221,9 +3233,14 @@
         function openNewProjectModal() {
             const form = document.getElementById('projectForm');
             delete form.dataset.projectId;
+            delete form.dataset.clientId;
             delete form.dataset.mode;
             form.reset();
             document.querySelector('#projectModal .modal-header h3').textContent = '🌐 Nuevo Proyecto';
+            
+            // Ocultar botón "Crear en Webs Desplegadas" en modo creación
+            document.getElementById('deployWebButton').style.display = 'none';
+            
             document.getElementById('projectModal').classList.add('active');
             loadClientsForSelect();
         }
