@@ -883,6 +883,30 @@
         .btn-filter:active {
             transform: translateY(0) !important;
         }
+
+        /* Header de usuario admin */
+        .admin-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-header-logout:hover {
+            background: #e5e7eb !important;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -961,6 +985,17 @@
 
             <!-- MAIN CONTENT -->
             <div class="main-content">
+                <!-- HEADER DE USUARIO ADMIN -->
+                <div class="admin-header">
+                    <div>
+                        <h2 id="adminUserName" style="font-size: 1.5rem; font-weight: 700; color: #1a1a1a; margin-bottom: 5px;">Administrador</h2>
+                        <p id="adminUserRole" style="color: #666; font-size: 0.95rem; margin: 0;">Panel de Administración</p>
+                    </div>
+                    <button onclick="logout()" class="admin-header-logout" style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                        🚪 Cerrar Sesión
+                    </button>
+                </div>
+
                 <!-- SECCIÓN: ESTADÍSTICAS -->
                 <div class="section active" id="section-estadisticas">
                     <div class="content-header">
@@ -1667,8 +1702,29 @@
 
         // ===== CARGAR DASHBOARD =====
         async function loadDashboard() {
+            // Cargar información del admin
+            loadAdminInfo();
+            
             await loadStats();
             await loadProjects();
+        }
+
+        // ===== CARGAR INFORMACIÓN DEL ADMIN =====
+        function loadAdminInfo() {
+            try {
+                const adminSession = localStorage.getItem('adminSession');
+                if (adminSession) {
+                    const session = JSON.parse(adminSession);
+                    
+                    // Actualizar nombre del admin
+                    const userName = session.username || 'Administrador';
+                    document.getElementById('adminUserName').textContent = userName;
+                    
+                    console.log('👤 [ADMIN] Información de usuario cargada:', userName);
+                }
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando info del usuario:', error);
+            }
         }
 
         // ===== CARGAR ESTADÍSTICAS =====
