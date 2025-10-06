@@ -938,6 +938,10 @@
                         <span class="icon">🚀</span>
                         <span>Webs Desplegadas</span>
                     </div>
+                    <div class="nav-item" onclick="showSection('facturas')">
+                        <span class="icon">🧾</span>
+                        <span>Facturas</span>
+                    </div>
                 </div>
 
                 <div class="sidebar-footer">
@@ -1276,6 +1280,70 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- SECCIÓN: FACTURAS -->
+                <div class="section" id="section-facturas">
+                    <div class="content-header">
+                        <h1>🧾 Facturas</h1>
+                        <p>Gestiona todas las facturas de Stripe</p>
+                    </div>
+
+                    <!-- Filtros y Estadísticas -->
+                    <div class="dashboard-stats" style="margin-bottom: 20px;">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalInvoices">0</div>
+                            <div class="stat-label">Total Facturas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="paidInvoices" style="color: #10B981;">0</div>
+                            <div class="stat-label">Pagadas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="pendingInvoices" style="color: #F59E0B;">0</div>
+                            <div class="stat-label">Pendientes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalRevenue" style="color: #0046FE;">0€</div>
+                            <div class="stat-label">Ingresos Totales</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Facturas -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Lista de Facturas</h2>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-primary" onclick="loadAllInvoices()">🔄 Actualizar</button>
+                                <button class="btn-secondary" onclick="exportInvoices()">📥 Exportar CSV</button>
+                            </div>
+                        </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nº Factura</th>
+                                <th>Cliente</th>
+                                <th>Empresa</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTable">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px;">
+                                    <div class="loader">
+                                        <div class="spinner"></div>
+                                        <p>Cargando facturas...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1514,6 +1582,9 @@
                     break;
                 case 'webs-desplegadas':
                     loadWebsDesplegadas();
+                    break;
+                case 'facturas':
+                    loadAllInvoices();
                     break;
             }
         }
@@ -2848,6 +2919,121 @@
                     'error'
                 );
             }
+        }
+
+        // ===== FACTURAS =====
+        let allInvoicesData = [];
+
+        async function loadAllInvoices() {
+            try {
+                console.log('🧾 [ADMIN] Cargando todas las facturas...');
+                
+                const tbody = document.getElementById('invoicesTable');
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><div class="loader"><div class="spinner"></div><p>Cargando facturas...</p></div></td></tr>';
+                
+                const response = await fetch(`${API_URL}/api/admin/invoices`);
+                const data = await response.json();
+                
+                allInvoicesData = data.invoices || [];
+                console.log(`✅ [ADMIN] ${allInvoicesData.length} facturas cargadas`);
+                
+                // Actualizar estadísticas
+                const totalInvoices = allInvoicesData.length;
+                const paidInvoices = allInvoicesData.filter(inv => inv.status === 'paid').length;
+                const pendingInvoices = allInvoicesData.filter(inv => inv.status === 'open').length;
+                const totalRevenue = allInvoicesData
+                    .filter(inv => inv.status === 'paid')
+                    .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+                
+                document.getElementById('totalInvoices').textContent = totalInvoices;
+                document.getElementById('paidInvoices').textContent = paidInvoices;
+                document.getElementById('pendingInvoices').textContent = pendingInvoices;
+                document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)}€`;
+                
+                // Renderizar tabla
+                if (allInvoicesData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No hay facturas disponibles</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = allInvoicesData.map(invoice => {
+                    const date = new Date(invoice.created).toLocaleDateString('es-ES', { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: 'numeric' 
+                    });
+                    
+                    const statusColors = {
+                        'paid': { badge: 'success', text: 'Pagada' },
+                        'open': { badge: 'warning', text: 'Pendiente' },
+                        'void': { badge: 'secondary', text: 'Anulada' },
+                        'uncollectible': { badge: 'danger', text: 'Impagada' }
+                    };
+                    
+                    const status = statusColors[invoice.status] || { badge: 'secondary', text: invoice.status };
+                    
+                    return `
+                        <tr>
+                            <td><strong>${invoice.number}</strong></td>
+                            <td>${invoice.client_name || 'N/A'}</td>
+                            <td>${invoice.client_business || invoice.client_email || 'N/A'}</td>
+                            <td><strong>${invoice.amount}€</strong></td>
+                            <td><span class="badge badge-${status.badge}">${status.text}</span></td>
+                            <td>${date}</td>
+                            <td>
+                                ${invoice.pdf_url ? `
+                                    <a href="${invoice.pdf_url}" target="_blank" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none; display: inline-block;">
+                                        📥 PDF
+                                    </a>
+                                ` : '<span style="color: #999;">N/A</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando facturas:', error);
+                const tbody = document.getElementById('invoicesTable');
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">Error al cargar las facturas</td></tr>';
+            }
+        }
+
+        function exportInvoices() {
+            if (allInvoicesData.length === 0) {
+                showNotification('No hay facturas para exportar', 'error');
+                return;
+            }
+            
+            console.log('📥 [ADMIN] Exportando facturas a CSV...');
+            
+            // Crear CSV
+            const headers = ['Nº Factura', 'Cliente', 'Empresa', 'Email', 'Monto', 'Moneda', 'Estado', 'Fecha', 'PDF URL'];
+            const rows = allInvoicesData.map(inv => [
+                inv.number,
+                inv.client_name || '',
+                inv.client_business || '',
+                inv.client_email || '',
+                inv.amount,
+                inv.currency,
+                inv.status,
+                new Date(inv.created).toLocaleDateString('es-ES'),
+                inv.pdf_url || ''
+            ]);
+            
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+            
+            // Descargar archivo
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `facturas_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            console.log('✅ [ADMIN] CSV descargado');
+            showNotification('Facturas exportadas correctamente', 'success');
         }
 
         // Event listeners para filtros
