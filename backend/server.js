@@ -2830,6 +2830,149 @@ app.post('/api/client/change-plan', async (req, res) => {
 });
 
 // ========================================
+// FACTURAS - STRIPE INVOICES
+// ========================================
+
+// Obtener facturas de un cliente específico
+app.get('/api/client/invoices/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        console.log(`🧾 [INVOICES] Obteniendo facturas para cliente #${clientId}`);
+        
+        // Obtener datos del cliente
+        const client = await db.getClientById(clientId);
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        if (!client.stripe_customer_id) {
+            console.log('⚠️ [INVOICES] Cliente sin stripe_customer_id');
+            return res.json({ invoices: [] });
+        }
+        
+        // Obtener facturas de Stripe
+        const invoices = await stripe.invoices.list({
+            customer: client.stripe_customer_id,
+            limit: 100
+        });
+        
+        console.log(`✅ [INVOICES] ${invoices.data.length} facturas encontradas`);
+        
+        // Formatear datos
+        const formattedInvoices = invoices.data.map(invoice => ({
+            id: invoice.id,
+            number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+            amount: (invoice.amount_paid / 100).toFixed(2),
+            currency: invoice.currency.toUpperCase(),
+            status: invoice.status,
+            created: new Date(invoice.created * 1000).toISOString(),
+            pdf_url: invoice.invoice_pdf,
+            hosted_invoice_url: invoice.hosted_invoice_url,
+            period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+            period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
+        }));
+        
+        res.json({ invoices: formattedInvoices });
+        
+    } catch (error) {
+        console.error('❌ [INVOICES] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener todas las facturas (Admin)
+app.get('/api/admin/invoices', async (req, res) => {
+    try {
+        console.log('🧾 [ADMIN] Obteniendo todas las facturas...');
+        
+        // Obtener todos los clientes con Stripe
+        const clients = await db.getAllClients();
+        const clientsWithStripe = clients.filter(c => c.stripe_customer_id);
+        
+        console.log(`📊 [ADMIN] ${clientsWithStripe.length} clientes con Stripe`);
+        
+        let allInvoices = [];
+        
+        // Obtener facturas de cada cliente
+        for (const client of clientsWithStripe) {
+            try {
+                const invoices = await stripe.invoices.list({
+                    customer: client.stripe_customer_id,
+                    limit: 100
+                });
+                
+                const formattedInvoices = invoices.data.map(invoice => ({
+                    id: invoice.id,
+                    number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+                    amount: (invoice.amount_paid / 100).toFixed(2),
+                    currency: invoice.currency.toUpperCase(),
+                    status: invoice.status,
+                    created: new Date(invoice.created * 1000).toISOString(),
+                    pdf_url: invoice.invoice_pdf,
+                    hosted_invoice_url: invoice.hosted_invoice_url,
+                    period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+                    period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
+                    // Datos del cliente
+                    client_id: client.id,
+                    client_name: client.full_name,
+                    client_email: client.email,
+                    client_business: client.business_name
+                }));
+                
+                allInvoices = allInvoices.concat(formattedInvoices);
+            } catch (err) {
+                console.warn(`⚠️ [ADMIN] Error obteniendo facturas de cliente #${client.id}:`, err.message);
+            }
+        }
+        
+        // Ordenar por fecha descendente
+        allInvoices.sort((a, b) => new Date(b.created) - new Date(a.created));
+        
+        console.log(`✅ [ADMIN] ${allInvoices.length} facturas totales encontradas`);
+        
+        res.json({ invoices: allInvoices });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
+// PERFIL DE USUARIO
+// ========================================
+
+// Actualizar datos de perfil del cliente
+app.patch('/api/client/profile/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { full_name, email, phone, address } = req.body;
+        
+        console.log(`👤 [PROFILE] Actualizando perfil del cliente #${clientId}`);
+        
+        // Actualizar en base de datos
+        await db.pool.query(
+            `UPDATE clients 
+             SET full_name = $1, 
+                 email = $2, 
+                 phone = $3, 
+                 address = $4,
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $5`,
+            [full_name, email, phone, address, clientId]
+        );
+        
+        console.log(`✅ [PROFILE] Perfil actualizado correctamente`);
+        
+        res.json({ success: true, message: 'Perfil actualizado correctamente' });
+        
+    } catch (error) {
+        console.error('❌ [PROFILE] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
 // ENDPOINT TEMPORAL: ARREGLAR PEDIDOS EXISTENTES
 // ========================================
 
