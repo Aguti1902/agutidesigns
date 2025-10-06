@@ -4973,22 +4973,17 @@
                 // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
                 const tickets = allTickets.filter(ticket => ticket.category !== 'facturacion');
                 
-                console.log('🎫 [CLIENT] Tickets después de filtrar facturación:', tickets.length);
+                // 📅 ORDENAR: Más recientes primero (orden cronológico descendente)
+                tickets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 
-                // Contar mensajes sin leer
+                console.log('🎫 [CLIENT] Tickets después de filtrar y ordenar:', tickets.length);
+                
+                // 🔔 Contar mensajes sin leer
                 const unreadCount = tickets.filter(t => t.client_unread === 1).length;
                 console.log('🔔 [CLIENT] Mensajes sin leer:', unreadCount);
                 
-                // Actualizar badge en el menú
-                const badge = document.getElementById('unreadBadgeMenu');
-                if (badge) {
-                    if (unreadCount > 0) {
-                        badge.textContent = unreadCount;
-                        badge.style.display = 'inline-block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
+                // Actualizar badges en el menú
+                updateUnreadBadge(unreadCount);
                 
                 displayClientTickets(tickets);
             } catch (error) {
@@ -5049,23 +5044,26 @@
                 if (ticket.status === 'cerrado') {
                     conversationStatus = '<span style="color: #666; font-size: 0.85rem;">✅ Conversación cerrada</span>';
                 } else if (hasUnreadMessage) {
-                    conversationStatus = '<span style="color: #0046FE; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px;"><span style="background: #0046FE; width: 8px; height: 8px; border-radius: 50%; display: inline-block;"></span>Mensaje nuevo sin leer</span>';
+                    conversationStatus = '<span style="color: #0046FE; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 5px;"><span style="background: #0046FE; width: 10px; height: 10px; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>⚡ Mensaje nuevo sin leer</span>';
                 } else if (hasResponse) {
                     conversationStatus = '<span style="color: #009A62; font-size: 0.85rem; font-weight: 600;">💬 Respuesta enviada</span>';
                 } else {
                     conversationStatus = '<span style="color: #999; font-size: 0.85rem;">⏳ Esperando respuesta</span>';
                 }
                 
-                // Highlight del card si hay mensaje sin leer
+                // 🔵 Highlight del card si hay mensaje sin leer con gradiente y borde
                 const cardStyle = hasUnreadMessage 
-                    ? 'cursor: pointer; transition: all 0.3s; border: 2px solid #0046FE; background: #e8f4ff;' 
+                    ? 'cursor: pointer; transition: all 0.3s; border: 3px solid #0046FE; background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%); box-shadow: 0 4px 12px rgba(0, 70, 254, 0.2); transform: scale(1.01);' 
                     : 'cursor: pointer; transition: all 0.3s; border: 2px solid #e8eaed;';
 
                 return `
                     <div class="card" style="${cardStyle}" onclick="viewClientTicket(${ticket.id})">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                             <div style="flex: 1;">
-                                <h3 style="color: #0046FE; margin: 0 0 8px 0; font-size: 1.1rem;">Ticket #${ticket.id}</h3>
+                                <h3 style="color: #0046FE; margin: 0 0 8px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                    Ticket #${ticket.id}
+                                    ${hasUnreadMessage ? '<span style="color: #0046FE; font-size: 1.3rem; animation: pulse 2s infinite;">●</span>' : ''}
+                                </h3>
                                 <p style="margin: 0; font-size: 1rem; font-weight: 600; color: #1B1B1B;">${ticket.subject}</p>
                             </div>
                             <div style="display: flex; gap: 8px;">

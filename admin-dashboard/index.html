@@ -1802,8 +1802,10 @@
                 // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
                 const tickets = allTickets.filter(ticket => ticket.category !== 'facturacion');
                 
-                console.log('🎫 [ADMIN] Tickets después de filtrar:', tickets.length, 'tickets');
-                console.log('🎫 [ADMIN] Datos:', tickets);
+                // 📅 ORDENAR: Más recientes primero (orden cronológico descendente)
+                tickets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                console.log('🎫 [ADMIN] Tickets después de filtrar y ordenar:', tickets.length, 'tickets');
 
                 const tbody = document.getElementById('ticketsTable');
                 
@@ -1814,9 +1816,11 @@
                 }
 
                 tbody.innerHTML = tickets.map(ticket => {
-                    // Determinar si hay mensaje sin leer del cliente
+                    // 🔵 Determinar si hay mensaje sin leer del cliente
                     const hasUnreadMessage = ticket.admin_unread === 1;
-                    const rowStyle = hasUnreadMessage ? 'background: #e8f4ff; font-weight: 600;' : '';
+                    const rowStyle = hasUnreadMessage 
+                        ? 'background: linear-gradient(to right, #e8f4ff 0%, #f0f8ff 100%); border-left: 4px solid #0046FE; font-weight: 500; transition: all 0.3s;' 
+                        : 'transition: all 0.3s;';
                     
                     // Badge de prioridad con colores correctos
                     const priorityColors = {
@@ -1835,39 +1839,59 @@
                     const statusBadge = statusColors[ticket.status] || 'secondary';
                     
                     return `
-                        <tr style="${rowStyle}">
-                            <td><strong>#${ticket.id}</strong> ${hasUnreadMessage ? '<span style="color: #0046FE; font-size: 1.2rem;">●</span>' : ''}</td>
+                        <tr style="${rowStyle}" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='${hasUnreadMessage ? 'linear-gradient(to right, #e8f4ff 0%, #f0f8ff 100%)' : ''}'">
+                            <td>
+                                <strong>#${ticket.id}</strong> 
+                                ${hasUnreadMessage ? '<span style="color: #0046FE; font-size: 1.3rem; margin-left: 5px; animation: pulse 2s infinite;">●</span>' : ''}
+                            </td>
                             <td>${ticket.client_name || 'N/A'}</td>
-                            <td>${ticket.subject}</td>
+                            <td>
+                                ${ticket.subject}
+                                ${hasUnreadMessage ? '<span style="display: block; color: #0046FE; font-size: 0.75rem; margin-top: 3px; font-weight: 600;">⚡ Nuevo mensaje</span>' : ''}
+                            </td>
                             <td><span class="badge badge-info">${ticket.category}</span></td>
                             <td><span class="badge badge-${priorityBadge}">${ticket.priority}</span></td>
                             <td><span class="badge badge-${statusBadge}">${ticket.status}</span></td>
                             <td>${formatDate(ticket.created_at)}</td>
-                            <td><button class="btn-secondary" onclick="viewTicket(${ticket.id})" ${hasUnreadMessage ? 'style="background: #0046FE; color: white; font-weight: 600;"' : ''}>Ver${hasUnreadMessage ? ' ●' : ''}</button></td>
+                            <td>
+                                <button 
+                                    class="btn-secondary" 
+                                    onclick="viewTicket(${ticket.id})" 
+                                    style="${hasUnreadMessage ? 'background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); color: white; font-weight: 600; border: none; box-shadow: 0 4px 8px rgba(0, 70, 254, 0.3);' : ''}"
+                                >
+                                    ${hasUnreadMessage ? '👁️ Ver Nuevo' : 'Ver'}
+                                </button>
+                            </td>
                         </tr>
                     `;
                 }).join('');
                 
-                // Contar mensajes sin leer del admin
+                // 🔔 Contar mensajes sin leer del admin
                 const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
                 console.log('🔔 [ADMIN] Mensajes sin leer:', unreadCount);
                 
-                // Actualizar badge en el menú
-                const badge = document.getElementById('unreadBadgeMenuAdmin');
-                if (badge) {
-                    if (unreadCount > 0) {
-                        badge.textContent = unreadCount;
-                        badge.style.display = 'inline-block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
+                // Actualizar badge del menú "Tickets"
+                updateAdminTicketsBadge(unreadCount);
                 
                 // Actualizar contador en stats
                 const openCount = tickets.filter(t => t.status === 'open').length;
                 document.getElementById('openTickets').textContent = openCount;
             } catch (error) {
                 console.error('Error cargando tickets:', error);
+            }
+        }
+        
+        // 🔔 Función auxiliar para actualizar badge de tickets en el menú
+        function updateAdminTicketsBadge(count) {
+            const badge = document.getElementById('unreadTicketsBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline-block';
+                    console.log('🔔 [ADMIN] Badge de tickets actualizado:', count);
+                } else {
+                    badge.style.display = 'none';
+                }
             }
         }
 
@@ -2073,11 +2097,10 @@
             document.getElementById('ticketModal').classList.remove('active');
             console.log('✅ [ADMIN] Modal cerrado - Auto-actualización del ticket desactivada');
             
-            // 🔥 ACTUALIZAR BADGE inmediatamente después de cerrar el modal
-            // porque el ticket ya fue marcado como leído cuando se abrió
+            // 🔥 RECARGAR TICKETS para quitar el fondo azul del ticket leído
             setTimeout(() => {
                 loadTickets();
-                console.log('🔄 [ADMIN] Badge actualizado después de cerrar ticket');
+                console.log('🔄 [ADMIN] Tickets recargados - Fondo azul eliminado del ticket leído');
             }, 300); // Pequeño delay para dar tiempo a que el backend actualice
         }
 
