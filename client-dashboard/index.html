@@ -234,12 +234,9 @@
         }
 
         .menu-icon {
+            font-size: 1.3rem;
             width: 24px;
-            height: 24px;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 12px;
-            filter: brightness(0) invert(1); /* Hacer los iconos blancos */
+            text-align: center;
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -705,16 +702,16 @@
             <!-- Sidebar -->
             <div class="sidebar">
                 <ul class="sidebar-menu">
-                    <li><button class="active" onclick="showSection('resumen')"><img src="../images/ICONOS PNG/24px/01-General/Home.png" class="menu-icon" alt="Resumen"><span>Resumen</span></button></li>
-                    <li><button onclick="showSection('negocio')"><img src="../images/ICONOS PNG/24px/07-Document-media/Project.png" class="menu-icon" alt="Mi Negocio"><span>Mi Negocio</span></button></li>
-                    <li><button onclick="showSection('sitio')"><img src="../images/ICONOS PNG/24px/01-General/Globe.png" class="menu-icon" alt="Mi Sitio Web"><span>Mi Sitio Web</span></button></li>
-                    <li><button onclick="showSection('estadisticas')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Analytics.png" class="menu-icon" alt="Estadísticas"><span>Estadísticas</span></button></li>
-                    <li><button onclick="showSection('tutoriales')"><img src="../images/ICONOS PNG/24px/07-Document-media/Video.png" class="menu-icon" alt="Tutoriales"><span>Tutoriales</span></button></li>
-                    <li><button onclick="showSection('dominio')"><img src="../images/ICONOS PNG/24px/01-General/Link.png" class="menu-icon" alt="Dominio & Hosting"><span>Dominio & Hosting</span></button></li>
-                    <li><button onclick="showSection('facturacion')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Receipt.png" class="menu-icon" alt="Facturación"><span>Facturación</span></button></li>
-                    <li><button onclick="showSection('contactar')"><img src="../images/ICONOS PNG/24px/04-Messaging/Messaging.png" class="menu-icon" alt="Contactar"><span>Contactar</span><span id="unreadBadgeMenu" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; animation: pulse 2s infinite;"></span></button></li>
-                    <li><button onclick="showSection('seo')"><img src="../images/ICONOS PNG/24px/06-Finance-Security/Chart Line.png" class="menu-icon" alt="SEO & Marketing"><span>SEO & Marketing</span></button></li>
-                    <li><button onclick="showSection('perfil')"><img src="../images/ICONOS PNG/24px/09-Social-Connection/User.png" class="menu-icon" alt="Mi Perfil"><span>Mi Perfil</span></button></li>
+                    <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">🏠</span><span>Resumen</span></button></li>
+                    <li><button onclick="showSection('negocio')"><span class="menu-icon">🏢</span><span>Mi Negocio</span></button></li>
+                    <li><button onclick="showSection('sitio')"><span class="menu-icon">🌐</span><span>Mi Sitio Web</span></button></li>
+                    <li><button onclick="showSection('estadisticas')"><span class="menu-icon">📊</span><span>Estadísticas</span></button></li>
+                    <li><button onclick="showSection('tutoriales')"><span class="menu-icon">🎥</span><span>Tutoriales</span></button></li>
+                    <li><button onclick="showSection('dominio')"><span class="menu-icon">🔗</span><span>Dominio & Hosting</span></button></li>
+                    <li><button onclick="showSection('facturacion')"><span class="menu-icon">💳</span><span>Facturación</span></button></li>
+                    <li><button onclick="showSection('contactar')"><span class="menu-icon">💬</span><span>Contactar</span><span id="unreadBadgeMenu" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 3px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; animation: pulse 2s infinite;"></span></button></li>
+                    <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
+                    <li><button onclick="showSection('perfil')"><span class="menu-icon">👤</span><span>Mi Perfil</span></button></li>
                 </ul>
             </div>
 
@@ -1649,6 +1646,38 @@
                         <p><strong>Estado:</strong> <span class="status-badge status-construction">Configurando</span></p>
                         <p><strong>Renovación:</strong> Automática (incluida en tu plan)</p>
                         <button class="btn-action" style="margin-top: 15px;">Ver Configuración DNS</button>
+                    </div>
+
+                    <!-- BUSCADOR DE DOMINIOS -->
+                    <div class="card" style="background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%); border: 2px solid #e8eaed;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🔍</div>
+                            <div>
+                                <h3 class="card-title" style="margin: 0;">Buscar Disponibilidad de Dominios</h3>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Verifica si un dominio está disponible</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <input 
+                                type="text" 
+                                id="dashboardDomainInput" 
+                                placeholder="Ej: tudominio.com, tudominio.es..." 
+                                style="flex: 1; padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; transition: all 0.3s;"
+                                onkeypress="if(event.key === 'Enter') checkDashboardDomain()"
+                            >
+                            <button onclick="checkDashboardDomain()" style="padding: 14px 28px; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3);">
+                                🔍 Verificar
+                            </button>
+                        </div>
+                        
+                        <div id="dashboardDomainResult" style="margin-top: 15px; display: none;"></div>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(0, 70, 254, 0.05); border-radius: 8px; border-left: 3px solid #0046FE;">
+                            <p style="margin: 0; color: #666; font-size: 0.85rem;">
+                                💡 <strong>Tip:</strong> Si tu dominio actual no está disponible, puedes verificar alternativas aquí. El cambio de dominio debe coordinarse con el administrador.
+                            </p>
+                        </div>
                     </div>
 
                     <div class="card">
@@ -6560,6 +6589,105 @@
                 console.error('❌ [GA] Error cargando estadísticas:', error);
                 document.getElementById('gaNotConfigured').style.display = 'block';
                 document.getElementById('gaConfigured').style.display = 'none';
+            }
+        }
+
+        // ========================================
+        // DOMAIN AVAILABILITY CHECKER
+        // ========================================
+        
+        async function checkDashboardDomain() {
+            const domainInput = document.getElementById('dashboardDomainInput');
+            const resultDiv = document.getElementById('dashboardDomainResult');
+            const domain = domainInput.value.trim();
+            
+            if (!domain) {
+                showNotification('⚠️ Por favor, ingresa un dominio', 'warning');
+                return;
+            }
+            
+            // Mostrar loading
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div style="padding: 16px; background: #f3f4f6; border-radius: 10px; border-left: 4px solid #0046FE;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="spinner" style="width: 20px; height: 20px; border: 3px solid #e0e0e0; border-top-color: #0046FE; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <span style="font-weight: 600; color: #0046FE;">Verificando ${domain}...</span>
+                    </div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/check-domain/${encodeURIComponent(domain)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al verificar dominio');
+                }
+                
+                const data = await response.json();
+                
+                if (data.available === true) {
+                    // Dominio disponible ✅
+                    resultDiv.innerHTML = `
+                        <div style="padding: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">✅</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; color: white; font-size: 1.15rem; margin-bottom: 3px;">${data.domain}</div>
+                                    <div style="color: rgba(255,255,255,0.95); font-size: 0.95rem; font-weight: 500;">¡Está disponible!</div>
+                                </div>
+                            </div>
+                            ${data.price && data.price !== 'N/A' ? `
+                                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; margin-top: 12px;">
+                                    <div style="color: white; font-size: 0.9rem; font-weight: 600;">💰 Precio estimado: ${data.price}</div>
+                                </div>
+                            ` : ''}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.95); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.2rem;">ℹ️</span>
+                                <span>El dominio está incluido en tu plan mensual. Contacta al administrador para registrarlo.</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.available === false) {
+                    // Dominio NO disponible ❌
+                    resultDiv.innerHTML = `
+                        <div style="padding: 18px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 12px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">❌</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; color: white; font-size: 1.15rem; margin-bottom: 3px;">${data.domain}</div>
+                                    <div style="color: rgba(255,255,255,0.95); font-size: 0.95rem; font-weight: 500;">No está disponible</div>
+                                </div>
+                            </div>
+                            ${data.registrar && data.registrar !== 'N/A' ? `
+                                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; margin-top: 12px;">
+                                    <div style="color: white; font-size: 0.9rem; font-weight: 600;">📍 Registrado en: ${data.registrar}</div>
+                                </div>
+                            ` : ''}
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.95); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.2rem;">💡</span>
+                                <span>Prueba con una variación del dominio o una extensión diferente (.es, .net, .io, etc.)</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // No se pudo verificar
+                    resultDiv.innerHTML = `
+                        <div style="padding: 18px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border: 2px solid #fbbf24;">
+                            <div style="color: #92400e; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">⚠️ No se pudo verificar</div>
+                            <div style="color: #78350f; font-size: 0.95rem; line-height: 1.5;">${data.message || 'Inténtalo de nuevo más tarde o contacta al administrador.'}</div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error verificando dominio:', error);
+                resultDiv.innerHTML = `
+                    <div style="padding: 18px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 12px; border: 2px solid #dc2626;">
+                        <div style="color: #991b1b; font-weight: 700; margin-bottom: 6px; font-size: 1.05rem;">❌ Error de conexión</div>
+                        <div style="color: #7f1d1d; font-size: 0.95rem; line-height: 1.5;">No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.</div>
+                    </div>
+                `;
             }
         }
     </script>
