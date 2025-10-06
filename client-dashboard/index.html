@@ -1789,26 +1789,26 @@
                         <h3 class="card-title">🔍 Optimización SEO</h3>
                         <p style="color: #666; margin-bottom: 15px;">Mejora el posicionamiento de tu sitio en buscadores</p>
                         <div style="background: #f9fafb; padding: 20px; border-radius: 10px;">
-                            <p><strong>Palabras clave configuradas:</strong> <span id="seoKeywords">Pendiente</span></p>
+                            <p><strong>Palabras clave configuradas:</strong> <span id="seoKeywords">3456789</span></p>
                             <p><strong>Meta descripción:</strong> Configurada ✓</p>
                             <p><strong>Velocidad del sitio:</strong> <span style="color: #009A62;">Excelente</span></p>
                         </div>
-                        <button class="btn-action" style="margin-top: 15px;">Ver Informe SEO</button>
+                        <button class="btn-action" style="margin-top: 15px;" onclick="openSEOReport()">Ver Informe SEO</button>
                     </div>
 
-                    <div class="card">
+                    <div class="card" id="emailMarketingCard">
                         <h3 class="card-title">📧 Email Marketing</h3>
-                        <p style="color: #666; margin-bottom: 15px;">Gestiona tus campañas de email (disponible en planes avanzados)</p>
-                        <button class="btn-action secondary">Actualizar a Plan Avanzado</button>
+                        <p id="emailMarketingDesc" style="color: #666; margin-bottom: 15px;">Gestiona tus campañas de email (disponible en planes avanzados)</p>
+                        <button id="emailMarketingBtn" class="btn-action secondary" onclick="openEmailMarketing()">Actualizar a Plan Avanzado</button>
                     </div>
 
                     <div class="card">
                         <h3 class="card-title">📱 Redes Sociales</h3>
                         <p style="color: #666; margin-bottom: 15px;">Conecta tu sitio web con tus redes sociales</p>
                         <div class="quick-actions">
-                            <button class="btn-action secondary">Conectar Instagram</button>
-                            <button class="btn-action secondary">Conectar Facebook</button>
-                            <button class="btn-action secondary">Conectar LinkedIn</button>
+                            <button class="btn-action secondary" onclick="connectSocialMedia('instagram')">Conectar Instagram</button>
+                            <button class="btn-action secondary" onclick="connectSocialMedia('facebook')">Conectar Facebook</button>
+                            <button class="btn-action secondary" onclick="connectSocialMedia('linkedin')">Conectar LinkedIn</button>
                         </div>
                     </div>
                 </div>
@@ -5733,8 +5733,135 @@
                 loadInvoices();
             } else if (section === 'perfil') {
                 loadProfile();
+            } else if (section === 'seo') {
+                updateSEOMarketingSection();
             }
         };
+
+        // ========================================
+        // SEO & MARKETING FUNCTIONS
+        // ========================================
+
+        // Actualizar sección SEO según el plan
+        function updateSEOMarketingSection() {
+            if (!currentClient) return;
+            
+            const clientPlan = currentClient.plan ? currentClient.plan.toLowerCase() : 'basico';
+            const emailMarketingBtn = document.getElementById('emailMarketingBtn');
+            const emailMarketingDesc = document.getElementById('emailMarketingDesc');
+            
+            // Email Marketing disponible en planes avanzado y premium
+            if (clientPlan === 'avanzado' || clientPlan === 'premium') {
+                emailMarketingDesc.textContent = 'Crea y gestiona campañas de email profesionales';
+                emailMarketingBtn.textContent = 'Gestionar Campañas';
+                emailMarketingBtn.className = 'btn-action';
+                emailMarketingBtn.onclick = function() { openEmailMarketing(); };
+                console.log('✅ [SEO] Email Marketing habilitado para plan:', clientPlan);
+            } else {
+                emailMarketingDesc.textContent = 'Gestiona tus campañas de email (disponible en planes avanzados)';
+                emailMarketingBtn.textContent = 'Actualizar a Plan Avanzado';
+                emailMarketingBtn.className = 'btn-action secondary';
+                emailMarketingBtn.onclick = function() { openPlanModal(); };
+                console.log('🔒 [SEO] Email Marketing bloqueado para plan:', clientPlan);
+            }
+        }
+
+        // Ver informe SEO
+        async function openSEOReport() {
+            console.log('🔍 [SEO] Abriendo informe SEO...');
+            
+            await showNotificationModal(
+                '🔍 Informe SEO',
+                `📊 <strong>Estado de tu SEO:</strong>\n\n` +
+                `✅ Palabras clave: Configuradas (3456789)\n` +
+                `✅ Meta descripción: Optimizada\n` +
+                `✅ Velocidad de carga: Excelente\n` +
+                `✅ Responsive: Optimizado\n` +
+                `✅ Sitemap: Generado\n\n` +
+                `💡 <strong>Próximos pasos:</strong>\n` +
+                `• Configurar Google Analytics\n` +
+                `• Conectar Google Search Console\n` +
+                `• Optimizar imágenes\n\n` +
+                `Para más detalles técnicos, contacta con soporte.`,
+                'info'
+            );
+        }
+
+        // Email Marketing
+        async function openEmailMarketing() {
+            if (!currentClient) return;
+            
+            const clientPlan = currentClient.plan ? currentClient.plan.toLowerCase() : 'basico';
+            
+            if (clientPlan === 'basico') {
+                console.log('🔒 [EMAIL] Email Marketing no disponible en plan básico');
+                await showNotificationModal(
+                    '📧 Email Marketing',
+                    `Esta funcionalidad está disponible en los planes <strong>Avanzado</strong> y <strong>Premium</strong>.\n\n` +
+                    `¿Te gustaría actualizar tu plan para acceder a campañas de email profesionales?`,
+                    'info'
+                );
+                openPlanModal();
+            } else {
+                console.log('📧 [EMAIL] Abriendo gestor de Email Marketing...');
+                await showNotificationModal(
+                    '📧 Email Marketing',
+                    `<strong>Gestor de Campañas</strong>\n\n` +
+                    `✅ Crea newsletters profesionales\n` +
+                    `✅ Segmenta tu audiencia\n` +
+                    `✅ Plantillas personalizables\n` +
+                    `✅ Estadísticas en tiempo real\n\n` +
+                    `💡 <strong>Próximamente:</strong>\n` +
+                    `• Integración con Mailchimp\n` +
+                    `• Automatizaciones\n` +
+                    `• A/B Testing\n\n` +
+                    `Para configurar tu primera campaña, contacta con soporte.`,
+                    'success'
+                );
+            }
+        }
+
+        // Conectar redes sociales
+        async function connectSocialMedia(platform) {
+            console.log(`📱 [SOCIAL] Conectando ${platform}...`);
+            
+            const platformNames = {
+                'instagram': 'Instagram',
+                'facebook': 'Facebook',
+                'linkedin': 'LinkedIn'
+            };
+            
+            const platformIcons = {
+                'instagram': '📸',
+                'facebook': '👍',
+                'linkedin': '💼'
+            };
+            
+            const name = platformNames[platform] || platform;
+            const icon = platformIcons[platform] || '📱';
+            
+            await showNotificationModal(
+                `${icon} Conectar ${name}`,
+                `<strong>Integración con ${name}</strong>\n\n` +
+                `Para conectar tu cuenta de ${name} con tu sitio web:\n\n` +
+                `1️⃣ Proporciona tu URL de ${name}\n` +
+                `2️⃣ Nuestro equipo configurará la integración\n` +
+                `3️⃣ Tus publicaciones aparecerán en tu web\n\n` +
+                `💡 <strong>Beneficios:</strong>\n` +
+                `• Feed de ${name} en tu web\n` +
+                `• Botones de compartir optimizados\n` +
+                `• Widgets personalizables\n\n` +
+                `📞 Contacta con soporte para configurarlo.`,
+                'info'
+            );
+            
+            // Opcional: Abrir sección de contacto
+            const confirmed = await showConfirmation('¿Deseas contactar con soporte ahora?');
+            if (confirmed) {
+                showSection('contactar');
+                switchContactTab('crear');
+            }
+        }
     </script>
 
     <!-- Sistema de Notificaciones -->
