@@ -1725,7 +1725,10 @@
                 <!-- CONTACTAR -->
                 <div id="contactar" class="content-section">
                     <div class="section-header">
-                        <h1 class="section-title">💬 Contactar con Soporte</h1>
+                        <h1 class="section-title">
+                            💬 Contactar con Soporte
+                            <span id="unreadBadgeHeader" class="notification-badge" style="display: none; background: #0046FE; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-left: 12px; animation: pulse 2s infinite; vertical-align: middle;"></span>
+                        </h1>
                         <p class="section-subtitle">Estamos aquí para ayudarte</p>
                     </div>
 
@@ -5452,14 +5455,23 @@
                 const unreadCount = tickets.filter(t => t.client_unread === 1).length;
                 console.log('🔔 [AUTO-UPDATE] Mensajes sin leer:', unreadCount);
                 
-                // Actualizar badge en el menú
-                const badge = document.getElementById('unreadBadgeMenu');
-                if (badge) {
-                    const previousCount = parseInt(badge.textContent) || 0;
+                // Actualizar badges (menú y header de la sección)
+                const badgeMenu = document.getElementById('unreadBadgeMenu');
+                const badgeHeader = document.getElementById('unreadBadgeHeader');
+                
+                if (badgeMenu) {
+                    const previousCount = parseInt(badgeMenu.textContent) || 0;
                     
                     if (unreadCount > 0) {
-                        badge.textContent = unreadCount;
-                        badge.style.display = 'inline-block';
+                        // Badge del menú
+                        badgeMenu.textContent = unreadCount;
+                        badgeMenu.style.display = 'inline-block';
+                        
+                        // Badge del header de la sección
+                        if (badgeHeader) {
+                            badgeHeader.textContent = unreadCount;
+                            badgeHeader.style.display = 'inline';
+                        }
                         
                         // Si hay mensajes nuevos que antes no había, mostrar notificación
                         if (unreadCount > previousCount && previousCount >= 0) {
@@ -5469,7 +5481,10 @@
                             }
                         }
                     } else {
-                        badge.style.display = 'none';
+                        badgeMenu.style.display = 'none';
+                        if (badgeHeader) {
+                            badgeHeader.style.display = 'none';
+                        }
                     }
                 }
                 
