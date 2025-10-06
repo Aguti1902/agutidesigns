@@ -1562,16 +1562,21 @@
             try {
                 console.log('🎫 [ADMIN] Cargando tickets...');
                 const response = await fetch(`${API_URL}/api/tickets`);
-                const tickets = await response.json();
+                const allTickets = await response.json();
                 
-                console.log('🎫 [ADMIN] Tickets recibidos:', tickets.length, 'tickets');
+                console.log('🎫 [ADMIN] Tickets recibidos:', allTickets.length, 'tickets');
+                
+                // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
+                const tickets = allTickets.filter(ticket => ticket.category !== 'facturacion');
+                
+                console.log('🎫 [ADMIN] Tickets después de filtrar:', tickets.length, 'tickets');
                 console.log('🎫 [ADMIN] Datos:', tickets);
 
                 const tbody = document.getElementById('ticketsTable');
                 
                 if (tickets.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No hay tickets</td></tr>';
-                    console.warn('⚠️ [ADMIN] No hay tickets en la base de datos');
+                    console.log('✅ [ADMIN] No hay tickets de soporte (se filtraron los tickets de facturación)');
                     return;
                 }
 
@@ -3224,7 +3229,10 @@
                 
                 if (!response.ok) return;
                 
-                const tickets = await response.json();
+                const allTickets = await response.json();
+                
+                // FILTRAR: Excluir tickets de facturación (upgrades/downgrades automáticos)
+                const tickets = allTickets.filter(t => t.category !== 'facturacion');
                 
                 // Contar mensajes sin leer del admin
                 const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
