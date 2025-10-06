@@ -1288,7 +1288,31 @@
                         <p>Gestiona todas las facturas de Stripe</p>
                     </div>
 
-                    <!-- Filtros y Estadísticas -->
+                    <!-- Filtros de Tiempo -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div style="padding: 20px;">
+                            <h3 style="margin-bottom: 15px; font-size: 1rem; color: #333;">📅 Filtrar por Período</h3>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="btn-filter" data-period="week" onclick="filterInvoicesByPeriod('week')" style="padding: 10px 20px; border: 2px solid #0046FE; background: #0046FE; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                                    📅 Última Semana
+                                </button>
+                                <button class="btn-filter" data-period="month" onclick="filterInvoicesByPeriod('month')" style="padding: 10px 20px; border: 2px solid #e0e0e0; background: white; color: #333; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                                    📆 Último Mes
+                                </button>
+                                <button class="btn-filter" data-period="quarter" onclick="filterInvoicesByPeriod('quarter')" style="padding: 10px 20px; border: 2px solid #e0e0e0; background: white; color: #333; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                                    📊 Último Trimestre
+                                </button>
+                                <button class="btn-filter" data-period="year" onclick="filterInvoicesByPeriod('year')" style="padding: 10px 20px; border: 2px solid #e0e0e0; background: white; color: #333; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                                    📈 Último Año
+                                </button>
+                                <button class="btn-filter" data-period="all" onclick="filterInvoicesByPeriod('all')" style="padding: 10px 20px; border: 2px solid #e0e0e0; background: white; color: #333; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                                    🌐 Todas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas -->
                     <div class="dashboard-stats" style="margin-bottom: 20px;">
                         <div class="stat-card">
                             <div class="stat-value" id="totalInvoices">0</div>
@@ -2923,6 +2947,8 @@
 
         // ===== FACTURAS =====
         let allInvoicesData = [];
+        let filteredInvoicesData = [];
+        let currentPeriod = 'week';
 
         async function loadAllInvoices() {
             try {
@@ -2932,83 +2958,148 @@
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><div class="loader"><div class="spinner"></div><p>Cargando facturas...</p></div></td></tr>';
                 
                 const response = await fetch(`${API_URL}/api/admin/invoices`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 allInvoicesData = data.invoices || [];
-                console.log(`✅ [ADMIN] ${allInvoicesData.length} facturas cargadas`);
+                console.log(`✅ [ADMIN] ${allInvoicesData.length} facturas cargadas desde Stripe`);
                 
-                // Actualizar estadísticas
-                const totalInvoices = allInvoicesData.length;
-                const paidInvoices = allInvoicesData.filter(inv => inv.status === 'paid').length;
-                const pendingInvoices = allInvoicesData.filter(inv => inv.status === 'open').length;
-                const totalRevenue = allInvoicesData
-                    .filter(inv => inv.status === 'paid')
-                    .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
-                
-                document.getElementById('totalInvoices').textContent = totalInvoices;
-                document.getElementById('paidInvoices').textContent = paidInvoices;
-                document.getElementById('pendingInvoices').textContent = pendingInvoices;
-                document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)}€`;
-                
-                // Renderizar tabla
-                if (allInvoicesData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No hay facturas disponibles</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = allInvoicesData.map(invoice => {
-                    const date = new Date(invoice.created).toLocaleDateString('es-ES', { 
-                        day: 'numeric', 
-                        month: 'short', 
-                        year: 'numeric' 
-                    });
-                    
-                    const statusColors = {
-                        'paid': { badge: 'success', text: 'Pagada' },
-                        'open': { badge: 'warning', text: 'Pendiente' },
-                        'void': { badge: 'secondary', text: 'Anulada' },
-                        'uncollectible': { badge: 'danger', text: 'Impagada' }
-                    };
-                    
-                    const status = statusColors[invoice.status] || { badge: 'secondary', text: invoice.status };
-                    
-                    return `
-                        <tr>
-                            <td><strong>${invoice.number}</strong></td>
-                            <td>${invoice.client_name || 'N/A'}</td>
-                            <td>${invoice.client_business || invoice.client_email || 'N/A'}</td>
-                            <td><strong>${invoice.amount}€</strong></td>
-                            <td><span class="badge badge-${status.badge}">${status.text}</span></td>
-                            <td>${date}</td>
-                            <td>
-                                ${invoice.pdf_url ? `
-                                    <a href="${invoice.pdf_url}" target="_blank" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none; display: inline-block;">
-                                        📥 PDF
-                                    </a>
-                                ` : '<span style="color: #999;">N/A</span>'}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+                // Aplicar filtro inicial (última semana)
+                filterInvoicesByPeriod(currentPeriod);
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando facturas:', error);
                 const tbody = document.getElementById('invoicesTable');
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">Error al cargar las facturas</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">Error al cargar las facturas: ${error.message}</td></tr>`;
             }
         }
 
+        function filterInvoicesByPeriod(period) {
+            currentPeriod = period;
+            console.log(`📅 [ADMIN] Filtrando facturas por: ${period}`);
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.btn-filter').forEach(btn => {
+                if (btn.dataset.period === period) {
+                    btn.style.background = '#0046FE';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#0046FE';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.color = '#333';
+                    btn.style.borderColor = '#e0e0e0';
+                }
+            });
+            
+            const now = new Date();
+            let startDate;
+            
+            switch(period) {
+                case 'week':
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'quarter':
+                    startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'all':
+                    startDate = new Date(0); // Desde el inicio de los tiempos
+                    break;
+                default:
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            }
+            
+            // Filtrar facturas por fecha
+            filteredInvoicesData = allInvoicesData.filter(invoice => {
+                const invoiceDate = new Date(invoice.created);
+                return invoiceDate >= startDate;
+            });
+            
+            console.log(`✅ [ADMIN] ${filteredInvoicesData.length} facturas en el período seleccionado`);
+            
+            // Renderizar
+            renderInvoicesTable();
+            updateInvoicesStats();
+        }
+
+        function renderInvoicesTable() {
+            const tbody = document.getElementById('invoicesTable');
+            
+            if (filteredInvoicesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No hay facturas en este período</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredInvoicesData.map(invoice => {
+                const date = new Date(invoice.created).toLocaleDateString('es-ES', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                const statusColors = {
+                    'paid': { badge: 'success', text: 'Pagada' },
+                    'open': { badge: 'warning', text: 'Pendiente' },
+                    'void': { badge: 'secondary', text: 'Anulada' },
+                    'uncollectible': { badge: 'danger', text: 'Impagada' }
+                };
+                
+                const status = statusColors[invoice.status] || { badge: 'secondary', text: invoice.status };
+                
+                return `
+                    <tr>
+                        <td><strong>${invoice.number}</strong></td>
+                        <td>${invoice.client_name || 'N/A'}</td>
+                        <td>${invoice.client_business || invoice.client_email || 'N/A'}</td>
+                        <td><strong>${invoice.amount}€</strong></td>
+                        <td><span class="badge badge-${status.badge}">${status.text}</span></td>
+                        <td>${date}</td>
+                        <td>
+                            ${invoice.pdf_url ? `
+                                <a href="${invoice.pdf_url}" target="_blank" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none; display: inline-block;">
+                                    📥 PDF
+                                </a>
+                            ` : '<span style="color: #999;">N/A</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateInvoicesStats() {
+            const totalInvoices = filteredInvoicesData.length;
+            const paidInvoices = filteredInvoicesData.filter(inv => inv.status === 'paid').length;
+            const pendingInvoices = filteredInvoicesData.filter(inv => inv.status === 'open').length;
+            const totalRevenue = filteredInvoicesData
+                .filter(inv => inv.status === 'paid')
+                .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+            
+            document.getElementById('totalInvoices').textContent = totalInvoices;
+            document.getElementById('paidInvoices').textContent = paidInvoices;
+            document.getElementById('pendingInvoices').textContent = pendingInvoices;
+            document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)}€`;
+        }
+
         function exportInvoices() {
-            if (allInvoicesData.length === 0) {
-                showNotification('No hay facturas para exportar', 'error');
+            if (filteredInvoicesData.length === 0) {
+                showNotification('No hay facturas para exportar en este período', 'error');
                 return;
             }
             
             console.log('📥 [ADMIN] Exportando facturas a CSV...');
             
-            // Crear CSV
+            // Crear CSV con facturas filtradas
             const headers = ['Nº Factura', 'Cliente', 'Empresa', 'Email', 'Monto', 'Moneda', 'Estado', 'Fecha', 'PDF URL'];
-            const rows = allInvoicesData.map(inv => [
+            const rows = filteredInvoicesData.map(inv => [
                 inv.number,
                 inv.client_name || '',
                 inv.client_business || '',
