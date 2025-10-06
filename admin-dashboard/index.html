@@ -2025,11 +2025,17 @@
         function parseAndSortMessages(ticket) {
             const messages = [];
             
+            console.log('🔍 [DEBUG] ticket.created_at:', ticket.created_at);
+            console.log('🔍 [DEBUG] ticket.admin_response_at:', ticket.admin_response_at);
+            console.log('🔍 [DEBUG] ticket.client_response_at:', ticket.client_response_at);
+            
             // Mensaje inicial del cliente (descripción)
+            const initialTimestamp = new Date(ticket.created_at);
+            console.log('🔍 [DEBUG] Mensaje inicial timestamp:', initialTimestamp);
             messages.push({
                 type: 'client',
                 content: ticket.description,
-                timestamp: new Date(ticket.created_at),
+                timestamp: initialTimestamp,
                 isInitial: true
             });
             
@@ -2107,7 +2113,17 @@
             }
             
             // Ordenar por timestamp
+            console.log('🔍 [DEBUG] Mensajes ANTES de ordenar:');
+            messages.forEach((msg, idx) => {
+                console.log(`  ${idx + 1}. ${msg.type} - ${msg.timestamp}`);
+            });
+            
             messages.sort((a, b) => a.timestamp - b.timestamp);
+            
+            console.log('🔍 [DEBUG] Mensajes DESPUÉS de ordenar:');
+            messages.forEach((msg, idx) => {
+                console.log(`  ${idx + 1}. ${msg.type} - ${msg.timestamp} - ${msg.isInitial ? '(INICIAL)' : ''}`);
+            });
             
             return messages;
         }
