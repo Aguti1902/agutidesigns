@@ -49,15 +49,28 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 let analyticsDataClient = null;
 if (process.env.GA_CLIENT_EMAIL && process.env.GA_PRIVATE_KEY) {
     try {
+        // Decodificar la clave privada desde Base64 o usar directamente
+        let privateKey;
+        try {
+            // Intentar decodificar desde Base64
+            privateKey = Buffer.from(process.env.GA_PRIVATE_KEY, 'base64').toString('utf-8');
+            console.log('🔓 Clave privada decodificada desde Base64');
+        } catch (e) {
+            // Si falla Base64, intentar con replace de \n
+            privateKey = process.env.GA_PRIVATE_KEY.replace(/\\n/g, '\n');
+            console.log('🔓 Clave privada procesada con replace');
+        }
+        
         analyticsDataClient = new BetaAnalyticsDataClient({
             credentials: {
                 client_email: process.env.GA_CLIENT_EMAIL,
-                private_key: process.env.GA_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                private_key: privateKey,
             },
         });
         console.log('✅ Google Analytics Data API inicializada correctamente');
     } catch (error) {
         console.error('⚠️ Error inicializando Google Analytics API:', error.message);
+        console.error('Stack:', error.stack);
     }
 } else {
     console.log('⚠️ Google Analytics no configurado (usando datos simulados)');
