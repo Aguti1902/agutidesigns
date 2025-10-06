@@ -2021,6 +2021,123 @@
             }
         }
 
+        // Función para parsear mensajes concatenados y ordenarlos cronológicamente
+        function parseAndSortMessages(ticket) {
+            const messages = [];
+            
+            // Mensaje inicial del cliente (descripción)
+            messages.push({
+                type: 'client',
+                content: ticket.description,
+                timestamp: new Date(ticket.created_at),
+                isInitial: true
+            });
+            
+            // Parsear respuestas del admin
+            if (ticket.admin_response && ticket.admin_response.trim() !== '') {
+                const adminParts = ticket.admin_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                
+                if (adminParts.length === 1) {
+                    // Solo una respuesta del admin
+                    messages.push({
+                        type: 'admin',
+                        content: adminParts[0].trim(),
+                        timestamp: ticket.admin_response_at ? new Date(ticket.admin_response_at) : new Date(ticket.created_at)
+                    });
+                } else {
+                    // Múltiples respuestas del admin
+                    messages.push({
+                        type: 'admin',
+                        content: adminParts[0].trim(),
+                        timestamp: ticket.admin_response_at ? new Date(ticket.admin_response_at) : new Date(ticket.created_at)
+                    });
+                    
+                    for (let i = 1; i < adminParts.length; i += 2) {
+                        if (i < adminParts.length - 1) {
+                            const dateStr = adminParts[i];
+                            const content = adminParts[i + 1].trim();
+                            
+                            // Parsear fecha del formato "6 oct 2025, 14:30"
+                            const date = parseDateFromString(dateStr) || new Date();
+                            
+                            messages.push({
+                                type: 'admin',
+                                content: content,
+                                timestamp: date
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Parsear respuestas del cliente
+            if (ticket.client_response && ticket.client_response.trim() !== '') {
+                const clientParts = ticket.client_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                
+                if (clientParts.length === 1) {
+                    // Solo una respuesta del cliente
+                    messages.push({
+                        type: 'client',
+                        content: clientParts[0].trim(),
+                        timestamp: ticket.client_response_at ? new Date(ticket.client_response_at) : new Date()
+                    });
+                } else {
+                    // Múltiples respuestas del cliente
+                    messages.push({
+                        type: 'client',
+                        content: clientParts[0].trim(),
+                        timestamp: ticket.client_response_at ? new Date(ticket.client_response_at) : new Date()
+                    });
+                    
+                    for (let i = 1; i < clientParts.length; i += 2) {
+                        if (i < clientParts.length - 1) {
+                            const dateStr = clientParts[i];
+                            const content = clientParts[i + 1].trim();
+                            
+                            const date = parseDateFromString(dateStr) || new Date();
+                            
+                            messages.push({
+                                type: 'client',
+                                content: content,
+                                timestamp: date
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Ordenar por timestamp
+            messages.sort((a, b) => a.timestamp - b.timestamp);
+            
+            return messages;
+        }
+        
+        // Función auxiliar para parsear fechas del formato "6 oct 2025, 14:30"
+        function parseDateFromString(dateStr) {
+            try {
+                // Mapeo de meses en español
+                const monthMap = {
+                    'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
+                    'jul': 6, 'ago': 7, 'sept': 8, 'oct': 9, 'nov': 10, 'dic': 11
+                };
+                
+                // Formato: "6 oct 2025, 14:30"
+                const match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+),\s+(\d+):(\d+)/);
+                if (match) {
+                    const day = parseInt(match[1]);
+                    const month = monthMap[match[2].toLowerCase()];
+                    const year = parseInt(match[3]);
+                    const hours = parseInt(match[4]);
+                    const minutes = parseInt(match[5]);
+                    
+                    return new Date(year, month, day, hours, minutes);
+                }
+            } catch (e) {
+                console.error('Error parseando fecha:', dateStr, e);
+            }
+            return null;
+        }
+        
         async function viewTicket(id) {
             try {
                 console.log('🎫 [ADMIN] Cargando detalles del ticket #', id);
@@ -2033,9 +2150,6 @@
                 
                 const ticket = await response.json();
                 console.log('🎫 [ADMIN] Ticket recibido:', ticket);
-                console.log('🔍 [ADMIN] ¿Tiene admin_response?', ticket.admin_response ? 'SÍ' : 'NO');
-                console.log('🔍 [ADMIN] ¿Tiene client_response?', ticket.client_response ? 'SÍ' : 'NO');
-                console.log('🔍 [ADMIN] Valor de client_response:', ticket.client_response);
                 
                 const detailsDiv = document.getElementById('ticketDetails');
                 
@@ -2101,30 +2215,35 @@
                             <p style="margin: 0; font-size: 1rem; font-weight: 600;">${ticket.subject}</p>
                         </div>
                         
-                        <!-- Descripción -->
-                        <div style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                            <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">📝 Descripción</h4>
-                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.description}</p>
+                        <!-- Conversación en orden cronológico -->
+                        <div style="margin-bottom: 15px;">
+                            <h4 style="color: #0046FE; margin: 0 0 15px 0; font-size: 1.1rem;">💬 Conversación</h4>
+                            ${parseAndSortMessages(ticket).map((message, index) => {
+                                if (message.type === 'client') {
+                                    return `
+                                        <div style="border-left: 4px solid #0046FE; background: ${message.isInitial ? '#f8f9fa' : '#e8f4ff'}; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                                <span style="background: #0046FE; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">C</span>
+                                                <strong style="color: #0046FE;">${message.isInitial ? 'Mensaje Inicial del Cliente' : 'Respuesta del Cliente'}</strong>
+                                            </div>
+                                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; color: #333;">${message.content}</p>
+                                            <p style="margin: 10px 0 0 0; font-size: 0.75rem; color: #666;">📅 ${formatDate(message.timestamp)}</p>
+                                        </div>
+                                    `;
+                                } else {
+                                    return `
+                                        <div style="border-left: 4px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                                <span style="background: #28a745; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">A</span>
+                                                <strong style="color: #28a745;">Tu Respuesta</strong>
+                                            </div>
+                                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; color: #333;">${message.content}</p>
+                                            <p style="margin: 10px 0 0 0; font-size: 0.75rem; color: #666;">📅 ${formatDate(message.timestamp)}</p>
+                                        </div>
+                                    `;
+                                }
+                            }).join('')}
                         </div>
-                        
-                        ${ticket.admin_response ? `
-                        <!-- Respuesta del Admin -->
-                        <div style="border: 2px solid #28a745; background: #f0f9f4; border-radius: 10px; padding: 15px; margin-bottom: 15px;" data-admin-response>
-                            <h4 style="color: #28a745; margin: 0 0 10px 0; font-size: 1rem;">💬 Tu Respuesta</h4>
-                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.admin_response}</p>
-                            ${ticket.admin_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.admin_response_at)}</p>` : ''}
-                        </div>
-                        ` : ''}
-                        
-                        ${ticket.client_response ? `
-                        <!-- Respuesta del Cliente -->
-                        <div style="border: 2px solid #0046FE; background: #e8f4ff; border-radius: 10px; padding: 15px; margin-bottom: 15px;" data-client-response data-timestamp="${ticket.client_response_at || ''}">
-                            <h4 style="color: #0046FE; margin: 0 0 10px 0; font-size: 1rem;">💬 Respuesta del Cliente</h4>
-                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">${ticket.client_response}</p>
-                            ${ticket.client_response_at ? `<p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #666;">📅 Enviado: ${formatDate(ticket.client_response_at)}</p>` : ''}
-                            <p style="margin: 10px 0 0 0; font-size: 0.8rem; color: #0046FE; font-weight: 600;">⚠️ El cliente ha respondido - revisa y responde nuevamente si es necesario</p>
-                        </div>
-                        ` : ''}
                         
                         <!-- Formulario de Respuesta -->
                         ${ticket.status !== 'cerrado' ? `
