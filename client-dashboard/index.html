@@ -3083,6 +3083,15 @@
                 const result = await response.json();
                 console.log('✅ Plan cambiado:', result);
                 
+                // 🔥 ACTUALIZAR currentClient con el nuevo plan
+                currentClient.plan = newPlan;
+                sessionStorage.setItem('client', JSON.stringify(currentClient));
+                console.log('✅ currentClient y sessionStorage actualizados con nuevo plan:', newPlan);
+                
+                // 🔥 ACTUALIZAR el texto del plan en el header INMEDIATAMENTE
+                document.getElementById('userPlan').textContent = `Plan ${capitalize(newPlan)}`;
+                console.log('✅ Texto del plan actualizado en header:', newPlan);
+                
                 if (result.isUpgrade) {
                     await showNotificationModal(
                         '🎉 ¡Plan Actualizado!',
@@ -3101,7 +3110,7 @@
                     );
                 }
                 
-                // Recargar dashboard después de 2 segundos
+                // Recargar dashboard después de 2 segundos para actualizar todo
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);
@@ -4648,6 +4657,30 @@
             const savedClient = sessionStorage.getItem('client');
             if (savedClient) {
                 currentClient = JSON.parse(savedClient);
+                
+                // 🔥 ACTUALIZAR datos del servidor para asegurar que el plan esté sincronizado
+                try {
+                    console.log('🔄 Refrescando datos del cliente desde servidor...');
+                    const response = await fetch(`${API_URL}/api/client/dashboard/${currentClient.id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.client) {
+                            // Actualizar currentClient con datos frescos
+                            const oldPlan = currentClient.plan;
+                            currentClient = { ...currentClient, ...data.client };
+                            sessionStorage.setItem('client', JSON.stringify(currentClient));
+                            console.log('✅ Datos actualizados desde servidor. Plan:', currentClient.plan);
+                            
+                            // Si el plan cambió, log para debug
+                            if (oldPlan !== currentClient.plan) {
+                                console.log(`🔄 Plan actualizado: ${oldPlan} → ${currentClient.plan}`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('⚠️ No se pudieron actualizar datos del servidor:', error);
+                }
+                
                 showDashboard();
                 return;
             }
