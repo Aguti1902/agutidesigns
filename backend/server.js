@@ -754,8 +754,37 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
 // 9. DASHBOARD ADMIN - ESTADÍSTICAS
 app.get('/api/admin/stats', async (req, res) => {
     try {
-        console.log('📊 [ADMIN] Obteniendo estadísticas generales...');
-        const stats = await db.getStats();
+        const { filter, startDate, endDate } = req.query;
+        console.log('📊 [ADMIN] Obteniendo estadísticas con filtros:', { filter, startDate, endDate });
+        
+        // Calcular fechas según filtro
+        let dateFilter = {};
+        if (startDate && endDate) {
+            // Rango personalizado
+            dateFilter.start = new Date(startDate);
+            dateFilter.end = new Date(endDate);
+            dateFilter.end.setHours(23, 59, 59, 999); // Incluir todo el día
+        } else if (filter && filter !== 'all') {
+            const now = new Date();
+            dateFilter.end = now;
+            
+            switch(filter) {
+                case 'today':
+                    dateFilter.start = new Date(now.setHours(0, 0, 0, 0));
+                    break;
+                case 'week':
+                    dateFilter.start = new Date(now.setDate(now.getDate() - 7));
+                    break;
+                case 'month':
+                    dateFilter.start = new Date(now.setMonth(now.getMonth() - 1));
+                    break;
+                case 'year':
+                    dateFilter.start = new Date(now.setFullYear(now.getFullYear() - 1));
+                    break;
+            }
+        }
+        
+        const stats = await db.getStats(dateFilter);
         console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);
         res.json(stats);
     } catch (error) {

@@ -294,6 +294,10 @@
             background: linear-gradient(135deg, #EC6746 0%, #D85635 100%);
         }
 
+        .stat-card.purple {
+            background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
+        }
+
         .stat-label {
             font-size: 0.9rem;
             opacity: 0.9;
@@ -384,6 +388,30 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
+        }
+
+        .btn-filter {
+            background: white;
+            color: #666;
+            border: 2px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-filter:hover {
+            background: #f8f9fa;
+            border-color: #0046FE;
+            color: #0046FE;
+        }
+
+        .btn-filter.active {
+            background: #0046FE;
+            color: white;
+            border-color: #0046FE;
         }
 
         /* ===== TABLE ===== */
@@ -980,8 +1008,27 @@
                 <!-- SECCIÓN: ESTADÍSTICAS -->
                 <div class="section active" id="section-estadisticas">
                     <div class="content-header">
-                        <h1>📊 Estadísticas</h1>
-                        <p>Vista general del negocio</p>
+                        <div>
+                            <h1>📊 Estadísticas</h1>
+                            <p>Vista general del negocio</p>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                            <!-- Filtros de tiempo -->
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-filter" data-filter="today" onclick="filterStats('today')">Hoy</button>
+                                <button class="btn-filter" data-filter="week" onclick="filterStats('week')">Esta Semana</button>
+                                <button class="btn-filter active" data-filter="month" onclick="filterStats('month')">Este Mes</button>
+                                <button class="btn-filter" data-filter="year" onclick="filterStats('year')">Este Año</button>
+                                <button class="btn-filter" data-filter="all" onclick="filterStats('all')">Todo</button>
+                            </div>
+                            <!-- Selector de fecha personalizado -->
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="date" id="startDate" style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.9rem;">
+                                <span style="color: #666;">a</span>
+                                <input type="date" id="endDate" style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.9rem;">
+                                <button class="btn-primary" onclick="filterStatsByDateRange()" style="padding: 8px 16px; font-size: 0.9rem;">📅 Filtrar</button>
+                            </div>
+                        </div>
                     </div>
 
             <div class="stats-grid">
@@ -1016,6 +1063,14 @@
                             </div>
                     <div class="stat-value" id="totalRevenue">0€</div>
                             <div class="stat-change">Revenue acumulado</div>
+                        </div>
+                        <div class="stat-card purple">
+                            <div class="stat-label">
+                                <span>💸</span>
+                                Comisión Diseñador
+                            </div>
+                            <div class="stat-value" id="designerCommission">0€</div>
+                            <div class="stat-change">0.3% del neto (después de impuestos y comisiones)</div>
                         </div>
                         <div class="stat-card blue">
                             <div class="stat-label">
@@ -1693,10 +1748,22 @@
         }
 
         // ===== CARGAR ESTADÍSTICAS =====
-        async function loadStats() {
+        // Variable global para el filtro actual
+        let currentStatsFilter = 'month';
+
+        async function loadStats(startDate = null, endDate = null) {
             try {
                 console.log('📊 [ADMIN] Cargando estadísticas...');
-                const response = await fetch(`${API_URL}/api/admin/stats`);
+                
+                // Construir URL con filtros de fecha si existen
+                let url = `${API_URL}/api/admin/stats`;
+                if (startDate && endDate) {
+                    url += `?startDate=${startDate}&endDate=${endDate}`;
+                } else if (currentStatsFilter !== 'all') {
+                    url += `?filter=${currentStatsFilter}`;
+                }
+                
+                const response = await fetch(url);
                 const stats = await response.json();
 
                 console.log('📊 [ADMIN] Estadísticas recibidas:', stats);
@@ -1706,6 +1773,20 @@
                 document.getElementById('activeClients').textContent = stats.activeClients || 0;
                 document.getElementById('inactiveClients').textContent = stats.noPlan || 0;
                 document.getElementById('totalRevenue').textContent = (stats.revenue || 0) + '€';
+                
+                // 💸 Calcular comisión del diseñador
+                const revenue = stats.revenue || 0;
+                // Fórmula: Neto = Revenue - (Stripe 1.5% + 0.25€) - IVA (21%) - IRPF (15%)
+                // Simplificado: Neto ≈ Revenue * 0.632 (63.2% del ingreso bruto)
+                const netRevenue = revenue * 0.632;
+                const designerCommission = netRevenue * 0.003; // 0.3% del neto
+                document.getElementById('designerCommission').textContent = designerCommission.toFixed(2) + '€';
+                
+                console.log('💸 [ADMIN] Comisión diseñador calculada:', {
+                    revenue: revenue,
+                    netRevenue: netRevenue.toFixed(2),
+                    commission: designerCommission.toFixed(2)
+                });
                 
                 // Webs en desarrollo
                 const websEnDesarrollo = document.getElementById('websEnDesarrollo');
@@ -1728,6 +1809,51 @@
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando stats:', error);
             }
+        }
+
+        // Filtrar estadísticas por período
+        function filterStats(filter) {
+            console.log('🔍 [ADMIN] Filtrando estadísticas:', filter);
+            currentStatsFilter = filter;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.btn-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            
+            // Limpiar fechas personalizadas
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            
+            // Recargar estadísticas
+            loadStats();
+        }
+
+        // Filtrar por rango de fechas personalizado
+        function filterStatsByDateRange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                showNotification('Por favor, selecciona ambas fechas', 'warning');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showNotification('La fecha de inicio debe ser anterior a la fecha de fin', 'error');
+                return;
+            }
+            
+            console.log('📅 [ADMIN] Filtrando por rango:', startDate, 'a', endDate);
+            
+            // Desactivar todos los botones de filtro
+            document.querySelectorAll('.btn-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Cargar stats con fechas
+            loadStats(startDate, endDate);
         }
 
         // ===== ACTUALIZAR BADGES DE NOTIFICACIONES =====
