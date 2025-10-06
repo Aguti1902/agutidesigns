@@ -3042,6 +3042,20 @@
                 
                 const data = await response.json();
                 
+                // Debug info
+                if (data.debug) {
+                    console.log('📊 [ADMIN] Debug info:', data.debug);
+                    console.log(`   - Total clientes: ${data.debug.totalClients}`);
+                    console.log(`   - Clientes con Stripe: ${data.debug.clientsWithStripe}`);
+                    console.log(`   - Total facturas: ${data.debug.totalInvoices}`);
+                    
+                    if (data.debug.clientsWithStripe === 0) {
+                        console.warn('⚠️ [ADMIN] No hay clientes con stripe_customer_id');
+                        console.warn('💡 [ADMIN] Esto significa que no ha habido pagos reales todavía');
+                        console.warn('💡 [ADMIN] Los clientes creados con la herramienta de test NO tienen pagos en Stripe');
+                    }
+                }
+                
                 allInvoicesData = data.invoices || [];
                 console.log(`✅ [ADMIN] ${allInvoicesData.length} facturas cargadas desde Stripe`);
                 
@@ -3116,7 +3130,25 @@
             const tbody = document.getElementById('invoicesTable');
             
             if (filteredInvoicesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No hay facturas en este período</td></tr>';
+                // Verificar si hay facturas en total
+                if (allInvoicesData.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 60px;">
+                                <div style="color: #666;">
+                                    <div style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+                                    <h3 style="color: #333; margin-bottom: 10px;">No hay facturas registradas</h3>
+                                    <p style="color: #999; margin-bottom: 15px;">Las facturas aparecerán aquí una vez que los clientes realicen pagos a través de Stripe</p>
+                                    <p style="font-size: 0.85rem; color: #999; background: #f8f9fa; padding: 12px; border-radius: 8px; display: inline-block;">
+                                        💡 <strong>Nota:</strong> Los clientes de prueba NO generan facturas reales en Stripe
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No hay facturas en este período</td></tr>';
+                }
                 return;
             }
             

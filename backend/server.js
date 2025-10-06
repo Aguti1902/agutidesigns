@@ -2942,9 +2942,25 @@ app.get('/api/admin/invoices', async (req, res) => {
         
         // Obtener todos los clientes con Stripe
         const clients = await db.getAllClients();
+        console.log(`📊 [ADMIN] Total clientes en DB: ${clients.length}`);
+        
+        // Debug: mostrar primeros 3 clientes para ver estructura
+        if (clients.length > 0) {
+            console.log('🔍 [ADMIN] Ejemplo de clientes:');
+            clients.slice(0, 3).forEach((c, i) => {
+                console.log(`  Cliente ${i + 1}:`, {
+                    id: c.id,
+                    email: c.email,
+                    plan: c.plan,
+                    stripe_customer_id: c.stripe_customer_id || 'NO ASIGNADO',
+                    stripe_subscription_id: c.stripe_subscription_id || 'NO ASIGNADO'
+                });
+            });
+        }
+        
         const clientsWithStripe = clients.filter(c => c.stripe_customer_id);
         
-        console.log(`📊 [ADMIN] ${clientsWithStripe.length} clientes con Stripe`);
+        console.log(`📊 [ADMIN] ${clientsWithStripe.length} clientes con Stripe Customer ID`);
         
         let allInvoices = [];
         
@@ -3002,7 +3018,19 @@ app.get('/api/admin/invoices', async (req, res) => {
         
         console.log(`✅ [ADMIN] ${allInvoices.length} facturas totales encontradas`);
         
-        res.json({ invoices: allInvoices });
+        if (allInvoices.length === 0 && clientsWithStripe.length === 0) {
+            console.log('⚠️ [ADMIN] No hay facturas porque ningún cliente tiene stripe_customer_id asignado');
+            console.log('💡 [ADMIN] Esto significa que no ha habido pagos exitosos o los clientes fueron creados sin pagar');
+        }
+        
+        res.json({ 
+            invoices: allInvoices,
+            debug: {
+                totalClients: clients.length,
+                clientsWithStripe: clientsWithStripe.length,
+                totalInvoices: allInvoices.length
+            }
+        });
         
     } catch (error) {
         console.error('❌ [ADMIN] Error:', error);
