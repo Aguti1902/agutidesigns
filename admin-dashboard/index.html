@@ -2088,6 +2088,22 @@
                 const response = await fetch(`${API_URL}/api/admin/submissions`);
                 const pedidos = await response.json();
 
+                console.log('📋 [ADMIN] Pedidos recibidos:', pedidos.length);
+                
+                // Debug: Mostrar detalles del primer pedido
+                if (pedidos.length > 0) {
+                    const firstPedido = pedidos[0];
+                    console.log('🔍 [DEBUG] Pedido #' + firstPedido.id + ':', {
+                        id: firstPedido.id,
+                        business_name: firstPedido.business_name,
+                        plan: firstPedido.plan,
+                        previous_plan: firstPedido.previous_plan,
+                        has_upgrade: firstPedido.has_upgrade,
+                        is_downgrade: firstPedido.is_downgrade,
+                        has_modifications: firstPedido.has_modifications
+                    });
+                }
+
                 const tbody = document.getElementById('pedidosTable');
                 
                 if (pedidos.length === 0) {
