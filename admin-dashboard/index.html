@@ -2437,14 +2437,33 @@
                 
                 console.log('📊 [ADMIN] Total de clientes:', clients.length);
                 
-                // Filtramos solo los que tienen un plan activo (pagaron)
-                allWebsData = clients.filter(client => {
-                    const hasPlan = client.plan && client.plan !== 'sin_plan';
-                    if (hasPlan) {
-                        console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
+                // Obtenemos todos los proyectos para verificar cuáles ya existen
+                const projectsResponse = await fetch(`${API_URL}/api/admin/projects`);
+                const projects = await projectsResponse.json();
+                console.log('📋 [ADMIN] Total de proyectos:', projects.length);
+                
+                // Crear un mapa de client_id -> project
+                const clientProjectMap = {};
+                projects.forEach(project => {
+                    if (project.client_id) {
+                        clientProjectMap[project.client_id] = project;
                     }
-                    return hasPlan;
                 });
+                
+                // Filtramos solo los que tienen un plan activo (pagaron) y añadimos info del proyecto
+                allWebsData = clients
+                    .filter(client => {
+                        const hasPlan = client.plan && client.plan !== 'sin_plan';
+                        if (hasPlan) {
+                            console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
+                        }
+                        return hasPlan;
+                    })
+                    .map(client => ({
+                        ...client,
+                        hasProject: !!clientProjectMap[client.id],
+                        projectId: clientProjectMap[client.id]?.id || null
+                    }));
                 
                 console.log('🎯 [ADMIN] Clientes con plan para gestionar:', allWebsData.length);
                 
@@ -2572,6 +2591,15 @@
                                     🚀 Activar Web
                                 </button>
                             ` : ''}
+                            ${web.hasProject ? `
+                                <button class="btn-web-action" style="background: #6c757d; cursor: not-allowed; opacity: 0.6;" disabled title="Proyecto ya creado">
+                                    ✅ Proyecto Creado
+                                </button>
+                            ` : `
+                                <button class="btn-web-action" onclick="createProjectForClient(${web.id}, '${web.business_name || web.full_name}', '${web.plan}')" style="background: #FF6B35; font-weight: 600;">
+                                    ➕ Crear Proyecto
+                                </button>
+                            `}
                         </div>
                     </div>
                 `;
@@ -2771,6 +2799,74 @@
                 console.error('❌ [ADMIN] Error activando web:', error);
                 showNotification(
                     'Error al activar la web: ' + error.message,
+                    'error'
+                );
+            }
+        }
+
+        async function createProjectForClient(clientId, clientName, plan) {
+            const displayName = clientName || 'el cliente';
+            
+            const confirmed = await showConfirmation(
+                `➕ ¿Crear proyecto para "${displayName}"?\n\n` +
+                `Plan: ${formatPlan(plan)}\n\n` +
+                `El proyecto aparecerá en el Kanban en la columna "Sin empezar".`
+            );
+            
+            if (!confirmed) {
+                console.log('⚠️ [ADMIN] Creación de proyecto cancelada');
+                return;
+            }
+            
+            try {
+                console.log(`➕ [ADMIN] Creando proyecto para cliente #${clientId}`);
+                
+                // Calcular deadline automático según el plan
+                const deadlineDays = { basico: 5, avanzado: 7, premium: 10 };
+                const daysToAdd = deadlineDays[plan] || 5;
+                const deadline = new Date();
+                deadline.setDate(deadline.getDate() + daysToAdd);
+                const deadlineFormatted = deadline.toISOString().split('T')[0];
+                
+                // Crear proyecto
+                const response = await fetch(`${API_URL}/api/admin/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: clientId,
+                        project_name: displayName,
+                        plan: plan,
+                        status: 'sin_empezar',
+                        priority: 'normal',
+                        deadline: deadlineFormatted,
+                        progress: 0,
+                        notes: `Proyecto creado manualmente desde Webs Desplegadas. Plan: ${plan}. Pago confirmado.`
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error creando proyecto');
+                }
+                
+                const result = await response.json();
+                console.log('✅ [ADMIN] Proyecto creado:', result);
+                
+                showNotification(
+                    `🎉 ¡Proyecto creado!\n\n` +
+                    `✅ Proyecto #${result.projectId} añadido al Kanban\n` +
+                    `📅 Fecha límite: ${deadlineFormatted}\n` +
+                    `📋 Estado: Sin empezar`,
+                    'success'
+                );
+                
+                // Recargar webs desplegadas
+                await loadWebsDesplegadas();
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error creando proyecto:', error);
+                showNotification(
+                    'Error al crear proyecto: ' + error.message,
                     'error'
                 );
             }

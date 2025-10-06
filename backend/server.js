@@ -2796,6 +2796,16 @@ app.post('/api/client/change-plan', async (req, res) => {
                         );
                         console.log(`🔼 [PLAN] Proyecto marcado como UPGRADE`);
                     }
+                    
+                    // 9️⃣ ACTUALIZAR NOTAS DEL PROYECTO con info del upgrade
+                    const upgradeNote = `Plan actualizado: ${oldPlan} → ${newPlan} (${billingCycle}). Upgrade confirmado. Contador de 24h reactivado.`;
+                    await db.pool.query(
+                        `UPDATE projects 
+                         SET notes = $1 
+                         WHERE client_id = $2`,
+                        [upgradeNote, clientId]
+                    );
+                    console.log(`📝 [PLAN] Notas del proyecto actualizadas con info del upgrade`);
                 }
             }
         }
