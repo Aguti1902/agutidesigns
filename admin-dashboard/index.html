@@ -1552,8 +1552,7 @@
                     <textarea id="projectNotes" rows="3"></textarea>
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button type="submit" class="btn-primary" style="flex: 1;">Crear Proyecto</button>
-                    <button type="button" id="deployWebButton" class="btn-secondary" style="flex: 1; background: #10B981; display: none;" onclick="deployWebFromProject()">
+                    <button type="button" id="deployWebButton" class="btn-secondary" style="width: 100%; background: #10B981; display: none;" onclick="deployWebFromProject()">
                         🚀 Crear en Webs Desplegadas
                     </button>
                 </div>
@@ -2805,14 +2804,7 @@
                 document.getElementById('webManagementClientId').value = client.id;
                 document.getElementById('webManagementInfo').textContent = `${client.full_name} - ${client.business_name || 'N/A'}`;
                 
-                const websiteLink = document.getElementById('webManagementWebsite').querySelector('a');
-                if (client.website_url) {
-                    websiteLink.href = client.website_url;
-                    websiteLink.textContent = client.website_url + ' 🔗';
-                } else {
-                    websiteLink.textContent = 'Pendiente de configuración';
-                }
-                
+                document.getElementById('websiteUrlInput').value = client.website_url || '';
                 document.getElementById('wordpressUrlInput').value = client.wordpress_url || '';
                 document.getElementById('screenshotUrlInput').value = client.website_screenshot_url || '';
                 document.getElementById('gaPropertyIdInput').value = client.ga_property_id || '';
@@ -2835,17 +2827,19 @@
             event.preventDefault();
             
             const clientId = document.getElementById('webManagementClientId').value;
+            const website_url = document.getElementById('websiteUrlInput').value.trim();
             const wordpress_url = document.getElementById('wordpressUrlInput').value.trim();
             const website_screenshot_url = document.getElementById('screenshotUrlInput').value.trim();
             const ga_property_id = document.getElementById('gaPropertyIdInput').value.trim();
             
-            console.log('💾 [ADMIN] Guardando gestión de web:', { clientId, wordpress_url, website_screenshot_url, ga_property_id });
+            console.log('💾 [ADMIN] Guardando gestión de web:', { clientId, website_url, wordpress_url, website_screenshot_url, ga_property_id });
             
             try {
                 const response = await fetch(`${API_URL}/api/admin/website-management/${clientId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        website_url: website_url || null,
                         wordpress_url: wordpress_url || null,
                         website_screenshot_url: website_screenshot_url || null,
                         ga_property_id: ga_property_id || null
@@ -4072,12 +4066,18 @@
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
-                            🌐 URL del Sitio Web
+                        <label for="websiteUrlInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            🌐 URL del Sitio Web Público
                         </label>
-                        <p id="webManagementWebsite" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin: 0;">
-                            <a href="#" target="_blank" style="color: #0046FE; text-decoration: none;">-</a>
-                        </p>
+                        <input 
+                            type="url" 
+                            id="websiteUrlInput" 
+                            placeholder="https://tusitio.com" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+                            URL del sitio web público que verán los visitantes (habilita el botón "Visitar")
+                        </small>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
@@ -4091,7 +4091,7 @@
                             style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem;"
                         >
                         <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
-                            El cliente usará este link para acceder a su WordPress
+                            URL del panel de WordPress para que el cliente pueda editar su sitio
                         </small>
                     </div>
                     

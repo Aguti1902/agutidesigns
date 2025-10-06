@@ -1560,9 +1560,10 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
 app.patch('/api/admin/website-management/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { wordpress_url, website_screenshot_url, ga_property_id } = req.body;
+        const { website_url, wordpress_url, website_screenshot_url, ga_property_id } = req.body;
         
         console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`, {
+            website_url,
             wordpress_url,
             website_screenshot_url,
             ga_property_id
@@ -1570,12 +1571,13 @@ app.patch('/api/admin/website-management/:clientId', async (req, res) => {
         
         await db.pool.query(`
             UPDATE clients 
-            SET wordpress_url = COALESCE($1, wordpress_url),
-                website_screenshot_url = COALESCE($2, website_screenshot_url),
-                ga_property_id = COALESCE($3, ga_property_id),
+            SET website_url = COALESCE($1, website_url),
+                wordpress_url = COALESCE($2, wordpress_url),
+                website_screenshot_url = COALESCE($3, website_screenshot_url),
+                ga_property_id = COALESCE($4, ga_property_id),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $4
-        `, [wordpress_url, website_screenshot_url, ga_property_id, clientId]);
+            WHERE id = $5
+        `, [website_url, wordpress_url, website_screenshot_url, ga_property_id, clientId]);
         
         console.log(`✅ [ADMIN] Gestión de web actualizada para cliente #${clientId}`);
         

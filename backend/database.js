@@ -253,6 +253,17 @@ async function initializeTables() {
             console.log('⚠️ Migración ga_property_id en clients ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo para URL del sitio web público
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS website_url TEXT
+            `);
+            console.log('✅ Migración: Campo website_url añadido a clients');
+        } catch (e) {
+            console.log('⚠️ Migración website_url en clients ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
