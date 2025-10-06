@@ -242,6 +242,17 @@ async function initializeTables() {
             console.log('⚠️ Migración Mailchimp en clients ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo para Google Analytics Property ID
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS ga_property_id TEXT
+            `);
+            console.log('✅ Migración: Campo ga_property_id añadido a clients');
+        } catch (e) {
+            console.log('⚠️ Migración ga_property_id en clients ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);

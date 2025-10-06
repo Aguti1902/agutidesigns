@@ -612,7 +612,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         @keyframes pulseAdmin {
             0%, 100% {
                 opacity: 1;
@@ -2815,6 +2815,7 @@
                 
                 document.getElementById('wordpressUrlInput').value = client.wordpress_url || '';
                 document.getElementById('screenshotUrlInput').value = client.website_screenshot_url || '';
+                document.getElementById('gaPropertyIdInput').value = client.ga_property_id || '';
                 
                 // Mostrar modal
                 document.getElementById('webManagementModal').classList.add('active');
@@ -2836,8 +2837,9 @@
             const clientId = document.getElementById('webManagementClientId').value;
             const wordpress_url = document.getElementById('wordpressUrlInput').value.trim();
             const website_screenshot_url = document.getElementById('screenshotUrlInput').value.trim();
+            const ga_property_id = document.getElementById('gaPropertyIdInput').value.trim();
             
-            console.log('💾 [ADMIN] Guardando gestión de web:', { clientId, wordpress_url, website_screenshot_url });
+            console.log('💾 [ADMIN] Guardando gestión de web:', { clientId, wordpress_url, website_screenshot_url, ga_property_id });
             
             try {
                 const response = await fetch(`${API_URL}/api/admin/website-management/${clientId}`, {
@@ -2845,7 +2847,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         wordpress_url: wordpress_url || null,
-                        website_screenshot_url: website_screenshot_url || null
+                        website_screenshot_url: website_screenshot_url || null,
+                        ga_property_id: ga_property_id || null
                     })
                 });
                 
@@ -4072,6 +4075,21 @@
                         >
                         <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
                             Opcional: URL de una imagen de captura del sitio web
+                        </small>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label for="gaPropertyIdInput" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            📊 Google Analytics Property ID
+                        </label>
+                        <input 
+                            type="text" 
+                            id="gaPropertyIdInput" 
+                            placeholder="123456789" 
+                            style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; font-family: monospace;"
+                        >
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+                            Opcional: Property ID de Google Analytics (GA4) para mostrar estadísticas en el dashboard del cliente
                         </small>
                     </div>
                     

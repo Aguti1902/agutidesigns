@@ -1510,33 +1510,73 @@
                         <p class="section-subtitle">Análisis y métricas de tu sitio web</p>
                     </div>
 
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">0</div>
-                            <div class="stat-label">Visitas Totales</div>
-                        </div>
-                        <div class="stat-card" style="background: linear-gradient(135deg, #009A62 0%, #007a4d 100%)">
-                            <div class="stat-value">0</div>
-                            <div class="stat-label">Visitantes Únicos</div>
-                        </div>
-                        <div class="stat-card" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
-                            <div class="stat-value">0 min</div>
-                            <div class="stat-label">Tiempo Promedio</div>
+                    <!-- Mensaje si GA no está configurado -->
+                    <div id="gaNotConfigured" class="card" style="display: none; background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%); border: 2px dashed #ddd;">
+                        <div style="text-align: center; padding: 40px;">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">📊</div>
+                            <h3 style="color: #666; margin-bottom: 15px;">Google Analytics no configurado</h3>
+                            <p style="color: #999; margin-bottom: 20px;">Las estadísticas estarán disponibles una vez que tu sitio web esté activo y tu administrador configure Google Analytics.</p>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h3 class="card-title">📈 Gráfico de Visitas</h3>
-                        <p style="color: #666;">Las estadísticas estarán disponibles una vez que tu sitio web esté activo.</p>
-                        <div style="background: #f9fafb; height: 200px; border-radius: 10px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: #999;">
-                            <p>📊 Gráfico de visitas próximamente</p>
+                    <!-- Estadísticas principales -->
+                    <div id="gaConfigured" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="gaVisitors">0</div>
+                                <div class="stat-label">Visitantes (30d)</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #009A62 0%, #007a4d 100%)">
+                                <div class="stat-value" id="gaPageviews">0</div>
+                                <div class="stat-label">Páginas Vistas</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
+                                <div class="stat-value" id="gaAvgTime">0 min</div>
+                                <div class="stat-label">Tiempo Promedio</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                                <div class="stat-value" id="gaBounceRate">0%</div>
+                                <div class="stat-label">Tasa de Rebote</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <h3 class="card-title">🔗 Google Analytics</h3>
-                        <p style="color: #666; margin-bottom: 15px;">Conecta tu cuenta de Google Analytics para obtener estadísticas detalladas.</p>
-                        <button class="btn-action">Conectar Google Analytics</button>
+                        <!-- Usuarios en tiempo real -->
+                        <div class="card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">🟢 Usuarios en Tiempo Real</h3>
+                                    <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">Visitantes activos ahora mismo</p>
+                                </div>
+                                <div style="font-size: 3rem; font-weight: 700;" id="gaRealTime">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Páginas más visitadas -->
+                        <div class="card">
+                            <h3 class="card-title">📄 Páginas Más Visitadas</h3>
+                            <div id="gaTopPages" style="margin-top: 15px;">
+                                <!-- Se carga dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- Dispositivos y Fuentes de tráfico -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+                            <!-- Dispositivos -->
+                            <div class="card">
+                                <h3 class="card-title">📱 Dispositivos</h3>
+                                <div id="gaDevices" style="margin-top: 15px;">
+                                    <!-- Se carga dinámicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Fuentes de tráfico -->
+                            <div class="card">
+                                <h3 class="card-title">🔗 Fuentes de Tráfico</h3>
+                                <div id="gaTrafficSources" style="margin-top: 15px;">
+                                    <!-- Se carga dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2675,6 +2715,8 @@
             // Cargar contenido específico según la sección
             if (sectionId === 'contactar') {
                 loadClientTickets();
+            } else if (sectionId === 'estadisticas') {
+                loadGoogleAnalyticsData();
             }
         }
         
@@ -6358,6 +6400,123 @@
                         );
                     }
                 });
+            }
+        }
+
+        // ========================================
+        // GOOGLE ANALYTICS STATISTICS
+        // ========================================
+        
+        async function loadGoogleAnalyticsData() {
+            if (!currentClient || !currentClient.id) {
+                console.warn('⚠️ [GA] No hay cliente cargado');
+                return;
+            }
+            
+            console.log('📊 [GA] Cargando estadísticas de Google Analytics...');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/client/google-analytics/${currentClient.id}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener estadísticas');
+                }
+                
+                const result = await response.json();
+                
+                console.log('📊 [GA] Respuesta:', result);
+                
+                if (!result.configured) {
+                    // Mostrar mensaje de no configurado
+                    document.getElementById('gaNotConfigured').style.display = 'block';
+                    document.getElementById('gaConfigured').style.display = 'none';
+                    console.log('⚠️ [GA] Google Analytics no configurado para este cliente');
+                    return;
+                }
+                
+                // Ocultar mensaje y mostrar estadísticas
+                document.getElementById('gaNotConfigured').style.display = 'none';
+                document.getElementById('gaConfigured').style.display = 'block';
+                
+                const data = result.data;
+                
+                // Actualizar resumen principal
+                document.getElementById('gaVisitors').textContent = data.summary.totalVisitors.toLocaleString();
+                document.getElementById('gaPageviews').textContent = data.summary.totalPageviews.toLocaleString();
+                
+                // Convertir segundos a minutos
+                const avgMinutes = Math.floor(data.summary.avgSessionDuration / 60);
+                const avgSeconds = data.summary.avgSessionDuration % 60;
+                document.getElementById('gaAvgTime').textContent = `${avgMinutes}:${avgSeconds.toString().padStart(2, '0')} min`;
+                
+                document.getElementById('gaBounceRate').textContent = data.summary.avgBounceRate + '%';
+                
+                // Usuarios en tiempo real
+                document.getElementById('gaRealTime').textContent = data.realTimeUsers;
+                
+                // Páginas más visitadas
+                const topPagesHTML = data.topPages.map((page, index) => `
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: ${index % 2 === 0 ? '#f9fafb' : 'white'}; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                            <div style="font-weight: 700; color: #0046FE; font-size: 1.1rem; min-width: 30px;">#${index + 1}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #333; margin-bottom: 3px;">${page.title}</div>
+                                <div style="color: #999; font-size: 0.85rem; font-family: monospace;">${page.path}</div>
+                            </div>
+                        </div>
+                        <div style="font-weight: 700; color: #0046FE; font-size: 1.1rem;">${page.views.toLocaleString()}</div>
+                    </div>
+                `).join('');
+                document.getElementById('gaTopPages').innerHTML = topPagesHTML;
+                
+                // Dispositivos
+                const devicesHTML = data.devices.map(device => {
+                    const icon = device.type === 'mobile' ? '📱' : device.type === 'desktop' ? '💻' : '📱';
+                    const label = device.type === 'mobile' ? 'Móvil' : device.type === 'desktop' ? 'Escritorio' : 'Tablet';
+                    return `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 600; color: #333;">${icon} ${label}</span>
+                                <span style="font-weight: 700; color: #0046FE;">${device.percentage}%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 10px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #0046FE 0%, #0056FF 100%); height: 100%; width: ${device.percentage}%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('gaDevices').innerHTML = devicesHTML;
+                
+                // Fuentes de tráfico
+                const trafficHTML = data.trafficSources.map(source => {
+                    const icons = {
+                        'Búsqueda orgánica': '🔍',
+                        'Directo': '🔗',
+                        'Redes sociales': '📱',
+                        'Referencias': '🌐',
+                        'Email': '📧'
+                    };
+                    const icon = icons[source.source] || '🌐';
+                    return `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 600; color: #333;">${icon} ${source.source}</span>
+                                <span style="font-weight: 700; color: #0046FE;">${source.percentage}%</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 10px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #009A62 0%, #007a4d 100%); height: 100%; width: ${source.percentage}%; transition: width 0.3s;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('gaTrafficSources').innerHTML = trafficHTML;
+                
+                console.log('✅ [GA] Estadísticas cargadas correctamente');
+                
+            } catch (error) {
+                console.error('❌ [GA] Error cargando estadísticas:', error);
+                document.getElementById('gaNotConfigured').style.display = 'block';
+                document.getElementById('gaConfigured').style.display = 'none';
             }
         }
     </script>

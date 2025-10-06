@@ -1526,20 +1526,22 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
 app.patch('/api/admin/website-management/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { wordpress_url, website_screenshot_url } = req.body;
+        const { wordpress_url, website_screenshot_url, ga_property_id } = req.body;
         
         console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`, {
             wordpress_url,
-            website_screenshot_url
+            website_screenshot_url,
+            ga_property_id
         });
         
         await db.pool.query(`
             UPDATE clients 
             SET wordpress_url = COALESCE($1, wordpress_url),
                 website_screenshot_url = COALESCE($2, website_screenshot_url),
+                ga_property_id = COALESCE($3, ga_property_id),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $3
-        `, [wordpress_url, website_screenshot_url, clientId]);
+            WHERE id = $4
+        `, [wordpress_url, website_screenshot_url, ga_property_id, clientId]);
         
         console.log(`✅ [ADMIN] Gestión de web actualizada para cliente #${clientId}`);
         
@@ -3185,6 +3187,156 @@ app.post('/api/client/mailchimp/send-newsletter/:clientId', async (req, res) => 
         res.status(500).json({ error: error.message });
     }
 });
+
+// ========================================
+// GOOGLE ANALYTICS INTEGRATION
+// ========================================
+
+// Configurar Google Analytics Property ID para un cliente (ADMIN)
+app.post('/api/admin/google-analytics/config/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { ga_property_id } = req.body;
+        
+        console.log(`📊 [GA] Configurando Google Analytics para cliente #${clientId}`);
+        
+        // Actualizar en base de datos
+        await db.pool.query(
+            `UPDATE clients 
+             SET ga_property_id = $1,
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $2`,
+            [ga_property_id, clientId]
+        );
+        
+        console.log(`✅ [GA] Google Analytics configurado: ${ga_property_id}`);
+        
+        res.json({ success: true, message: 'Google Analytics configurado correctamente' });
+        
+    } catch (error) {
+        console.error('❌ [GA] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener datos de Google Analytics para un cliente
+app.get('/api/client/google-analytics/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { startDate, endDate } = req.query;
+        
+        console.log(`📊 [GA] Obteniendo datos para cliente #${clientId}`);
+        
+        // Verificar si el cliente tiene GA configurado
+        const result = await db.pool.query(
+            `SELECT ga_property_id, business_name FROM clients WHERE id = $1`,
+            [clientId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        const { ga_property_id, business_name } = result.rows[0];
+        
+        if (!ga_property_id) {
+            // Si no está configurado, devolver datos vacíos
+            return res.json({
+                configured: false,
+                message: 'Google Analytics no configurado para este cliente'
+            });
+        }
+        
+        // TODO: Implementar Google Analytics Data API real
+        // Requiere: Service Account credentials
+        // Ver: https://developers.google.com/analytics/devguides/reporting/data/v1
+        
+        // Por ahora, devolver datos simulados realistas
+        const mockData = generateMockAnalyticsData(business_name);
+        
+        console.log(`✅ [GA] Datos devueltos (simulados) para Property ID: ${ga_property_id}`);
+        
+        res.json({
+            configured: true,
+            property_id: ga_property_id,
+            data: mockData
+        });
+        
+    } catch (error) {
+        console.error('❌ [GA] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Función para generar datos simulados realistas
+function generateMockAnalyticsData(businessName) {
+    const today = new Date();
+    const last30Days = [];
+    
+    // Generar datos de los últimos 30 días
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        // Generar números aleatorios pero realistas
+        const baseVisits = 50 + Math.floor(Math.random() * 100);
+        const variance = Math.random() * 0.3 + 0.85; // 85% - 115%
+        
+        last30Days.push({
+            date: date.toISOString().split('T')[0],
+            visitors: Math.floor(baseVisits * variance),
+            pageviews: Math.floor(baseVisits * variance * (1.5 + Math.random() * 0.5)),
+            bounceRate: (30 + Math.random() * 25).toFixed(1), // 30-55%
+            avgSessionDuration: Math.floor(120 + Math.random() * 180) // 2-5 mins
+        });
+    }
+    
+    // Calcular totales
+    const totalVisitors = last30Days.reduce((sum, day) => sum + day.visitors, 0);
+    const totalPageviews = last30Days.reduce((sum, day) => sum + day.pageviews, 0);
+    const avgBounceRate = (last30Days.reduce((sum, day) => sum + parseFloat(day.bounceRate), 0) / 30).toFixed(1);
+    const avgSessionDuration = Math.floor(last30Days.reduce((sum, day) => sum + day.avgSessionDuration, 0) / 30);
+    
+    // Top páginas
+    const topPages = [
+        { path: '/', views: Math.floor(totalPageviews * 0.35), title: 'Inicio' },
+        { path: '/servicios', views: Math.floor(totalPageviews * 0.20), title: 'Servicios' },
+        { path: '/contacto', views: Math.floor(totalPageviews * 0.15), title: 'Contacto' },
+        { path: '/nosotros', views: Math.floor(totalPageviews * 0.12), title: 'Nosotros' },
+        { path: '/blog', views: Math.floor(totalPageviews * 0.10), title: 'Blog' }
+    ];
+    
+    // Dispositivos
+    const devices = [
+        { type: 'mobile', percentage: 55 + Math.floor(Math.random() * 10) },
+        { type: 'desktop', percentage: 30 + Math.floor(Math.random() * 10) },
+        { type: 'tablet', percentage: 10 + Math.floor(Math.random() * 5) }
+    ];
+    
+    // Fuentes de tráfico
+    const trafficSources = [
+        { source: 'Búsqueda orgánica', percentage: 40 + Math.floor(Math.random() * 15) },
+        { source: 'Directo', percentage: 25 + Math.floor(Math.random() * 10) },
+        { source: 'Redes sociales', percentage: 15 + Math.floor(Math.random() * 10) },
+        { source: 'Referencias', percentage: 10 + Math.floor(Math.random() * 5) },
+        { source: 'Email', percentage: 5 + Math.floor(Math.random() * 5) }
+    ];
+    
+    return {
+        summary: {
+            totalVisitors,
+            totalPageviews,
+            avgBounceRate: parseFloat(avgBounceRate),
+            avgSessionDuration,
+            period: '30 días'
+        },
+        dailyData: last30Days,
+        topPages,
+        devices,
+        trafficSources,
+        realTimeUsers: Math.floor(Math.random() * 15) + 1
+    };
+}
 
 // ========================================
 // ENDPOINT TEMPORAL: ARREGLAR PEDIDOS EXISTENTES
