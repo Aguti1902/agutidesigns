@@ -1128,7 +1128,6 @@
                             <h2>Lista de Pedidos</h2>
                             <div style="display: flex; gap: 10px;">
                                 <button class="btn-primary" onclick="loadPedidos()">🔄 Actualizar</button>
-                                <button class="btn-secondary" onclick="fixTracking()" style="background: #FF6B35;">🔧 Arreglar Tracking</button>
                             </div>
                         </div>
                 <div class="table-container">
@@ -1838,46 +1837,6 @@
         }
 
         // ===== PEDIDOS =====
-        
-        // Función temporal para sincronizar pedidos con estado real del cliente
-        async function fixTracking() {
-            if (!confirm('🔄 SINCRONIZAR PEDIDOS\n\nEsto hará lo siguiente:\n\n1. Verificará el plan ACTUAL del cliente\n2. Actualizará el pedido #8 con el plan correcto\n3. Eliminará el pedido #9 (duplicado)\n4. Mostrará los badges correctos\n\n¿Continuar?')) {
-                return;
-            }
-            
-            try {
-                console.log('🔧 [ADMIN] Sincronizando pedidos...');
-                
-                const response = await fetch(`${API_URL}/api/admin/fix-tracking`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (!response.ok) throw new Error('Error al sincronizar pedidos');
-                
-                const result = await response.json();
-                console.log('✅ [ADMIN] Pedidos sincronizados:', result);
-                
-                let message = `✅ ¡Pedidos sincronizados!\n\n`;
-                message += `• Plan: ${result.currentPlan.toUpperCase()}\n`;
-                message += `• Monto: ${result.amount}€ (${result.billingCycle === 'annual' ? 'Anual' : 'Mensual'})\n`;
-                if (result.hasUpgrade) {
-                    message += `• 🔼 UPGRADE detectado: ${result.previousPlan} → ${result.currentPlan}\n`;
-                }
-                message += `• ✏️ Marcado como MODIFICADO\n`;
-                message += `• Pedido #9 eliminado\n\n`;
-                message += `Recargando lista...`;
-                
-                alert(message);
-                
-                // Recargar pedidos
-                await loadPedidos();
-                
-            } catch (error) {
-                console.error('❌ [ADMIN] Error:', error);
-                alert('❌ Error al sincronizar pedidos: ' + error.message);
-            }
-        }
         
         async function loadPedidos() {
             try {
