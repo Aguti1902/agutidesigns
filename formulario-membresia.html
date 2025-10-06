@@ -2388,6 +2388,17 @@
             document.querySelector('input[name="physical_address"]').required = addressChecked;
         }
 
+        // Función auxiliar para obtener nombre del sector (DEBE estar antes de handleSectorChange)
+        function getSectorName(sector) {
+            const names = {
+                'restaurantes': 'Restaurante',
+                'cafeteria': 'Cafetería',
+                'bar': 'Bar',
+                'catering': 'Catering'
+            };
+            return names[sector] || 'Negocio';
+        }
+
         // Manejar cambio de sector y mostrar campos específicos
         function handleSectorChange(sector) {
             const sectorSection = document.getElementById('sectorSpecificSection');
@@ -2528,17 +2539,6 @@
                     console.log(`✅ Página personalizada "${pageName}" añadida automáticamente`);
                 }
             }, 100);
-        }
-
-        // Obtener nombre del sector para mostrar
-        function getSectorName(sector) {
-            const names = {
-                'restaurantes': 'Restaurante',
-                'cafeteria': 'Cafetería',
-                'bar': 'Bar',
-                'catering': 'Catering'
-            };
-            return names[sector] || 'Negocio';
         }
 
         // Quitar clase de error cuando el usuario empieza a escribir/seleccionar
