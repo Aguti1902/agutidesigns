@@ -1801,7 +1801,17 @@
                     <div class="card" id="emailMarketingCard">
                         <h3 class="card-title">📧 Newsletter & Email Marketing</h3>
                         <p id="emailMarketingDesc" style="color: #666; margin-bottom: 15px;">Gestiona tus campañas de email (disponible en planes avanzados)</p>
-                        <button id="emailMarketingBtn" class="btn-action secondary" onclick="openEmailMarketing()">Actualizar a Plan Avanzado</button>
+                        
+                        <!-- Estado de configuración de Mailchimp -->
+                        <div id="mailchimpStatus" style="display: none; background: #f0f9ff; border: 2px solid #0046FE; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <p style="font-weight: 600; color: #0046FE; margin-bottom: 5px;">✅ Mailchimp Configurado</p>
+                            <p style="color: #666; font-size: 0.9rem;">Tu cuenta de Mailchimp está conectada correctamente.</p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button id="emailMarketingBtn" class="btn-action secondary" onclick="openEmailMarketing()">Actualizar a Plan Avanzado</button>
+                            <button id="mailchimpConfigBtn" class="btn-action secondary" onclick="openMailchimpConfig()" style="display: none;">⚙️ Configurar Mailchimp</button>
+                        </div>
                     </div>
                 </div>
 

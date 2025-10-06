@@ -229,6 +229,19 @@ async function initializeTables() {
             console.log('⚠️ Migración modifications_viewed_at en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campos para integración con Mailchimp
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS mailchimp_api_key TEXT,
+                ADD COLUMN IF NOT EXISTS mailchimp_server_prefix TEXT,
+                ADD COLUMN IF NOT EXISTS mailchimp_audience_id TEXT
+            `);
+            console.log('✅ Migración: Campos de Mailchimp añadidos a clients');
+        } catch (e) {
+            console.log('⚠️ Migración Mailchimp en clients ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);

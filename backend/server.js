@@ -3008,6 +3008,185 @@ app.patch('/api/client/profile/:clientId', async (req, res) => {
 });
 
 // ========================================
+// MAILCHIMP INTEGRATION
+// ========================================
+
+// Guardar/actualizar configuración de Mailchimp
+app.post('/api/client/mailchimp/config/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { api_key, server_prefix, audience_id } = req.body;
+        
+        console.log(`📧 [MAILCHIMP] Guardando configuración para cliente #${clientId}`);
+        
+        // Actualizar en base de datos
+        await db.pool.query(
+            `UPDATE clients 
+             SET mailchimp_api_key = $1, 
+                 mailchimp_server_prefix = $2, 
+                 mailchimp_audience_id = $3,
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $4`,
+            [api_key, server_prefix, audience_id, clientId]
+        );
+        
+        console.log(`✅ [MAILCHIMP] Configuración guardada correctamente`);
+        
+        res.json({ success: true, message: 'Configuración de Mailchimp guardada correctamente' });
+        
+    } catch (error) {
+        console.error('❌ [MAILCHIMP] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener configuración de Mailchimp
+app.get('/api/client/mailchimp/config/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        console.log(`📧 [MAILCHIMP] Obteniendo configuración para cliente #${clientId}`);
+        
+        const result = await db.pool.query(
+            `SELECT mailchimp_api_key, mailchimp_server_prefix, mailchimp_audience_id 
+             FROM clients 
+             WHERE id = $1`,
+            [clientId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        const config = {
+            api_key: result.rows[0].mailchimp_api_key || '',
+            server_prefix: result.rows[0].mailchimp_server_prefix || '',
+            audience_id: result.rows[0].mailchimp_audience_id || '',
+            is_configured: !!(result.rows[0].mailchimp_api_key && result.rows[0].mailchimp_server_prefix && result.rows[0].mailchimp_audience_id)
+        };
+        
+        console.log(`✅ [MAILCHIMP] Configuración obtenida:`, config.is_configured ? 'Configurado' : 'No configurado');
+        
+        res.json(config);
+        
+    } catch (error) {
+        console.error('❌ [MAILCHIMP] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Enviar newsletter usando Mailchimp
+app.post('/api/client/mailchimp/send-newsletter/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { subject, content, send_time } = req.body;
+        
+        console.log(`📧 [MAILCHIMP] Enviando newsletter para cliente #${clientId}`);
+        
+        // Obtener configuración
+        const configResult = await db.pool.query(
+            `SELECT mailchimp_api_key, mailchimp_server_prefix, mailchimp_audience_id, business_name 
+             FROM clients 
+             WHERE id = $1`,
+            [clientId]
+        );
+        
+        if (configResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        const { mailchimp_api_key, mailchimp_server_prefix, mailchimp_audience_id, business_name } = configResult.rows[0];
+        
+        if (!mailchimp_api_key || !mailchimp_server_prefix || !mailchimp_audience_id) {
+            return res.status(400).json({ error: 'Mailchimp no está configurado. Por favor, configura tu API key primero.' });
+        }
+        
+        // Llamar a la API de Mailchimp
+        const mailchimpUrl = `https://${mailchimp_server_prefix}.api.mailchimp.com/3.0/campaigns`;
+        
+        // Crear campaña
+        const campaignResponse = await fetch(mailchimpUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${mailchimp_api_key}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: 'regular',
+                recipients: {
+                    list_id: mailchimp_audience_id
+                },
+                settings: {
+                    subject_line: subject,
+                    from_name: business_name || 'Mi Negocio',
+                    reply_to: configResult.rows[0].email || 'noreply@example.com',
+                    title: `Newsletter - ${subject}`
+                }
+            })
+        });
+        
+        if (!campaignResponse.ok) {
+            const error = await campaignResponse.json();
+            console.error('❌ [MAILCHIMP] Error creando campaña:', error);
+            return res.status(400).json({ error: 'Error al crear la campaña en Mailchimp: ' + (error.detail || 'Error desconocido') });
+        }
+        
+        const campaign = await campaignResponse.json();
+        const campaignId = campaign.id;
+        
+        // Añadir contenido a la campaña
+        const contentResponse = await fetch(`https://${mailchimp_server_prefix}.api.mailchimp.com/3.0/campaigns/${campaignId}/content`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${mailchimp_api_key}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                html: `
+                    <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            ${content.replace(/\n/g, '<br>')}
+                        </body>
+                    </html>
+                `
+            })
+        });
+        
+        if (!contentResponse.ok) {
+            const error = await contentResponse.json();
+            console.error('❌ [MAILCHIMP] Error añadiendo contenido:', error);
+            return res.status(400).json({ error: 'Error al añadir contenido a la campaña' });
+        }
+        
+        // Enviar campaña si es "now", o dejarla como draft si es "schedule"
+        if (send_time === 'now') {
+            const sendResponse = await fetch(`https://${mailchimp_server_prefix}.api.mailchimp.com/3.0/campaigns/${campaignId}/actions/send`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${mailchimp_api_key}`
+                }
+            });
+            
+            if (!sendResponse.ok) {
+                const error = await sendResponse.json();
+                console.error('❌ [MAILCHIMP] Error enviando campaña:', error);
+                return res.status(400).json({ error: 'Error al enviar la campaña' });
+            }
+            
+            console.log(`✅ [MAILCHIMP] Newsletter enviada exitosamente`);
+            res.json({ success: true, message: 'Newsletter enviada correctamente', campaign_id: campaignId });
+        } else {
+            console.log(`✅ [MAILCHIMP] Campaña creada como borrador`);
+            res.json({ success: true, message: 'Campaña creada. Ve a tu cuenta de Mailchimp para programar el envío.', campaign_id: campaignId });
+        }
+        
+    } catch (error) {
+        console.error('❌ [MAILCHIMP] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
 // ENDPOINT TEMPORAL: ARREGLAR PEDIDOS EXISTENTES
 // ========================================
 
