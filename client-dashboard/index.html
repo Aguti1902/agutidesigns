@@ -787,7 +787,7 @@
                         </div>
                         <div class="stat-card" style="background: linear-gradient(135deg, #009A62 0%, #007a4d 100%)">
                             <div class="stat-value" id="visitsCount">0</div>
-                            <div class="stat-label">Visitas este mes</div>
+                            <div class="stat-label">Visitas (30 días)</div>
                         </div>
                         <div class="stat-card" id="deliveryTimeCard" style="background: linear-gradient(135deg, #E5FC63 0%, #d4eb52 100%); color: #1B1B1B;">
                             <div class="stat-value" id="deliveryDays">-</div>
@@ -2125,6 +2125,9 @@
                 document.getElementById('supportNoPlan').style.display = 'none';
                 // IMPORTANTE: NO aplicar restricciones si tiene plan
                 removeFreePlanRestrictions();
+                
+                // Cargar estadísticas de visitas para el resumen
+                loadVisitsForSummary();
                 console.log('✅ Todas las secciones desbloqueadas para cliente con plan');
             } else {
                 document.getElementById('userPlan').textContent = 'Sin plan activo';
@@ -6406,6 +6409,43 @@
         // ========================================
         // GOOGLE ANALYTICS STATISTICS
         // ========================================
+        
+        // Cargar visitas para la página de resumen
+        async function loadVisitsForSummary() {
+            if (!currentClient || !currentClient.id) {
+                console.warn('⚠️ [GA-SUMMARY] No hay cliente cargado');
+                return;
+            }
+            
+            console.log('📊 [GA-SUMMARY] Cargando visitas para resumen...');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/client/google-analytics/${currentClient.id}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al obtener estadísticas');
+                }
+                
+                const result = await response.json();
+                
+                if (!result.configured || !result.data) {
+                    console.log('⚠️ [GA-SUMMARY] Google Analytics no configurado, manteniendo 0');
+                    document.getElementById('visitsCount').textContent = '0';
+                    return;
+                }
+                
+                // Actualizar contador de visitas (últimos 30 días)
+                const totalVisitors = result.data.summary.totalVisitors || 0;
+                document.getElementById('visitsCount').textContent = totalVisitors.toLocaleString();
+                
+                console.log(`✅ [GA-SUMMARY] Visitas actualizadas: ${totalVisitors}`);
+                
+            } catch (error) {
+                console.error('❌ [GA-SUMMARY] Error cargando visitas:', error);
+                // Mantener 0 si hay error
+                document.getElementById('visitsCount').textContent = '0';
+            }
+        }
         
         async function loadGoogleAnalyticsData() {
             if (!currentClient || !currentClient.id) {
