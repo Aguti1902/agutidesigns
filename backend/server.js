@@ -2867,18 +2867,28 @@ app.get('/api/client/invoices/:clientId', async (req, res) => {
                 const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
                 return hasRealAmount && isNotFullyRefunded;
             })
-            .map(invoice => ({
-                id: invoice.id,
-                number: invoice.number || `INV-${invoice.id.slice(-8)}`,
-                amount: (invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100).toFixed(2),
-                currency: invoice.currency.toUpperCase(),
-                status: invoice.status,
-                created: new Date(invoice.created * 1000).toISOString(),
-                pdf_url: invoice.invoice_pdf,
-                hosted_invoice_url: invoice.hosted_invoice_url,
-                period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
-                period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
-            }));
+            .map(invoice => {
+                // Obtener el monto base (sin IVA)
+                const baseAmount = invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100;
+                
+                // Calcular IVA (21%)
+                const amountWithVAT = baseAmount * 1.21;
+                
+                return {
+                    id: invoice.id,
+                    number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+                    amount: amountWithVAT.toFixed(2),
+                    amount_without_vat: baseAmount.toFixed(2),
+                    vat_amount: (amountWithVAT - baseAmount).toFixed(2),
+                    currency: invoice.currency.toUpperCase(),
+                    status: invoice.status,
+                    created: new Date(invoice.created * 1000).toISOString(),
+                    pdf_url: invoice.invoice_pdf,
+                    hosted_invoice_url: invoice.hosted_invoice_url,
+                    period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+                    period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
+                };
+            });
         
         res.json({ invoices: formattedInvoices });
         
@@ -2916,23 +2926,33 @@ app.get('/api/admin/invoices', async (req, res) => {
                         const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
                         return hasRealAmount && isNotFullyRefunded;
                     })
-                    .map(invoice => ({
-                        id: invoice.id,
-                        number: invoice.number || `INV-${invoice.id.slice(-8)}`,
-                        amount: (invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100).toFixed(2),
-                        currency: invoice.currency.toUpperCase(),
-                        status: invoice.status,
-                        created: new Date(invoice.created * 1000).toISOString(),
-                        pdf_url: invoice.invoice_pdf,
-                        hosted_invoice_url: invoice.hosted_invoice_url,
-                        period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
-                        period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
-                        // Datos del cliente
-                        client_id: client.id,
-                        client_name: client.full_name,
-                        client_email: client.email,
-                        client_business: client.business_name
-                    }));
+                    .map(invoice => {
+                        // Obtener el monto base (sin IVA)
+                        const baseAmount = invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100;
+                        
+                        // Calcular IVA (21%)
+                        const amountWithVAT = baseAmount * 1.21;
+                        
+                        return {
+                            id: invoice.id,
+                            number: invoice.number || `INV-${invoice.id.slice(-8)}`,
+                            amount: amountWithVAT.toFixed(2),
+                            amount_without_vat: baseAmount.toFixed(2),
+                            vat_amount: (amountWithVAT - baseAmount).toFixed(2),
+                            currency: invoice.currency.toUpperCase(),
+                            status: invoice.status,
+                            created: new Date(invoice.created * 1000).toISOString(),
+                            pdf_url: invoice.invoice_pdf,
+                            hosted_invoice_url: invoice.hosted_invoice_url,
+                            period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+                            period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
+                            // Datos del cliente
+                            client_id: client.id,
+                            client_name: client.full_name,
+                            client_email: client.email,
+                            client_business: client.business_name
+                        };
+                    });
                 
                 allInvoices = allInvoices.concat(formattedInvoices);
             } catch (err) {

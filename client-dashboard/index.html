@@ -4834,9 +4834,14 @@
                 }
                 
                 const data = await response.json();
-                const tickets = data.tickets || [];
+                const allTickets = data.tickets || [];
                 
-                console.log('🎫 [CLIENT] Tickets recibidos:', tickets.length);
+                console.log('🎫 [CLIENT] Tickets recibidos:', allTickets.length);
+                
+                // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
+                const tickets = allTickets.filter(ticket => ticket.category !== 'facturacion');
+                
+                console.log('🎫 [CLIENT] Tickets después de filtrar facturación:', tickets.length);
                 
                 // Contar mensajes sin leer
                 const unreadCount = tickets.filter(t => t.client_unread === 1).length;
@@ -5305,7 +5310,12 @@
                 if (!response.ok) return;
                 
                 const data = await response.json();
-                const tickets = data.tickets || [];
+                const allTickets = data.tickets || [];
+                
+                // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
+                const tickets = allTickets.filter(t => t.category !== 'facturacion');
+                
+                console.log('🔔 [AUTO-UPDATE] Total tickets:', allTickets.length, '| Tickets de soporte:', tickets.length);
                 
                 // Contar mensajes sin leer
                 const unreadCount = tickets.filter(t => t.client_unread === 1).length;
@@ -5598,7 +5608,12 @@
                                 <span style="background: ${status.color}20; color: ${status.color}; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; display: inline-block; margin-top: 5px;">${status.text}</span>
                             </div>
                             <div style="text-align: right;">
-                                <p style="font-weight: 700; color: #0046FE; font-size: 1.2rem; margin-bottom: 10px;">${invoice.amount}€</p>
+                                <p style="font-weight: 700; color: #0046FE; font-size: 1.2rem; margin-bottom: 5px;">${invoice.amount}€</p>
+                                ${invoice.amount_without_vat ? `
+                                    <p style="color: #999; font-size: 0.75rem; margin-bottom: 8px;">
+                                        Base: ${invoice.amount_without_vat}€ + IVA (21%): ${invoice.vat_amount}€
+                                    </p>
+                                ` : ''}
                                 ${invoice.pdf_url ? `
                                     <a href="${invoice.pdf_url}" target="_blank" class="btn-action secondary" style="display: inline-block; padding: 8px 16px; text-decoration: none; font-size: 0.85rem;">
                                         📥 Descargar PDF
