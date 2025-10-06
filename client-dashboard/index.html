@@ -2753,6 +2753,17 @@
                     loadGoogleAnalyticsData();
                 }
             }
+            
+            // 🔔 Inicializar sistema de notificaciones
+            console.log('🔔 [INIT] Iniciando sistema de notificaciones de tickets...');
+            updateUnreadBadge(); // Llamada inicial
+            
+            // Configurar polling automático cada 15 segundos
+            setInterval(() => {
+                updateUnreadBadge();
+            }, 15000);
+            
+            console.log('✅ [INIT] Sistema de notificaciones activo (polling cada 15s)');
         }
 
         // Logout
