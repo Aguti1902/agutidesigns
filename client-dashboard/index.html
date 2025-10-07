@@ -3992,8 +3992,14 @@
                     setTimeout(() => location.reload(), 2000);
                 } else if (result.invalid_subscription) {
                     // Suscripción inválida - recargar para actualizar UI
-                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
-                    setTimeout(() => location.reload(), 1500);
+                    alert(
+                        '⚠️ Suscripción No Válida\n\n' +
+                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
+                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
+                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
+                        'Se actualizará tu dashboard...'
+                    );
+                    setTimeout(() => location.reload(), 2000);
                 } else {
                     throw new Error(result.error || 'No se pudo aplicar el descuento');
                 }
@@ -4043,8 +4049,14 @@
                     setTimeout(() => location.reload(), 2000);
                 } else if (result.invalid_subscription) {
                     // Suscripción inválida - recargar para actualizar UI
-                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
-                    setTimeout(() => location.reload(), 1500);
+                    alert(
+                        '⚠️ Suscripción No Válida\n\n' +
+                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
+                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
+                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
+                        'Se actualizará tu dashboard...'
+                    );
+                    setTimeout(() => location.reload(), 2000);
                 } else {
                     throw new Error(result.error || 'Error desconocido');
                 }
@@ -4081,8 +4093,14 @@
                     setTimeout(() => location.reload(), 2000);
                 } else if (result.invalid_subscription) {
                     // Suscripción inválida - recargar para actualizar UI
-                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
-                    setTimeout(() => location.reload(), 1500);
+                    alert(
+                        '⚠️ Suscripción No Válida\n\n' +
+                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
+                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
+                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
+                        'Se actualizará tu dashboard...'
+                    );
+                    setTimeout(() => location.reload(), 2000);
                 } else {
                     throw new Error(result.error || 'Error desconocido');
                 }
