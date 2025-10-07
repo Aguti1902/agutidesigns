@@ -977,7 +977,8 @@
             }
 
             .sidebar-logo img {
-                height: 35px;
+                height: 40px;
+                filter: brightness(0) invert(1); /* Asegurar que sea blanco */
             }
 
             .sidebar-logo p {
@@ -1123,19 +1124,7 @@
             }
 
             .dashboard-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-                padding: 20px;
-            }
-
-            .header-left h1 {
-                font-size: 1.5rem;
-            }
-
-            .header-right {
-                width: 100%;
-                justify-content: center;
+                display: none; /* Ocultar header en móvil */
             }
 
             /* STATS */
@@ -1459,7 +1448,7 @@
             <div class="sidebar">
                 <div class="sidebar-logo">
                     <div>
-                        <img src="/images/Logo.svg" alt="agutidesigns">
+                        <img src="/images/Logo blanco.svg" alt="agutidesigns">
                         <p>Panel de Administración</p>
                     </div>
                     <button class="close-menu-btn" onclick="toggleMobileMenu()">✕</button>

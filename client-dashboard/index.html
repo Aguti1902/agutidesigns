@@ -684,7 +684,8 @@
             }
 
             .sidebar-logo img {
-                height: 35px;
+                height: 40px;
+                filter: brightness(0) invert(1); /* Asegurar que sea blanco */
             }
 
             .close-menu-btn {
@@ -846,19 +847,7 @@
             }
 
             .dashboard-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-                padding: 20px;
-            }
-
-            .header-logo img {
-                height: 35px;
-            }
-
-            .user-menu {
-                width: 100%;
-                justify-content: center;
+                display: none; /* Ocultar header en móvil */
             }
 
             /* MAIN CONTENT */
@@ -1280,7 +1269,7 @@
             <div class="sidebar">
                 <!-- Logo y botón cerrar -->
                 <div class="sidebar-logo">
-                    <img src="/images/Logo.svg" alt="agutidesigns">
+                    <img src="/images/Logo blanco.svg" alt="agutidesigns">
                     <button class="close-menu-btn" onclick="toggleMobileMenu()">✕</button>
                 </div>
 
