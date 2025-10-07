@@ -71,13 +71,17 @@ Railway instalará automáticamente al hacer deploy.
 
 ## 🧪 Paso 4: Probar la Funcionalidad
 
+**⚠️ IMPORTANTE:** La funcionalidad de IA **NO funcionará** hasta que configures la `OPENAI_API_KEY` en Railway (Paso 3). Si no está configurada, verás el mensaje: _"Generación de IA no disponible. Contacta al administrador."_
+
 ### En el formulario:
-1. Ve a [agutidesigns.es/formulario-membresia.html](https://agutidesigns.es/formulario-membresia.html)
-2. Completa **Paso 1** (nombre y descripción del negocio)
-3. Ve al **Paso 4** (Contenido Web)
-4. Click en **"✨ Generar todos los textos con IA"**
-5. Espera 3-5 segundos
-6. ¡Los textos aparecerán automáticamente!
+1. **Primero:** Asegúrate de haber configurado la API key en Railway
+2. Espera 2-3 minutos para que Railway redespliegue
+3. Ve a [agutidesigns.es/formulario-membresia.html](https://agutidesigns.es/formulario-membresia.html)
+4. Completa **Paso 1** (nombre y descripción del negocio)
+5. Ve al **Paso 4** (Contenido Web)
+6. Click en **"✨ Generar todos los textos con IA"**
+7. Espera 3-5 segundos
+8. ¡Los textos aparecerán automáticamente!
 
 ### Para menús de restaurante:
 1. Selecciona sector "Restaurante/Cafetería"
