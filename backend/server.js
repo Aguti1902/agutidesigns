@@ -453,8 +453,13 @@ app.post('/api/create-subscription', async (req, res) => {
             }
 
             // Enviar emails
-            await emailService.sendAdminNotification(submission);
-            await emailService.sendClientConfirmation(submission);
+            try {
+                await emailService.sendEmail('admin-new-client', submission);
+                await emailService.sendEmail('payment-success', submission);
+                console.log('✅ Emails de confirmación enviados');
+            } catch (emailError) {
+                console.error('⚠️ Error enviando emails (no crítico):', emailError.message);
+            }
 
             return res.json({
                 success: true,
@@ -526,11 +531,14 @@ app.post('/webhook', async (req, res) => {
                 }
             }
 
-            // Enviar email al admin
-            await emailService.sendAdminNotification(submission);
-
-            // Enviar email de confirmación al cliente
-            await emailService.sendClientConfirmation(submission);
+            // Enviar emails
+            try {
+                await emailService.sendEmail('admin-new-client', submission);
+                await emailService.sendEmail('payment-success', submission);
+                console.log('✅ Emails de confirmación enviados');
+            } catch (emailError) {
+                console.error('⚠️ Error enviando emails (no crítico):', emailError.message);
+            }
 
             console.log(`Pago completado para submission ${submissionId}`);
             break;
