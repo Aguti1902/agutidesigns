@@ -41,10 +41,21 @@ router.post('/client/cancel-subscription', async (req, res) => {
         try {
             console.log('🔍 [STRIPE] Verificando suscripción:', client.stripe_subscription_id);
             subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+            console.log('✅ [STRIPE] Suscripción encontrada en Stripe:', subscription.id, 'status:', subscription.status);
         } catch (stripeError) {
             console.error('❌ [STRIPE] Suscripción no encontrada en Stripe:', stripeError.message);
+            console.log('🧹 [DB] Limpiando subscription_id inválido del cliente #' + client_id);
+            
+            // Limpiar subscription_id inválido
+            await db.updateClient(client_id, {
+                stripe_subscription_id: null,
+                plan: 'sin_plan',
+                website_status: 'inactivo'
+            });
+            
             return res.status(400).json({ 
-                error: 'La suscripción no existe en Stripe. Puede que ya haya sido cancelada o eliminada. Por favor, contacta con soporte.' 
+                error: 'Tu suscripción no está activa en nuestro sistema de pagos. Por favor, contacta con soporte o realiza un nuevo pago.',
+                invalid_subscription: true
             });
         }
         
@@ -145,11 +156,22 @@ router.post('/client/reactivate-subscription', async (req, res) => {
         // Verificar que la suscripción existe en Stripe
         try {
             console.log('🔍 [STRIPE] Verificando suscripción:', client.stripe_subscription_id);
-            await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+            const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+            console.log('✅ [STRIPE] Suscripción encontrada en Stripe:', subscription.id, 'status:', subscription.status);
         } catch (stripeError) {
             console.error('❌ [STRIPE] Suscripción no encontrada en Stripe:', stripeError.message);
+            console.log('🧹 [DB] Limpiando subscription_id inválido del cliente #' + client_id);
+            
+            // Limpiar subscription_id inválido
+            await db.updateClient(client_id, {
+                stripe_subscription_id: null,
+                plan: 'sin_plan',
+                website_status: 'inactivo'
+            });
+            
             return res.status(400).json({ 
-                error: 'La suscripción no existe en Stripe. Por favor, contacta con soporte.' 
+                error: 'Tu suscripción no está activa en nuestro sistema de pagos. Por favor, contacta con soporte o realiza un nuevo pago.',
+                invalid_subscription: true
             });
         }
         
