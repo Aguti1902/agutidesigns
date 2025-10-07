@@ -602,31 +602,394 @@
             animation: slideUp 0.3s ease;
         }
 
+        /* ==================================
+           RESPONSIVE DESIGN - MÓVIL
+           ================================== */
+
+        @media (max-width: 968px) {
+            .main-content {
+                padding: 25px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 768px) {
+            /* LOGIN PAGE */
+            .login-logo {
+                margin-bottom: 25px;
+            }
+
+            .login-logo img {
+                height: 40px;
+            }
+
+            .login-box {
+                max-width: 100%;
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            /* SIDEBAR - Colapsado en móvil */
             .sidebar {
-                width: 80px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                width: 100%;
+                height: 70px;
+                flex-direction: row;
+                background: white;
+                border-top: 1px solid #e5e7eb;
+                border-right: none;
+                padding: 0;
+                z-index: 1000;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            }
+
+            .sidebar-logo {
+                display: none;
+            }
+
+            .sidebar-menu {
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 0;
+                padding: 0;
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .sidebar-menu button {
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 4px;
+                padding: 8px 10px;
+                min-width: auto;
+                flex: 1;
+                border-radius: 0;
+                font-size: 0.7rem;
+            }
+
+            .sidebar-menu button .menu-icon {
+                font-size: 1.2rem;
+                margin-right: 0;
             }
 
             .sidebar-menu button span:not(.menu-icon) {
+                display: block;
+                font-size: 0.7rem;
+                white-space: nowrap;
+            }
+
+            .sidebar-menu button.active {
+                background: #f0f7ff;
+            }
+
+            .sidebar-divider {
                 display: none;
+            }
+
+            .btn-logout {
+                display: none;
+            }
+
+            /* DASHBOARD PAGE */
+            #dashboardPage {
+                margin-left: 0;
+                margin-bottom: 70px; /* Espacio para sidebar inferior */
             }
 
             .dashboard-header {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
-            }
-
-            .main-content {
                 padding: 20px;
             }
 
-            .section-title {
-                font-size: 1.5rem;
+            .header-logo img {
+                height: 35px;
             }
 
+            .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* MAIN CONTENT */
+            .main-content {
+                padding: 20px 15px;
+                padding-bottom: 90px; /* Más espacio para sidebar */
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 15px;
+            }
+
+            /* STATS GRID */
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 20px 15px;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            /* CARDS */
+            .content-card {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            /* TABLAS */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            /* MODALES */
+            .modal-content,
+            .custom-modal-content {
+                width: 95%;
+                max-width: none;
+                margin: 10px;
+                padding: 25px 20px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-header h2,
+            .custom-modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .modal-buttons,
+            .custom-modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-buttons button,
+            .custom-modal-buttons button {
+                width: 100%;
+            }
+
+            /* PLAN CARDS */
+            .plan-comparison {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .comparison-cards {
+                min-width: 800px;
+            }
+
+            /* MI NEGOCIO - Secciones */
+            .business-section {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .business-section h3 {
+                font-size: 1.1rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .info-row label {
+                font-size: 0.85rem;
+            }
+
+            .info-row .value,
+            .info-row input,
+            .info-row textarea {
+                font-size: 0.9rem;
+                width: 100%;
+            }
+
+            /* BOTONES */
+            .btn-primary,
+            .btn-secondary {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+
+            /* WEB PREVIEW */
+            .web-preview {
+                padding: 15px;
+            }
+
+            /* CHAT WIDGET */
+            #chatWidget {
+                bottom: 90px !important; /* Encima del sidebar */
+            }
+
+            #chatWindow {
+                width: 100% !important;
+                height: calc(100vh - 180px) !important;
+                bottom: 0 !important;
+                right: 0 !important;
+                left: 0 !important;
+                border-radius: 0 !important;
+                position: fixed !important;
+            }
+
+            /* BANNER CANCELADO */
+            #cancelledBanner {
+                font-size: 0.85rem;
+                padding: 10px 15px;
+            }
+
+            /* TIMER EDICIÓN */
+            .edit-timer {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+
+            /* COUNTDOWN ENTREGA */
+            .delivery-countdown {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            /* WORDPRESS CREDENTIALS */
+            #wpCredentialsCard {
+                padding: 20px 15px;
+            }
+
+            /* TABS/PESTAÑAS */
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 8px;
+            }
+
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+                white-space: nowrap;
+            }
+
+            /* GRID DE FACTURAS */
+            .invoices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* MI PERFIL */
+            .profile-section {
+                padding: 20px 15px;
+            }
+
+            .profile-form .form-group {
+                margin-bottom: 20px;
+            }
+
+            /* NEWSLETTER */
+            .newsletter-config {
+                padding: 20px 15px;
+            }
+
+            /* ANALYTICS */
+            .analytics-card {
+                padding: 20px 15px;
+            }
+
+            .analytics-metric {
+                padding: 15px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px 10px;
+                padding-bottom: 90px;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .sidebar-menu button {
+                padding: 6px 8px;
+                font-size: 0.65rem;
+            }
+
+            .sidebar-menu button .menu-icon {
+                font-size: 1.1rem;
+            }
+
+            .stat-card {
+                padding: 15px 12px;
+            }
+
+            .stat-value {
+                font-size: 1.6rem;
+            }
+
+            .content-card {
+                padding: 15px 12px;
+            }
+
+            .modal-content,
+            .custom-modal-content {
+                padding: 20px 15px;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Landscape en móvil */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .sidebar {
+                height: 60px;
+            }
+
+            .sidebar-menu button {
+                padding: 6px 8px;
+            }
+
+            #dashboardPage {
+                margin-bottom: 60px;
+            }
+
+            .main-content {
+                padding: 15px;
+                padding-bottom: 75px;
             }
         }
         
