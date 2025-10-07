@@ -6317,10 +6317,19 @@
             if (!currentClient || !currentClient.id) return;
             
             try {
-                console.log('🔄 [AUTO-UPDATE] Actualizando contador de mensajes...');
-                const response = await fetch(`${API_URL}/api/tickets/client/${currentClient.id}`);
+                // Timeout de 5 segundos para evitar colgarse
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
                 
-                if (!response.ok) return;
+                const response = await fetch(`${API_URL}/api/tickets/client/${currentClient.id}`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    // Silenciosamente falla si el servidor está caído
+                    return;
+                }
                 
                 const data = await response.json();
                 const allTickets = data.tickets || [];
@@ -6328,11 +6337,8 @@
                 // FILTRAR: Excluir tickets automáticos de cambios de plan (categoría "facturacion")
                 const tickets = allTickets.filter(t => t.category !== 'facturacion');
                 
-                console.log('🔔 [AUTO-UPDATE] Total tickets:', allTickets.length, '| Tickets de soporte:', tickets.length);
-                
                 // Contar mensajes sin leer
                 const unreadCount = tickets.filter(t => t.client_unread === true).length;
-                console.log('🔔 [AUTO-UPDATE] Mensajes sin leer:', unreadCount);
                 
                 // Actualizar badges (menú y header de la sección)
                 const badgeMenu = document.getElementById('unreadBadgeMenu');
@@ -6350,7 +6356,6 @@
                         if (badgeHeader) {
                             badgeHeader.textContent = unreadCount;
                             badgeHeader.style.display = 'inline-block';
-                            console.log('✅ [CLIENT] Badge header actualizado:', unreadCount);
                         }
                         
                         // Si hay mensajes nuevos que antes no había, mostrar notificación
@@ -6380,12 +6385,16 @@
                 // 🆕 Si hay un modal de ticket abierto, actualizarlo automáticamente
                 const modal = document.getElementById('viewTicketModal');
                 if (modal && modal.style.display === 'flex' && currentOpenTicketId) {
-                    console.log(`🔄 [AUTO-UPDATE] Actualizando ticket abierto #${currentOpenTicketId}`);
                     await refreshOpenTicket(currentOpenTicketId);
                 }
                 
             } catch (error) {
-                console.error('❌ [AUTO-UPDATE] Error actualizando badge:', error);
+                // Silenciosamente manejar errores de conexión (backend redeployando, sin internet, etc.)
+                // Solo loggear si es un error real, no problemas de red
+                if (error.name !== 'AbortError' && !error.message.includes('Failed to fetch')) {
+                    console.warn('⚠️ [AUTO-UPDATE] No se pudo actualizar:', error.message);
+                }
+                // No hacer nada, el próximo auto-update lo intentará de nuevo
             }
         }
 
