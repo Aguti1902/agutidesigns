@@ -2025,13 +2025,8 @@
         function parseAndSortMessages(ticket) {
             const messages = [];
             
-            console.log('🔍 [DEBUG] ticket.created_at:', ticket.created_at);
-            console.log('🔍 [DEBUG] ticket.admin_response_at:', ticket.admin_response_at);
-            console.log('🔍 [DEBUG] ticket.client_response_at:', ticket.client_response_at);
-            
             // Mensaje inicial del cliente (descripción)
             const initialTimestamp = new Date(ticket.created_at);
-            console.log('🔍 [DEBUG] Mensaje inicial timestamp:', initialTimestamp);
             messages.push({
                 type: 'client',
                 content: ticket.description,
@@ -2050,20 +2045,34 @@
                 }
                 
                 if (adminParts.length === 1) {
-                    // Solo una respuesta del admin
+                    // Solo una respuesta del admin (sin separadores adicionales)
                     messages.push({
                         type: 'admin',
                         content: adminParts[0].trim(),
                         timestamp: ticket.admin_response_at ? new Date(ticket.admin_response_at) : new Date(ticket.created_at)
                     });
                 } else {
-                    // Múltiples respuestas del admin
+                    // Múltiples respuestas del admin - parsear TODAS desde los separadores
+                    // La primera respuesta NO tiene separador, usar admin_response_at solo como fallback
+                    let firstResponseTime = ticket.admin_response_at ? new Date(ticket.admin_response_at) : new Date(ticket.created_at);
+                    
+                    // Si hay al menos un separador con timestamp, usar ese como base
+                    if (adminParts.length > 2) {
+                        const firstSeparatorStr = adminParts[1];
+                        const timestampMs = parseInt(firstSeparatorStr);
+                        if (!isNaN(timestampMs) && timestampMs > 1000000000000) {
+                            // Restar 1 segundo a la primera respuesta para que aparezca antes
+                            firstResponseTime = new Date(timestampMs - 1000);
+                        }
+                    }
+                    
                     messages.push({
                         type: 'admin',
                         content: adminParts[0].trim(),
-                        timestamp: ticket.admin_response_at ? new Date(ticket.admin_response_at) : new Date(ticket.created_at)
+                        timestamp: firstResponseTime
                     });
                     
+                    // Parsear el resto de respuestas con sus timestamps
                     for (let i = 1; i < adminParts.length; i += 2) {
                         if (i < adminParts.length - 1) {
                             const dateStr = adminParts[i];
@@ -2075,11 +2084,9 @@
                             if (!isNaN(timestampMs) && timestampMs > 1000000000000) {
                                 // Es un timestamp válido en milisegundos
                                 date = new Date(timestampMs);
-                                console.log('✅ [PARSE] Timestamp parseado:', timestampMs, '→', date);
                             } else {
                                 // Formato antiguo, parsear como fecha legible
                                 date = parseDateFromString(dateStr) || new Date();
-                                console.log('⚠️ [PARSE] Formato antiguo:', dateStr, '→', date);
                             }
                             
                             messages.push({
@@ -2144,17 +2151,7 @@
             }
             
             // Ordenar por timestamp
-            console.log('🔍 [DEBUG] Mensajes ANTES de ordenar:');
-            messages.forEach((msg, idx) => {
-                console.log(`  ${idx + 1}. ${msg.type} - ${msg.timestamp}`);
-            });
-            
             messages.sort((a, b) => a.timestamp - b.timestamp);
-            
-            console.log('🔍 [DEBUG] Mensajes DESPUÉS de ordenar:');
-            messages.forEach((msg, idx) => {
-                console.log(`  ${idx + 1}. ${msg.type} - ${msg.timestamp} - ${msg.isInitial ? '(INICIAL)' : ''}`);
-            });
             
             return messages;
         }
@@ -2333,6 +2330,9 @@
                 currentOpenAdminTicketId = id;
                 document.getElementById('ticketModal').classList.add('active');
                 console.log('✅ [ADMIN] Modal de ticket abierto correctamente - Auto-actualización activada');
+                
+                // 🔔 Recargar lista de tickets en segundo plano para actualizar badge
+                loadTickets().catch(err => console.error('Error recargando tickets:', err));
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando detalles del ticket:', error);
