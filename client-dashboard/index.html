@@ -6,6 +6,8 @@
     <title>Mi Dashboard - agutidesigns</title>
     <!-- jsPDF para generar informes PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -117,6 +119,27 @@
             background: #0036C8;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 70, 254, 0.25);
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0 0 0;
+            color: #94a3b8;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .login-divider span {
+            padding: 0 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .error-message {
@@ -677,6 +700,14 @@
 
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
             </form>
+
+            <!-- Separador -->
+            <div class="login-divider">
+                <span>O</span>
+            </div>
+
+            <!-- Google Sign-In Button -->
+            <div id="googleSignInButton" style="display: flex; justify-content: center; margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -2219,6 +2250,72 @@
                 console.error('Error:', error);
             }
         });
+
+        // ============================================
+        // 🔐 GOOGLE SIGN-IN
+        // ============================================
+
+        // Inicializar Google Sign-In cuando el script de Google cargue
+        window.onload = function () {
+            if (window.google) {
+                google.accounts.id.initialize({
+                    client_id: 'TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+                    callback: handleGoogleCallback,
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+
+                google.accounts.id.renderButton(
+                    document.getElementById('googleSignInButton'),
+                    {
+                        theme: 'outline',
+                        size: 'large',
+                        width: '100%',
+                        text: 'continue_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left'
+                    }
+                );
+
+                console.log('✅ Google Sign-In inicializado');
+            }
+        };
+
+        // Callback cuando el usuario se autentica con Google
+        async function handleGoogleCallback(response) {
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                console.log('🔐 [GOOGLE] Token recibido, enviando al backend...');
+                
+                const res = await fetch(`${API_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    console.log('✅ [GOOGLE] Autenticación exitosa:', data.user.email);
+                    
+                    // Guardar cliente en sessionStorage
+                    sessionStorage.setItem('client', JSON.stringify(data.user));
+                    currentClient = data.user;
+                    
+                    // Mostrar dashboard
+                    showDashboard();
+                } else {
+                    console.error('❌ [GOOGLE] Error:', data.error);
+                    errorDiv.textContent = data.error || 'Error al autenticar con Google';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('❌ [GOOGLE] Error de conexión:', error);
+                errorDiv.textContent = 'Error de conexión con Google. Intenta de nuevo.';
+                errorDiv.style.display = 'block';
+            }
+        }
 
         // Mostrar dashboard
         async function showDashboard() {

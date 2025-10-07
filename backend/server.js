@@ -41,6 +41,7 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const db = require('./database');
 const emailService = require('./email-service');
+const googleAuth = require('./google-auth');
 
 // Google Analytics Data API
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
@@ -1328,6 +1329,47 @@ app.post('/api/client/login', async (req, res) => {
     } catch (error) {
         console.error('Error en login de cliente:', error);
         res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+// ============================================
+// 🔐 AUTENTICACIÓN CON GOOGLE
+// ============================================
+
+// Endpoint para login/registro con Google
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        
+        if (!credential) {
+            return res.status(400).json({ error: 'Token de Google requerido' });
+        }
+        
+        console.log('🔐 [GOOGLE AUTH] Verificando token de Google...');
+        
+        // Verificar token de Google
+        const googleData = await googleAuth.verifyGoogleToken(credential);
+        console.log('✅ [GOOGLE AUTH] Token verificado:', googleData.email);
+        
+        // Obtener o crear usuario
+        const user = await googleAuth.getOrCreateGoogleUser(googleData, db);
+        console.log('✅ [GOOGLE AUTH] Usuario autenticado:', user.email);
+        
+        // Retornar datos del usuario (sin contraseña)
+        const { password, ...userData } = user;
+        
+        res.json({
+            success: true,
+            user: userData,
+            message: 'Autenticación exitosa con Google'
+        });
+        
+    } catch (error) {
+        console.error('❌ [GOOGLE AUTH] Error:', error);
+        res.status(401).json({ 
+            error: 'Error en autenticación con Google',
+            details: error.message 
+        });
     }
 });
 
