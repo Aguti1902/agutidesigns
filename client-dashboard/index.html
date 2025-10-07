@@ -1477,30 +1477,79 @@
                         <p class="section-subtitle">Gestiona y edita tu sitio web</p>
                     </div>
 
-                    <div class="card">
-                        <h3 class="card-title">🎨 Editor WordPress</h3>
-                        <p style="margin-bottom: 20px; color: #666;">Accede a tu panel de WordPress para gestionar y editar todo el contenido de tu sitio web.</p>
-                        <button class="btn-action" onclick="openWordPressEditor()" id="btnWordPress">
-                            <span>✏️ Editar Sitio Web</span>
-                        </button>
-                        <p id="wordpressMessage" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404;">
-                            ⚠️ El acceso a WordPress estará disponible una vez que tu sitio web sea entregado.
-                        </p>
-                    </div>
+                <div class="card">
+                    <h3 class="card-title">🎨 Editor WordPress</h3>
+                    <p style="margin-bottom: 20px; color: #666;">Accede a tu panel de WordPress para gestionar y editar todo el contenido de tu sitio web.</p>
+                    <button class="btn-action" onclick="openWordPressEditor()" id="btnWordPress">
+                        <span>✏️ Editar Sitio Web</span>
+                    </button>
+                    <p id="wordpressMessage" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404;">
+                        ⚠️ El acceso a WordPress estará disponible una vez que tu sitio web sea entregado.
+                    </p>
+                </div>
 
-                    <div class="card">
-                        <h3 class="card-title">📊 Estado del Sitio</h3>
-                        <div style="display: grid; gap: 15px;">
-                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estado Actual</p>
-                                <p style="font-weight: 600; color: #1B1B1B;" id="siteStatusDisplay">-</p>
+                <!-- Credenciales de WordPress (solo visible cuando el sitio está activo) -->
+                <div class="card" id="wpCredentialsCard" style="display: none;">
+                    <h3 class="card-title">🔐 Credenciales de Acceso</h3>
+                    <p style="margin-bottom: 20px; color: #666;">Usa estas credenciales para acceder al panel de administración de tu WordPress.</p>
+                    
+                    <div style="background: #e8f4ff; padding: 20px; border-radius: 10px; border: 2px solid #0046FE; margin-bottom: 15px;">
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🌐 URL del Panel</p>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <p style="font-weight: 600; color: #0046FE; word-break: break-all; flex: 1;" id="wpAdminUrl">-</p>
+                                <button onclick="copyToClipboard(document.getElementById('wpAdminUrl').textContent, 'URL')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                    📋 Copiar
+                                </button>
                             </div>
-                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">URL del Sitio</p>
-                                <p style="font-weight: 600; color: #0046FE; word-break: break-all;" id="siteUrlDisplay">-</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">👤 Usuario</p>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <p style="font-weight: 600; color: #1B1B1B; flex: 1;" id="wpUsername">-</p>
+                                <button onclick="copyToClipboard(document.getElementById('wpUsername').textContent, 'Usuario')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                    📋 Copiar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🔑 Contraseña</p>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                                    <p style="font-weight: 600; color: #1B1B1B; font-family: monospace; letter-spacing: 1px;" id="wpPassword">••••••••••••</p>
+                                    <button onclick="togglePasswordVisibility()" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;" id="togglePasswordBtn">
+                                        👁️ Mostrar
+                                    </button>
+                                </div>
+                                <button onclick="copyToClipboard(document.getElementById('wpPassword').dataset.password, 'Contraseña')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                    📋 Copiar
+                                </button>
                             </div>
                         </div>
                     </div>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                            <strong>💡 Consejo:</strong> Guarda estas credenciales en un lugar seguro. Puedes cambiar tu contraseña desde el panel de WordPress una vez hayas iniciado sesión.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">📊 Estado del Sitio</h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estado Actual</p>
+                            <p style="font-weight: 600; color: #1B1B1B;" id="siteStatusDisplay">-</p>
+                        </div>
+                        <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">URL del Sitio</p>
+                            <p style="font-weight: 600; color: #0046FE; word-break: break-all;" id="siteUrlDisplay">-</p>
+                        </div>
+                    </div>
+                </div>
                 </div>
 
                 <!-- ESTADÍSTICAS -->
