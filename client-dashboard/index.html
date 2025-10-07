@@ -1477,79 +1477,79 @@
                         <p class="section-subtitle">Gestiona y edita tu sitio web</p>
                     </div>
 
-                <div class="card">
-                    <h3 class="card-title">🎨 Editor WordPress</h3>
-                    <p style="margin-bottom: 20px; color: #666;">Accede a tu panel de WordPress para gestionar y editar todo el contenido de tu sitio web.</p>
-                    <button class="btn-action" onclick="openWordPressEditor()" id="btnWordPress">
-                        <span>✏️ Editar Sitio Web</span>
-                    </button>
-                    <p id="wordpressMessage" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404;">
-                        ⚠️ El acceso a WordPress estará disponible una vez que tu sitio web sea entregado.
-                    </p>
-                </div>
-
-                <!-- Credenciales de WordPress (solo visible cuando el sitio está activo) -->
-                <div class="card" id="wpCredentialsCard" style="display: none;">
-                    <h3 class="card-title">🔐 Credenciales de Acceso</h3>
-                    <p style="margin-bottom: 20px; color: #666;">Usa estas credenciales para acceder al panel de administración de tu WordPress.</p>
-                    
-                    <div style="background: #e8f4ff; padding: 20px; border-radius: 10px; border: 2px solid #0046FE; margin-bottom: 15px;">
-                        <div style="margin-bottom: 15px;">
-                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🌐 URL del Panel</p>
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <p style="font-weight: 600; color: #0046FE; word-break: break-all; flex: 1;" id="wpAdminUrl">-</p>
-                                <button onclick="copyToClipboard(document.getElementById('wpAdminUrl').textContent, 'URL')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
-                                    📋 Copiar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">👤 Usuario</p>
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <p style="font-weight: 600; color: #1B1B1B; flex: 1;" id="wpUsername">-</p>
-                                <button onclick="copyToClipboard(document.getElementById('wpUsername').textContent, 'Usuario')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
-                                    📋 Copiar
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🔑 Contraseña</p>
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
-                                    <p style="font-weight: 600; color: #1B1B1B; font-family: monospace; letter-spacing: 1px;" id="wpPassword">••••••••••••</p>
-                                    <button onclick="togglePasswordVisibility()" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;" id="togglePasswordBtn">
-                                        👁️ Mostrar
-                                    </button>
-                                </div>
-                                <button onclick="copyToClipboard(document.getElementById('wpPassword').dataset.password, 'Contraseña')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
-                                    📋 Copiar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
-                            <strong>💡 Consejo:</strong> Guarda estas credenciales en un lugar seguro. Puedes cambiar tu contraseña desde el panel de WordPress una vez hayas iniciado sesión.
+                    <div class="card">
+                        <h3 class="card-title">🎨 Editor WordPress</h3>
+                        <p style="margin-bottom: 20px; color: #666;">Accede a tu panel de WordPress para gestionar y editar todo el contenido de tu sitio web.</p>
+                        <button class="btn-action" onclick="openWordPressEditor()" id="btnWordPress">
+                            <span>✏️ Editar Sitio Web</span>
+                        </button>
+                        <p id="wordpressMessage" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404;">
+                            ⚠️ El acceso a WordPress estará disponible una vez que tu sitio web sea entregado.
                         </p>
                     </div>
-                </div>
 
-                <div class="card">
-                    <h3 class="card-title">📊 Estado del Sitio</h3>
-                    <div style="display: grid; gap: 15px;">
-                        <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estado Actual</p>
-                            <p style="font-weight: 600; color: #1B1B1B;" id="siteStatusDisplay">-</p>
+                    <!-- Credenciales de WordPress (solo visible cuando el sitio está activo) -->
+                    <div class="card" id="wpCredentialsCard" style="display: none;">
+                        <h3 class="card-title">🔐 Credenciales de Acceso</h3>
+                        <p style="margin-bottom: 20px; color: #666;">Usa estas credenciales para acceder al panel de administración de tu WordPress.</p>
+                        
+                        <div style="background: #e8f4ff; padding: 20px; border-radius: 10px; border: 2px solid #0046FE; margin-bottom: 15px;">
+                            <div style="margin-bottom: 15px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🌐 URL del Panel</p>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <p style="font-weight: 600; color: #0046FE; word-break: break-all; flex: 1;" id="wpAdminUrl">-</p>
+                                    <button onclick="copyToClipboard(document.getElementById('wpAdminUrl').textContent, 'URL')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                        📋 Copiar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">👤 Usuario</p>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <p style="font-weight: 600; color: #1B1B1B; flex: 1;" id="wpUsername">-</p>
+                                    <button onclick="copyToClipboard(document.getElementById('wpUsername').textContent, 'Usuario')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                        📋 Copiar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">🔑 Contraseña</p>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                                        <p style="font-weight: 600; color: #1B1B1B; font-family: monospace; letter-spacing: 1px;" id="wpPassword">••••••••••••</p>
+                                        <button onclick="togglePasswordVisibility()" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;" id="togglePasswordBtn">
+                                            👁️ Mostrar
+                                        </button>
+                                    </div>
+                                    <button onclick="copyToClipboard(document.getElementById('wpPassword').dataset.password, 'Contraseña')" class="btn-secondary" style="padding: 8px 15px; font-size: 0.9rem;">
+                                        📋 Copiar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
-                            <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">URL del Sitio</p>
-                            <p style="font-weight: 600; color: #0046FE; word-break: break-all;" id="siteUrlDisplay">-</p>
+                        
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                                <strong>💡 Consejo:</strong> Guarda estas credenciales en un lugar seguro. Puedes cambiar tu contraseña desde el panel de WordPress una vez hayas iniciado sesión.
+                            </p>
                         </div>
                     </div>
-                </div>
+
+                    <div class="card">
+                        <h3 class="card-title">📊 Estado del Sitio</h3>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">Estado Actual</p>
+                                <p style="font-weight: 600; color: #1B1B1B;" id="siteStatusDisplay">-</p>
+                            </div>
+                            <div style="padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                <p style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">URL del Sitio</p>
+                                <p style="font-weight: 600; color: #0046FE; word-break: break-all;" id="siteUrlDisplay">-</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ESTADÍSTICAS -->
@@ -2850,6 +2850,94 @@
                 loadClientTickets();
             } else if (sectionId === 'estadisticas') {
                 loadGoogleAnalyticsData();
+            } else if (sectionId === 'sitio') {
+                loadWordPressCredentials();
+            }
+        }
+        
+        // 🆕 Función para abrir el editor de WordPress
+        function openWordPressEditor() {
+            if (!currentClient || !currentClient.wordpress_url) {
+                showNotification('El acceso a WordPress no está disponible aún', 'warning');
+                return;
+            }
+            
+            console.log('🚀 Abriendo WordPress:', currentClient.wordpress_url);
+            window.open(currentClient.wordpress_url, '_blank');
+        }
+        
+        // Funciones para manejo de credenciales de WordPress
+        function togglePasswordVisibility() {
+            const passwordElement = document.getElementById('wpPassword');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const actualPassword = passwordElement.dataset.password;
+            
+            if (passwordElement.textContent === actualPassword) {
+                // Ocultar contraseña
+                passwordElement.textContent = '••••••••••••';
+                toggleBtn.textContent = '👁️ Mostrar';
+            } else {
+                // Mostrar contraseña
+                passwordElement.textContent = actualPassword;
+                toggleBtn.textContent = '🙈 Ocultar';
+            }
+        }
+
+        function copyToClipboard(text, fieldName) {
+            if (!text || text === '-') {
+                showNotification(`No hay ${fieldName} para copiar`, 'error');
+                return;
+            }
+            
+            // Crear un elemento temporal para copiar el texto
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-9999px';
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                showNotification(`${fieldName} copiado al portapapeles`, 'success');
+            } catch (err) {
+                showNotification(`Error al copiar ${fieldName}`, 'error');
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+
+        // Cargar credenciales de WordPress cuando el sitio esté activo
+        function loadWordPressCredentials() {
+            if (!currentClient) {
+                console.log('[WP] No hay cliente actual');
+                return;
+            }
+
+            console.log('[WP] Verificando credenciales para cliente:', currentClient.id);
+            
+            // Verificar si el sitio está activo y tiene credenciales
+            if (currentClient.website_status === 'activo' && currentClient.wordpress_url) {
+                console.log('[WP] Sitio activo, mostrando credenciales');
+                
+                // Mostrar tarjeta de credenciales
+                document.getElementById('wpCredentialsCard').style.display = 'block';
+                
+                // Agregar /wp-admin al final de la URL si no está
+                let adminUrl = currentClient.wordpress_url;
+                if (!adminUrl.endsWith('/wp-admin') && !adminUrl.endsWith('/wp-admin/')) {
+                    adminUrl += (adminUrl.endsWith('/') ? 'wp-admin' : '/wp-admin');
+                }
+                
+                // Rellenar credenciales
+                document.getElementById('wpAdminUrl').textContent = adminUrl;
+                document.getElementById('wpUsername').textContent = currentClient.wordpress_username || 'N/A';
+                document.getElementById('wpPassword').textContent = '••••••••••••';
+                document.getElementById('wpPassword').dataset.password = currentClient.wordpress_password || '';
+                
+            } else {
+                console.log('[WP] Sitio no activo o sin credenciales');
+                document.getElementById('wpCredentialsCard').style.display = 'none';
             }
         }
         
@@ -6085,8 +6173,6 @@
                 loadProfile();
             } else if (section === 'seo') {
                 updateSEOMarketingSection();
-            } else if (section === 'sitio') {
-                loadWordPressCredentials();
             }
         };
 
@@ -6961,146 +7047,6 @@
                         <div style="color: #7f1d1d; font-size: 0.95rem; line-height: 1.5;">No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.</div>
                     </div>
                 `;
-            }
-        }
-
-        // ===== FUNCIONES PARA CREDENCIALES DE WORDPRESS =====
-        function togglePasswordVisibility() {
-            const passwordElement = document.getElementById('wpPassword');
-            const toggleBtn = document.getElementById('togglePasswordBtn');
-            const actualPassword = passwordElement.dataset.password;
-            
-            if (passwordElement.textContent === actualPassword) {
-                // Ocultar contraseña
-                passwordElement.textContent = '••••••••••••';
-                toggleBtn.textContent = '👁️ Mostrar';
-            } else {
-                // Mostrar contraseña
-                passwordElement.textContent = actualPassword;
-                toggleBtn.textContent = '🙈 Ocultar';
-            }
-        }
-
-        function copyToClipboard(text, fieldName) {
-            if (!text || text === '-') {
-                showNotification(`No hay ${fieldName} para copiar`, 'error');
-                return;
-            }
-            
-            // Crear un elemento temporal para copiar el texto
-            const tempInput = document.createElement('textarea');
-            tempInput.value = text;
-            tempInput.style.position = 'absolute';
-            tempInput.style.left = '-9999px';
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            
-            try {
-                document.execCommand('copy');
-                showNotification(`${fieldName} copiado al portapapeles`, 'success');
-            } catch (err) {
-                showNotification(`Error al copiar ${fieldName}`, 'error');
-            }
-            
-            document.body.removeChild(tempInput);
-        }
-
-        // Cargar credenciales de WordPress del proyecto
-        async function loadWordPressCredentials() {
-            if (!currentClient || !currentClient.id) {
-                console.log('[WP] No hay cliente actual');
-                return;
-            }
-
-            try {
-                console.log(`[WP] Cargando credenciales para cliente #${currentClient.id}...`);
-                
-                // Obtener proyecto del cliente
-                const response = await fetch(`${API_URL}/api/admin/projects/client/${currentClient.id}`);
-                
-                if (!response.ok) {
-                    throw new Error('No se pudo obtener el proyecto');
-                }
-                
-                const projects = await response.json();
-                
-                if (!projects || projects.length === 0) {
-                    console.log('[WP] No hay proyectos para este cliente');
-                    return;
-                }
-                
-                // Tomar el primer proyecto (asumiendo que cada cliente tiene un proyecto)
-                const project = projects[0];
-                console.log('[WP] Proyecto encontrado:', project);
-                
-                // Verificar si el proyecto está desplegado
-                if (project.is_deployed && project.wordpress_url) {
-                    console.log('[WP] Proyecto desplegado, mostrando credenciales');
-                    
-                    // Mostrar tarjeta de credenciales
-                    document.getElementById('wpCredentialsCard').style.display = 'block';
-                    
-                    // Agregar /wp-admin al final de la URL si no está
-                    let adminUrl = project.wordpress_url;
-                    if (!adminUrl.endsWith('/wp-admin') && !adminUrl.endsWith('/wp-admin/')) {
-                        adminUrl += (adminUrl.endsWith('/') ? 'wp-admin' : '/wp-admin');
-                    }
-                    
-                    // Rellenar credenciales
-                    document.getElementById('wpAdminUrl').textContent = adminUrl;
-                    document.getElementById('wpUsername').textContent = project.wordpress_username || 'N/A';
-                    document.getElementById('wpPassword').textContent = '••••••••••••';
-                    document.getElementById('wpPassword').dataset.password = project.wordpress_password || '';
-                } else {
-                    console.log('[WP] Proyecto no desplegado aún');
-                    document.getElementById('wpCredentialsCard').style.display = 'none';
-                }
-                
-            } catch (error) {
-                console.error('[WP] Error cargando credenciales:', error);
-            }
-        }
-
-        // Modificar openWordPressEditor para usar las credenciales del proyecto
-        async function openWordPressEditor() {
-            if (!currentClient || !currentClient.id) {
-                showNotification('No se pudo identificar tu cuenta', 'error');
-                return;
-            }
-
-            try {
-                // Obtener proyecto del cliente
-                const response = await fetch(`${API_URL}/api/admin/projects/client/${currentClient.id}`);
-                
-                if (!response.ok) {
-                    throw new Error('No se pudo obtener el proyecto');
-                }
-                
-                const projects = await response.json();
-                
-                if (!projects || projects.length === 0 || !projects[0].is_deployed) {
-                    document.getElementById('wordpressMessage').style.display = 'block';
-                    return;
-                }
-                
-                const project = projects[0];
-                
-                if (project.wordpress_url) {
-                    // Abrir WordPress en una nueva pestaña
-                    let adminUrl = project.wordpress_url;
-                    if (!adminUrl.endsWith('/wp-admin') && !adminUrl.endsWith('/wp-admin/')) {
-                        adminUrl += (adminUrl.endsWith('/') ? 'wp-admin' : '/wp-admin');
-                    }
-                    
-                    window.open(adminUrl, '_blank');
-                    showNotification('Abriendo panel de WordPress...', 'success');
-                } else {
-                    document.getElementById('wordpressMessage').style.display = 'block';
-                }
-                
-            } catch (error) {
-                console.error('Error abriendo WordPress:', error);
-                showNotification('Error al abrir WordPress', 'error');
             }
         }
     </script>

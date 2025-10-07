@@ -1599,13 +1599,22 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
 app.patch('/api/admin/website-management/:clientId', async (req, res) => {
     try {
         const { clientId } = req.params;
-        const { website_url, wordpress_url, website_screenshot_url, ga_property_id } = req.body;
+        const { 
+            website_url, 
+            wordpress_url, 
+            website_screenshot_url, 
+            ga_property_id,
+            wordpress_username,
+            wordpress_password
+        } = req.body;
         
         console.log(`🔧 [ADMIN] Actualizando gestión de web para cliente #${clientId}`, {
             website_url,
             wordpress_url,
             website_screenshot_url,
-            ga_property_id
+            ga_property_id,
+            wordpress_username: wordpress_username ? '***' : undefined,
+            wordpress_password: wordpress_password ? '***' : undefined
         });
         
         await db.pool.query(`
@@ -1614,9 +1623,19 @@ app.patch('/api/admin/website-management/:clientId', async (req, res) => {
                 wordpress_url = COALESCE($2, wordpress_url),
                 website_screenshot_url = COALESCE($3, website_screenshot_url),
                 ga_property_id = COALESCE($4, ga_property_id),
+                wordpress_username = COALESCE($5, wordpress_username),
+                wordpress_password = COALESCE($6, wordpress_password),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $5
-        `, [website_url, wordpress_url, website_screenshot_url, ga_property_id, clientId]);
+            WHERE id = $7
+        `, [
+            website_url, 
+            wordpress_url, 
+            website_screenshot_url, 
+            ga_property_id, 
+            wordpress_username, 
+            wordpress_password, 
+            clientId
+        ]);
         
         console.log(`✅ [ADMIN] Gestión de web actualizada para cliente #${clientId}`);
         
@@ -2208,52 +2227,6 @@ app.patch('/api/admin/projects/:id', async (req, res) => {
         res.json({ success: true, project: updatedProject });
     } catch (error) {
         console.error('❌ [ADMIN] Error actualizando proyecto:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Desplegar proyecto manualmente
-app.post('/api/admin/projects/:id/deploy', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { wordpress_url, wordpress_username, wordpress_password } = req.body;
-        
-        console.log(`🚀 [ADMIN] Desplegando proyecto #${id}...`);
-        
-        // Obtener el proyecto
-        const project = await db.getProjectById(id);
-        if (!project) {
-            return res.status(404).json({ error: 'Proyecto no encontrado' });
-        }
-        
-        // Actualizar proyecto con credenciales y marcar como desplegado
-        await db.updateProject(id, {
-            wordpress_url,
-            wordpress_username,
-            wordpress_password,
-            is_deployed: true,
-            deployed_at: new Date()
-        });
-        
-        // Actualizar el website_status del cliente a 'activo'
-        if (project.client_id) {
-            await db.pool.query(
-                'UPDATE clients SET website_status = $1 WHERE id = $2',
-                ['activo', project.client_id]
-            );
-            console.log(`✅ [ADMIN] Cliente #${project.client_id} marcado como activo`);
-        }
-        
-        const updatedProject = await db.getProjectById(id);
-        console.log(`✅ [ADMIN] Proyecto #${id} desplegado exitosamente`);
-        
-        res.json({ 
-            success: true, 
-            message: 'Proyecto desplegado exitosamente',
-            project: updatedProject 
-        });
-    } catch (error) {
-        console.error('❌ [ADMIN] Error desplegando proyecto:', error);
         res.status(500).json({ error: error.message });
     }
 });
