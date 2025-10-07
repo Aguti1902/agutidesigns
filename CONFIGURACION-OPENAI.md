@@ -103,6 +103,16 @@ Railway instalará automáticamente al hacer deploy.
   - Descripción de servicios
   - Llamada a la acción
 
+### ✅ Generación de Descripciones de Servicios
+- **Campo:** Textos para cada servicio
+- **Botón:** "✨ Generar con IA"
+- **Requisito:** Primero completar "Lista tus servicios"
+- **Genera:**
+  - Descripción profesional de cada servicio
+  - 2-3 líneas por servicio
+  - Destaca beneficios principales
+  - Tono profesional pero cercano
+
 ### ✅ Generación de Menú (Restaurantes)
 - **Campo:** Menú del restaurante
 - **Botón:** "✨ Generar menú con IA"
