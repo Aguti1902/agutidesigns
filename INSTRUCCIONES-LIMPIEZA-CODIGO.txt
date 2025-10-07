@@ -1,0 +1,45 @@
+INSTRUCCIONES PARA ELIMINAR CÓDIGO BASURA
+==========================================
+
+ARCHIVO: client-dashboard/index.html
+
+MÉTODO 1 - IR A LÍNEA (MÁS RÁPIDO):
+1. Presiona Cmd+G (Mac) o Ctrl+G (Windows)
+2. Escribe: 3814
+3. Presiona Enter
+4. Presiona Shift+Cmd+G (o Shift+Ctrl+G)
+5. Escribe: 4076
+6. Presiona Enter
+7. Presiona Delete o Backspace
+8. Guarda (Cmd+S o Ctrl+S)
+
+MÉTODO 2 - BUSCAR Y REEMPLAZAR:
+1. Busca (Cmd+F): "document.getElementById('confirmCancel').checked"
+2. Elimina TODA esa función y las siguientes hasta encontrar:
+   "// Manejo especial para páginas"
+3. Deja solo la función cancelEditSection correcta
+
+FUNCIONES A ELIMINAR (si las ves):
+- closeCancelModal()
+- nextCancelStep()
+- selectCancelReason()
+- acceptDiscount()
+- confirmCancellation()
+- reactivateSubscription()
+- updateCancellationUI()
+- Y todo el código relacionado
+
+VERIFICACIÓN:
+Después de eliminar, la función cancelEditSection debe empezar así:
+```javascript
+function cancelEditSection(section) {
+    // Mostrar campos y ocultar inputs
+    document.querySelectorAll(`.field-${section}`)
+    ...
+    // Manejo especial para páginas
+    if (section === 'paginas') {
+```
+
+Si ves referencias a 'cancelModal', 'cancelStep1', 'confirmCancel', etc.,
+significa que aún hay código basura.
+

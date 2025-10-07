@@ -1,0 +1,69 @@
+CONFIGURACIÓN DEL STRIPE CUSTOMER PORTAL
+=========================================
+
+URL: https://dashboard.stripe.com/test/settings/billing/portal
+
+PASOS:
+------
+
+1. ACTIVAR EL CUSTOMER PORTAL
+   - Click en "Activate test link" o "Activar enlace de prueba"
+   - Confirma la activación
+
+2. CONFIGURAR FUNCIONALIDADES
+   En la sección "Functionality":
+   
+   ✅ Customer information
+      - [x] Allow customers to update their email addresses
+   
+   ✅ Payment methods
+      - [x] Allow customers to update payment methods
+      - [x] Allow customers to remove payment methods
+   
+   ✅ Invoices
+      - [x] Allow customers to view invoice history
+   
+   ✅ Subscriptions
+      - [x] Allow customers to cancel subscriptions
+      - [x] Cancel immediately (or "at period end" - tú eliges)
+
+3. CONFIGURAR MENSAJE DE ADVERTENCIA AL CANCELAR
+   En la sección "Subscription cancellation":
+   
+   - Marca: "Require customers to provide a reason"
+   - Marca: "Show retention offer" (opcional)
+   
+   - En "Cancellation message", añade:
+   
+   ```
+   ⚠️ IMPORTANTE: Al cancelar tu suscripción
+
+   • Tu sitio web se desactivará al final de tu período de facturación actual
+   • Guardaremos tu sitio web y todos tus datos durante 6 meses
+   • Podrás reactivar tu plan en cualquier momento durante esos 6 meses desde tu dashboard
+   • Después de 6 meses, tu sitio será eliminado permanentemente
+   
+   Si tienes alguna duda o problema, contacta con nuestro soporte antes de cancelar.
+   
+   ¿Estás seguro de que deseas continuar con la cancelación?
+   ```
+
+4. CONFIGURAR OPCIONES AVANZADAS (OPCIONAL)
+   
+   - URL de retorno: https://agutidesigns.vercel.app/client-dashboard/
+   - Colores del tema: Ajusta a tu marca (azul #0046FE)
+
+5. GUARDAR CAMBIOS
+   - Click en "Save changes" o "Guardar cambios"
+   - ¡Listo!
+
+NOTA IMPORTANTE:
+----------------
+Cuando un cliente cancele desde el Customer Portal:
+- Stripe enviará un webhook customer.subscription.deleted
+- Nuestro backend lo detectará automáticamente
+- Se registrará en la tabla 'cancellations' del admin dashboard
+- El cliente verá su estado actualizado en su dashboard
+
+NO necesitas configurar nada más en el backend, todo está listo.
+
