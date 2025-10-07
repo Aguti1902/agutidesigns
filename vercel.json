@@ -3,6 +3,26 @@
     {
       "source": "/",
       "destination": "/index.html"
+    },
+    {
+      "source": "/formulario",
+      "destination": "/formulario-membresia.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/checkout.html"
+    },
+    {
+      "source": "/success",
+      "destination": "/success.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/reset-password.html"
+    },
+    {
+      "source": "/crear-usuario-prueba",
+      "destination": "/crear-usuario-prueba.html"
     }
   ]
 }

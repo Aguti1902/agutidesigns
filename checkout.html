@@ -567,7 +567,7 @@
                         if (result.success) {
                             ev.complete('success');
                             sessionStorage.removeItem('orderData');
-                            window.location.href = '/success.html?session_id=' + result.subscriptionId;
+                            window.location.href = '/success?session_id=' + result.subscriptionId;
                         } else {
                             ev.complete('fail');
                             throw new Error(result.error || 'Error al procesar el pago');
@@ -687,7 +687,7 @@
 
                 // Pago exitoso
                 sessionStorage.removeItem('orderData');
-                window.location.href = '/success.html?session_id=' + result.subscriptionId;
+                window.location.href = '/success?session_id=' + result.subscriptionId;
 
             } catch (error) {
                 console.error('Error:', error);

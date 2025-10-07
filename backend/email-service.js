@@ -50,7 +50,7 @@ function createEmailLayout(content, preheader = '') {
     <div class="container">
         <div class="header">
             <a href="https://agutidesigns.es" style="display: inline-block;">
-                <img src="https://agutidesigns.vercel.app/images/Logo%20blanco.png" alt="agutidesigns" style="height: 50px; width: auto; display: block; margin: 0 auto;">
+                <img src="https://agutidesigns.es/images/Logo%20blanco.png" alt="agutidesigns" style="height: 50px; width: auto; display: block; margin: 0 auto;">
             </a>
         </div>
         <div class="content">
@@ -90,7 +90,7 @@ function welcomeEmail(clientData) {
         <p>Puedes seguir el progreso de tu sitio web en tiempo real desde tu panel de control:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">🚀 Acceder a Mi Dashboard</a>
+            <a href="https://panel.agutidesigns.es" class="button" style="color: #ffffff;">🚀 Acceder a Mi Dashboard</a>
         </div>
         
         <p><strong>Tus credenciales de acceso:</strong></p>
@@ -164,7 +164,7 @@ function paymentSuccessEmail(clientData) {
         4️⃣ Recibirás acceso completo cuando esté listo</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">📊 Ver Mi Dashboard</a>
+            <a href="https://panel.agutidesigns.es" class="button" style="color: #ffffff;">📊 Ver Mi Dashboard</a>
         </div>
         
         <p><strong>💡 Tip:</strong> Revisa tu correo para encontrar la factura de Stripe con todos los detalles del pago.</p>
@@ -217,7 +217,7 @@ function websiteDeliveredEmail(clientData) {
         4️⃣ Contacta al soporte si necesitas ayuda</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">📊 Ir a Mi Dashboard</a>
+            <a href="https://panel.agutidesigns.es" class="button" style="color: #ffffff;">📊 Ir a Mi Dashboard</a>
         </div>
         
         <p>¡Felicidades por tu nuevo sitio web! 🎉</p>
@@ -247,7 +247,7 @@ function ticketResponseEmail(clientData, ticketData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#contactar" class="button" style="color: #ffffff;">💬 Ver Conversación Completa</a>
+            <a href="https://panel.agutidesigns.es#contactar" class="button" style="color: #ffffff;">💬 Ver Conversación Completa</a>
         </div>
         
         <p>Si tienes más preguntas, no dudes en responder desde tu dashboard.</p>
@@ -265,7 +265,7 @@ function ticketResponseEmail(clientData, ticketData) {
 
 // 5. Reset de contraseña
 function passwordResetEmail(email, resetToken) {
-    const resetUrl = `https://agutidesigns.vercel.app/reset-password.html?token=${resetToken}`;
+    const resetUrl = `https://agutidesigns.es/reset-password?token=${resetToken}`;
     
     const content = `
         <h1>🔐 Restablece tu contraseña</h1>
@@ -346,7 +346,7 @@ function renewalReminderEmail(clientData, daysLeft) {
         <p>Asegúrate de que tu tarjeta tenga fondos suficientes para evitar interrupciones en tu servicio.</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">💳 Gestionar Método de Pago</a>
+            <a href="https://panel.agutidesigns.es#facturacion" class="button" style="color: #ffffff;">💳 Gestionar Método de Pago</a>
         </div>
         
         <p><strong>¿Necesitas cambiar tu plan?</strong> Puedes hacerlo desde tu dashboard en cualquier momento.</p>
@@ -386,7 +386,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p>Te recomendamos actualizar tu método de pago para evitar futuros problemas:</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">💳 Actualizar Método de Pago</a>
+                <a href="https://panel.agutidesigns.es#facturacion" class="button" style="color: #ffffff;">💳 Actualizar Método de Pago</a>
             </div>
             
             <p>Si necesitas ayuda, estamos disponibles para asistirte.</p>
@@ -423,7 +423,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p><strong>Te quedan aproximadamente 2 días</strong> antes del último intento.</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.2rem; color: #ffffff;">💳 ACTUALIZAR TARJETA AHORA</a>
+                <a href="https://panel.agutidesigns.es#facturacion" class="button" style="background: #dc2626; font-size: 1.2rem; color: #ffffff;">💳 ACTUALIZAR TARJETA AHORA</a>
             </div>
             
             <p>Si tienes problemas o necesitas ayuda, contáctanos de inmediato: <strong>info@agutidesigns.es</strong></p>
@@ -461,7 +461,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p>Actualiza tu método de pago <strong>AHORA</strong> para evitar la suspensión:</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.3rem; padding: 20px 50px; color: #ffffff;">💳 EVITAR SUSPENSIÓN - ACTUALIZAR PAGO</a>
+                <a href="https://panel.agutidesigns.es#facturacion" class="button" style="background: #dc2626; font-size: 1.3rem; padding: 20px 50px; color: #ffffff;">💳 EVITAR SUSPENSIÓN - ACTUALIZAR PAGO</a>
             </div>
             
             <div class="info-box">
@@ -506,7 +506,7 @@ function serviceSuspendedEmail(clientData) {
         <p>Puedes reactivar tu servicio en cualquier momento actualizando tu método de pago:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Servicio</a>
+            <a href="https://panel.agutidesigns.es#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Servicio</a>
         </div>
         
         <h3>💬 ¿Necesitas ayuda?</h3>
@@ -552,7 +552,7 @@ function subscriptionCancelledEmail(clientData) {
         <p>Si decides reactivar tu suscripción, puedes hacerlo fácilmente:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Suscripción</a>
+            <a href="https://panel.agutidesigns.es#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Suscripción</a>
         </div>
         
         <p>Lamentamos verte partir, pero esperamos volver a trabajar juntos en el futuro.</p>

@@ -2227,7 +2227,7 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
                                     <h3 style="color: #333; margin-top: 0;">Próximos Pasos:</h3>
                                     <ul style="line-height: 1.8;">
                                         <li>✓ Revisa tu sitio web y navega por todas las páginas</li>
-                                        <li>✓ Accede a tu <a href="https://agutidesigns.vercel.app/client-dashboard/">Dashboard</a> para ver estadísticas</li>
+                                        <li>✓ Accede a tu <a href="https://panel.agutidesigns.es">Dashboard</a> para ver estadísticas</li>
                                         <li>✓ Puedes solicitar cambios menores en las próximas 48h sin costo</li>
                                         <li>✓ Si tienes dudas, crea un ticket de soporte</li>
                                     </ul>
@@ -2303,7 +2303,7 @@ app.post('/api/create-test-account', async (req, res) => {
             credentials: {
                 email: testEmail,
                 password: testPassword,
-                dashboard_url: 'https://agutidesigns.vercel.app/client-dashboard/'
+                dashboard_url: 'https://panel.agutidesigns.es'
             },
             client: {
                 id: clientId,
@@ -4636,7 +4636,7 @@ app.post('/api/create-customer-portal-session', async (req, res) => {
         // Crear sesión del Customer Portal
         const session = await stripe.billingPortal.sessions.create({
             customer: client.stripe_customer_id,
-            return_url: `${process.env.CLIENT_URL || 'https://agutidesigns.vercel.app'}/client-dashboard/`,
+            return_url: `${process.env.CLIENT_DASHBOARD_URL || 'https://panel.agutidesigns.es'}`,
         });
         
         console.log(`✅ [PORTAL] Sesión creada: ${session.url}`);
