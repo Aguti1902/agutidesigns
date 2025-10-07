@@ -4993,6 +4993,18 @@
                 const unreadCount = tickets.filter(t => t.client_unread === 1).length;
                 console.log('🔔 [CLIENT] Mensajes sin leer:', unreadCount);
                 
+                // 🔔 Actualizar badge en el menú
+                const badge = document.getElementById('unreadBadgeMenu');
+                if (badge) {
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = 'inline-block';
+                        console.log('🔔 [CLIENT] Badge actualizado:', unreadCount);
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
                 displayClientTickets(tickets);
             } catch (error) {
                 console.error('❌ [CLIENT] Error cargando tickets:', error);
