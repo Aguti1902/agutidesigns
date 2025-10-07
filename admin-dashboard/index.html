@@ -1715,16 +1715,23 @@
                     loadTickets();
                     break;
                 case 'pedidos':
+                    console.log('📋 [ADMIN] Entrando en sección pedidos...');
                     // Verificar si se acaba de ver un pedido para recargar
                     const pedidoViewed = localStorage.getItem('pedidoViewed');
                     if (pedidoViewed) {
                         const viewedTime = parseInt(pedidoViewed);
-                        // Si se vio hace menos de 5 segundos, recargar
-                        if (Date.now() - viewedTime < 5000) {
-                            console.log('🔄 [ADMIN] Pedido recién visto, recargando lista...');
+                        console.log('🔍 [ADMIN] Detectado pedidoViewed en localStorage:', {
+                            timestamp: viewedTime,
+                            elapsed: Date.now() - viewedTime
+                        });
+                        // Si se vio hace menos de 30 segundos, es válido
+                        if (Date.now() - viewedTime < 30000) {
+                            console.log('✅ [ADMIN] Pedido recién visto válido, limpiando localStorage y recargando lista...');
                         }
                         localStorage.removeItem('pedidoViewed');
+                        console.log('🧹 [ADMIN] localStorage limpiado');
                     }
+                    console.log('🔄 [ADMIN] Llamando a loadPedidos()...');
                     loadPedidos();
                     break;
                 case 'clientes':
@@ -2430,16 +2437,23 @@
         // ===== PEDIDOS =====
         
         async function loadPedidos() {
+            console.log('🚀 [ADMIN] loadPedidos() iniciada');
             try {
+                console.log('📡 [ADMIN] Fetching pedidos desde:', `${API_URL}/api/admin/submissions`);
                 const response = await fetch(`${API_URL}/api/admin/submissions`);
+                
+                if (!response.ok) {
+                    console.error('❌ [ADMIN] Error en respuesta:', response.status, response.statusText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const pedidos = await response.json();
-
-                console.log('📋 [ADMIN] Pedidos recibidos:', pedidos.length);
+                console.log('✅ [ADMIN] Pedidos recibidos exitosamente:', pedidos.length);
                 
                 // Debug: Mostrar detalles del primer pedido
                 if (pedidos.length > 0) {
                     const firstPedido = pedidos[0];
-                    console.log('🔍 [DEBUG] Pedido #' + firstPedido.id + ':', {
+                    console.log('🔍 [DEBUG] Primer pedido #' + firstPedido.id + ':', {
                         id: firstPedido.id,
                         business_name: firstPedido.business_name,
                         plan: firstPedido.plan,
@@ -2451,8 +2465,10 @@
                 }
 
                 const tbody = document.getElementById('pedidosTable');
+                console.log('📋 [ADMIN] Elemento tbody encontrado:', !!tbody);
                 
                 if (pedidos.length === 0) {
+                    console.log('📭 [ADMIN] No hay pedidos, mostrando mensaje');
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">No hay pedidos</td></tr>';
                     return;
                 }
@@ -2499,8 +2515,25 @@
                     </tr>
                 `;
                 }).join('');
+                
+                console.log('✅ [ADMIN] Tabla de pedidos renderizada correctamente');
             } catch (error) {
-                console.error('Error cargando pedidos:', error);
+                console.error('❌ [ADMIN] Error cargando pedidos:', error);
+                console.error('❌ [ADMIN] Stack trace:', error.stack);
+                const tbody = document.getElementById('pedidosTable');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: red;">
+                                <p style="margin-bottom: 10px;">❌ Error al cargar pedidos</p>
+                                <p style="font-size: 0.9rem; color: #666;">${error.message}</p>
+                                <button onclick="loadPedidos()" style="margin-top: 15px; padding: 10px 20px; background: #0046FE; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    🔄 Reintentar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
             }
         }
 
@@ -4362,13 +4395,15 @@
             const viewedTime = parseInt(pedidoViewedOnLoad);
             // Si se vio hace menos de 30 segundos, redirigir a pedidos
             if (Date.now() - viewedTime < 30000) {
-                console.log('🔄 [ADMIN] Detectado pedido recién visto, redirigiendo a sección Pedidos...');
-                localStorage.removeItem('pedidoViewed');
+                console.log('🔄 [ADMIN] Detectado pedido recién visto al cargar, redirigiendo a sección Pedidos...');
+                // NO eliminar aquí, dejar que showSection lo maneje
                 // Pequeño delay para que la página cargue completamente
                 setTimeout(() => {
+                    console.log('🔄 [ADMIN] Ejecutando showSection(pedidos)...');
                     showSection('pedidos');
-                }, 100);
+                }, 200); // Aumentado a 200ms para dar más tiempo
             } else {
+                console.log('⏰ [ADMIN] Timestamp muy antiguo, limpiando localStorage');
                 localStorage.removeItem('pedidoViewed');
             }
         }
