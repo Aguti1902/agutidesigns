@@ -3,17 +3,20 @@
 ## 📍 ESTRUCTURA FINAL
 
 ```
-agutidesigns.es (Proyecto principal - Vercel)
-├── / (landing page - index.html)
-├── /formulario (formulario-membresia.html)
+agutidesigns.es (WordPress - Hosting IONOS)
+└── / (Landing page en WordPress)
+    └── Botón → https://formulario.agutidesigns.es
+
+formulario.agutidesigns.es (Proyecto Vercel - Formulario)
+├── / (formulario-membresia.html)
 ├── /checkout (checkout.html)
 ├── /success (success.html)
 └── /reset-password (reset-password.html)
 
-panel.agutidesigns.es (Dashboard Cliente - Vercel separado)
+panel.agutidesigns.es (Proyecto Vercel - Dashboard Cliente)
 └── / (client-dashboard/index.html)
 
-admin.agutidesigns.es (Dashboard Admin - Vercel separado)
+admin.agutidesigns.es (Proyecto Vercel - Dashboard Admin)
 ├── / (admin-dashboard/index.html)
 └── /pedido-detalle (pedido-detalle.html)
 ```
@@ -22,14 +25,24 @@ admin.agutidesigns.es (Dashboard Admin - Vercel separado)
 
 ## 🎯 PARTE 1: CONFIGURACIÓN EN VERCEL
 
-### **1. Proyecto Principal (agutidesigns.es)**
+### **1. Proyecto Formulario (formulario.agutidesigns.es)**
 
-Este ya está configurado. Solo debes:
+**Paso 1:** Ir a tu proyecto actual en Vercel (donde está el formulario)
 
-1. Ir a tu proyecto en Vercel
+1. Ve a tu proyecto en Vercel
 2. Settings → Domains
-3. Añadir: `agutidesigns.es`
-4. Vercel te dará instrucciones específicas para IONOS
+3. **ELIMINAR** cualquier dominio `agutidesigns.vercel.app` o `agutidesigns.es` si existe
+4. **AÑADIR:** `formulario.agutidesigns.es`
+5. Vercel te mostrará registros DNS para configurar
+
+**Paso 2:** Variables de entorno
+
+Verifica que el proyecto tenga (si no las tiene, añádelas):
+
+```
+API_URL=https://agutidesigns-production.up.railway.app
+STRIPE_PUBLIC_KEY=[tu key]
+```
 
 ---
 
@@ -102,20 +115,15 @@ API_URL=https://agutidesigns-production.up.railway.app
 
 ### **Registros DNS a Añadir**
 
-#### **1. Dominio Principal (agutidesigns.es)**
+**IMPORTANTE:** `agutidesigns.es` ya está configurado para tu WordPress en IONOS. **NO TOQUES** los registros principales (A, MX, etc.).
 
-Vercel te proporcionará estos registros cuando añadas el dominio. Típicamente serán:
+Solo necesitas añadir **3 subdominios CNAME:**
 
-```
-Tipo: A
-Nombre: @ (o dejar vacío)
-Valor: [IP de Vercel] (ejemplo: 76.76.21.21)
-TTL: 3600
-```
+#### **1. Subdominio Formulario (formulario.agutidesigns.es)**
 
 ```
 Tipo: CNAME
-Nombre: www
+Nombre: formulario
 Valor: cname.vercel-dns.com
 TTL: 3600
 ```
@@ -154,26 +162,30 @@ Ve a tu proyecto en Railway → Variables y añade/actualiza:
 ```
 CLIENT_DASHBOARD_URL=https://panel.agutidesigns.es
 ADMIN_DASHBOARD_URL=https://admin.agutidesigns.es
-FRONTEND_URL=https://agutidesigns.es
+FRONTEND_URL=https://formulario.agutidesigns.es
 
-# CORS (ya debería estar, pero verifica)
-ALLOWED_ORIGINS=https://agutidesigns.es,https://panel.agutidesigns.es,https://admin.agutidesigns.es
+# CORS (IMPORTANTE: incluye todos los subdominios)
+ALLOWED_ORIGINS=https://agutidesigns.es,https://formulario.agutidesigns.es,https://panel.agutidesigns.es,https://admin.agutidesigns.es
 ```
 
 ---
 
 ## ✅ PARTE 4: VERIFICACIÓN
 
-### **1. Dominio Principal**
+### **1. Dominio Principal (WordPress)**
+
+- ✅ https://agutidesigns.es → Landing page de WordPress
+- ✅ Botón en landing → debe redirigir a `formulario.agutidesigns.es`
+
+### **2. Formulario y Checkout**
 
 Verifica estas URLs (después de la propagación DNS):
 
-- ✅ https://agutidesigns.es → Landing page
-- ✅ https://agutidesigns.es/formulario → Formulario
-- ✅ https://agutidesigns.es/checkout → Checkout
-- ✅ https://agutidesigns.es/success → Success page
+- ✅ https://formulario.agutidesigns.es → Formulario
+- ✅ https://formulario.agutidesigns.es/checkout → Checkout
+- ✅ https://formulario.agutidesigns.es/success → Success page
 
-### **2. Dashboard Cliente**
+### **3. Dashboard Cliente**
 
 - ✅ https://panel.agutidesigns.es → Login cliente
 - ✅ Probar login con cuenta de prueba
@@ -185,15 +197,17 @@ Verifica estas URLs (después de la propagación DNS):
 - ✅ Probar login con cuenta admin
 - ✅ Verificar que carga datos del backend
 
-### **4. Flujo Completo**
+### **5. Flujo Completo de Usuario**
 
-1. ✅ Llenar formulario en `/formulario`
-2. ✅ Redirige a `/checkout`
-3. ✅ Hacer pago de prueba
-4. ✅ Redirige a `/success`
-5. ✅ Botón redirige a `panel.agutidesigns.es`
-6. ✅ Login funciona correctamente
-7. ✅ Dashboard carga datos
+1. ✅ Usuario visita `agutidesigns.es` (WordPress)
+2. ✅ Click en botón → redirige a `formulario.agutidesigns.es`
+3. ✅ Llenar formulario en `formulario.agutidesigns.es`
+4. ✅ Redirige a `formulario.agutidesigns.es/checkout`
+5. ✅ Hacer pago de prueba
+6. ✅ Redirige a `formulario.agutidesigns.es/success`
+7. ✅ Botón "Acceder a Mi Dashboard" → redirige a `panel.agutidesigns.es`
+8. ✅ Login funciona correctamente
+9. ✅ Dashboard carga datos del backend
 
 ---
 
@@ -253,26 +267,51 @@ Verifica estas URLs (después de la propagación DNS):
 
 ## 🎯 SIGUIENTE PASO
 
-1. **Commit y push del código:**
-   ```bash
-   git add .
-   git commit -m "feat: migración a dominios y subdominios
+### **✅ CÓDIGO YA ACTUALIZADO Y PUSHEADO**
 
-   - agutidesigns.es: landing + formulario
-   - panel.agutidesigns.es: dashboard cliente
-   - admin.agutidesigns.es: dashboard admin
-   - Rutas limpias (slugs) configuradas
-   - URLs actualizadas en backend y emails"
-   git push origin main
-   ```
+El código ya está listo y pusheado a GitHub. Ahora debes:
 
-2. **Crear proyectos en Vercel** (siguiendo Parte 1)
+### **1. En tu Landing de WordPress:**
 
-3. **Configurar DNS en IONOS** (siguiendo Parte 2)
+En tu página de WordPress (agutidesigns.es), actualiza el botón/link que redirige al formulario:
 
-4. **Actualizar variables en Railway** (siguiendo Parte 3)
+```
+Antes: https://agutidesigns.vercel.app/formulario-membresia.html
+Ahora:  https://formulario.agutidesigns.es
+```
 
-5. **Verificar todo** (siguiendo Parte 4)
+**Cómo hacerlo en WordPress:**
+1. Edita la página de tu landing
+2. Encuentra el botón de CTA (Call to Action)
+3. Cambia el enlace a: `https://formulario.agutidesigns.es`
+4. Guarda y publica
+
+### **2. Configurar Vercel:**
+
+**A. Proyecto actual (formulario):**
+- Settings → Domains
+- Cambiar a: `formulario.agutidesigns.es`
+
+**B. Crear 2 nuevos proyectos:**
+- `panel.agutidesigns.es` (client-dashboard)
+- `admin.agutidesigns.es` (admin-dashboard)
+
+(Ver instrucciones detalladas en **Parte 1** arriba)
+
+### **3. Configurar DNS en IONOS:**
+
+Añadir 3 registros CNAME (Ver **Parte 2** arriba):
+- `formulario` → cname.vercel-dns.com
+- `panel` → cname.vercel-dns.com
+- `admin` → cname.vercel-dns.com
+
+### **4. Actualizar variables en Railway:**
+
+(Ver **Parte 3** arriba)
+
+### **5. Verificar todo:**
+
+(Ver **Parte 4** arriba)
 
 ---
 
