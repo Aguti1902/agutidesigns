@@ -1341,8 +1341,7 @@
                                 <select id="filterStatusWebs" style="padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; min-width: 150px;">
                                     <option value="">Todos los estados</option>
                                     <option value="activo">✅ Activo</option>
-                                    <option value="inactivo">⚠️ Inactivo</option>
-                                    <option value="mantenimiento">🔧 Mantenimiento</option>
+                                    <option value="inactivo">⚠️ Inactivo / Cancelado</option>
                                 </select>
                             </div>
                             
@@ -3365,10 +3364,14 @@
                                 </button>
                             ` : ''}
                             ${web.subscription_status !== 'cancelled' ? `
-                                <button class="btn-web-action" onclick="cancelWebSubscription(${web.id}, '${web.business_name || web.full_name}')" style="background: #dc2626; font-weight: 600;">
-                                    🚫 Cancelar Suscripción
+                                <button class="btn-web-action" onclick="markWebCancelled(${web.id}, '${web.business_name || web.full_name}')" style="background: #dc2626; font-weight: 600;">
+                                    🚫 Web Cancelada
                                 </button>
-                            ` : ''}
+                            ` : `
+                                <div style="padding: 8px 16px; background: #fecaca; color: #dc2626; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-align: center;">
+                                    🚫 Cancelada
+                                </div>
+                            `}
                         </div>
                     </div>
                 `;
@@ -3389,8 +3392,20 @@
                     (web.business_name && web.business_name.toLowerCase().includes(searchTerm)) ||
                     (web.email && web.email.toLowerCase().includes(searchTerm));
                 
-                // Filtro por estado
-                const matchesStatus = !statusFilter || web.website_status === statusFilter;
+                // Filtro por estado (las canceladas se consideran "inactivo")
+                let matchesStatus = true;
+                if (statusFilter) {
+                    if (statusFilter === 'inactivo') {
+                        // Incluir tanto las inactivas como las canceladas
+                        matchesStatus = web.subscription_status === 'cancelled' || 
+                                       web.website_status === 'inactivo' || 
+                                       web.website_status === 'en_construccion';
+                    } else {
+                        // Para "activo" solo mostrar las activas que NO están canceladas
+                        matchesStatus = web.website_status === statusFilter && 
+                                       web.subscription_status !== 'cancelled';
+                    }
+                }
                 
                 // Filtro por plan
                 const matchesPlan = !planFilter || web.plan === planFilter;
@@ -3948,37 +3963,17 @@
             }
         }
 
-        async function cancelWebSubscription(clientId, businessName) {
-            const confirmed = await showCustomConfirmation(
-                '⚠️ Marcar como Cancelado',
-                `¿Estás seguro de que deseas marcar la web de <strong>${businessName}</strong> como <span style="color: #dc2626; font-weight: 700;">CANCELADA</span>?<br><br>
-                <div style="background: #e0f2fe; border: 2px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 15px;">
-                    <p style="margin: 0; color: #0369a1; font-weight: 600;">ℹ️ Esta acción:</p>
-                    <ul style="margin: 10px 0 0 20px; color: #666;">
-                        <li><strong>Marcará la web con badge rojo "🚫 Cancelado"</strong></li>
-                        <li>Solo es un indicador visual en el panel de admin</li>
-                        <li><strong>NO cancela la suscripción en Stripe</strong></li>
-                    </ul>
-                </div>
-                <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-top: 10px;">
-                    <p style="margin: 0; color: #ea580c; font-weight: 600;">💡 Para cancelar realmente en Stripe:</p>
-                    <p style="margin: 5px 0 0 20px; color: #666; font-size: 0.9rem;">El cliente debe hacerlo desde su dashboard, en la sección "Facturación"</p>
-                </div>`,
-                'Sí, Marcar como Cancelado',
-                'No, Mantener'
-            );
-
-            if (!confirmed) return;
-
+        // Función simple para marcar web como cancelada (solo visual)
+        async function markWebCancelled(clientId, businessName) {
             try {
-                console.log('🚫 [ADMIN] Cancelando suscripción del cliente #', clientId);
-                showLoading('Procesando cancelación...');
+                console.log('🚫 [ADMIN] Marcando web como cancelada #', clientId);
+                showLoading('Marcando como cancelada...');
                 
                 const response = await fetch(`${API_URL}/api/admin/cancel-subscription/${clientId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        reason: 'Cancelado manualmente desde el panel de admin'
+                        reason: 'Marcado como cancelado desde panel de admin'
                     })
                 });
                 
@@ -3986,33 +3981,20 @@
                 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || 'Error al cancelar suscripción');
+                    throw new Error(error.error || 'Error al marcar como cancelado');
                 }
                 
-                const result = await response.json();
-                console.log('✅ [ADMIN] Suscripción cancelada:', result);
+                console.log('✅ [ADMIN] Web marcada como cancelada');
                 
-                await showNotificationModal(
-                    '✅ Marcado como Cancelado',
-                    `La web de <strong>${businessName}</strong> ahora muestra el badge rojo "🚫 Cancelado".<br><br>
-                    <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 10px; text-align: left;">
-                        <p style="margin: 0; color: #0369a1; font-size: 0.95rem;">
-                            <strong>Nota:</strong> Esto es solo visual en el panel de admin.<br>
-                            La suscripción de Stripe sigue activa.
-                        </p>
-                    </div>`,
-                    'success'
-                );
-                
-                // Recargar webs desplegadas
+                // Recargar webs desplegadas inmediatamente
                 await loadWebsDesplegadas();
                 
             } catch (error) {
-                console.error('❌ [ADMIN] Error cancelando suscripción:', error);
+                console.error('❌ [ADMIN] Error:', error);
                 hideLoading();
                 await showNotificationModal(
                     '❌ Error',
-                    `No se pudo cancelar la suscripción:\n${error.message}`,
+                    `No se pudo marcar como cancelada:\n${error.message}`,
                     'error'
                 );
             }
