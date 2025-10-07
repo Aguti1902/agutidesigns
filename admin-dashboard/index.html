@@ -3341,12 +3341,12 @@
                         </div>
                         
                         <div class="web-card-actions">
-                            ${web.website_url ? `
-                                <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url}', '_blank')">
+                            ${(web.website_url || web.wordpress_url) ? `
+                                <button class="btn-web-action btn-web-visit" onclick="window.open('${web.website_url || web.wordpress_url}', '_blank')">
                                     🌐 Visitar
                                 </button>
                             ` : `
-                                <button class="btn-web-action" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                                <button class="btn-web-action" style="opacity: 0.5; cursor: not-allowed;" disabled title="Añade la URL en Gestionar">
                                     🌐 Visitar
                                 </button>
                             `}
@@ -3358,20 +3358,11 @@
                             <button class="btn-web-action btn-web-details" onclick="editWebManagement(${web.id})" style="background: #0046FE;">
                                 ⚙️ Gestionar
                             </button>
-                            ${web.website_status === 'en_construccion' ? `
+                            ${web.website_status === 'en_construccion' && web.subscription_status !== 'cancelled' ? `
                                 <button class="btn-web-action" onclick="activateWebsite(${web.id}, '${web.full_name}', '${web.business_name}')" style="background: #10B981; font-weight: 600;">
                                     🚀 Activar Web
                                 </button>
                             ` : ''}
-                            ${web.subscription_status !== 'cancelled' ? `
-                                <button class="btn-web-action" onclick="markWebCancelled(${web.id}, '${web.business_name || web.full_name}')" style="background: #dc2626; font-weight: 600;">
-                                    🚫 Web Cancelada
-                                </button>
-                            ` : `
-                                <div style="padding: 8px 16px; background: #fecaca; color: #dc2626; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-align: center;">
-                                    🚫 Cancelada
-                                </div>
-                            `}
                         </div>
                     </div>
                 `;
@@ -3960,43 +3951,6 @@
                 console.error('❌ [ADMIN] Error cargando cancelaciones:', error);
                 const tbody = document.getElementById('cancellationsTable');
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #EF4444;">Error al cargar cancelaciones: ${error.message}</td></tr>`;
-            }
-        }
-
-        // Función simple para marcar web como cancelada (solo visual)
-        async function markWebCancelled(clientId, businessName) {
-            try {
-                console.log('🚫 [ADMIN] Marcando web como cancelada #', clientId);
-                showLoading('Marcando como cancelada...');
-                
-                const response = await fetch(`${API_URL}/api/admin/cancel-subscription/${clientId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        reason: 'Marcado como cancelado desde panel de admin'
-                    })
-                });
-                
-                hideLoading();
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Error al marcar como cancelado');
-                }
-                
-                console.log('✅ [ADMIN] Web marcada como cancelada');
-                
-                // Recargar webs desplegadas inmediatamente
-                await loadWebsDesplegadas();
-                
-            } catch (error) {
-                console.error('❌ [ADMIN] Error:', error);
-                hideLoading();
-                await showNotificationModal(
-                    '❌ Error',
-                    `No se pudo marcar como cancelada:\n${error.message}`,
-                    'error'
-                );
             }
         }
 
