@@ -229,6 +229,17 @@ async function initializeTables() {
             console.log('⚠️ Migración modifications_viewed_at en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo billing_cycle a clients
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'monthly'
+            `);
+            console.log('✅ Migración: Campo billing_cycle añadido a clients');
+        } catch (e) {
+            console.log('⚠️ Migración billing_cycle en clients ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campos para integración con Mailchimp
         try {
             await client.query(`
