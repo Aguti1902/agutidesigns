@@ -2366,6 +2366,24 @@
 4. Sección "Servicios" (descripción breve)
 5. Llamada a la acción (CTA)`;
                 targetField = document.querySelector('textarea[name="web_texts"]');
+            } else if (type === 'services') {
+                const servicesList = document.querySelector('textarea[name="services_list"]').value;
+                
+                if (!servicesList || servicesList.trim().length < 3) {
+                    alert('⚠️ Por favor, primero escribe tu lista de servicios arriba.');
+                    return;
+                }
+                
+                prompt = `Basándote en esta lista de servicios:
+                
+${servicesList}
+
+Genera una descripción profesional y atractiva para CADA servicio. 
+- Máximo 2-3 líneas por servicio
+- Destaca los beneficios principales
+- Usa un tono profesional pero cercano
+- Separa cada descripción claramente`;
+                targetField = document.querySelector('textarea[name="services_texts"]');
             } else if (type === 'menu') {
                 prompt = `Genera un menú de restaurante completo con platos organizados por categorías (Entrantes, Principales, Postres, Bebidas). Incluye nombre del plato, breve descripción y precio sugerido.`;
                 targetField = document.querySelector('textarea[name="menu_content"]');
