@@ -4146,7 +4146,7 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
         // Primero verificar si las columnas existen
         let cancellations = [];
         try {
-            const result = await pool.query(`
+            const result = await db.pool.query(`
                 SELECT 
                     id, email, full_name, business_name, plan, 
                     subscription_status, cancelled_at, cancellation_reason, subscription_end_date
@@ -4209,7 +4209,7 @@ app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
         endDate.setDate(endDate.getDate() + 30);
         
         // Actualizar estado del cliente
-        await pool.query(`
+        await db.pool.query(`
             UPDATE clients
             SET 
                 subscription_status = 'cancelled',
