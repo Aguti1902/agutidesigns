@@ -50,7 +50,7 @@ function createEmailLayout(content, preheader = '') {
     <div class="container">
         <div class="header">
             <a href="https://agutidesigns.es" style="display: inline-block;">
-                <img src="https://agutidesigns.vercel.app/images/Logo%20blanco.svg" alt="agutidesigns" style="height: 50px; width: auto; display: block;">
+                <img src="https://agutidesigns.vercel.app/images/Logo%20blanco.png" alt="agutidesigns" style="height: 50px; width: auto; display: block; margin: 0 auto;">
             </a>
         </div>
         <div class="content">
