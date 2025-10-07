@@ -3250,7 +3250,7 @@
 
         // Abrir modal de cancelación de suscripción
         async function openCancelSubscriptionModal() {
-            const confirmed = await showConfirmationModal(
+            const confirmed = await showCustomConfirmModal(
                 '⚠️ Cancelar Suscripción',
                 `<div style="text-align: left;">
                     <p style="margin-bottom: 15px;"><strong>¿Estás seguro de que deseas cancelar tu suscripción?</strong></p>
@@ -3272,6 +3272,48 @@
                 // Redirigir al portal de Stripe donde puede cancelar
                 await openStripePortal();
             }
+        }
+
+        // Modal de confirmación personalizado con dos botones
+        function showCustomConfirmModal(title, message, confirmText = 'Confirmar', cancelText = 'Cancelar') {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 550px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <h2 style="color: #dc2626; margin-bottom: 20px; font-size: 1.6rem; text-align: center;">${title}</h2>
+                        <div style="color: #666; line-height: 1.6; margin-bottom: 30px; font-size: 1rem;">${message}</div>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="confirmBtn" style="flex: 1; background: #dc2626; color: white; padding: 14px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: all 0.3s;">
+                                ${confirmText}
+                            </button>
+                            <button id="cancelBtn" style="flex: 1; background: #f0f0f0; color: #333; padding: 14px 24px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: all 0.3s;">
+                                ${cancelText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Hover effects
+                const confirmBtn = modal.querySelector('#confirmBtn');
+                const cancelBtn = modal.querySelector('#cancelBtn');
+                
+                confirmBtn.onmouseover = () => confirmBtn.style.background = '#b91c1c';
+                confirmBtn.onmouseout = () => confirmBtn.style.background = '#dc2626';
+                cancelBtn.onmouseover = () => cancelBtn.style.background = '#e5e5e5';
+                cancelBtn.onmouseout = () => cancelBtn.style.background = '#f0f0f0';
+                
+                confirmBtn.onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(true);
+                };
+                
+                cancelBtn.onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(false);
+                };
+            });
         }
 
         async function selectPlanAndCheckout(plan) {
