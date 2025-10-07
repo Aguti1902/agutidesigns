@@ -793,6 +793,17 @@
             color: #004085;
         }
 
+        .web-status-en_construccion {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .web-status-cancelled {
+            background: #fecaca;
+            color: #dc2626;
+            font-weight: 700;
+        }
+
         .web-card-info {
             display: flex;
             flex-direction: column;
@@ -3257,9 +3268,11 @@
             }
             
             websGrid.innerHTML = webs.map(web => {
-                const statusClass = `web-status-${web.website_status || 'en_construccion'}`;
-                const statusEmoji = web.website_status === 'activo' ? '✅' : (web.website_status === 'mantenimiento' ? '🔧' : '🔨');
-                const statusText = web.website_status === 'activo' ? 'Activo' : (web.website_status === 'mantenimiento' ? 'Mantenimiento' : 'En Construcción');
+                // Si está cancelado, mostrar estado especial
+                const isCancelled = web.subscription_status === 'cancelled';
+                const statusClass = isCancelled ? 'web-status-cancelled' : `web-status-${web.website_status || 'en_construccion'}`;
+                const statusEmoji = isCancelled ? '🚫' : (web.website_status === 'activo' ? '✅' : (web.website_status === 'mantenimiento' ? '🔧' : '🔨'));
+                const statusText = isCancelled ? 'Cancelado' : (web.website_status === 'activo' ? 'Activo' : (web.website_status === 'mantenimiento' ? 'Mantenimiento' : 'En Construcción'));
                 
                 const planClass = `plan-${web.plan || 'basico'}`;
                 const planText = formatPlan(web.plan);
@@ -3937,17 +3950,21 @@
 
         async function cancelWebSubscription(clientId, businessName) {
             const confirmed = await showCustomConfirmation(
-                '⚠️ Cancelar Suscripción',
-                `¿Estás seguro de que deseas marcar como CANCELADA la suscripción de <strong>${businessName}</strong>?<br><br>
-                <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-top: 15px;">
-                    <p style="margin: 0; color: #ea580c; font-weight: 600;">⚠️ Esta acción:</p>
+                '⚠️ Marcar como Cancelado',
+                `¿Estás seguro de que deseas marcar la web de <strong>${businessName}</strong> como <span style="color: #dc2626; font-weight: 700;">CANCELADA</span>?<br><br>
+                <div style="background: #e0f2fe; border: 2px solid #0284c7; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                    <p style="margin: 0; color: #0369a1; font-weight: 600;">ℹ️ Esta acción:</p>
                     <ul style="margin: 10px 0 0 20px; color: #666;">
-                        <li>Marcará el proyecto como cancelado</li>
-                        <li>El cliente no podrá acceder a funciones premium</li>
-                        <li>La web se desactivará al finalizar el período de pago</li>
+                        <li><strong>Marcará la web con badge rojo "🚫 Cancelado"</strong></li>
+                        <li>Solo es un indicador visual en el panel de admin</li>
+                        <li><strong>NO cancela la suscripción en Stripe</strong></li>
                     </ul>
+                </div>
+                <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-top: 10px;">
+                    <p style="margin: 0; color: #ea580c; font-weight: 600;">💡 Para cancelar realmente en Stripe:</p>
+                    <p style="margin: 5px 0 0 20px; color: #666; font-size: 0.9rem;">El cliente debe hacerlo desde su dashboard, en la sección "Facturación"</p>
                 </div>`,
-                'Confirmar Cancelación',
+                'Sí, Marcar como Cancelado',
                 'No, Mantener'
             );
 
@@ -3976,9 +3993,14 @@
                 console.log('✅ [ADMIN] Suscripción cancelada:', result);
                 
                 await showNotificationModal(
-                    '✅ Suscripción Cancelada',
-                    `La suscripción de ${businessName} ha sido marcada como cancelada.<br><br>
-                    El cliente mantendrá acceso hasta que finalice su período de facturación actual.`,
+                    '✅ Marcado como Cancelado',
+                    `La web de <strong>${businessName}</strong> ahora muestra el badge rojo "🚫 Cancelado".<br><br>
+                    <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 10px; text-align: left;">
+                        <p style="margin: 0; color: #0369a1; font-size: 0.95rem;">
+                            <strong>Nota:</strong> Esto es solo visual en el panel de admin.<br>
+                            La suscripción de Stripe sigue activa.
+                        </p>
+                    </div>`,
                     'success'
                 );
                 

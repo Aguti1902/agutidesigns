@@ -535,8 +535,80 @@ app.post('/webhook', async (req, res) => {
             break;
 
         case 'customer.subscription.updated':
+            const updatedSubscription = event.data.object;
+            console.log(`🔄 [WEBHOOK] Suscripción actualizada: ${updatedSubscription.id}`);
+            console.log(`📊 [WEBHOOK] Estado: ${updatedSubscription.status}, Cancel at end: ${updatedSubscription.cancel_at_period_end}`);
+            
+            // Si está marcada para cancelar al final del período
+            if (updatedSubscription.cancel_at_period_end === true) {
+                try {
+                    // Buscar cliente por stripe_subscription_id
+                    const clientResult = await db.pool.query(
+                        'SELECT id, email, full_name FROM clients WHERE stripe_subscription_id = $1',
+                        [updatedSubscription.id]
+                    );
+                    
+                    if (clientResult.rows.length > 0) {
+                        const client = clientResult.rows[0];
+                        const endDate = new Date(updatedSubscription.current_period_end * 1000);
+                        
+                        console.log(`🚫 [WEBHOOK] Marcando cliente ${client.email} como cancelado (expira: ${endDate})`);
+                        
+                        // Actualizar cliente como cancelado
+                        await db.pool.query(`
+                            UPDATE clients
+                            SET 
+                                subscription_status = 'cancelled',
+                                cancelled_at = CURRENT_TIMESTAMP,
+                                cancellation_reason = 'Cancelado desde Stripe Customer Portal',
+                                subscription_end_date = $1
+                            WHERE id = $2
+                        `, [endDate, client.id]);
+                        
+                        console.log(`✅ [WEBHOOK] Cliente #${client.id} (${client.email}) marcado como cancelado`);
+                    } else {
+                        console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${updatedSubscription.id}`);
+                    }
+                } catch (dbError) {
+                    console.error('❌ [WEBHOOK] Error actualizando cliente cancelado:', dbError);
+                }
+            }
+            break;
+
         case 'customer.subscription.deleted':
-            console.log(`Suscripción actualizada: ${event.type}`);
+            const deletedSubscription = event.data.object;
+            console.log(`🚫 [WEBHOOK] Suscripción eliminada: ${deletedSubscription.id}`);
+            
+            try {
+                // Buscar cliente por stripe_subscription_id
+                const clientResult = await db.pool.query(
+                    'SELECT id, email FROM clients WHERE stripe_subscription_id = $1',
+                    [deletedSubscription.id]
+                );
+                
+                if (clientResult.rows.length > 0) {
+                    const client = clientResult.rows[0];
+                    
+                    console.log(`🚫 [WEBHOOK] Marcando cliente ${client.email} como cancelado (suscripción eliminada)`);
+                    
+                    // Marcar como cancelado inmediatamente
+                    await db.pool.query(`
+                        UPDATE clients
+                        SET 
+                            subscription_status = 'cancelled',
+                            cancelled_at = CURRENT_TIMESTAMP,
+                            cancellation_reason = 'Suscripción eliminada en Stripe',
+                            subscription_end_date = CURRENT_TIMESTAMP
+                        WHERE id = $1
+                    `, [client.id]);
+                    
+                    console.log(`✅ [WEBHOOK] Cliente #${client.id} (${client.email}) marcado como cancelado`);
+                } else {
+                    console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${deletedSubscription.id}`);
+                }
+            } catch (dbError) {
+                console.error('❌ [WEBHOOK] Error procesando cancelación:', dbError);
+            }
             break;
 
         default:
@@ -4190,13 +4262,13 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
     }
 });
 
-// Cancelar suscripción de un cliente (desde admin dashboard)
+// Marcar cliente como cancelado (solo visual, desde admin dashboard)
 app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
     try {
         const clientId = parseInt(req.params.clientId);
         const { reason } = req.body;
         
-        console.log(`🚫 [ADMIN] Cancelando suscripción del cliente #${clientId}`);
+        console.log(`🚫 [ADMIN] Marcando cliente #${clientId} como cancelado (solo visual)`);
         
         // Obtener cliente
         const client = await db.getClientById(clientId);
@@ -4204,11 +4276,11 @@ app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
         
-        // Calcular fecha de expiración (30 días desde ahora o próxima fecha de facturación)
+        // Calcular fecha de expiración (30 días desde ahora)
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 30);
         
-        // Actualizar estado del cliente
+        // Actualizar estado del cliente SOLO EN NUESTRA DB (no toca Stripe)
         await db.pool.query(`
             UPDATE clients
             SET 
@@ -4217,32 +4289,20 @@ app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
                 cancellation_reason = $1,
                 subscription_end_date = $2
             WHERE id = $3
-        `, [reason || 'Cancelado desde panel de admin', endDate, clientId]);
+        `, [reason || 'Marcado como cancelado desde panel de admin', endDate, clientId]);
         
-        // Si el cliente tiene stripe_customer_id, cancelar también en Stripe
-        if (client.stripe_customer_id && client.stripe_subscription_id) {
-            try {
-                console.log(`💳 [STRIPE] Cancelando suscripción en Stripe: ${client.stripe_subscription_id}`);
-                await stripe.subscriptions.update(client.stripe_subscription_id, {
-                    cancel_at_period_end: true
-                });
-                console.log('✅ [STRIPE] Suscripción marcada para cancelar al final del período');
-            } catch (stripeError) {
-                console.error('⚠️ [STRIPE] Error cancelando en Stripe:', stripeError.message);
-                // Continuar aunque falle Stripe, ya que el cliente está cancelado en nuestra DB
-            }
-        }
-        
-        console.log(`✅ [ADMIN] Cliente #${clientId} marcado como cancelado`);
+        console.log(`✅ [ADMIN] Cliente #${clientId} marcado como cancelado (visual)`);
+        console.log(`💡 [ADMIN] Nota: Esto NO cancela la suscripción en Stripe, solo marca visualmente en el panel`);
         
         res.json({ 
             success: true, 
-            message: 'Suscripción cancelada exitosamente',
-            subscription_end_date: endDate
+            message: 'Cliente marcado como cancelado en el panel',
+            subscription_end_date: endDate,
+            note: 'Esto no cancela la suscripción en Stripe, solo es visual'
         });
         
     } catch (error) {
-        console.error('❌ [ADMIN] Error cancelando suscripción:', error);
+        console.error('❌ [ADMIN] Error marcando como cancelado:', error);
         res.status(500).json({ error: error.message });
     }
 });
