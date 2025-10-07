@@ -1417,13 +1417,23 @@
 
                 <div class="form-group">
                     <label class="form-label">Crea una contraseña <span class="required">*</span></label>
-                    <input type="password" class="form-input" name="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    <div style="position: relative;">
+                        <input type="password" class="form-input" id="password" name="password" required minlength="8" placeholder="Mínimo 8 caracteres" style="padding-right: 50px;">
+                        <button type="button" onclick="togglePasswordVisibility('password')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #666; padding: 5px; transition: color 0.2s;" title="Mostrar/ocultar contraseña">
+                            <span id="password-icon">👁️</span>
+                        </button>
+                    </div>
                     <span class="helper-text">Incluye al menos una letra y un número</span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Confirma tu contraseña <span class="required">*</span></label>
-                    <input type="password" class="form-input" name="password_confirm" required minlength="8" placeholder="Repite tu contraseña">
+                    <div style="position: relative;">
+                        <input type="password" class="form-input" id="password_confirm" name="password_confirm" required minlength="8" placeholder="Repite tu contraseña" style="padding-right: 50px;">
+                        <button type="button" onclick="togglePasswordVisibility('password_confirm')" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #666; padding: 5px; transition: color 0.2s;" title="Mostrar/ocultar contraseña">
+                            <span id="password_confirm-icon">👁️</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group" style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #0046FE; margin-top: 25px;">
@@ -2659,6 +2669,20 @@
             } catch (error) {
                 console.error('❌ Error procesando autenticación de Google:', error);
                 alert('❌ Error al procesar los datos de Google. Por favor, intenta de nuevo o completa el formulario manualmente.');
+            }
+        }
+
+        // Función para mostrar/ocultar contraseña
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(inputId + '-icon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈'; // Ojo cerrado
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️'; // Ojo abierto
             }
         }
 
