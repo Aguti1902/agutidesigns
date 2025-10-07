@@ -3290,7 +3290,12 @@
                 }
                 
                 return `
-                    <div class="web-card" data-client-id="${web.id}">
+                    <div class="web-card" data-client-id="${web.id}" ${isCancelled ? 'style="border: 3px solid #dc2626; box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);"' : ''}>
+                        ${isCancelled ? `
+                            <div style="position: absolute; top: -15px; right: 20px; background: #dc2626; color: white; padding: 8px 20px; border-radius: 25px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4); z-index: 10;">
+                                🚫 INACTIVO / CANCELADO
+                            </div>
+                        ` : ''}
                         <!-- Screenshot de la Web -->
                         <div class="web-screenshot" ${web.website_url ? `onclick="window.open('${web.website_url}', '_blank')" style="cursor: pointer;"` : 'style="cursor: default;"'}>
                             ${web.website_screenshot_url ? `
