@@ -454,11 +454,28 @@ app.post('/api/create-subscription', async (req, res) => {
 
             // Enviar emails
             try {
-                await emailService.sendEmail('admin-new-client', submission);
-                await emailService.sendEmail('payment-success', submission);
-                console.log('✅ Emails de confirmación enviados');
+                console.log('📧 [EMAILS] Preparando envío de emails...');
+                console.log('📧 [EMAILS] Datos del cliente:', {
+                    email: submission.email,
+                    full_name: submission.full_name,
+                    business_name: submission.business_name,
+                    plan: submission.plan
+                });
+                
+                // Email 1: Admin
+                console.log('📧 [EMAIL 1/2] Enviando notificación al admin...');
+                const adminResult = await emailService.sendEmail('admin-new-client', submission);
+                console.log('✅ [EMAIL 1/2] Admin notificado:', adminResult.success ? 'SUCCESS' : 'FAILED');
+                
+                // Email 2: Cliente
+                console.log('📧 [EMAIL 2/2] Enviando confirmación al cliente:', submission.email);
+                const clientResult = await emailService.sendEmail('payment-success', submission);
+                console.log('✅ [EMAIL 2/2] Cliente notificado:', clientResult.success ? 'SUCCESS' : 'FAILED');
+                
+                console.log('✅ Proceso de emails completado');
             } catch (emailError) {
-                console.error('⚠️ Error enviando emails (no crítico):', emailError.message);
+                console.error('❌ Error enviando emails:', emailError);
+                console.error('❌ Error stack:', emailError.stack);
             }
 
             return res.json({
@@ -533,11 +550,27 @@ app.post('/webhook', async (req, res) => {
 
             // Enviar emails
             try {
-                await emailService.sendEmail('admin-new-client', submission);
-                await emailService.sendEmail('payment-success', submission);
-                console.log('✅ Emails de confirmación enviados');
+                console.log('📧 [WEBHOOK EMAILS] Preparando envío de emails...');
+                console.log('📧 [WEBHOOK EMAILS] Datos:', {
+                    email: submission.email,
+                    full_name: submission.full_name,
+                    business_name: submission.business_name
+                });
+                
+                // Email 1: Admin
+                console.log('📧 [WEBHOOK EMAIL 1/2] Enviando notificación al admin...');
+                const adminResult = await emailService.sendEmail('admin-new-client', submission);
+                console.log('✅ [WEBHOOK EMAIL 1/2] Admin notificado:', adminResult.success ? 'SUCCESS' : 'FAILED');
+                
+                // Email 2: Cliente
+                console.log('📧 [WEBHOOK EMAIL 2/2] Enviando confirmación al cliente:', submission.email);
+                const clientResult = await emailService.sendEmail('payment-success', submission);
+                console.log('✅ [WEBHOOK EMAIL 2/2] Cliente notificado:', clientResult.success ? 'SUCCESS' : 'FAILED');
+                
+                console.log('✅ Proceso de emails completado (webhook)');
             } catch (emailError) {
-                console.error('⚠️ Error enviando emails (no crítico):', emailError.message);
+                console.error('❌ Error enviando emails (webhook):', emailError);
+                console.error('❌ Error stack:', emailError.stack);
             }
 
             console.log(`Pago completado para submission ${submissionId}`);
