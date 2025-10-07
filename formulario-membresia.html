@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Membresía - agutidesigns</title>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
 
@@ -2574,11 +2576,90 @@
             }
         });
 
-        // Registro con Google
+        // ============================================
+        // 🔐 GOOGLE SIGN-IN - REGISTRO EN FORMULARIO
+        // ============================================
+
+        // Inicializar Google Sign-In
+        function initializeGoogleSignIn() {
+            console.log('🔍 Inicializando Google Sign-In para formulario...');
+            
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.log('⏳ Google Sign-In script aún no cargado, reintentando...');
+                setTimeout(initializeGoogleSignIn, 500);
+                return;
+            }
+
+            try {
+                google.accounts.id.initialize({
+                    client_id: '27242010279-amuh9oqm83sdi24hq65ptdqaotpkk094.apps.googleusercontent.com',
+                    callback: handleGoogleRegistration,
+                    auto_select: false
+                });
+                
+                console.log('✅ Google Sign-In inicializado en formulario');
+            } catch (error) {
+                console.error('❌ Error inicializando Google Sign-In:', error);
+            }
+        }
+
+        // Iniciar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+        } else {
+            initializeGoogleSignIn();
+        }
+
+        // Función llamada por el botón "Continuar con Google"
         function registerWithGoogle() {
-            alert('🚧 La integración con Google estará disponible próximamente.\n\nPor ahora, completa el registro manualmente.');
-            // TODO: Implementar Google OAuth cuando esté en producción
-            // window.location.href = 'https://agutidesigns-production.up.railway.app/auth/google';
+            console.log('🔐 Usuario hizo click en "Continuar con Google"');
+            
+            if (typeof google === 'undefined' || !google.accounts) {
+                alert('⚠️ Google Sign-In aún no está listo. Por favor, intenta de nuevo en un momento.');
+                return;
+            }
+
+            // Solicitar autenticación de Google
+            google.accounts.id.prompt();
+        }
+
+        // Callback cuando el usuario se autentica con Google
+        function handleGoogleRegistration(response) {
+            try {
+                console.log('✅ Token de Google recibido, decodificando...');
+                
+                // Decodificar el JWT de Google para obtener los datos del usuario
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                console.log('✅ Datos de Google:', payload);
+
+                // Pre-rellenar los campos del formulario
+                const firstName = payload.given_name || '';
+                const lastName = payload.family_name || '';
+                const email = payload.email || '';
+
+                // Rellenar los campos
+                document.querySelector('input[name="first_name"]').value = firstName;
+                document.querySelector('input[name="last_name"]').value = lastName;
+                document.querySelector('input[name="email"]').value = email;
+
+                // Generar una contraseña aleatoria (el usuario no necesita saberla si usa Google)
+                const randomPassword = 'Google_' + Math.random().toString(36).substring(2, 15);
+                document.querySelector('input[name="password"]').value = randomPassword;
+                document.querySelector('input[name="password_confirm"]').value = randomPassword;
+
+                // Guardar el token de Google para enviar al backend
+                window.googleCredential = response.credential;
+                window.isGoogleUser = true;
+
+                console.log('✅ Formulario pre-rellenado con datos de Google');
+                
+                // Mostrar mensaje de éxito
+                alert('✅ ¡Perfecto! Hemos pre-rellenado tus datos con Google.\n\nAhora continúa completando el resto del formulario.');
+                
+            } catch (error) {
+                console.error('❌ Error procesando autenticación de Google:', error);
+                alert('❌ Error al procesar los datos de Google. Por favor, intenta de nuevo o completa el formulario manualmente.');
+            }
         }
 
         // Validar que las contraseñas coincidan
