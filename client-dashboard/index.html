@@ -3231,9 +3231,12 @@
                 const client = dashboardData.client || {};
                 const submission = dashboardData.submission || {};
                 const currentPlan = client.plan;
+                const currentBillingCycle = client.billing_cycle || 'monthly'; // Obtener ciclo actual
                 
                 console.log(`💳 [PLAN] Plan actual del cliente: "${currentPlan}" (type: ${typeof currentPlan})`);
+                console.log(`💳 [BILLING] Ciclo actual: "${currentBillingCycle}"`);
                 console.log(`💳 [PLAN] Plan solicitado: "${plan}"`);
+                console.log(`💳 [BILLING] Ciclo solicitado: "${modalBillingCycle}"`);
                 console.log(`📊 [RESUMEN] ${currentPlan ? `Plan actual: ${currentPlan}` : 'SIN PLAN'} → Nuevo plan: ${plan}`);
                 
                 // Si no tiene plan, redirigir a checkout normal (nuevo cliente)
@@ -3243,13 +3246,27 @@
                     return;
                 }
                 
-                // Si es el mismo plan, solo mostrar aviso
-                if (currentPlan === plan) {
+                // Si es el mismo plan Y el mismo ciclo de facturación, solo mostrar aviso
+                if (currentPlan === plan && currentBillingCycle === modalBillingCycle) {
                     await showNotificationModal(
                         '📋 Plan Actual',
-                        'Ya tienes este plan activo.',
+                        'Ya tienes este plan activo con este ciclo de facturación.',
                         'info'
                     );
+                    return;
+                }
+                
+                // Si es el mismo plan pero diferente ciclo (ej: básico mensual → básico anual)
+                if (currentPlan === plan && currentBillingCycle !== modalBillingCycle) {
+                    const cycleText = modalBillingCycle === 'annual' ? 'anual' : 'mensual';
+                    const currentCycleText = currentBillingCycle === 'annual' ? 'anual' : 'mensual';
+                    
+                    const confirmed = await showBillingCycleChangeModal(currentPlan, currentCycleText, cycleText);
+                    
+                    if (!confirmed) return;
+                    
+                    // Procesar cambio de ciclo (sin cambio de plan)
+                    await processPlanChange(plan, null);
                     return;
                 }
                 
@@ -3510,6 +3527,44 @@
                     resolve(true);
                 };
                 document.getElementById('downgradeCancel').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(false);
+                };
+            });
+        }
+        
+        // Modal de cambio de ciclo de facturación (ej: mensual a anual)
+        function showBillingCycleChangeModal(plan, currentCycle, newCycle) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+                
+                const savingsText = newCycle === 'anual' 
+                    ? '<strong style="color: #009A62;">✓ Ahorrarás hasta un 20% con la facturación anual</strong><br>'
+                    : '';
+                
+                modal.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="font-size: 3.5rem; margin-bottom: 15px;">🔄</div>
+                        <h2 style="color: #0046FE; margin-bottom: 15px; font-size: 1.8rem;">Cambio de Facturación</h2>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 25px; font-size: 1.05rem;">
+                            Vas a cambiar tu plan <strong>${plan.toUpperCase()}</strong> de <strong>${currentCycle}</strong> a <strong>${newCycle}</strong>.<br><br>
+                            ${savingsText}
+                            <strong style="color: #0046FE;">La nueva facturación se aplicará automáticamente</strong>
+                        </p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="cycleConfirm" style="background: #0046FE; color: white; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 1.05rem;">Confirmar Cambio</button>
+                            <button id="cycleCancel" style="background: #f0f0f0; color: #666; padding: 15px 35px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 1.05rem;">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                document.getElementById('cycleConfirm').onclick = () => {
+                    document.body.removeChild(modal);
+                    resolve(true);
+                };
+                document.getElementById('cycleCancel').onclick = () => {
                     document.body.removeChild(modal);
                     resolve(false);
                 };
