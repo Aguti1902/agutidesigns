@@ -844,6 +844,42 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
+// 🐛 DEBUG: Endpoint temporal para ver datos del cliente
+app.get('/api/debug-client/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        console.log('🐛 [DEBUG] Consultando cliente #' + clientId);
+        
+        const client = await db.getClientById(clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        console.log('🐛 [DEBUG] Cliente encontrado:', {
+            id: client.id,
+            email: client.email,
+            plan: client.plan,
+            stripe_subscription_id: client.stripe_subscription_id,
+            payment_date: client.payment_date,
+            created_at: client.created_at
+        });
+        
+        res.json({
+            id: client.id,
+            email: client.email,
+            plan: client.plan,
+            stripe_subscription_id: client.stripe_subscription_id,
+            payment_date: client.payment_date,
+            created_at: client.created_at,
+            all_fields: Object.keys(client)
+        });
+    } catch (error) {
+        console.error('🐛 [DEBUG] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Endpoint para obtener datos de suscripción (para success page)
 app.get('/api/subscription-data/:subscriptionId', async (req, res) => {
     try {
