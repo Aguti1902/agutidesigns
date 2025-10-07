@@ -2065,6 +2065,113 @@
         </div>
     </div>
 
+    <!-- Modal de Cancelación Multi-Paso -->
+    <div class="plan-modal" id="cancelModal" onclick="closeCancelModal(event)">
+        <div class="plan-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+            <!-- Paso 1: Confirmación inicial -->
+            <div id="cancelStep1" class="cancel-step">
+                <h2 style="color: #dc2626; margin-bottom: 10px; font-size: 1.8rem;">🚫 Cancelar Suscripción</h2>
+                <p style="color: #666; margin-bottom: 25px;">¿Estás seguro de que quieres cancelar tu plan?</p>
+                
+                <div style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <p style="margin: 0 0 10px 0; color: #dc2626; font-weight: 600; font-size: 1rem;">⚠️ Importante:</p>
+                    <ul style="margin: 0; padding-left: 20px; color: #666;">
+                        <li>Mantendrás acceso hasta el final de tu período actual</li>
+                        <li>Tu sitio web se desactivará en esa fecha</li>
+                        <li>No se realizarán más cobros automáticos</li>
+                        <li>Podrás reactivar tu plan en cualquier momento antes de la fecha efectiva</li>
+                    </ul>
+                </div>
+
+                <button class="btn-action" onclick="nextCancelStep(2)" style="width: 100%; margin-bottom: 10px;">Continuar con la Cancelación</button>
+                <button class="btn-secondary" onclick="closeCancelModal(event)" style="width: 100%;">No, Mantener Mi Plan</button>
+            </div>
+
+            <!-- Paso 2: Razón de cancelación -->
+            <div id="cancelStep2" class="cancel-step" style="display: none;">
+                <h2 style="color: #dc2626; margin-bottom: 10px; font-size: 1.8rem;">📝 ¿Por qué cancelas?</h2>
+                <p style="color: #666; margin-bottom: 25px;">Tu opinión nos ayuda a mejorar nuestro servicio</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <label style="background: #f9fafb; padding: 15px; border: 2px solid #e8eaed; border-radius: 10px; cursor: pointer; transition: all 0.3s;" onclick="selectCancelReason('muy_caro', this)">
+                        <input type="radio" name="cancelReason" value="muy_caro" style="margin-right: 10px;">
+                        <span>💰 Es muy caro</span>
+                    </label>
+                    <label style="background: #f9fafb; padding: 15px; border: 2px solid #e8eaed; border-radius: 10px; cursor: pointer; transition: all 0.3s;" onclick="selectCancelReason('no_necesito', this)">
+                        <input type="radio" name="cancelReason" value="no_necesito" style="margin-right: 10px;">
+                        <span>❌ Ya no lo necesito</span>
+                    </label>
+                    <label style="background: #f9fafb; padding: 15px; border: 2px solid #e8eaed; border-radius: 10px; cursor: pointer; transition: all 0.3s;" onclick="selectCancelReason('otra_plataforma', this)">
+                        <input type="radio" name="cancelReason" value="otra_plataforma" style="margin-right: 10px;">
+                        <span>🔄 Me cambio a otra plataforma</span>
+                    </label>
+                    <label style="background: #f9fafb; padding: 15px; border: 2px solid #e8eaed; border-radius: 10px; cursor: pointer; transition: all 0.3s;" onclick="selectCancelReason('problemas_tecnicos', this)">
+                        <input type="radio" name="cancelReason" value="problemas_tecnicos" style="margin-right: 10px;">
+                        <span>🔧 Problemas técnicos</span>
+                    </label>
+                    <label style="background: #f9fafb; padding: 15px; border: 2px solid #e8eaed; border-radius: 10px; cursor: pointer; transition: all 0.3s;" onclick="selectCancelReason('otro', this)">
+                        <input type="radio" name="cancelReason" value="otro" style="margin-right: 10px;">
+                        <span>💬 Otro motivo</span>
+                    </label>
+                </div>
+
+                <div id="otherReasonContainer" style="display: none; margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #1B1B1B; font-weight: 600;">¿Puedes contarnos más?</label>
+                    <textarea id="cancelReasonDetails" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e8eaed; border-radius: 10px; font-size: 1rem; resize: vertical; font-family: inherit;" placeholder="Cuéntanos qué podemos mejorar..."></textarea>
+                </div>
+
+                <button class="btn-action" onclick="nextCancelStep(3)" style="width: 100%; margin-bottom: 10px;" id="btnContinueStep2" disabled>Continuar</button>
+                <button class="btn-secondary" onclick="nextCancelStep(1)" style="width: 100%;">← Atrás</button>
+            </div>
+
+            <!-- Paso 3: Oferta de retención -->
+            <div id="cancelStep3" class="cancel-step" style="display: none;">
+                <h2 style="color: #10b981; margin-bottom: 10px; font-size: 1.8rem;">🎁 ¡Espera! Tenemos una oferta</h2>
+                <p style="color: #666; margin-bottom: 25px;">Antes de que te vayas, queremos agradecerte por confiar en nosotros</p>
+                
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 15px; margin-bottom: 25px; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                    <h3 style="font-size: 2rem; margin: 0 0 10px 0;">20% de Descuento</h3>
+                    <p style="font-size: 1.2rem; margin: 0; opacity: 0.95;">Durante los próximos 3 meses</p>
+                </div>
+
+                <div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <p style="margin: 0 0 10px 0; color: #10b981; font-weight: 600;">✅ Con este descuento:</p>
+                    <ul style="margin: 0; padding-left: 20px; color: #666;">
+                        <li id="discountBasico" style="display: none;">Plan Básico: <strong>28€/mes</strong> en vez de 35€</li>
+                        <li id="discountAvanzado" style="display: none;">Plan Avanzado: <strong>39.20€/mes</strong> en vez de 49€</li>
+                        <li id="discountPremium" style="display: none;">Plan Premium: <strong>52€/mes</strong> en vez de 65€</li>
+                        <li>Mismo servicio premium que siempre</li>
+                        <li>Válido por 3 meses, luego precio normal</li>
+                    </ul>
+                </div>
+
+                <button class="btn-action" onclick="acceptDiscount()" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">🎁 Sí, Acepto el Descuento</button>
+                <button class="btn-secondary" onclick="nextCancelStep(4)" style="width: 100%;">No gracias, Continuar con Cancelación</button>
+            </div>
+
+            <!-- Paso 4: Confirmación final -->
+            <div id="cancelStep4" class="cancel-step" style="display: none;">
+                <h2 style="color: #dc2626; margin-bottom: 10px; font-size: 1.8rem;">⚠️ Confirmación Final</h2>
+                <p style="color: #666; margin-bottom: 25px;">Estás a punto de cancelar tu suscripción</p>
+                
+                <div style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <p style="margin: 0 0 15px 0; color: #dc2626; font-weight: 600; font-size: 1.1rem;">📅 Fecha de Cancelación:</p>
+                    <p id="effectiveDatePreview" style="margin: 0 0 20px 0; font-size: 1.3rem; font-weight: 700; color: #dc2626;">Calculando...</p>
+                    <p style="margin: 0; color: #666; font-size: 0.95rem;">Tu sitio web se desactivará automáticamente en esa fecha. Podrás reactivar tu plan desde tu dashboard hasta ese momento.</p>
+                </div>
+
+                <label style="display: flex; align-items: start; gap: 10px; margin-bottom: 20px; cursor: pointer;">
+                    <input type="checkbox" id="confirmCancel" style="margin-top: 4px;">
+                    <span style="color: #666;">Entiendo que mi sitio web se desactivará el <strong id="effectiveDateConfirm" style="color: #dc2626;">-</strong> y que no se realizarán más cobros automáticos.</span>
+                </label>
+
+                <button class="btn-action" onclick="confirmCancellation()" style="width: 100%; margin-bottom: 10px; background: #dc2626;" id="btnConfirmCancel" disabled>Sí, Cancelar Mi Suscripción</button>
+                <button class="btn-secondary" onclick="closeCancelModal(event)" style="width: 100%;">No, Mantener Mi Plan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Crear Ticket -->
     <div class="plan-modal" id="ticketModal" onclick="closeTicketModal(event)">
         <div class="plan-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
@@ -3752,6 +3859,250 @@
         // Mostrar modal de precios (para overlays y card de comparación)
         function showPricingModal() {
             openPlanModal();
+        }
+
+        // ===== FUNCIONES DE CANCELACIÓN =====
+        
+        let selectedCancelReason = null;
+        let currentCancelStep = 1;
+
+        function openCancelModal() {
+            // Resetear estado
+            selectedCancelReason = null;
+            currentCancelStep = 1;
+            document.querySelectorAll('.cancel-step').forEach(step => step.style.display = 'none');
+            document.getElementById('cancelStep1').style.display = 'block';
+            document.getElementById('confirmCancel').checked = false;
+            document.getElementById('btnConfirmCancel').disabled = true;
+            
+            // Mostrar precio con descuento según plan actual
+            const plan = currentClient.plan;
+            document.getElementById('discountBasico').style.display = plan === 'basico' ? 'list-item' : 'none';
+            document.getElementById('discountAvanzado').style.display = plan === 'avanzado' ? 'list-item' : 'none';
+            document.getElementById('discountPremium').style.display = plan === 'premium' ? 'list-item' : 'none';
+            
+            // Calcular fecha efectiva (aproximada, se actualizará al confirmar)
+            const today = new Date();
+            const effectiveDate = new Date(today);
+            effectiveDate.setMonth(effectiveDate.getMonth() + 1);
+            const dateStr = effectiveDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('effectiveDatePreview').textContent = dateStr;
+            document.getElementById('effectiveDateConfirm').textContent = dateStr;
+            
+            // Mostrar modal
+            document.getElementById('cancelModal').style.display = 'flex';
+        }
+
+        function closeCancelModal(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        function nextCancelStep(step) {
+            // Ocultar todos los pasos
+            document.querySelectorAll('.cancel-step').forEach(s => s.style.display = 'none');
+            // Mostrar paso actual
+            document.getElementById('cancelStep' + step).style.display = 'block';
+            currentCancelStep = step;
+        }
+
+        function selectCancelReason(reason, element) {
+            selectedCancelReason = reason;
+            
+            // Actualizar estilos
+            document.querySelectorAll('#cancelStep2 label').forEach(label => {
+                label.style.border = '2px solid #e8eaed';
+                label.style.background = '#f9fafb';
+            });
+            element.style.border = '2px solid #0046FE';
+            element.style.background = '#e8f4ff';
+            
+            // Mostrar/ocultar campo de texto si es "otro"
+            document.getElementById('otherReasonContainer').style.display = reason === 'otro' ? 'block' : 'none';
+            
+            // Habilitar botón continuar
+            document.getElementById('btnContinueStep2').disabled = false;
+        }
+
+        async function acceptDiscount() {
+            try {
+                console.log('🎁 [CLIENT] Aceptando descuento...');
+                
+                const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentClient.id,
+                        reason: selectedCancelReason,
+                        reason_details: document.getElementById('cancelReasonDetails').value,
+                        apply_coupon: true
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.coupon_applied) {
+                    showCustomModal(
+                        '🎉 ¡Descuento Aplicado!',
+                        'Hemos aplicado un 20% de descuento a tu suscripción por los próximos 3 meses. ¡Gracias por quedarte con nosotros!',
+                        '✅ Entendido'
+                    );
+                    closeCancelModal();
+                    // Recargar datos del cliente
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    throw new Error('No se pudo aplicar el descuento');
+                }
+                
+            } catch (error) {
+                console.error('❌ [CLIENT] Error aplicando descuento:', error);
+                showCustomModal(
+                    '❌ Error',
+                    'Hubo un problema al aplicar el descuento. Por favor, contacta con soporte.',
+                    'Cerrar'
+                );
+            }
+        }
+
+        async function confirmCancellation() {
+            try {
+                console.log('🚫 [CLIENT] Confirmando cancelación...');
+                
+                const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentClient.id,
+                        reason: selectedCancelReason,
+                        reason_details: document.getElementById('cancelReasonDetails').value,
+                        apply_coupon: false
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const effectiveDate = new Date(result.effective_date).toLocaleDateString('es-ES', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                    });
+                    
+                    showCustomModal(
+                        '✅ Suscripción Cancelada',
+                        `Tu suscripción ha sido cancelada. Mantendrás acceso completo hasta el ${effectiveDate}.<br><br>Puedes reactivar tu plan en cualquier momento desde la sección de Facturación.`,
+                        'Entendido'
+                    );
+                    closeCancelModal();
+                    
+                    // Recargar página después de 2 segundos
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
+                }
+                
+            } catch (error) {
+                console.error('❌ [CLIENT] Error cancelando suscripción:', error);
+                showCustomModal(
+                    '❌ Error',
+                    'Hubo un problema al cancelar tu suscripción. Por favor, contacta con soporte.',
+                    'Cerrar'
+                );
+            }
+        }
+
+        async function reactivateSubscription() {
+            try {
+                // Confirmar con el usuario
+                const confirm = await showCustomConfirm(
+                    '🔄 Reactivar Suscripción',
+                    '¿Estás seguro de que quieres reactivar tu suscripción? La renovación automática se reanudará.',
+                    'Sí, Reactivar',
+                    'Cancelar'
+                );
+                
+                if (!confirm) return;
+                
+                console.log('🔄 [CLIENT] Reactivando suscripción...');
+                
+                const response = await fetch(`${API_URL}/api/client/reactivate-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: currentClient.id
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showCustomModal(
+                        '✅ ¡Suscripción Reactivada!',
+                        'Tu suscripción ha sido reactivada exitosamente. La renovación automática continuará normalmente.',
+                        'Entendido'
+                    );
+                    
+                    // Recargar página después de 2 segundos
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
+                }
+                
+            } catch (error) {
+                console.error('❌ [CLIENT] Error reactivando suscripción:', error);
+                showCustomModal(
+                    '❌ Error',
+                    'Hubo un problema al reactivar tu suscripción. Por favor, contacta con soporte.',
+                    'Cerrar'
+                );
+            }
+        }
+
+        // Habilitar botón de confirmación final
+        document.addEventListener('DOMContentLoaded', () => {
+            const confirmCheckbox = document.getElementById('confirmCancel');
+            if (confirmCheckbox) {
+                confirmCheckbox.addEventListener('change', (e) => {
+                    document.getElementById('btnConfirmCancel').disabled = !e.target.checked;
+                });
+            }
+        });
+
+        // Función para mostrar/ocultar card de cancelación según estado
+        function updateCancellationUI() {
+            const cancellationCard = document.getElementById('cancellationCard');
+            const cancelSection = document.getElementById('cancelPlanSection');
+            const reactivateSection = document.getElementById('reactivatePlanSection');
+            
+            if (!currentClient || !currentClient.plan) {
+                cancellationCard.style.display = 'none';
+                return;
+            }
+            
+            cancellationCard.style.display = 'block';
+            
+            if (currentClient.cancellation_scheduled) {
+                // Hay cancelación programada
+                cancelSection.style.display = 'none';
+                reactivateSection.style.display = 'block';
+                
+                // Actualizar fecha
+                const effectiveDate = new Date(currentClient.cancellation_effective_date);
+                document.getElementById('cancellationDate').textContent = effectiveDate.toLocaleDateString('es-ES', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                
+                // Calcular días restantes
+                const today = new Date();
+                const daysRemaining = Math.ceil((effectiveDate - today) / (1000 * 60 * 60 * 24));
+                document.getElementById('daysRemaining').textContent = `Quedan ${daysRemaining} días de acceso`;
+            } else {
+                // No hay cancelación programada
+                cancelSection.style.display = 'block';
+                reactivateSection.style.display = 'none';
+            }
         }
 
         // Variables para edición
@@ -6251,6 +6602,7 @@
             
             if (section === 'facturacion') {
                 loadInvoices();
+                updateCancellationUI(); // Actualizar estado de cancelación
             } else if (section === 'perfil') {
                 loadProfile();
             } else if (section === 'seo') {
