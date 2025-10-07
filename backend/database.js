@@ -714,14 +714,43 @@ async function updateClient(clientId, updates) {
         fields.push(`submission_id = $${paramCount++}`);
         values.push(updates.submission_id);
     }
+    if (updates.website_status !== undefined) {
+        fields.push(`website_status = $${paramCount++}`);
+        values.push(updates.website_status);
+    }
+    if (updates.plan_change_at !== undefined) {
+        fields.push(`plan_change_at = $${paramCount++}`);
+        values.push(updates.plan_change_at);
+    }
+    if (updates.billing_cycle !== undefined) {
+        fields.push(`billing_cycle = $${paramCount++}`);
+        values.push(updates.billing_cycle);
+    }
+    if (updates.cancellation_scheduled !== undefined) {
+        fields.push(`cancellation_scheduled = $${paramCount++}`);
+        values.push(updates.cancellation_scheduled);
+    }
+    if (updates.cancellation_effective_date !== undefined) {
+        fields.push(`cancellation_effective_date = $${paramCount++}`);
+        values.push(updates.cancellation_effective_date);
+    }
+    if (updates.cancellation_reason !== undefined) {
+        fields.push(`cancellation_reason = $${paramCount++}`);
+        values.push(updates.cancellation_reason);
+    }
     
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(clientId);
+    
+    console.log('🔧 [DB] updateClient - Campos a actualizar:', fields.join(', '));
+    console.log('🔧 [DB] updateClient - Valores:', values.slice(0, -1));
     
     await pool.query(
         `UPDATE clients SET ${fields.join(', ')} WHERE id = $${paramCount}`,
         values
     );
+    
+    console.log('✅ [DB] Cliente #' + clientId + ' actualizado exitosamente');
 }
 
 async function getClientByEmail(email) {
