@@ -1769,6 +1769,29 @@
                             <span style="margin-right: 8px;">💳</span> Gestionar en Stripe
                         </button>
                     </div>
+
+                    <!-- Card Cancelación / Reactivación -->
+                    <div class="card" id="cancellationCard" style="display: none;">
+                        <!-- Mostrar si NO hay cancelación programada -->
+                        <div id="cancelPlanSection">
+                            <h3 class="card-title">🚫 Cancelar Suscripción</h3>
+                            <p style="color: #666; margin-bottom: 15px;">Puedes cancelar tu suscripción en cualquier momento. Mantendrás acceso hasta el final de tu período actual.</p>
+                            <button class="btn-secondary" onclick="openCancelModal()" style="background: #dc2626; color: white; border: none;">
+                                🚫 Cancelar Mi Plan
+                            </button>
+                        </div>
+
+                        <!-- Mostrar si HAY cancelación programada -->
+                        <div id="reactivatePlanSection" style="display: none;">
+                            <h3 class="card-title" style="color: #dc2626;">⚠️ Cancelación Programada</h3>
+                            <p style="margin-bottom: 10px; color: #666;">Tu plan se cancelará el <strong id="cancellationDate" style="color: #dc2626;">-</strong></p>
+                            <p id="daysRemaining" style="margin-bottom: 15px; font-size: 1.1rem; font-weight: 600; color: #dc2626;"></p>
+                            <p style="margin-bottom: 15px; color: #999; font-size: 0.9rem;">Tu sitio web se desactivará en esa fecha. Si cambias de opinión, puedes reactivar tu suscripción.</p>
+                            <button class="btn-action" onclick="reactivateSubscription()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                🔄 Reactivar Mi Suscripción
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- CONTACTAR -->

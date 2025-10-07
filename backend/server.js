@@ -142,7 +142,13 @@ app.use(fileUpload({
 // Servir archivos estáticos del dashboard
 app.use('/admin', express.static(path.join(__dirname, '../admin-dashboard')));
 
+// ===== IMPORTAR RUTAS EXTERNAS =====
+const cancellationRoutes = require('./routes/cancellations');
+
 // ===== RUTAS API =====
+
+// Rutas de cancelación
+app.use('/api', cancellationRoutes);
 
 // 1. OBTENER CLAVE PÚBLICA DE STRIPE
 app.get('/api/config', (req, res) => {
