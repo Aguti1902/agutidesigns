@@ -904,6 +904,26 @@
         }
 
         /* ==================================
+           ELEMENTOS SOLO MÓVIL (ocultos en desktop)
+           ================================== */
+        
+        .sidebar .sidebar-logo {
+            display: none;
+        }
+
+        .close-menu-btn {
+            display: none;
+        }
+
+        .hamburger-btn {
+            display: none !important;
+        }
+
+        .menu-overlay {
+            display: none;
+        }
+
+        /* ==================================
            RESPONSIVE DESIGN - MÓVIL
            ================================== */
 
@@ -966,8 +986,8 @@
                 left: 0;
             }
 
-            .sidebar-logo {
-                display: flex;
+            .sidebar .sidebar-logo {
+                display: flex !important; /* Mostrar en móvil */
                 justify-content: space-between;
                 align-items: center;
                 padding: 20px;
@@ -988,6 +1008,7 @@
             }
 
             .close-menu-btn {
+                display: flex !important; /* Mostrar en móvil */
                 background: rgba(255, 255, 255, 0.2);
                 border: none;
                 color: white;
@@ -996,7 +1017,6 @@
                 border-radius: 50%;
                 font-size: 1.2rem;
                 cursor: pointer;
-                display: flex;
                 align-items: center;
                 justify-content: center;
                 transition: all 0.3s ease;
@@ -1064,6 +1084,7 @@
 
             /* Botón hamburger */
             .hamburger-btn {
+                display: flex !important; /* Mostrar en móvil */
                 position: fixed;
                 bottom: 20px;
                 left: 20px;
@@ -1077,7 +1098,6 @@
                 cursor: pointer;
                 z-index: 9999;
                 box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3);
-                display: flex;
                 align-items: center;
                 justify-content: center;
                 transition: all 0.3s ease;
@@ -1101,12 +1121,12 @@
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.5);
                 z-index: 9998;
-                display: none;
+                display: none !important; /* Oculto por defecto */
                 backdrop-filter: blur(4px);
             }
 
             .menu-overlay.show {
-                display: block;
+                display: block !important; /* Mostrar cuando .show */
             }
 
             /* MAIN CONTENT */
