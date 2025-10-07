@@ -263,6 +263,55 @@ function ticketResponseEmail(clientData, ticketData) {
     };
 }
 
+// 5. Reset de contraseña
+function passwordResetEmail(email, resetToken) {
+    const resetUrl = `https://agutidesigns.vercel.app/reset-password.html?token=${resetToken}`;
+    
+    const content = `
+        <h1>🔐 Restablece tu contraseña</h1>
+        <p>Hola,</p>
+        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>agutidesigns</strong>.</p>
+        
+        <p>Si no realizaste esta solicitud, puedes ignorar este email de forma segura.</p>
+        
+        <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
+            <p style="margin: 0; color: #856404;">
+                <strong>⏰ Este enlace expirará en 1 hora</strong><br>
+                Por motivos de seguridad, este enlace solo es válido durante 1 hora.
+            </p>
+        </div>
+        
+        <p>Para crear una nueva contraseña, haz clic en el botón de abajo:</p>
+        
+        <div style="text-align: center;">
+            <a href="${resetUrl}" class="button" style="color: #ffffff; background: #0046FE;">🔑 Restablecer Contraseña</a>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 0.9rem; color: #666;">
+            <strong>Si el botón no funciona, copia y pega este enlace en tu navegador:</strong><br>
+            <a href="${resetUrl}" style="color: #0046FE; word-break: break-all;">${resetUrl}</a>
+        </p>
+        
+        <div class="divider"></div>
+        
+        <p style="font-size: 0.85rem; color: #999;">
+            <strong>💡 Consejos de seguridad:</strong><br>
+            • Nunca compartas tu contraseña con nadie<br>
+            • Usa una combinación de letras, números y símbolos<br>
+            • No reutilices contraseñas de otros sitios
+        </p>
+        
+        <p>Saludos,<br><strong>El equipo de agutidesigns</strong></p>
+    `;
+    
+    return {
+        to: email,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: '🔐 Restablece tu contraseña - agutidesigns',
+        html: createEmailLayout(content, 'Solicitud de restablecimiento de contraseña')
+    };
+}
+
 // 5-7. Recordatorios de renovación
 function renewalReminderEmail(clientData, daysLeft) {
     let emoji, urgency, boxClass;
@@ -675,6 +724,9 @@ async function sendEmail(type, data) {
                 break;
             case 'ticket-response':
                 emailData = ticketResponseEmail(data.client, data.ticket);
+                break;
+            case 'password-reset':
+                emailData = passwordResetEmail(data.email, data.token);
                 break;
             case 'renewal-reminder':
                 emailData = renewalReminderEmail(data.client, data.daysLeft);

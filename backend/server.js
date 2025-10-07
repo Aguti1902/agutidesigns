@@ -1415,6 +1415,114 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
+// ==========================================
+// RESET DE CONTRASEÑA
+// ==========================================
+
+// Solicitar reset de contraseña (envía email)
+app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ error: 'Email requerido' });
+        }
+        
+        console.log('🔐 [RESET] Solicitud de reset para:', email);
+        
+        // Verificar que el usuario existe
+        const client = await db.getClientByEmail(email);
+        if (!client) {
+            // Por seguridad, no revelamos si el email existe o no
+            console.log('⚠️ [RESET] Email no encontrado:', email);
+            return res.json({ 
+                success: true, 
+                message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' 
+            });
+        }
+        
+        // Generar token único
+        const crypto = require('crypto');
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 3600000); // 1 hora
+        
+        // Guardar token en la BD
+        await db.createPasswordResetToken(email, resetToken, expiresAt);
+        console.log('✅ [RESET] Token creado para:', email);
+        
+        // Enviar email
+        const emailResult = await emailService.sendEmail('password-reset', {
+            email: email,
+            token: resetToken
+        });
+        
+        if (emailResult.success) {
+            console.log('✅ [RESET] Email de reset enviado a:', email);
+        } else {
+            console.error('❌ [RESET] Error enviando email:', emailResult.error);
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Si el email existe, recibirás un enlace para restablecer tu contraseña' 
+        });
+        
+    } catch (error) {
+        console.error('❌ [RESET] Error:', error);
+        res.status(500).json({ error: 'Error procesando solicitud' });
+    }
+});
+
+// Restablecer contraseña con token
+app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+        
+        if (!token || !newPassword) {
+            return res.status(400).json({ error: 'Token y contraseña requeridos' });
+        }
+        
+        if (newPassword.length < 8) {
+            return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
+        }
+        
+        console.log('🔐 [RESET] Intentando restablecer contraseña con token');
+        
+        // Verificar token
+        const resetData = await db.getPasswordResetToken(token);
+        
+        if (!resetData) {
+            console.log('❌ [RESET] Token inválido o expirado');
+            return res.status(400).json({ error: 'Token inválido o expirado' });
+        }
+        
+        console.log('✅ [RESET] Token válido para:', resetData.email);
+        
+        // Hashear nueva contraseña
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // Actualizar contraseña del cliente
+        await db.updateClient(
+            (await db.getClientByEmail(resetData.email)).id,
+            { password: hashedPassword }
+        );
+        
+        // Marcar token como usado
+        await db.markTokenAsUsed(token);
+        
+        console.log('✅ [RESET] Contraseña actualizada para:', resetData.email);
+        
+        res.json({ 
+            success: true, 
+            message: 'Contraseña actualizada exitosamente' 
+        });
+        
+    } catch (error) {
+        console.error('❌ [RESET] Error:', error);
+        res.status(500).json({ error: 'Error procesando solicitud' });
+    }
+});
+
 // Obtener datos del dashboard del cliente
 app.get('/api/client/dashboard/:clientId', async (req, res) => {
     try {
