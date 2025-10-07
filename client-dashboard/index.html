@@ -3927,6 +3927,14 @@
         async function acceptDiscount() {
             try {
                 console.log('🎁 [CLIENT] Aceptando descuento...');
+                console.log('📋 [CLIENT] currentClient:', currentClient);
+                console.log('📋 [CLIENT] Enviando:', {
+                    client_id: currentClient.id,
+                    stripe_subscription_id: currentClient.stripe_subscription_id,
+                    plan: currentClient.plan,
+                    reason: selectedCancelReason,
+                    apply_coupon: true
+                });
                 
                 const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
                     method: 'POST',
@@ -3959,6 +3967,14 @@
         async function confirmCancellation() {
             try {
                 console.log('🚫 [CLIENT] Confirmando cancelación...');
+                console.log('📋 [CLIENT] currentClient:', currentClient);
+                console.log('📋 [CLIENT] Enviando:', {
+                    client_id: currentClient.id,
+                    stripe_subscription_id: currentClient.stripe_subscription_id,
+                    plan: currentClient.plan,
+                    reason: selectedCancelReason,
+                    apply_coupon: false
+                });
                 
                 const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
                     method: 'POST',
