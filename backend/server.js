@@ -1936,17 +1936,10 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         // Si hay una nueva respuesta del cliente, concatenarla con las anteriores
         let updatedClientResponse = client_response;
         if (client_response && currentTicket && currentTicket.client_response) {
-            // Agregar separador con timestamp para conversación (incluye segundos para unicidad)
-            const timestamp = new Date().toLocaleString('es-ES', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            // Agregar separador con timestamp en milisegundos (sin problemas de zona horaria)
+            const timestampMs = Date.now();
             updatedClientResponse = currentTicket.client_response + 
-                `\n\n--- Respuesta adicional (${timestamp}) ---\n\n` + 
+                `\n\n--- Respuesta adicional [${timestampMs}] ---\n\n` + 
                 client_response;
             console.log('💬 [BACKEND] Concatenando respuesta del cliente con historial anterior');
         }
@@ -2012,17 +2005,10 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         // Si hay una nueva respuesta del admin, concatenarla con las anteriores
         let updatedAdminResponse = admin_response;
         if (admin_response && currentTicket && currentTicket.admin_response) {
-            // Agregar separador con timestamp para conversación (incluye segundos para unicidad)
-            const timestamp = new Date().toLocaleString('es-ES', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            // Agregar separador con timestamp en milisegundos (sin problemas de zona horaria)
+            const timestampMs = Date.now();
             updatedAdminResponse = currentTicket.admin_response + 
-                `\n\n--- Respuesta adicional (${timestamp}) ---\n\n` + 
+                `\n\n--- Respuesta adicional [${timestampMs}] ---\n\n` + 
                 admin_response;
             console.log('💬 [BACKEND] Concatenando respuesta con historial anterior');
         }

@@ -2041,7 +2041,13 @@
             
             // Parsear respuestas del admin
             if (ticket.admin_response && ticket.admin_response.trim() !== '') {
-                const adminParts = ticket.admin_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                // Primero intentar con el nuevo formato [timestamp_ms]
+                let adminParts = ticket.admin_response.split(/\n\n--- Respuesta adicional \[(\d+)\] ---\n\n/);
+                
+                // Si no hay matches con el nuevo formato, intentar con el formato antiguo (compatibilidad)
+                if (adminParts.length === 1) {
+                    adminParts = ticket.admin_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                }
                 
                 if (adminParts.length === 1) {
                     // Solo una respuesta del admin
@@ -2063,8 +2069,18 @@
                             const dateStr = adminParts[i];
                             const content = adminParts[i + 1].trim();
                             
-                            // Parsear fecha del formato "6 oct 2025, 14:30"
-                            const date = parseDateFromString(dateStr) || new Date();
+                            // Intentar parsear como timestamp en milisegundos
+                            let date;
+                            const timestampMs = parseInt(dateStr);
+                            if (!isNaN(timestampMs) && timestampMs > 1000000000000) {
+                                // Es un timestamp válido en milisegundos
+                                date = new Date(timestampMs);
+                                console.log('✅ [PARSE] Timestamp parseado:', timestampMs, '→', date);
+                            } else {
+                                // Formato antiguo, parsear como fecha legible
+                                date = parseDateFromString(dateStr) || new Date();
+                                console.log('⚠️ [PARSE] Formato antiguo:', dateStr, '→', date);
+                            }
                             
                             messages.push({
                                 type: 'admin',
@@ -2078,7 +2094,13 @@
             
             // Parsear respuestas del cliente
             if (ticket.client_response && ticket.client_response.trim() !== '') {
-                const clientParts = ticket.client_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                // Primero intentar con el nuevo formato [timestamp_ms]
+                let clientParts = ticket.client_response.split(/\n\n--- Respuesta adicional \[(\d+)\] ---\n\n/);
+                
+                // Si no hay matches con el nuevo formato, intentar con el formato antiguo (compatibilidad)
+                if (clientParts.length === 1) {
+                    clientParts = ticket.client_response.split(/\n\n--- Respuesta adicional \((.*?)\) ---\n\n/);
+                }
                 
                 if (clientParts.length === 1) {
                     // Solo una respuesta del cliente
@@ -2100,7 +2122,16 @@
                             const dateStr = clientParts[i];
                             const content = clientParts[i + 1].trim();
                             
-                            const date = parseDateFromString(dateStr) || new Date();
+                            // Intentar parsear como timestamp en milisegundos
+                            let date;
+                            const timestampMs = parseInt(dateStr);
+                            if (!isNaN(timestampMs) && timestampMs > 1000000000000) {
+                                // Es un timestamp válido en milisegundos
+                                date = new Date(timestampMs);
+                            } else {
+                                // Formato antiguo, parsear como fecha legible
+                                date = parseDateFromString(dateStr) || new Date();
+                            }
                             
                             messages.push({
                                 type: 'client',
