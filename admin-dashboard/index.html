@@ -944,74 +944,137 @@
                 font-size: 0.9rem;
             }
 
-            /* SIDEBAR - Bottom Navigation */
+            /* HAMBURGER MENU MÓVIL */
             .sidebar {
                 position: fixed;
+                top: 0;
+                left: -100%;
                 bottom: 0;
-                left: 0;
-                right: 0;
-                top: auto;
                 width: 100%;
-                height: 70px;
-                flex-direction: row;
+                height: 100vh;
+                flex-direction: column;
                 background: white;
-                border-top: 1px solid #e5e7eb;
                 border-right: none;
-                padding: 0;
-                z-index: 1000;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-                transform: translateX(0);
+                padding: 20px 0;
+                z-index: 10000;
+                box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+                transition: left 0.3s ease;
+                overflow-y: auto;
+            }
+
+            .sidebar.show {
+                left: 0;
             }
 
             .sidebar-logo {
-                display: none;
+                display: block;
+                padding: 0 20px 20px 20px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .sidebar-logo img {
+                height: 40px;
             }
 
             .sidebar-divider {
-                display: none;
+                display: block;
+                margin: 10px 20px;
             }
 
             .sidebar-menu {
-                flex-direction: row;
-                overflow-x: auto;
-                overflow-y: hidden;
-                gap: 0;
-                padding: 0;
+                flex-direction: column;
+                overflow: visible;
+                gap: 5px;
+                padding: 20px 15px;
                 width: 100%;
-                justify-content: space-around;
             }
 
             .sidebar-menu button {
-                flex-direction: column;
-                justify-content: center;
+                flex-direction: row;
+                justify-content: flex-start;
                 align-items: center;
-                gap: 3px;
-                padding: 6px 8px;
-                min-width: auto;
-                flex: 1;
-                border-radius: 0;
-                font-size: 0.65rem;
+                gap: 15px;
+                padding: 15px 20px;
+                width: 100%;
+                border-radius: 12px;
+                font-size: 1rem;
+                text-align: left;
             }
 
             .sidebar-menu button::before {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
                 margin-right: 0;
-                margin-bottom: 2px;
             }
 
             .sidebar-menu button.active {
                 background: #f0f7ff;
+                color: #0046FE;
+                font-weight: 600;
             }
 
             .btn-logout {
+                display: block;
+                margin: 10px 15px;
+            }
+
+            /* Botón hamburger */
+            .hamburger-btn {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: #0046FE;
+                color: white;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+                z-index: 9999;
+                box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .hamburger-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0, 70, 254, 0.4);
+            }
+
+            .hamburger-btn:active {
+                transform: scale(0.95);
+            }
+
+            /* Overlay oscuro */
+            .menu-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9998;
                 display: none;
+                backdrop-filter: blur(4px);
+            }
+
+            .menu-overlay.show {
+                display: block;
             }
 
             /* MAIN CONTENT */
             .main-content {
                 margin-left: 0;
-                margin-bottom: 70px;
+                margin-bottom: 0;
                 padding: 20px 15px;
+                padding-bottom: 90px;
+            }
+
+            /* Ocultar hamburger en desktop */
+            .hamburger-btn {
+                display: flex !important;
             }
 
             .dashboard-header {
@@ -1338,6 +1401,14 @@
 
     <!-- ===== DASHBOARD ===== -->
     <div class="dashboard" id="dashboard">
+        <!-- Botón Hamburger (solo móvil) -->
+        <button class="hamburger-btn" onclick="toggleMobileMenu()" style="display: none;">
+            ☰
+        </button>
+
+        <!-- Overlay oscuro (solo móvil) -->
+        <div class="menu-overlay" onclick="toggleMobileMenu()"></div>
+
         <div class="dashboard-layout">
             <!-- SIDEBAR -->
             <div class="sidebar">
@@ -2165,8 +2236,27 @@
         }
 
         // ===== NAVEGACIÓN =====
+        // ==========================================
+        // MENÚ MÓVIL
+        // ==========================================
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.menu-overlay');
+            
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
         function showSection(sectionName, event = null) {
             console.log(`🔀 [ADMIN] showSection('${sectionName}') llamada`, event ? 'con evento' : 'programáticamente');
+            
+            // Cerrar menú móvil si está abierto
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.menu-overlay');
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
             
             // Ocultar todas las secciones
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
