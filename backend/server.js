@@ -553,8 +553,47 @@ app.post('/webhook', async (req, res) => {
             break;
 
         case 'customer.subscription.updated':
+            console.log(`🔄 [WEBHOOK] Suscripción actualizada: ${event.data.object.id}`);
+            // Aquí podrías actualizar el plan si cambia
+            break;
+
         case 'customer.subscription.deleted':
-            console.log(`Suscripción actualizada: ${event.type}`);
+            console.log(`🚫 [WEBHOOK] Suscripción cancelada: ${event.data.object.id}`);
+            
+            // Buscar cliente por subscription_id
+            const cancelledSubscription = event.data.object;
+            const clientBySub = await db.getClientBySubscriptionId(cancelledSubscription.id);
+            
+            if (clientBySub) {
+                console.log(`📝 [WEBHOOK] Cliente encontrado: ${clientBySub.email} (ID: ${clientBySub.id})`);
+                
+                // Registrar cancelación en la tabla de cancelaciones
+                await db.createCancellation({
+                    client_id: clientBySub.id,
+                    subscription_id: cancelledSubscription.id,
+                    cancelled_at: new Date(),
+                    effective_date: new Date(cancelledSubscription.current_period_end * 1000),
+                    reason: 'cancelled_via_stripe_portal',
+                    reason_details: 'Cliente canceló desde el Customer Portal de Stripe',
+                    cancelled_by: 'customer',
+                    reactivated: false,
+                    coupon_applied: false
+                });
+                
+                // Actualizar cliente en DB
+                await db.updateClient(clientBySub.id, {
+                    cancellation_scheduled: true,
+                    cancellation_effective_date: new Date(cancelledSubscription.current_period_end * 1000),
+                    cancellation_reason: 'cancelled_via_stripe_portal'
+                });
+                
+                console.log(`✅ [WEBHOOK] Cancelación registrada. Web se desactivará el: ${new Date(cancelledSubscription.current_period_end * 1000).toLocaleString('es-ES')}`);
+                
+                // TODO: Enviar email de confirmación al cliente
+                // TODO: Notificar al admin en el dashboard
+            } else {
+                console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${cancelledSubscription.id}`);
+            }
             break;
 
         default:
@@ -564,7 +603,32 @@ app.post('/webhook', async (req, res) => {
     res.json({ received: true });
 });
 
-// 4. OBTENER DATOS DE UNA SESIÓN
+// 4. CREAR STRIPE CUSTOMER PORTAL SESSION
+app.post('/api/create-portal-session', async (req, res) => {
+    try {
+        const { customerId, returnUrl } = req.body;
+        
+        console.log('💳 [PORTAL] Creando sesión del Customer Portal para:', customerId);
+        
+        if (!customerId) {
+            return res.status(400).json({ error: 'Customer ID no proporcionado' });
+        }
+        
+        const portalSession = await stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: returnUrl || 'https://agutidesigns.vercel.app/client-dashboard/',
+        });
+        
+        console.log('✅ [PORTAL] Sesión creada:', portalSession.url);
+        res.json({ url: portalSession.url });
+        
+    } catch (error) {
+        console.error('❌ [PORTAL] Error creando sesión:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 5. OBTENER DATOS DE UNA SESIÓN
 app.get('/api/session/:sessionId', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);

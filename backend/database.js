@@ -769,6 +769,11 @@ async function getClientByEmail(email) {
     return result.rows[0];
 }
 
+async function getClientBySubscriptionId(subscriptionId) {
+    const result = await pool.query('SELECT * FROM clients WHERE stripe_subscription_id = $1', [subscriptionId]);
+    return result.rows[0];
+}
+
 async function getClientById(id) {
     const result = await pool.query('SELECT * FROM clients WHERE id = $1', [id]);
     return result.rows[0];
@@ -1230,6 +1235,7 @@ module.exports = {
     getAllClients,
     getClientWithDetails,
     getClientByEmail,
+    getClientBySubscriptionId,
     getClientById,
     updateWebsiteStatus,
     getClientDashboardData,
