@@ -2477,12 +2477,16 @@
                         }
                         
                         document.getElementById('btnChangePlan').textContent = 'Cambiar Plan';
+                        document.getElementById('btnChangePlan').style.background = '#0046FE';
                     } else {
-                        document.getElementById('currentPlan').textContent = 'Sin plan activo';
-                        document.getElementById('planPrice').textContent = '-';
+                        document.getElementById('currentPlan').innerHTML = '<span style="color: #dc2626;">Sin plan activo</span>';
+                        document.getElementById('planPrice').innerHTML = '<span style="color: #dc2626;">Tu web está inactiva</span>';
                         document.getElementById('renovacionInfo').style.display = 'none';
                         document.getElementById('nextBillingInfo').style.display = 'none';
-                        document.getElementById('btnChangePlan').textContent = 'Contratar Plan';
+                        document.getElementById('btnChangePlan').textContent = '✨ Reactivar Mi Web';
+                        document.getElementById('btnChangePlan').style.background = '#10b981';
+                        document.getElementById('btnChangePlan').style.fontSize = '1.1rem';
+                        document.getElementById('btnChangePlan').style.fontWeight = '700';
                     }
 
                     // Establecer límite de páginas según plan
@@ -3389,9 +3393,41 @@
                 console.log(`💳 [BILLING] Ciclo solicitado: "${modalBillingCycle}"`);
                 console.log(`📊 [RESUMEN] ${currentPlan ? `Plan actual: ${currentPlan}` : 'SIN PLAN'} → Nuevo plan: ${plan}`);
                 
-                // Si no tiene plan, redirigir a checkout normal (nuevo cliente)
-                if (!currentPlan) {
-                    console.log('🆕 Cliente sin plan, redirigir a checkout');
+                // Si no tiene plan, redirigir a checkout normal (reactivación)
+                if (!currentPlan || currentPlan === 'sin_plan') {
+                    console.log('🆕 Cliente sin plan, preparando reactivación');
+                    
+                    const planNames = {
+                        'basico': 'Básico',
+                        'avanzado': 'Avanzado',
+                        'premium': 'Premium'
+                    };
+                    
+                    const prices = {
+                        'monthly': { basico: '35€', avanzado: '49€', premium: '65€' },
+                        'annual': { basico: '28€', avanzado: '39€', premium: '52€' }
+                    };
+                    
+                    const cycleText = modalBillingCycle === 'annual' ? 'anual' : 'mensual';
+                    const planName = planNames[plan];
+                    const price = prices[modalBillingCycle][plan];
+                    const totalText = modalBillingCycle === 'annual' ? 
+                        `(${parseInt(price) * 12}€/año + IVA)` : 
+                        `(${price}/mes + IVA)`;
+                    
+                    const confirmed = window.confirm(
+                        `✨ Reactivar tu Sitio Web\n\n` +
+                        `Plan seleccionado: ${planName} ${cycleText}\n` +
+                        `Precio: ${price}/mes ${totalText}\n\n` +
+                        `Tu sitio web se reactivará inmediatamente después del pago.\n\n` +
+                        `¿Deseas continuar al checkout?`
+                    );
+                    
+                    if (!confirmed) {
+                        console.log('❌ Usuario canceló la reactivación');
+                        return;
+                    }
+                    
                     await redirectToCheckout(plan, dashboardData);
                     return;
                 }

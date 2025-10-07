@@ -400,6 +400,9 @@ app.post('/api/create-subscription', async (req, res) => {
                 // Verificar si es un cambio de plan (para reiniciar ventana de edición 24h)
                 const isPlanChange = existingClient.plan && existingClient.plan !== plan;
                 
+                // Verificar si es una reactivación (plan era 'sin_plan' o null)
+                const isReactivation = !existingClient.plan || existingClient.plan === 'sin_plan';
+                
                 // Actualizar plan, payment_date, submission_id Y plan_change_at (si es cambio de plan)
                 const updateData = {
                     plan: plan,
@@ -409,17 +412,26 @@ app.post('/api/create-subscription', async (req, res) => {
                     submission_id: finalSubmissionId
                 };
                 
-                // Si es cambio de plan, actualizar plan_change_at para reiniciar ventana de edición
-                if (isPlanChange) {
+                // Si es cambio de plan o reactivación, actualizar plan_change_at para reiniciar ventana de edición
+                if (isPlanChange || isReactivation) {
                     updateData.plan_change_at = new Date().toISOString();
-                    console.log('🔄 Cambio de plan detectado:', existingClient.plan, '→', plan, '- Reiniciando ventana de edición 24h');
+                    updateData.website_status = 'en_construccion';
+                    
+                    if (isReactivation) {
+                        console.log('✨ Reactivación detectada: sin_plan → ' + plan + ' - Reactivando web y temporizador 24h');
+                    } else {
+                        console.log('🔄 Cambio de plan detectado:', existingClient.plan, '→', plan, '- Reiniciando ventana de edición 24h');
+                    }
                 }
                 
                 await db.updateClient(existingClient.id, updateData);
                 
                 console.log(`✅ Cliente ${clientId} actualizado con submission_id: ${finalSubmissionId}`);
-                if (isPlanChange) {
+                if (isPlanChange || isReactivation) {
                     console.log('⏰ plan_change_at actualizado - Temporizador de 24h reiniciado');
+                    if (isReactivation) {
+                        console.log('🌐 website_status actualizado a: en_construccion');
+                    }
                 }
                 
                 // Verificar actualización
