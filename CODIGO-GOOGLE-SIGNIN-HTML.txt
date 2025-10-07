@@ -1,0 +1,361 @@
+===========================================
+🔐 CÓDIGO PARA GOOGLE SIGN-IN EN HTML
+===========================================
+
+⚠️ IMPORTANTE: Reemplaza 'TU_GOOGLE_CLIENT_ID' con tu Client ID real
+
+
+===========================================
+1. AÑADIR EN client-dashboard/index.html
+===========================================
+
+A. EN EL <head>, añade esta línea:
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+B. REEMPLAZA la variable GOOGLE_CLIENT_ID (busca esta línea):
+
+// Busca esto:
+const GOOGLE_CLIENT_ID = 'TU_GOOGLE_CLIENT_ID';
+
+// Reemplázalo con tu Client ID real:
+const GOOGLE_CLIENT_ID = '123456789-abcdefg.apps.googleusercontent.com';
+
+
+C. AÑADE este código después del botón de "Iniciar Sesión" normal:
+
+<!-- Divisor OR -->
+<div style="display: flex; align-items: center; margin: 20px 0;">
+    <div style="flex: 1; height: 1px; background: #e8eaed;"></div>
+    <span style="padding: 0 15px; color: #999; font-size: 0.9rem;">O</span>
+    <div style="flex: 1; height: 1px; background: #e8eaed;"></div>
+</div>
+
+<!-- Botón de Google Sign-In -->
+<div id="googleSignInButton" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+
+<!-- Botón de Google alternativo (si One-Tap no funciona) -->
+<button type="button" id="googleLoginBtn" onclick="loginWithGoogle()" style="width: 100%; padding: 14px; border: 1px solid #e8eaed; border-radius: 10px; background: white; color: #333; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; margin-bottom: 10px;">
+    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style="width: 20px; height: 20px;">
+    Continuar con Google
+</button>
+
+
+D. AÑADE estas funciones JavaScript (busca donde están las otras funciones y añade estas):
+
+// ============================================
+// 🔐 AUTENTICACIÓN CON GOOGLE
+// ============================================
+
+// Inicializar Google Sign-In
+function initGoogleSignIn() {
+    if (typeof google === 'undefined') {
+        console.warn('⚠️ Google Sign-In library not loaded');
+        return;
+    }
+    
+    // Configurar el botón de Google One-Tap
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSignIn,
+        auto_select: false,
+        cancel_on_tap_outside: true
+    });
+    
+    // Renderizar el botón
+    google.accounts.id.renderButton(
+        document.getElementById('googleSignInButton'),
+        {
+            theme: 'outline',
+            size: 'large',
+            width: 400,
+            text: 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
+        }
+    );
+    
+    console.log('✅ Google Sign-In inicializado');
+}
+
+// Manejar respuesta de Google
+async function handleGoogleSignIn(response) {
+    try {
+        console.log('🔐 Iniciando sesión con Google...');
+        
+        // Mostrar loader
+        document.getElementById('loginBtn').disabled = true;
+        document.getElementById('loginBtn').textContent = 'Iniciando sesión...';
+        
+        // Enviar token al backend
+        const result = await fetch(`${API_URL}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                credential: response.credential
+            })
+        });
+        
+        const data = await result.json();
+        
+        if (data.success && data.user) {
+            console.log('✅ Autenticación exitosa con Google');
+            
+            // Guardar sesión
+            currentClient = data.user;
+            localStorage.setItem('currentClient', JSON.stringify(data.user));
+            
+            // Mostrar dashboard
+            await showDashboard();
+            
+        } else {
+            throw new Error(data.error || 'Error en autenticación');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error con Google Sign-In:', error);
+        alert('Error al iniciar sesión con Google. Por favor, intenta de nuevo.');
+        
+        // Restaurar botón
+        document.getElementById('loginBtn').disabled = false;
+        document.getElementById('loginBtn').textContent = 'Iniciar Sesión';
+    }
+}
+
+// Login con Google (botón alternativo)
+function loginWithGoogle() {
+    if (typeof google === 'undefined') {
+        alert('Google Sign-In no está disponible. Por favor, recarga la página.');
+        return;
+    }
+    
+    google.accounts.id.prompt();
+}
+
+// Inicializar cuando cargue la página
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initGoogleSignIn, 1000);
+});
+
+
+===========================================
+2. AÑADIR EN formulario-membresia.html
+===========================================
+
+A. EN EL <head>, añade esta línea:
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+B. REEMPLAZA la variable GOOGLE_CLIENT_ID:
+
+const GOOGLE_CLIENT_ID = '123456789-abcdefg.apps.googleusercontent.com';
+
+
+C. AÑADE este código en el formulario, ANTES del input de email:
+
+<!-- Sección de Google Sign-In -->
+<div style="background: #f0f9ff; border: 2px solid #0046FE; border-radius: 12px; padding: 25px; margin-bottom: 30px; text-align: center;">
+    <h3 style="margin: 0 0 15px 0; color: #0046FE; font-size: 1.2rem;">
+        ⚡ Registro Rápido con Google
+    </h3>
+    <p style="margin: 0 0 20px 0; color: #666; font-size: 0.95rem;">
+        Completa tu registro en segundos usando tu cuenta de Google
+    </p>
+    
+    <!-- Botón de Google One-Tap -->
+    <div id="googleSignInButton" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
+    
+    <!-- Botón alternativo -->
+    <button type="button" onclick="signUpWithGoogle()" style="width: 100%; max-width: 400px; padding: 14px; border: 1px solid #e8eaed; border-radius: 10px; background: white; color: #333; font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto;">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style="width: 20px; height: 20px;">
+        Registrarme con Google
+    </button>
+    
+    <p style="margin: 15px 0 0 0; color: #999; font-size: 0.85rem;">
+        💡 Tus datos se completarán automáticamente
+    </p>
+</div>
+
+<!-- Divisor -->
+<div style="display: flex; align-items: center; margin: 30px 0;">
+    <div style="flex: 1; height: 1px; background: #e8eaed;"></div>
+    <span style="padding: 0 15px; color: #999; font-size: 0.9rem;">O completa el formulario manualmente</span>
+    <div style="flex: 1; height: 1px; background: #e8eaed;"></div>
+</div>
+
+
+D. AÑADE estas funciones JavaScript:
+
+// ============================================
+// 🔐 REGISTRO CON GOOGLE
+// ============================================
+
+// Inicializar Google Sign-In para registro
+function initGoogleSignUp() {
+    if (typeof google === 'undefined') {
+        console.warn('⚠️ Google Sign-In library not loaded');
+        return;
+    }
+    
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSignUp,
+        auto_select: false,
+        cancel_on_tap_outside: true
+    });
+    
+    google.accounts.id.renderButton(
+        document.getElementById('googleSignInButton'),
+        {
+            theme: 'outline',
+            size: 'large',
+            width: 400,
+            text: 'signup_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
+        }
+    );
+    
+    console.log('✅ Google Sign-Up inicializado');
+}
+
+// Manejar registro con Google
+async function handleGoogleSignUp(response) {
+    try {
+        console.log('🔐 Registrando con Google...');
+        
+        // Enviar token al backend
+        const result = await fetch(`${API_URL}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                credential: response.credential
+            })
+        });
+        
+        const data = await result.json();
+        
+        if (data.success && data.user) {
+            console.log('✅ Registro exitoso con Google');
+            
+            // Pre-llenar formulario con datos de Google
+            document.getElementById('account_email').value = data.user.email || '';
+            document.getElementById('account_first_name').value = data.user.first_name || '';
+            document.getElementById('account_last_name').value = data.user.last_name || '';
+            
+            // Si tiene foto de perfil, mostrarla
+            if (data.user.picture) {
+                console.log('📷 Foto de perfil de Google:', data.user.picture);
+            }
+            
+            // Marcar que viene de Google
+            window.googleUser = data.user;
+            
+            // Scroll al siguiente paso
+            document.getElementById('account_email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Mostrar mensaje de éxito
+            alert('✅ ¡Cuenta vinculada con Google! Completa los datos restantes para continuar.');
+            
+        } else {
+            throw new Error(data.error || 'Error en registro');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error con Google Sign-Up:', error);
+        alert('Error al registrarse con Google. Por favor, intenta de nuevo.');
+    }
+}
+
+// Botón de registro con Google (alternativo)
+function signUpWithGoogle() {
+    if (typeof google === 'undefined') {
+        alert('Google Sign-In no está disponible. Por favor, recarga la página.');
+        return;
+    }
+    
+    google.accounts.id.prompt();
+}
+
+// Inicializar cuando cargue la página
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initGoogleSignUp, 1000);
+});
+
+
+===========================================
+3. ENDPOINT EN server.js
+===========================================
+
+Añade esto en backend/server.js después de los otros endpoints de auth:
+
+const googleAuth = require('./google-auth');
+
+// ============================================
+// 🔐 AUTENTICACIÓN CON GOOGLE
+// ============================================
+
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        
+        if (!credential) {
+            return res.status(400).json({ error: 'Token de Google requerido' });
+        }
+        
+        console.log('🔐 [GOOGLE AUTH] Verificando token de Google...');
+        
+        // Verificar token de Google
+        const googleData = await googleAuth.verifyGoogleToken(credential);
+        console.log('✅ [GOOGLE AUTH] Token verificado:', googleData.email);
+        
+        // Obtener o crear usuario
+        const user = await googleAuth.getOrCreateGoogleUser(googleData, db);
+        console.log('✅ [GOOGLE AUTH] Usuario autenticado:', user.email);
+        
+        // Retornar datos del usuario (sin contraseña)
+        const { password, ...userData } = user;
+        
+        res.json({
+            success: true,
+            user: userData,
+            message: 'Autenticación exitosa con Google'
+        });
+        
+    } catch (error) {
+        console.error('❌ [GOOGLE AUTH] Error:', error);
+        res.status(401).json({ 
+            error: 'Error en autenticación con Google',
+            details: error.message 
+        });
+    }
+});
+
+
+===========================================
+4. RESUMEN
+===========================================
+
+✅ Dashboard (login):
+   - Botón "Continuar con Google"
+   - One-Tap automático
+   - Login instantáneo
+
+✅ Formulario (registro):
+   - Botón "Registrarme con Google"
+   - Pre-llena email y nombre
+   - Vincula cuenta automáticamente
+
+✅ Backend:
+   - Verifica tokens con Google
+   - Crea usuarios automáticamente
+   - Vincula cuentas existentes
+
+🎉 ¡Sistema completo de Google OAuth!
+
