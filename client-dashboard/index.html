@@ -1713,7 +1713,7 @@
                         <p><strong>Dominio Principal:</strong> <span id="domainInfo">Pendiente de configuración</span></p>
                         <p><strong>Estado:</strong> <span class="status-badge status-construction">Configurando</span></p>
                         <p><strong>Renovación:</strong> Automática (incluida en tu plan)</p>
-                        <button class="btn-action" style="margin-top: 15px;">Ver Configuración DNS</button>
+                        <button class="btn-action" onclick="showDNSConfig()" style="margin-top: 15px;">Ver Configuración DNS</button>
                     </div>
 
                     <!-- BUSCADOR DE DOMINIOS -->
@@ -3333,6 +3333,85 @@
         }
 
         // Abrir modal de cancelación de suscripción
+        // Mostrar configuración DNS
+        function showDNSConfig() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 20px; padding: 40px; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">🌐</div>
+                        <h2 style="margin: 0 0 10px 0; color: #0046FE; font-size: 1.8rem;">Configuración DNS</h2>
+                        <p style="color: #666; margin: 0;">Información para configurar tu dominio</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0046FE; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                        <p style="margin: 0 0 20px 0; color: #333; font-weight: 600; font-size: 1.1rem;">
+                            📋 Nameservers (DNS) de Hostinger:
+                        </p>
+                        
+                        <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #0046FE;">
+                            <p style="margin: 0 0 5px 0; color: #666; font-size: 0.85rem; font-weight: 600;">Nameserver 1:</p>
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                <code style="font-size: 1rem; color: #0046FE; font-weight: 600;">ns1.dns-parking.com</code>
+                                <button onclick="copyToClipboardDNS('ns1.dns-parking.com', this)" style="background: #0046FE; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;">
+                                    📋 Copiar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 8px; padding: 15px; border-left: 4px solid #0046FE;">
+                            <p style="margin: 0 0 5px 0; color: #666; font-size: 0.85rem; font-weight: 600;">Nameserver 2:</p>
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                                <code style="font-size: 1rem; color: #0046FE; font-weight: 600;">ns2.dns-parking.com</code>
+                                <button onclick="copyToClipboardDNS('ns2.dns-parking.com', this)" style="background: #0046FE; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease;">
+                                    📋 Copiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+                        <p style="margin: 0; color: #ea580c; font-size: 0.9rem; line-height: 1.6;">
+                            💡 <strong>Instrucciones:</strong><br>
+                            Configura estos nameservers en el panel de tu proveedor de dominio. La propagación DNS puede tardar hasta 24-48 horas.
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('[style*=\\'position: fixed\\']').remove()" style="background: #0046FE; color: white; border: none; padding: 14px 40px; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3); transition: all 0.3s ease;">
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Cerrar modal al hacer clic fuera
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Función auxiliar para copiar DNS al portapapeles
+        function copyToClipboardDNS(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copiado';
+                button.style.background = '#16a34a';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#0046FE';
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('No se pudo copiar. Por favor, copia manualmente: ' + text);
+            });
+        }
+
         async function openCancelSubscriptionModal() {
             const confirmed = await showCustomConfirmModal(
                 '⚠️ Cancelar Suscripción',
