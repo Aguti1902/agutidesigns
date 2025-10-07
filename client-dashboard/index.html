@@ -3778,6 +3778,26 @@
                     return;
                 }
                 
+                // Mostrar mensaje informativo ANTES de redirigir
+                const confirmed = window.confirm(
+                    '💳 Portal de Gestión de Stripe\n\n' +
+                    'Vas a ser redirigido al portal de Stripe donde podrás:\n\n' +
+                    '• Gestionar tus métodos de pago\n' +
+                    '• Ver tu historial de facturas\n' +
+                    '• Cancelar tu suscripción si lo deseas\n\n' +
+                    '⚠️ IMPORTANTE: Si decides cancelar tu suscripción:\n\n' +
+                    '• Tu sitio web se desactivará al final de tu período actual\n' +
+                    '• Guardaremos tu sitio y datos durante 6 meses\n' +
+                    '• Podrás reactivar en cualquier momento durante esos 6 meses\n' +
+                    '• Después de 6 meses, se eliminará permanentemente\n\n' +
+                    '¿Deseas continuar al portal de Stripe?'
+                );
+                
+                if (!confirmed) {
+                    console.log('💳 [STRIPE] Usuario canceló la apertura del portal');
+                    return;
+                }
+                
                 console.log('💳 [STRIPE] Abriendo Customer Portal para cliente #' + currentClient.id);
                 
                 const response = await fetch(`${API_URL}/api/create-portal-session`, {
@@ -3811,269 +3831,6 @@
         function cancelEditSection(section) {
             // Mostrar campos y ocultar inputs
             document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
-            document.querySelectorAll(`.input-${section}`).forEach(input => input.style.display = 'none');
-            document.getElementById('confirmCancel').checked = false;
-            document.getElementById('btnConfirmCancel').disabled = true;
-            
-            // Mostrar precio con descuento según plan actual
-            const plan = currentClient.plan;
-            document.getElementById('discountBasico').style.display = plan === 'basico' ? 'list-item' : 'none';
-            document.getElementById('discountAvanzado').style.display = plan === 'avanzado' ? 'list-item' : 'none';
-            document.getElementById('discountPremium').style.display = plan === 'premium' ? 'list-item' : 'none';
-            
-            // Calcular fecha efectiva (aproximada, se actualizará al confirmar)
-            const today = new Date();
-            const effectiveDate = new Date(today);
-            effectiveDate.setMonth(effectiveDate.getMonth() + 1);
-            const dateStr = effectiveDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('effectiveDatePreview').textContent = dateStr;
-            document.getElementById('effectiveDateConfirm').textContent = dateStr;
-            
-            // Mostrar modal
-            document.getElementById('cancelModal').style.display = 'flex';
-        }
-
-        function closeCancelModal(event) {
-            if (event) event.stopPropagation();
-            document.getElementById('cancelModal').style.display = 'none';
-        }
-
-        function nextCancelStep(step) {
-            // Ocultar todos los pasos
-            document.querySelectorAll('.cancel-step').forEach(s => s.style.display = 'none');
-            // Mostrar paso actual
-            document.getElementById('cancelStep' + step).style.display = 'block';
-            currentCancelStep = step;
-        }
-
-        function selectCancelReason(reason, element) {
-            selectedCancelReason = reason;
-            
-            // Actualizar estilos
-            document.querySelectorAll('#cancelStep2 label').forEach(label => {
-                label.style.border = '2px solid #e8eaed';
-                label.style.background = '#f9fafb';
-            });
-            element.style.border = '2px solid #0046FE';
-            element.style.background = '#e8f4ff';
-            
-            // Mostrar/ocultar campo de texto si es "otro"
-            document.getElementById('otherReasonContainer').style.display = reason === 'otro' ? 'block' : 'none';
-            
-            // Habilitar botón continuar
-            document.getElementById('btnContinueStep2').disabled = false;
-        }
-
-        async function acceptDiscount() {
-            try {
-                console.log('🎁 [CLIENT] Aceptando descuento...');
-                console.log('📋 [CLIENT] currentClient:', currentClient);
-                console.log('📋 [CLIENT] Enviando:', {
-                    client_id: currentClient.id,
-                    stripe_subscription_id: currentClient.stripe_subscription_id,
-                    plan: currentClient.plan,
-                    reason: selectedCancelReason,
-                    apply_coupon: true
-                });
-                
-                const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: currentClient.id,
-                        reason: selectedCancelReason,
-                        reason_details: document.getElementById('cancelReasonDetails').value,
-                        apply_coupon: true
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok && result.coupon_applied) {
-                    alert('🎉 ¡Descuento Aplicado!\n\nHemos aplicado un 20% de descuento a tu suscripción por los próximos 3 meses. ¡Gracias por quedarte con nosotros!');
-                    closeCancelModal();
-                    // Recargar datos del cliente
-                    setTimeout(() => location.reload(), 2000);
-                } else if (result.invalid_subscription) {
-                    // Suscripción inválida - recargar para actualizar UI
-                    alert(
-                        '⚠️ Suscripción No Válida\n\n' +
-                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
-                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
-                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
-                        'Se actualizará tu dashboard...'
-                    );
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    throw new Error(result.error || 'No se pudo aplicar el descuento');
-                }
-                
-            } catch (error) {
-                console.error('❌ [CLIENT] Error aplicando descuento:', error);
-                alert('❌ Error\n\nHubo un problema al aplicar el descuento: ' + error.message + '\n\nPor favor, contacta con soporte.');
-            }
-        }
-
-        async function confirmCancellation() {
-            try {
-                console.log('🚫 [CLIENT] Confirmando cancelación...');
-                console.log('📋 [CLIENT] currentClient:', currentClient);
-                console.log('📋 [CLIENT] Enviando:', {
-                    client_id: currentClient.id,
-                    stripe_subscription_id: currentClient.stripe_subscription_id,
-                    plan: currentClient.plan,
-                    reason: selectedCancelReason,
-                    apply_coupon: false
-                });
-                
-                const response = await fetch(`${API_URL}/api/client/cancel-subscription`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: currentClient.id,
-                        reason: selectedCancelReason,
-                        reason_details: document.getElementById('cancelReasonDetails').value,
-                        apply_coupon: false
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    const effectiveDate = new Date(result.effective_date).toLocaleDateString('es-ES', { 
-                        day: 'numeric', 
-                        month: 'long', 
-                        year: 'numeric' 
-                    });
-                    
-                    alert(`✅ Suscripción Cancelada\n\nTu suscripción ha sido cancelada. Mantendrás acceso completo hasta el ${effectiveDate}.\n\nPuedes reactivar tu plan en cualquier momento desde la sección de Facturación.`);
-                    closeCancelModal();
-                    
-                    // Recargar página después de 2 segundos
-                    setTimeout(() => location.reload(), 2000);
-                } else if (result.invalid_subscription) {
-                    // Suscripción inválida - recargar para actualizar UI
-                    alert(
-                        '⚠️ Suscripción No Válida\n\n' +
-                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
-                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
-                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
-                        'Se actualizará tu dashboard...'
-                    );
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    throw new Error(result.error || 'Error desconocido');
-                }
-                
-            } catch (error) {
-                console.error('❌ [CLIENT] Error cancelando suscripción:', error);
-                alert('❌ Error\n\nHubo un problema al cancelar tu suscripción: ' + error.message + '\n\nPor favor, contacta con soporte.');
-            }
-        }
-
-        async function reactivateSubscription() {
-            try {
-                // Confirmar con el usuario
-                const confirm = window.confirm('🔄 Reactivar Suscripción\n\n¿Estás seguro de que quieres reactivar tu suscripción? La renovación automática se reanudará.');
-                
-                if (!confirm) return;
-                
-                console.log('🔄 [CLIENT] Reactivando suscripción...');
-                
-                const response = await fetch(`${API_URL}/api/client/reactivate-subscription`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: currentClient.id
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
-                    alert('✅ ¡Suscripción Reactivada!\n\nTu suscripción ha sido reactivada exitosamente. La renovación automática continuará normalmente.');
-                    
-                    // Recargar página después de 2 segundos
-                    setTimeout(() => location.reload(), 2000);
-                } else if (result.invalid_subscription) {
-                    // Suscripción inválida - recargar para actualizar UI
-                    alert(
-                        '⚠️ Suscripción No Válida\n\n' +
-                        'Tu suscripción actual no está registrada correctamente en nuestro sistema de pagos. ' +
-                        'Esto puede ocurrir con cuentas de prueba.\n\n' +
-                        'Solución: Deberás reactivar tu plan para continuar.\n\n' +
-                        'Se actualizará tu dashboard...'
-                    );
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    throw new Error(result.error || 'Error desconocido');
-                }
-                
-            } catch (error) {
-                console.error('❌ [CLIENT] Error reactivando suscripción:', error);
-                alert('❌ Error\n\nHubo un problema al reactivar tu suscripción: ' + error.message + '\n\nPor favor, contacta con soporte.');
-            }
-        }
-
-        // Habilitar botón de confirmación final
-        document.addEventListener('DOMContentLoaded', () => {
-            const confirmCheckbox = document.getElementById('confirmCancel');
-            if (confirmCheckbox) {
-                confirmCheckbox.addEventListener('change', (e) => {
-                    document.getElementById('btnConfirmCancel').disabled = !e.target.checked;
-                });
-            }
-        });
-
-        // Función para mostrar/ocultar card de cancelación según estado
-        function updateCancellationUI() {
-            const cancellationCard = document.getElementById('cancellationCard');
-            const cancelSection = document.getElementById('cancelPlanSection');
-            const reactivateSection = document.getElementById('reactivatePlanSection');
-            
-            // Ocultar si no hay cliente o plan
-            if (!currentClient || !currentClient.plan || currentClient.plan === 'sin_plan') {
-                cancellationCard.style.display = 'none';
-                return;
-            }
-            
-            // Ocultar si no hay stripe_subscription_id (suscripción inactiva)
-            if (!currentClient.stripe_subscription_id) {
-                console.log('⚠️ [CANCEL] Cliente sin suscripción activa, ocultando botón de cancelar');
-                cancellationCard.style.display = 'none';
-                return;
-            }
-            
-            cancellationCard.style.display = 'block';
-            
-            if (currentClient.cancellation_scheduled) {
-                // Hay cancelación programada
-                cancelSection.style.display = 'none';
-                reactivateSection.style.display = 'block';
-                
-                // Actualizar fecha
-                const effectiveDate = new Date(currentClient.cancellation_effective_date);
-                document.getElementById('cancellationDate').textContent = effectiveDate.toLocaleDateString('es-ES', { 
-                    day: 'numeric', 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
-                
-                // Calcular días restantes
-                const today = new Date();
-                const daysRemaining = Math.ceil((effectiveDate - today) / (1000 * 60 * 60 * 24));
-                document.getElementById('daysRemaining').textContent = `Quedan ${daysRemaining} días de acceso`;
-            } else {
-                // No hay cancelación programada
-                cancelSection.style.display = 'block';
-                reactivateSection.style.display = 'none';
-            }
-        }
-
-        // Variables para edición
-        let currentPages = [];
-        let pageLimit = 5;
-
         function cancelEditSection(section) {
             // Mostrar campos y ocultar inputs
             document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
