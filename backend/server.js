@@ -399,6 +399,7 @@ app.post('/api/create-subscription', async (req, res) => {
                 const updateData = {
                     plan: plan,
                     billing_cycle: billingCycle,
+                    stripe_customer_id: customer.id,  // ✅ CRITICAL: Vincular con Stripe Customer
                     stripe_subscription_id: subscription.id,
                     payment_date: new Date().toISOString(),
                     submission_id: finalSubmissionId

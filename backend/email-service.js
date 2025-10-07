@@ -717,14 +717,25 @@ async function sendEmail(type, data) {
                 throw new Error(`Tipo de email no reconocido: ${type}`);
         }
         
+        console.log(`📤 [SENDGRID] Intentando enviar email...`);
+        console.log(`   Tipo: ${type}`);
+        console.log(`   De: ${emailData.from}`);
+        console.log(`   Para: ${emailData.to}`);
+        console.log(`   Asunto: ${emailData.subject}`);
+        console.log(`   API Key configurada: ${process.env.SENDGRID_API_KEY ? 'Sí (primeros 10 chars: ' + process.env.SENDGRID_API_KEY.substring(0, 10) + '...)' : 'NO ❌'}`);
+        
         const result = await sgMail.send(emailData);
-        console.log(`✅ Email enviado: ${type} → ${emailData.to}`);
+        console.log(`✅ Email enviado exitosamente: ${type} → ${emailData.to}`);
+        console.log(`📊 [SENDGRID] Response status:`, result[0].statusCode);
         return { success: true, result };
         
     } catch (error) {
         console.error(`❌ Error enviando email (${type}):`, error);
+        console.error(`❌ Error code:`, error.code);
+        console.error(`❌ Error message:`, error.message);
         if (error.response) {
-            console.error('Detalles del error:', error.response.body);
+            console.error('❌ SendGrid response status:', error.response.statusCode);
+            console.error('❌ SendGrid response body:', JSON.stringify(error.response.body, null, 2));
         }
         return { success: false, error: error.message };
     }
