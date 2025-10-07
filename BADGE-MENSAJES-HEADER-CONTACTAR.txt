@@ -1,0 +1,303 @@
+═══════════════════════════════════════════════════════════════
+✅ BADGE DE MENSAJES NO LEÍDOS EN HEADER "CONTACTAR"
+═══════════════════════════════════════════════════════════════
+
+📋 SOLICITUD:
+"Puedes añadir aquí como un número en una redondita azul si 
+tienes mensajes sin ver"
+
+UBICACIÓN: Header de la sección "Contactar con Soporte"
+
+═══════════════════════════════════════════════════════════════
+✅ IMPLEMENTACIÓN
+═══════════════════════════════════════════════════════════════
+
+SE AGREGÓ:
+
+1. BADGE VISUAL EN EL TÍTULO
+   
+   ANTES:
+   💬 Contactar con Soporte
+   
+   AHORA:
+   💬 Contactar con Soporte  [3]  ← Círculo azul con número
+   
+   DISEÑO:
+   - Color: Azul corporativo (#0046FE)
+   - Forma: Círculo/píldora redondeada
+   - Tamaño: Ligeramente más grande que el del menú
+   - Animación: Pulso suave para llamar la atención
+   - Se oculta automáticamente cuando no hay mensajes
+
+2. SINCRONIZACIÓN AUTOMÁTICA
+   
+   El badge se actualiza en tiempo real:
+   ✅ Al cargar el dashboard
+   ✅ Cada 10 segundos automáticamente
+   ✅ Al abrir un ticket (se marca como leído)
+   ✅ Al cerrar un ticket
+   ✅ Al recibir una respuesta del admin
+
+3. CONSISTENCIA CON EL MENÚ
+   
+   Ahora hay 2 badges sincronizados:
+   
+   📍 Menú lateral:
+      💬 Contactar  [3]  ← Badge pequeño
+   
+   📍 Header de la sección:
+      💬 Contactar con Soporte  [3]  ← Badge más grande
+   
+   Ambos muestran el mismo número y se actualizan juntos
+
+═══════════════════════════════════════════════════════════════
+📊 CAMBIOS TÉCNICOS
+═══════════════════════════════════════════════════════════════
+
+✅ client-dashboard/index.html
+
+   LÍNEA 1728-1731: Nuevo badge en el título
+   ```html
+   <h1 class="section-title">
+       💬 Contactar con Soporte
+       <span id="unreadBadgeHeader" 
+             class="notification-badge" 
+             style="display: none; 
+                    background: #0046FE; 
+                    color: white; 
+                    padding: 6px 14px; 
+                    border-radius: 20px; 
+                    font-size: 0.85rem; 
+                    font-weight: 700; 
+                    margin-left: 12px; 
+                    animation: pulse 2s infinite; 
+                    vertical-align: middle;">
+       </span>
+   </h1>
+   ```
+   
+   LÍNEA 5458-5489: Actualización de función updateUnreadBadge()
+   ```javascript
+   // Actualizar badges (menú y header de la sección)
+   const badgeMenu = document.getElementById('unreadBadgeMenu');
+   const badgeHeader = document.getElementById('unreadBadgeHeader');
+   
+   if (badgeMenu) {
+       if (unreadCount > 0) {
+           // Badge del menú
+           badgeMenu.textContent = unreadCount;
+           badgeMenu.style.display = 'inline-block';
+           
+           // Badge del header de la sección
+           if (badgeHeader) {
+               badgeHeader.textContent = unreadCount;
+               badgeHeader.style.display = 'inline';
+           }
+       } else {
+           badgeMenu.style.display = 'none';
+           if (badgeHeader) {
+               badgeHeader.style.display = 'none';
+           }
+       }
+   }
+   ```
+
+═══════════════════════════════════════════════════════════════
+🎨 DISEÑO VISUAL
+═══════════════════════════════════════════════════════════════
+
+CARACTERÍSTICAS DEL BADGE:
+
+📏 Tamaño y Espaciado:
+   - Padding: 6px vertical, 14px horizontal
+   - Border-radius: 20px (muy redondeado)
+   - Font-size: 0.85rem
+   - Margin-left: 12px (separación del título)
+
+🎨 Colores:
+   - Fondo: #0046FE (azul corporativo)
+   - Texto: Blanco (#FFFFFF)
+   - Font-weight: 700 (negrita)
+
+✨ Animación:
+   - Pulso suave que se repite cada 2 segundos
+   - Llama la atención sin ser molesto
+   - Usa la animación @keyframes pulse existente
+
+📱 Responsive:
+   - Se adapta al tamaño del texto
+   - Vertical-align: middle (alineado con el título)
+   - Display: inline (se integra con el texto)
+
+═══════════════════════════════════════════════════════════════
+🔄 COMPORTAMIENTO
+═══════════════════════════════════════════════════════════════
+
+ESTADOS DEL BADGE:
+
+1. SIN MENSAJES NO LEÍDOS:
+   💬 Contactar con Soporte
+   (Badge oculto completamente)
+
+2. CON 1 MENSAJE:
+   💬 Contactar con Soporte  [1]
+   (Badge visible con número)
+
+3. CON MÚLTIPLES MENSAJES:
+   💬 Contactar con Soporte  [5]
+   (Badge visible con número)
+
+ACTUALIZACIÓN AUTOMÁTICA:
+
+⏰ Polling cada 10 segundos:
+   - Consulta API de tickets
+   - Cuenta mensajes con client_unread = 1
+   - Actualiza ambos badges simultáneamente
+   - Excluye tickets automáticos (facturación)
+
+📬 Al abrir un ticket:
+   - El ticket se marca como leído
+   - Badge se actualiza al cerrar el modal
+   - Si era el último no leído, badge desaparece
+
+💬 Al recibir respuesta del admin:
+   - Badge se actualiza automáticamente
+   - Muestra notificación de nuevo mensaje
+   - Pulso de animación para llamar atención
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR
+═══════════════════════════════════════════════════════════════
+
+ESCENARIO 1: Ver badge con mensajes
+
+1. Ir al Admin Dashboard
+2. Responder a un ticket de un cliente
+3. Ir al Client Dashboard de ese cliente
+4. ✅ Debe aparecer badge azul [1] en:
+   - Menú lateral en "Contactar"
+   - Header de la sección "Contactar"
+
+ESCENARIO 2: Badge desaparece al leer
+
+1. Cliente tiene mensajes sin leer
+2. Badge muestra [2]
+3. Cliente abre los 2 tickets
+4. ✅ Badge desaparece de ambos lugares
+
+ESCENARIO 3: Actualización en tiempo real
+
+1. Cliente está en el dashboard
+2. Admin responde un ticket
+3. Esperar ~10 segundos
+4. ✅ Badge aparece automáticamente [1]
+5. ✅ Notificación: "Tienes 1 mensaje nuevo"
+
+ESCENARIO 4: Múltiples mensajes
+
+1. Admin responde 3 tickets diferentes
+2. Cliente recarga dashboard
+3. ✅ Badge muestra [3]
+4. Cliente lee 1 ticket
+5. ✅ Badge actualiza a [2]
+
+ESCENARIO 5: Navegación entre secciones
+
+1. Cliente está en "Resumen"
+2. Badge en menú muestra [2]
+3. Cliente va a "Contactar"
+4. ✅ Badge en header también muestra [2]
+5. Cliente lee 1 ticket
+6. ✅ Ambos badges actualizan a [1]
+
+═══════════════════════════════════════════════════════════════
+💡 DETALLES IMPORTANTES
+═══════════════════════════════════════════════════════════════
+
+1. SINCRONIZACIÓN PERFECTA
+   - Ambos badges siempre muestran el mismo número
+   - Se actualizan simultáneamente
+   - Usan la misma fuente de datos
+
+2. FILTRADO INTELIGENTE
+   - Solo cuenta tickets reales de soporte
+   - Excluye automáticamente tickets de cambio de plan
+   - Usa: category !== 'facturacion'
+
+3. RENDIMIENTO
+   - No afecta la velocidad de carga
+   - Actualización en segundo plano
+   - No bloquea la UI
+
+4. ANIMACIÓN SUTIL
+   - Pulso suave cada 2 segundos
+   - No distrae al usuario
+   - Solo cuando hay mensajes
+
+5. ACCESIBILIDAD
+   - Número claramente visible
+   - Buen contraste (blanco sobre azul)
+   - Tamaño de fuente legible
+
+═══════════════════════════════════════════════════════════════
+🎯 CASOS DE USO
+═══════════════════════════════════════════════════════════════
+
+PARA EL CLIENTE:
+
+✅ Indicador visual claro de mensajes pendientes
+✅ No necesita revisar constantemente
+✅ Doble confirmación (menú + header)
+✅ Se entera inmediatamente de respuestas del admin
+
+PARA EL ADMIN:
+
+✅ Los clientes ven claramente las respuestas
+✅ Reduce consultas repetidas
+✅ Mejora la comunicación cliente-admin
+✅ Aumenta engagement con el sistema de soporte
+
+PARA LA EXPERIENCIA:
+
+✅ Interfaz moderna y profesional
+✅ Coherente con aplicaciones populares (WhatsApp, Gmail)
+✅ Feedback visual inmediato
+✅ Reduce frustración del cliente
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Badge en header: IMPLEMENTADO ✅
+• Sincronización con menú: FUNCIONANDO ✅
+• Actualización automática: ACTIVA ✅
+• Animación de pulso: IMPLEMENTADA ✅
+• Deploy en Vercel: ~30 segundos ⏱️
+
+TODO LISTO PARA USAR 🚀
+
+═══════════════════════════════════════════════════════════════
+📸 VISUALIZACIÓN
+═══════════════════════════════════════════════════════════════
+
+ANTES:
+┌─────────────────────────────────────┐
+│ 💬 Contactar con Soporte            │
+│ Estamos aquí para ayudarte          │
+└─────────────────────────────────────┘
+
+AHORA (con mensajes):
+┌─────────────────────────────────────┐
+│ 💬 Contactar con Soporte  (3)       │← Badge azul pulsando
+│ Estamos aquí para ayudarte          │
+└─────────────────────────────────────┘
+
+AHORA (sin mensajes):
+┌─────────────────────────────────────┐
+│ 💬 Contactar con Soporte            │← Badge oculto
+│ Estamos aquí para ayudarte          │
+└─────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+
+

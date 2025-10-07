@@ -1,0 +1,234 @@
+═══════════════════════════════════════════════════════════════
+✅ CAMBIOS: BOTÓN VISITAR Y MODAL DE KANBAN
+═══════════════════════════════════════════════════════════════
+
+📋 PROBLEMAS REPORTADOS:
+
+1. El botón "Visitar" aparece deshabilitado (gris)
+2. Eliminar el botón azul "Crear Proyecto" del modal de Kanban
+3. El proyecto solo debe crearse en "Webs Desplegadas" desde el 
+   botón verde dentro del modal del Kanban
+
+═══════════════════════════════════════════════════════════════
+🔧 SOLUCIONES IMPLEMENTADAS
+═══════════════════════════════════════════════════════════════
+
+1. NUEVO CAMPO: URL DEL SITIO WEB PÚBLICO
+   
+   ✅ Se agregó campo `website_url` a la base de datos (tabla `clients`)
+   ✅ Se agregó input editable en el modal "Gestionar Web"
+   ✅ El botón "Visitar" ahora funciona cuando hay URL configurada
+   
+   UBICACIÓN: Modal "Gestionar Web" en Webs Desplegadas
+   
+   📝 Campos ahora disponibles:
+   - 🌐 URL del Sitio Web Público (NUEVO)
+     → Para que el botón "Visitar" funcione
+     → Ejemplo: https://tusitio.com
+   
+   - ✏️ URL de WordPress (Admin)
+     → Para que el cliente acceda a su panel
+     → Ejemplo: https://tusitio.com/wp-admin
+   
+   - 📸 URL de Captura de Pantalla
+     → Opcional, para preview visual
+   
+   - 📊 Google Analytics Property ID
+     → Opcional, para estadísticas en dashboard del cliente
+
+2. BOTÓN "CREAR PROYECTO" ELIMINADO
+   
+   ❌ ANTES (Modal de Kanban):
+   [Crear Proyecto] [🚀 Crear en Webs Desplegadas]
+   (2 botones lado a lado)
+   
+   ✅ AHORA (Modal de Kanban):
+   [🚀 Crear en Webs Desplegadas]
+   (1 solo botón verde, ancho completo)
+   
+   RAZÓN: El botón azul no tenía función según el usuario
+
+3. FLUJO CORREGIDO: CREAR PROYECTO EN WEBS DESPLEGADAS
+   
+   📌 FLUJO CORRECTO:
+   
+   Paso 1: Cliente realiza pago
+   → Se crea automáticamente en el Kanban (columna "Sin Empezar")
+   → Aparece en la lista de "Webs Desplegadas"
+   
+   Paso 2: Admin abre el proyecto en Kanban
+   → Clic en la tarjeta del proyecto
+   → Se abre el modal de edición
+   
+   Paso 3: Admin hace clic en "🚀 Crear en Webs Desplegadas"
+   → Confirma la acción
+   → El proyecto se marca como "desplegado"
+   → Solo se puede hacer UNA VEZ por proyecto
+   
+   Paso 4: Admin gestiona la web
+   → Va a "Webs Desplegadas"
+   → Clic en "⚙️ Gestionar" en la tarjeta del cliente
+   → Configura:
+     ✅ URL del Sitio Web Público (habilita botón "Visitar")
+     ✅ URL de WordPress (para que cliente edite)
+     ✅ Screenshot opcional
+     ✅ Google Analytics opcional
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ backend/database.js
+   - Líneas 256-265: Migración para añadir campo `website_url`
+   
+✅ backend/server.js
+   - Líneas 1560-1580: Actualizar endpoint PATCH para guardar website_url
+   - Se modificó el endpoint /api/admin/website-management/:clientId
+   
+✅ admin-dashboard/index.html
+   - Líneas 4074-4102: Nuevo input para website_url en modal
+   - Líneas 1554-1558: Eliminado botón "Crear Proyecto" azul
+   - Líneas 2808-2811: Actualizar función editWebManagement
+   - Líneas 2831-2846: Actualizar función saveWebManagement
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR
+═══════════════════════════════════════════════════════════════
+
+PRUEBA 1: Botón "Visitar" habilitado
+
+1. Ir al Admin Dashboard
+2. Sección "Webs Desplegadas"
+3. Elegir un cliente
+4. Clic en "⚙️ Gestionar"
+5. Rellenar el campo:
+   🌐 URL del Sitio Web Público: https://tusitio.com
+6. Guardar cambios
+7. ✅ El botón "🌐 Visitar" ahora está habilitado (azul)
+8. Clic en "Visitar"
+9. ✅ Debe abrir la URL del sitio web en nueva pestaña
+
+PRUEBA 2: Botón azul "Crear Proyecto" eliminado
+
+1. Ir al Admin Dashboard
+2. Sección "Webs (Kanban)"
+3. Clic en cualquier proyecto
+4. ✅ Solo debe aparecer el botón verde:
+   "🚀 Crear en Webs Desplegadas"
+5. ❌ NO debe aparecer el botón azul "Crear Proyecto"
+
+PRUEBA 3: Crear proyecto en Webs Desplegadas
+
+1. En el modal del proyecto (Kanban)
+2. Clic en "🚀 Crear en Webs Desplegadas"
+3. Confirmar el mensaje
+4. ✅ Debe aparecer mensaje de éxito
+5. Ir a "Webs Desplegadas"
+6. ✅ El cliente debe aparecer en la lista
+7. Clic en "⚙️ Gestionar"
+8. ✅ Todos los campos deben estar disponibles
+
+═══════════════════════════════════════════════════════════════
+💡 NOTAS IMPORTANTES
+═══════════════════════════════════════════════════════════════
+
+1. DIFERENCIA ENTRE URLs:
+   
+   • Website URL (Público) 🌐
+     → Para visitantes normales
+     → Ejemplo: https://tusitio.com
+     → Habilita el botón "Visitar"
+   
+   • WordPress URL (Admin) ✏️
+     → Para que el cliente edite contenido
+     → Ejemplo: https://tusitio.com/wp-admin
+     → Habilita el botón "WordPress"
+
+2. CAMPO WEBSITE_URL ES OPCIONAL
+   
+   • Si no se configura, el botón "Visitar" aparece deshabilitado
+   • Es completamente normal tenerlo vacío al inicio
+   • Se configura cuando el sitio web está listo para producción
+
+3. MIGRACIÓN AUTOMÁTICA
+   
+   • El campo `website_url` se añade automáticamente a la DB
+   • Railway ejecutará la migración al arrancar
+   • Logs mostrarán: "✅ Migración: Campo website_url añadido"
+
+4. RETROCOMPATIBILIDAD
+   
+   • Clientes existentes tendrán `website_url = NULL`
+   • Esto es correcto, solo hay que configurarlo cuando esté listo
+   • No afecta ninguna funcionalidad existente
+
+═══════════════════════════════════════════════════════════════
+🚀 PRÓXIMOS PASOS
+═══════════════════════════════════════════════════════════════
+
+1. Esperar deploy en Railway (~1 minuto)
+   → Migración de database.js se ejecutará automáticamente
+   
+2. Esperar deploy en Vercel (~30 segundos)
+   → Cambios del admin dashboard estarán disponibles
+   
+3. Recargar Admin Dashboard
+   → F5 o Ctrl+R
+   
+4. Probar el nuevo campo en "Gestionar Web"
+   → Configurar website_url para un cliente
+   
+5. Verificar que el botón "Visitar" funciona
+   → Debe abrir la URL del sitio web
+
+═══════════════════════════════════════════════════════════════
+❓ PREGUNTAS FRECUENTES
+═══════════════════════════════════════════════════════════════
+
+P: ¿Por qué el botón "Visitar" estaba deshabilitado?
+R: Porque el campo `website_url` no existía en la base de datos.
+   Ahora se puede configurar desde el modal "Gestionar Web".
+
+P: ¿Cuál es la diferencia entre website_url y wordpress_url?
+R: • website_url = URL pública del sitio (para visitantes)
+   • wordpress_url = URL del panel de administración (para editar)
+
+P: ¿Debo configurar ambos?
+R: Depende:
+   • Si solo quieres que el botón "Visitar" funcione → website_url
+   • Si quieres que el cliente pueda editar → wordpress_url
+   • Para experiencia completa → ambos
+
+P: ¿Se puede usar la misma URL para ambos?
+R: No es recomendable. El website_url debe ser la URL pública
+   (ej: https://tusitio.com) y el wordpress_url debe incluir
+   /wp-admin (ej: https://tusitio.com/wp-admin).
+
+P: ¿Qué pasa si no configuro el website_url?
+R: El botón "Visitar" seguirá deshabilitado, pero todo lo demás
+   funciona normalmente.
+
+P: ¿El botón "Crear Proyecto" del Kanban desapareció completamente?
+R: Sí, se eliminó porque no tenía función. Solo queda el botón verde
+   "🚀 Crear en Webs Desplegadas" que sí tiene función específica.
+
+P: ¿Cómo sé si un proyecto ya fue creado en Webs Desplegadas?
+R: El botón verde solo aparece si aún NO se ha creado. Después de
+   crearlo, el botón se oculta para evitar duplicados.
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Campo website_url: IMPLEMENTADO ✅
+• Botón "Visitar": FUNCIONAL ✅
+• Botón azul "Crear Proyecto": ELIMINADO ✅
+• Migración de base de datos: LISTA ✅
+• Deploy backend: ~1 minuto ⏱️
+• Deploy frontend: ~30 segundos ⏱️
+
+TODO LISTO PARA USAR 🚀
+
+═══════════════════════════════════════════════════════════════
+
+

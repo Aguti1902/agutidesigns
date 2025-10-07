@@ -2736,12 +2736,32 @@
                         console.error('❌ No hay datos disponibles (ni submission ni client)');
                     }
                     
-                    // Iniciar temporizador de 24h SOLO si tiene plan, payment_date Y web NO está activa
-                    if (websiteStatus !== 'activo' && hasPlan && data.client.payment_date) {
-                        startEditTimer(data.client.payment_date);
-                    } else if (websiteStatus !== 'activo' && hasPlan && !data.client.payment_date) {
-                        // Si tiene plan pero no payment_date (datos antiguos), usar created_at
-                        startEditTimer(data.client.created_at);
+                    // Iniciar temporizador de 24h SOLO si tiene plan Y web NO está activa
+                    if (websiteStatus !== 'activo' && hasPlan) {
+                        // Usar el más reciente entre payment_date y plan_change_at
+                        let startDate = null;
+                        
+                        if (data.client.plan_change_at && data.client.payment_date) {
+                            // Si ambos existen, usar el más reciente
+                            const planChangeDate = new Date(data.client.plan_change_at);
+                            const paymentDate = new Date(data.client.payment_date);
+                            startDate = planChangeDate > paymentDate ? data.client.plan_change_at : data.client.payment_date;
+                            console.log('⏰ Usando fecha más reciente:', planChangeDate > paymentDate ? 'plan_change_at' : 'payment_date', startDate);
+                        } else if (data.client.plan_change_at) {
+                            // Solo existe plan_change_at (cambio de plan reciente)
+                            startDate = data.client.plan_change_at;
+                            console.log('⏰ Usando plan_change_at:', startDate);
+                        } else if (data.client.payment_date) {
+                            // Solo existe payment_date (pago inicial)
+                            startDate = data.client.payment_date;
+                            console.log('⏰ Usando payment_date:', startDate);
+                        } else {
+                            // Fallback a created_at (datos antiguos)
+                            startDate = data.client.created_at;
+                            console.log('⏰ Usando created_at (fallback):', startDate);
+                        }
+                        
+                        startEditTimer(startDate);
                     } else {
                         // Si no tiene plan o website está activo, mostrar banner informativo
                         const editCountdownBanner = document.getElementById('editCountdownBanner');

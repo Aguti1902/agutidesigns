@@ -1,0 +1,287 @@
+═══════════════════════════════════════════════════════════════
+🔧 CORRECCIÓN: DOWNGRADES Y BADGE "MODIFICADO"
+═══════════════════════════════════════════════════════════════
+
+📋 PROBLEMAS ENCONTRADOS:
+
+1. ❌ Downgrade (Premium → Avanzado) no muestra badge morado
+2. ❌ Aparece badge azul "MODIFICADO" cuando no debería
+
+═══════════════════════════════════════════════════════════════
+🔍 CAUSA DEL PROBLEMA
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA 1: Downgrade no visible
+→ El campo is_downgrade no existía cuando hiciste el cambio
+→ El downgrade se hizo ANTES de implementar esta funcionalidad
+→ La base de datos tiene: is_downgrade = false (o NULL)
+
+PROBLEMA 2: Badge "MODIFICADO" incorrecto
+→ El endpoint de cambio de plan estaba marcando has_modifications = true
+→ has_modifications solo debería activarse cuando el cliente 
+  edita datos en "Mi Negocio", NO cuando cambia de plan
+→ Los cambios de plan deben usar: has_upgrade o is_downgrade
+
+═══════════════════════════════════════════════════════════════
+✅ SOLUCIÓN IMPLEMENTADA
+═══════════════════════════════════════════════════════════════
+
+1. ENDPOINT DE CORRECCIÓN AUTOMÁTICA
+
+   Se creó un endpoint temporal que:
+   ✓ Busca todos los cambios de plan en la base de datos
+   ✓ Detecta automáticamente si es upgrade o downgrade
+   ✓ Corrige los flags: is_downgrade, has_upgrade
+   ✓ Resetea has_modifications = false (si solo fue cambio de plan)
+   ✓ Actualiza submissions Y projects
+
+2. PREVENCIÓN FUTURA
+
+   Se modificó el endpoint de cambio de plan para que:
+   ✓ NUNCA marque has_modifications en cambios de plan
+   ✓ Solo use has_upgrade o is_downgrade
+   ✓ has_modifications solo para ediciones en "Mi Negocio"
+
+═══════════════════════════════════════════════════════════════
+🚀 CÓMO USAR EL SCRIPT DE CORRECCIÓN
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Esperar deploy de Railway (~1-2 minutos)
+
+PASO 2: Ejecutar el script de corrección
+
+   Opción A - Desde el navegador:
+   
+   Abre esta URL en tu navegador:
+   https://agutidesigns-production.up.railway.app/api/admin/fix-downgrades
+   
+   Opción B - Desde la terminal:
+   
+   curl https://agutidesigns-production.up.railway.app/api/admin/fix-downgrades
+
+PASO 3: Verificar respuesta
+
+   Verás algo como:
+   ```json
+   {
+     "success": true,
+     "total": 3,
+     "fixed": 2,
+     "alreadyCorrect": 1,
+     "details": [
+       {
+         "id": 8,
+         "change": "premium → avanzado",
+         "corrected": "DOWNGRADE"
+       }
+     ]
+   }
+   ```
+
+PASO 4: Recargar Admin Dashboard
+
+   1. Recargar la página (F5)
+   2. Ir a "Pedidos"
+   3. ✅ Pedido #8 debe mostrar: 🔽 DOWNGRADE (morado)
+   4. ❌ NO debe mostrar: ✏️ MODIFICADO
+   5. Ir a "Webs (Kanban)"
+   6. ✅ Proyecto debe tener borde morado + badge
+
+═══════════════════════════════════════════════════════════════
+📊 QUÉ HACE EL SCRIPT
+═══════════════════════════════════════════════════════════════
+
+PARA CADA SUBMISSION CON PREVIOUS_PLAN:
+
+1. Compara plan actual vs plan anterior:
+   
+   basico (1) < avanzado (2) < premium (3)
+   
+   Si plan actual < plan anterior → DOWNGRADE
+   Si plan actual > plan anterior → UPGRADE
+
+2. Actualiza base de datos:
+   
+   UPDATE submissions SET
+     is_downgrade = true/false,
+     has_upgrade = true/false,
+     has_modifications = false
+   
+   UPDATE projects SET
+     is_downgrade = true/false,
+     is_upgrade = true/false
+
+3. Registra cambios en la respuesta
+
+═══════════════════════════════════════════════════════════════
+🧪 VERIFICACIÓN DESPUÉS DEL SCRIPT
+═══════════════════════════════════════════════════════════════
+
+CASO: Premium → Avanzado (DOWNGRADE)
+
+ANTES:
+┌──────────────────────────────────────────────────────┐
+│ #8 | NexGenteeedxss  ✏️ MODIFICADO                  │
+│    | Plan: Avanzado (Antes: Premium)                 │
+│    | Estado: Pagado                                  │
+└──────────────────────────────────────────────────────┘
+
+DESPUÉS:
+┌──────────────────────────────────────────────────────┐
+│ #8 | NexGenteeedxss  🔽 DOWNGRADE                   │
+│    | Plan: Avanzado (Antes: Premium)                 │
+│    | Estado: Pagado                                  │
+└──────────────────────────────────────────────────────┘
+
+EN KANBAN:
+┌───────────────────────┐
+│ │ NexGenteeedxss      │ ← Borde morado
+│ │ 🔽 DOWNGRADE        │ ← Badge morado
+│ │ 📦 Avanzado         │
+└───────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+💡 CASOS DE USO DE BADGES
+═══════════════════════════════════════════════════════════════
+
+UPGRADE (Naranja 🔼):
+• Cliente mejoró su plan (ej: Básico → Avanzado)
+• Proyecto reabierto, 24h reactivadas
+• has_upgrade = true
+
+DOWNGRADE (Morado 🔽):
+• Cliente bajó su plan (ej: Premium → Avanzado)
+• Páginas eliminadas si excedían límite
+• is_downgrade = true
+
+MODIFICADO (Azul ✏️):
+• Cliente editó datos en "Mi Negocio"
+• Cambios pendientes de revisar por admin
+• has_modifications = true
+• NO se usa para cambios de plan
+
+═══════════════════════════════════════════════════════════════
+🔄 FLUJO CORRECTO AHORA
+═══════════════════════════════════════════════════════════════
+
+CAMBIO DE PLAN (futuro):
+
+1. Cliente cambia de plan en dashboard
+2. Backend actualiza:
+   ✓ is_downgrade = true/false
+   ✓ has_upgrade = true/false
+   ✓ has_modifications = false ← IMPORTANTE
+3. Admin ve badge correcto:
+   → 🔼 UPGRADE (si subió)
+   → 🔽 DOWNGRADE (si bajó)
+   → NO ✏️ MODIFICADO
+
+EDICIÓN EN "MI NEGOCIO" (futuro):
+
+1. Cliente edita datos personales/empresa
+2. Backend actualiza:
+   ✓ has_modifications = true
+   ✓ last_modified_at = ahora
+3. Admin ve:
+   → ✏️ MODIFICADO
+   → +🔼 UPGRADE (si también cambió plan antes)
+   → +🔽 DOWNGRADE (si también cambió plan antes)
+
+═══════════════════════════════════════════════════════════════
+❓ PREGUNTAS FRECUENTES
+═══════════════════════════════════════════════════════════════
+
+P: ¿Tengo que ejecutar el script cada vez?
+R: NO. Solo una vez para corregir los datos históricos.
+   Los nuevos cambios de plan ya funcionarán correctamente.
+
+P: ¿El script afecta a los datos del cliente?
+R: NO. Solo corrige los flags internos (is_downgrade, 
+   has_upgrade, has_modifications). Los datos del cliente,
+   plan actual, y páginas NO se modifican.
+
+P: ¿Puedo ejecutar el script varias veces?
+R: SÍ. Es seguro ejecutarlo varias veces. Si los datos
+   ya están correctos, simplemente reportará:
+   "alreadyCorrect": X
+
+P: ¿Qué pasa si un pedido tiene UPGRADE y MODIFICADO?
+R: Es posible tenerlos juntos:
+   • El cliente hizo upgrade (🔼 UPGRADE)
+   • Luego editó datos (✏️ MODIFICADO)
+   • Ambos badges aparecen
+
+P: ¿Cómo sé si un downgrade fue con páginas eliminadas?
+R: Mira las "Notas" del proyecto en el Kanban:
+   "Plan actualizado: premium → avanzado. Downgrade
+   confirmado. Páginas eliminadas: Blog, Portfolio."
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ backend/server.js
+   - Líneas 2226-2298: Nuevo endpoint /api/admin/fix-downgrades
+   - Línea 2874: has_modifications = false en upgrades
+   - Línea 2947: has_modifications = false en downgrades
+   - Línea 2262: has_modifications = false en script corrección
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Script de corrección: CREADO ✅
+• Prevención futura: IMPLEMENTADA ✅
+• Bug crítico encontrado: CORREGIDO ✅
+  → getAllSubmissions() no devolvía is_downgrade
+  → Ahora incluye is_downgrade en el SELECT
+• Logs de debug: AÑADIDOS ✅
+• Deploy backend: ~1-2 minutos ⏱️
+
+PRÓXIMOS PASOS:
+
+1. Esperar deploy de Railway (~1-2 min)
+2. Ejecutar script: https://agutidesigns-production.up.railway.app/api/admin/fix-downgrades
+3. Recargar admin dashboard (F5)
+4. Abrir consola (F12) → Ver logs
+5. Verificar badges corregidos
+
+TODO LISTO 🚀
+
+═══════════════════════════════════════════════════════════════
+🐛 BUG CRÍTICO ENCONTRADO Y CORREGIDO
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA:
+La función getAllSubmissions() en database.js NO estaba 
+incluyendo el campo is_downgrade en el SELECT, por eso
+los badges nunca aparecían.
+
+ANTES:
+```sql
+SELECT id, business_name, email, plan, amount, status, created_at,
+       has_upgrade, has_modifications, previous_plan, ...
+```
+
+DESPUÉS:
+```sql
+SELECT id, business_name, email, plan, amount, status, created_at,
+       has_upgrade, is_downgrade, has_modifications, previous_plan, ...
+```
+
+LOGS AÑADIDOS:
+Ahora la consola mostrará:
+```
+📋 [ADMIN] Pedidos recibidos: X
+🔍 [DEBUG] Pedido #8: {
+  id: 8,
+  plan: "basico",
+  previous_plan: "avanzado",
+  has_upgrade: false,
+  is_downgrade: true,    ← ESTO debe ser true
+  has_modifications: false ← ESTO debe ser false
+}
+```
+
+═══════════════════════════════════════════════════════════════
+

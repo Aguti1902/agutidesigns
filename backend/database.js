@@ -287,6 +287,17 @@ async function initializeTables() {
             console.log('⚠️ Migración is_downgrade en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo plan_change_at para reiniciar ventana de edición 24h
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS plan_change_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campo plan_change_at añadido a clients');
+        } catch (e) {
+            console.log('⚠️ Migración plan_change_at en clients ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campo is_downgrade para projects
         try {
             await client.query(`

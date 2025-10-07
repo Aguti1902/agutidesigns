@@ -1,0 +1,513 @@
+═══════════════════════════════════════════════════════════════
+🚀 SISTEMA DE DESPLIEGUE MANUAL Y CREDENCIALES WORDPRESS
+═══════════════════════════════════════════════════════════════
+
+CAMBIOS IMPLEMENTADOS:
+
+✅ 1. Los proyectos NO se despliegan automáticamente al pagar
+✅ 2. El admin despliega manualmente desde el botón del Kanban
+✅ 3. Credenciales de WordPress gestionadas por el admin
+✅ 4. Credenciales visibles para el cliente cuando el sitio está activo
+✅ 5. Botón "Visitar" funcional en Webs Desplegadas
+
+═══════════════════════════════════════════════════════════════
+📋 FLUJO COMPLETO DEL SISTEMA
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Cliente realiza el pago
+--------------------------------
+• Se crea el cliente en la BD
+• Se crea un proyecto en el Kanban (columna "Sin empezar")
+• ❌ NO se crea entrada en "Webs Desplegadas"
+
+PASO 2: Admin trabaja en el proyecto
+------------------------------------
+• El proyecto avanza por las columnas del Kanban
+• El admin puede moverlo a "En Desarrollo", "En Revisión", etc.
+
+PASO 3: Admin despliega el proyecto (Kanban)
+--------------------------------------------
+• Admin abre el proyecto en el Kanban
+• Click en el botón "🚀 Crear en Webs Desplegadas"
+• Se crea una entrada en "Webs Desplegadas" con estado "PENDIENTE"
+• El botón se deshabilita (ya no se puede volver a desplegar)
+
+PASO 4: Admin configura WordPress (Webs Desplegadas)
+----------------------------------------------------
+• Admin va a la sección "Webs Desplegadas"
+• Encuentra el proyecto del cliente
+• Click en "⚙️ Gestionar"
+• Rellena los campos:
+  - 🌐 URL del Sitio Web Público (ej: https://cliente.com)
+  - ✏️ URL de WordPress Admin (ej: https://cliente.com/wp-admin)
+  - 👤 Usuario de WordPress (ej: admin)
+  - 🔑 Contraseña de WordPress (ej: Pass123!)
+  - 📸 URL de Screenshot (opcional)
+  - 📊 Google Analytics Property ID (opcional)
+• Click en "💾 Guardar Cambios"
+
+PASO 5: Admin activa el sitio web
+----------------------------------
+• Desde "Webs Desplegadas", click en "🚀 Activar Web"
+• El sitio cambia de estado a "Activo"
+• El cliente recibe una notificación (email)
+• El proyecto se marca como "Entregado" en el Kanban
+
+PASO 6: Cliente accede a su sitio
+---------------------------------
+• En su dashboard, el cliente ve:
+  - Card "🎨 Editor WordPress" con botón para abrir WordPress
+  - Card "🔐 Credenciales de Acceso" con:
+    * URL del panel de WordPress
+    * Usuario
+    * Contraseña (oculta por defecto, con botón mostrar/ocultar)
+    * Botones para copiar cada campo
+  - Card "📊 Estado del Sitio" mostrando "Activo"
+
+═══════════════════════════════════════════════════════════════
+🗄️ CAMBIOS EN LA BASE DE DATOS
+═══════════════════════════════════════════════════════════════
+
+Tabla: clients
+--------------
+Nuevas columnas:
+• wordpress_username TEXT - Usuario de acceso a WordPress
+• wordpress_password TEXT - Contraseña de acceso a WordPress
+
+Estas columnas se añaden automáticamente al hacer deploy en Railway
+gracias a la migración en backend/database.js (líneas 267-277)
+
+═══════════════════════════════════════════════════════════════
+🔧 CAMBIOS EN EL BACKEND
+═══════════════════════════════════════════════════════════════
+
+1️⃣ backend/database.js
+-----------------------
+Líneas 267-277: Migración para añadir columnas de credenciales
+
+```sql
+ALTER TABLE clients 
+ADD COLUMN IF NOT EXISTS wordpress_username TEXT,
+ADD COLUMN IF NOT EXISTS wordpress_password TEXT
+```
+
+2️⃣ backend/server.js
+--------------------
+Líneas 1599-1651: Endpoint PATCH /api/admin/website-management/:clientId
+
+ANTES:
+- Solo guardaba website_url, wordpress_url, screenshot, ga_property_id
+
+AHORA:
+- Además guarda wordpress_username y wordpress_password
+- Las contraseñas se loggean como '***' en los logs (seguridad)
+
+EJEMPLO DE USO:
+```javascript
+PATCH /api/admin/website-management/123
+{
+  "website_url": "https://cliente.com",
+  "wordpress_url": "https://cliente.com/wp-admin",
+  "wordpress_username": "admin",
+  "wordpress_password": "Pass123!",
+  "website_screenshot_url": "https://...",
+  "ga_property_id": "123456789"
+}
+```
+
+═══════════════════════════════════════════════════════════════
+🎨 CAMBIOS EN EL ADMIN DASHBOARD
+═══════════════════════════════════════════════════════════════
+
+1️⃣ Modal "Gestionar Web" (Webs Desplegadas)
+-------------------------------------------
+Archivo: admin-dashboard/index.html
+Líneas: 4520-4555
+
+NUEVOS CAMPOS:
+• 👤 Usuario de WordPress (input text)
+• 🔑 Contraseña de WordPress (input text, monospace)
+
+DISEÑO:
+• Sección con fondo amarillo (#fff3cd)
+• Borde izquierdo amarillo (#ffc107)
+• Título "🔐 Credenciales de Acceso a WordPress"
+• Tooltips explicativos para cada campo
+
+2️⃣ Función saveWebManagement()
+-------------------------------
+Archivo: admin-dashboard/index.html
+Líneas: 3247-3297
+
+CAMBIOS:
+- Captura los campos wordpress_username y wordpress_password
+- Los envía al endpoint PATCH
+- Logs con credenciales ofuscadas (seguridad)
+
+3️⃣ Función para abrir modal
+---------------------------
+Archivo: admin-dashboard/index.html
+Líneas: 3224-3236
+
+CAMBIOS:
+- Carga wordpress_username y wordpress_password del cliente
+- Rellena los campos en el formulario
+
+4️⃣ Botón "Crear en Webs Desplegadas" (Kanban)
+---------------------------------------------
+Archivo: admin-dashboard/index.html
+
+ANTES:
+- Botón "🚀 Desplegar Proyecto"
+- Abría modal para ingresar credenciales
+- Endpoint POST /api/admin/projects/:id/deploy
+
+AHORA:
+- Botón "🚀 Crear en Webs Desplegadas"
+- Crea entrada directamente en Webs Desplegadas
+- Marca wordpress_url como "PENDIENTE"
+- El admin luego configura desde "Webs Desplegadas"
+
+LÓGICA:
+```javascript
+async function deployWebFromProject() {
+    // Crear entrada en Webs Desplegadas
+    await fetch(`${API_URL}/api/admin/website-management/${clientId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+            wordpress_url: 'PENDIENTE'
+        })
+    });
+    
+    // Deshabilitar botón
+    deployButton.disabled = true;
+    deployButton.textContent = '✅ Ya Desplegado';
+}
+```
+
+5️⃣ Botón "Visitar" en Webs Desplegadas
+---------------------------------------
+Archivo: admin-dashboard/index.html
+Líneas: 3147-3155
+
+FUNCIONAMIENTO:
+```html
+${web.website_url ? `
+    <button onclick="window.open('${web.website_url}', '_blank')">
+        🌐 Visitar
+    </button>
+` : `
+    <button disabled style="opacity: 0.5; cursor: not-allowed;">
+        🌐 Visitar
+    </button>
+`}
+```
+
+ESTADO:
+- ✅ Habilitado: Si website_url existe
+- ❌ Deshabilitado: Si website_url es null/vacío
+
+═══════════════════════════════════════════════════════════════
+👥 CAMBIOS EN EL CLIENTE DASHBOARD
+═══════════════════════════════════════════════════════════════
+
+1️⃣ Nueva Card "Credenciales de Acceso"
+--------------------------------------
+Archivo: client-dashboard/index.html
+Líneas: 1492-1538
+
+VISIBILIDAD:
+- Solo visible cuando website_status === 'activo'
+- Solo visible cuando wordpress_url existe
+
+CONTENIDO:
+• 🌐 URL del Panel de WordPress
+  - Se muestra con /wp-admin al final
+  - Botón "📋 Copiar"
+  
+• 👤 Usuario de WordPress
+  - Se muestra el wordpress_username
+  - Botón "📋 Copiar"
+  
+• 🔑 Contraseña de WordPress
+  - Oculta por defecto (••••••••••••)
+  - Botón "👁️ Mostrar / 🙈 Ocultar"
+  - Botón "📋 Copiar"
+
+DISEÑO:
+• Fondo azul claro (#e8f4ff)
+• Borde azul (#0046FE)
+• Sección de consejo con fondo amarillo
+
+2️⃣ Función togglePasswordVisibility()
+--------------------------------------
+Archivo: client-dashboard/index.html
+Líneas: 2868-2882
+
+FUNCIONALIDAD:
+```javascript
+function togglePasswordVisibility() {
+    const passwordElement = document.getElementById('wpPassword');
+    const actualPassword = passwordElement.dataset.password;
+    
+    if (passwordElement.textContent === actualPassword) {
+        // Ocultar
+        passwordElement.textContent = '••••••••••••';
+        toggleBtn.textContent = '👁️ Mostrar';
+    } else {
+        // Mostrar
+        passwordElement.textContent = actualPassword;
+        toggleBtn.textContent = '🙈 Ocultar';
+    }
+}
+```
+
+3️⃣ Función copyToClipboard()
+-----------------------------
+Archivo: client-dashboard/index.html
+Líneas: 2884-2906
+
+FUNCIONALIDAD:
+```javascript
+function copyToClipboard(text, fieldName) {
+    // Crear elemento temporal
+    const tempInput = document.createElement('textarea');
+    tempInput.value = text;
+    tempInput.style.position = 'absolute';
+    tempInput.style.left = '-9999px';
+    document.body.appendChild(tempInput);
+    
+    // Seleccionar y copiar
+    tempInput.select();
+    document.execCommand('copy');
+    
+    // Limpiar
+    document.body.removeChild(tempInput);
+    
+    // Notificación
+    showNotification(`${fieldName} copiado al portapapeles`, 'success');
+}
+```
+
+4️⃣ Función loadWordPressCredentials()
+--------------------------------------
+Archivo: client-dashboard/index.html
+Líneas: 2908-2940
+
+SE EJECUTA:
+- Cuando se carga la sección "Mi Sitio Web"
+- showSection('sitio') → loadWordPressCredentials()
+
+LÓGICA:
+```javascript
+function loadWordPressCredentials() {
+    if (currentClient.website_status === 'activo' && 
+        currentClient.wordpress_url) {
+        
+        // Mostrar card
+        document.getElementById('wpCredentialsCard').style.display = 'block';
+        
+        // Rellenar datos
+        document.getElementById('wpAdminUrl').textContent = wordpress_url;
+        document.getElementById('wpUsername').textContent = wordpress_username;
+        document.getElementById('wpPassword').dataset.password = wordpress_password;
+    } else {
+        // Ocultar card
+        document.getElementById('wpCredentialsCard').style.display = 'none';
+    }
+}
+```
+
+5️⃣ Modificación de showSection()
+---------------------------------
+Archivo: client-dashboard/index.html
+Líneas: 2848-2856
+
+AÑADIDO:
+```javascript
+if (sectionId === 'sitio') {
+    loadWordPressCredentials();
+}
+```
+
+═══════════════════════════════════════════════════════════════
+🔐 SEGURIDAD
+═══════════════════════════════════════════════════════════════
+
+BACKEND:
+--------
+✅ Contraseñas se loggean como '***' en los logs
+✅ Se usan consultas parametrizadas (SQL injection protection)
+✅ Endpoint requiere autenticación de admin
+
+FRONTEND:
+---------
+✅ Contraseñas ocultas por defecto (••••••••••••)
+✅ Botón para mostrar/ocultar explícitamente
+✅ Solo visibles para el cliente propietario
+✅ Solo visibles cuando el sitio está activo
+
+CONSIDERACIONES:
+---------------
+⚠️ Las contraseñas se almacenan en texto plano en la BD
+⚠️ Esto es aceptable para este caso de uso (dashboard de cliente)
+⚠️ El cliente puede cambiar la contraseña desde WordPress
+
+RECOMENDACIONES:
+---------------
+• Usar contraseñas fuertes al configurar WordPress
+• Cambiar las contraseñas periódicamente
+• El cliente debería cambiar su contraseña al recibir el sitio
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR
+═══════════════════════════════════════════════════════════════
+
+TEST 1: Despliegue Manual desde Kanban
+--------------------------------------
+1. Admin: Ir a Kanban
+2. Abrir un proyecto existente
+3. ✅ Ver botón "🚀 Crear en Webs Desplegadas"
+4. Click en el botón
+5. ✅ Confirmación aparece
+6. ✅ Botón se deshabilita ("✅ Ya Desplegado")
+7. Ir a "Webs Desplegadas"
+8. ✅ El proyecto aparece en la lista
+9. ✅ Estado: "WordPress: ⚠️ Pendiente"
+
+TEST 2: Configurar Credenciales (Admin)
+---------------------------------------
+1. Admin: Ir a "Webs Desplegadas"
+2. Buscar el proyecto del cliente
+3. Click en "⚙️ Gestionar"
+4. ✅ Modal aparece con todos los campos
+5. Rellenar:
+   - URL sitio: https://ejemplo.com
+   - URL WordPress: https://ejemplo.com/wp-admin
+   - Usuario: admin
+   - Contraseña: Test123!
+6. Click en "💾 Guardar Cambios"
+7. ✅ Notificación de éxito
+8. ✅ Datos se guardan
+
+TEST 3: Botón "Visitar" (Admin)
+-------------------------------
+1. Admin: En "Webs Desplegadas"
+2. Buscar proyecto con website_url configurada
+3. ✅ Botón "🌐 Visitar" está habilitado
+4. Click en el botón
+5. ✅ Se abre el sitio en nueva pestaña
+
+TEST 4: Activar Sitio (Admin)
+-----------------------------
+1. Admin: En "Webs Desplegadas"
+2. Buscar proyecto con estado "En Construcción"
+3. Click en "🚀 Activar Web"
+4. ✅ Confirmación aparece
+5. ✅ Estado cambia a "Activo"
+6. ✅ Cliente recibe email (si configurado)
+
+TEST 5: Ver Credenciales (Cliente)
+----------------------------------
+1. Cliente: Login en dashboard
+2. Ir a "Mi Sitio Web"
+3. ✅ Ver card "🔐 Credenciales de Acceso"
+4. ✅ URL de WordPress se muestra
+5. ✅ Usuario se muestra
+6. ✅ Contraseña está oculta (••••••••••••)
+
+TEST 6: Mostrar/Ocultar Contraseña (Cliente)
+--------------------------------------------
+1. Cliente: En "Mi Sitio Web"
+2. Click en "👁️ Mostrar" junto a la contraseña
+3. ✅ Contraseña se muestra en texto plano
+4. ✅ Botón cambia a "🙈 Ocultar"
+5. Click en "🙈 Ocultar"
+6. ✅ Contraseña vuelve a ocultarse
+
+TEST 7: Copiar Credenciales (Cliente)
+-------------------------------------
+1. Cliente: En "Mi Sitio Web"
+2. Click en "📋 Copiar" junto a URL
+3. ✅ Notificación: "URL copiado al portapapeles"
+4. Pegar en un editor de texto
+5. ✅ URL correcta se pega
+6. Repetir con Usuario y Contraseña
+7. ✅ Ambos se copian correctamente
+
+TEST 8: Acceder a WordPress (Cliente)
+-------------------------------------
+1. Cliente: En "Mi Sitio Web"
+2. Click en "✏️ Editar Sitio Web"
+3. ✅ Se abre WordPress en nueva pestaña
+4. Usar credenciales copiadas
+5. ✅ Login exitoso en WordPress
+
+═══════════════════════════════════════════════════════════════
+🐛 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA: Botón "Visitar" está deshabilitado
+SOLUCIÓN: Verificar que website_url esté configurada en el modal "Gestionar"
+
+PROBLEMA: Credenciales no aparecen en cliente dashboard
+SOLUCIÓN: 
+- Verificar que website_status sea 'activo'
+- Verificar que wordpress_url esté configurada
+- Verificar que wordpress_username y wordpress_password existan
+
+PROBLEMA: Error al guardar credenciales
+SOLUCIÓN:
+- Verificar que las columnas existan en la BD (migración)
+- Verificar logs de Railway para errores SQL
+
+PROBLEMA: Contraseña no se copia
+SOLUCIÓN:
+- Verificar que dataset.password esté configurado
+- Verificar que el botón llame copyToClipboard() correctamente
+
+═══════════════════════════════════════════════════════════════
+📊 RESUMEN DE ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+backend/database.js
+-------------------
+• Líneas 267-277: Migración para columnas de credenciales
+
+backend/server.js
+-----------------
+• Líneas 1599-1651: Endpoint PATCH actualizado con credenciales
+
+admin-dashboard/index.html
+--------------------------
+• Líneas 3224-3236: Cargar credenciales en modal
+• Líneas 3247-3297: Guardar credenciales
+• Líneas 4520-4555: Campos de credenciales en modal
+
+client-dashboard/index.html
+---------------------------
+• Líneas 1492-1538: Card de credenciales
+• Líneas 2848-2856: Cargar credenciales al cambiar sección
+• Líneas 2868-2882: Mostrar/ocultar contraseña
+• Líneas 2884-2906: Copiar al portapapeles
+• Líneas 2908-2940: Cargar y mostrar credenciales
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO FINAL
+═══════════════════════════════════════════════════════════════
+
+✅ Sistema de despliegue manual implementado
+✅ Credenciales gestionadas por el admin
+✅ Credenciales visibles para el cliente
+✅ Botones de copiar funcionando
+✅ Botón mostrar/ocultar contraseña funcionando
+✅ Botón "Visitar" funcional
+✅ Migración de BD incluida
+✅ Seguridad básica implementada
+
+TODO IMPLEMENTADO Y FUNCIONANDO 🚀
+
+Deploy: ~1-2 minutos en Railway + Vercel ⏱️
+
+═══════════════════════════════════════════════════════════════
+

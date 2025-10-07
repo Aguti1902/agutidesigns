@@ -1,0 +1,396 @@
+═══════════════════════════════════════════════════════════════
+🔔 SISTEMA DE NOTIFICACIONES VISUALES PARA TICKETS
+═══════════════════════════════════════════════════════════════
+
+✅ IMPLEMENTADO COMPLETO EN AMBOS DASHBOARDS
+
+═══════════════════════════════════════════════════════════════
+📋 CARACTERÍSTICAS IMPLEMENTADAS
+═══════════════════════════════════════════════════════════════
+
+1. ✅ ORDEN CRONOLÓGICO
+   • Tickets ordenados por fecha de creación
+   • Más recientes aparecen PRIMERO
+   • Implementado con: tickets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+2. ✅ FONDO AZUL PARA TICKETS NO LEÍDOS
+   • Gradiente azul: linear-gradient(to right, #e8f4ff 0%, #f0f8ff 100%)
+   • Borde izquierdo grueso: 4px solid #0046FE (admin)
+   • Borde completo: 3px solid #0046FE (cliente)
+   • Sombra: box-shadow para destacar
+   • Transform: scale(1.01) para efecto de elevación
+
+3. ✅ INDICADOR VISUAL ANIMADO
+   • Punto azul pulsante: ●
+   • Animación CSS pulse (2s infinite)
+   • Color corporativo: #0046FE
+   • Ubicado junto al ID del ticket
+
+4. ✅ BADGE CON NÚMERO EN MENÚ LATERAL
+   • Muestra cantidad de mensajes sin leer
+   • Actualización automática cada 15 segundos
+   • Desaparece cuando no hay mensajes
+   • Color azul corporativo (#0046FE)
+
+5. ✅ MARCADO COMO LEÍDO AUTOMÁTICO
+   • Al abrir un ticket se marca como leído
+   • Backend: ?markAsRead=admin o ?markAsRead=client
+   • Al cerrar el modal se recarga la lista
+   • El fondo azul desaparece inmediatamente
+
+═══════════════════════════════════════════════════════════════
+🔵 ADMIN DASHBOARD - NOTIFICACIONES
+═══════════════════════════════════════════════════════════════
+
+📊 TABLA DE TICKETS:
+
+TICKET NO LEÍDO:
+┌────────────────────────────────────────────────────────────┐
+│ 🔵 FONDO AZUL GRADIENTE                                    │
+│ #10 ● | Alejandro  | assad           | contenido | baja   │
+│        ⚡ Nuevo mensaje                                     │
+│        [👁️ Ver Nuevo] ← Botón azul destacado              │
+└────────────────────────────────────────────────────────────┘
+
+TICKET LEÍDO:
+┌────────────────────────────────────────────────────────────┐
+│ FONDO BLANCO                                               │
+│ #7 | Alejandro  | KJBJKB           | contenido | alta     │
+│     [Ver] ← Botón gris normal                              │
+└────────────────────────────────────────────────────────────┘
+
+📍 CARACTERÍSTICAS VISUALES:
+
+• Borde izquierdo: 4px solid #0046FE (tickets no leídos)
+• Punto animado: ● (junto al ID)
+• Texto adicional: "⚡ Nuevo mensaje" (bajo el asunto)
+• Botón destacado: "👁️ Ver Nuevo" con gradiente azul
+• Hover: Fondo gris suave en cualquier ticket
+
+🔔 BADGE EN MENÚ:
+
+Ubicación: Menú lateral → "🎫 Tickets"
+┌──────────────────────────────┐
+│ 🎫 Tickets         [3]       │ ← Badge azul con número
+└──────────────────────────────┘
+
+Actualización:
+• Función: updateAdminTicketsBadge(count)
+• Cuenta: tickets.filter(t => t.admin_unread === 1).length
+• Excluye: Tickets de categoría "facturacion"
+• Polling: Cada 15 segundos
+
+═══════════════════════════════════════════════════════════════
+🔵 CLIENT DASHBOARD - NOTIFICACIONES
+═══════════════════════════════════════════════════════════════
+
+📊 LISTA DE TICKETS:
+
+TICKET NO LEÍDO:
+┌────────────────────────────────────────────────────────────┐
+│ 🔵 FONDO AZUL GRADIENTE + BORDE AZUL 3PX                   │
+│ Ticket #10 ●                                               │
+│ Cómo puedo acceder                                         │
+│                                                            │
+│ [abierto] [media]                                          │
+│ 📅 6 de octubre de 2025                                    │
+│ ⚡ Mensaje nuevo sin leer ●                                │
+└────────────────────────────────────────────────────────────┘
+
+TICKET LEÍDO:
+┌────────────────────────────────────────────────────────────┐
+│ FONDO BLANCO + BORDE GRIS                                  │
+│ Ticket #8                                                  │
+│ Cómo puedo acceder                                         │
+│                                                            │
+│ [abierto] [media]                                          │
+│ 📅 6 de octubre de 2025                                    │
+│ 💬 Respuesta enviada                                       │
+└────────────────────────────────────────────────────────────┘
+
+TICKET CERRADO:
+┌────────────────────────────────────────────────────────────┐
+│ FONDO BLANCO + BORDE GRIS                                  │
+│ Ticket #1                                                  │
+│ asassa                                                     │
+│                                                            │
+│ [cerrado] [baja]                                           │
+│ 📅 4 de octubre de 2025                                    │
+│ ✅ Conversación cerrada                                    │
+└────────────────────────────────────────────────────────────┘
+
+📍 CARACTERÍSTICAS VISUALES:
+
+• Borde: 3px solid #0046FE (tickets no leídos)
+• Fondo: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%)
+• Sombra: 0 4px 12px rgba(0, 70, 254, 0.2)
+• Escala: transform: scale(1.01) para elevar
+• Punto animado: ● (junto al título y en estado)
+• Estado: "⚡ Mensaje nuevo sin leer ●" con animación pulse
+
+🔔 BADGE EN MENÚ:
+
+Ubicación 1: Menú lateral → "💬 Contactar"
+┌──────────────────────────────┐
+│ 💬 Contactar       [2]       │ ← Badge azul con número
+└──────────────────────────────┘
+
+Ubicación 2: Header de la sección "Contactar"
+┌────────────────────────────────────────────┐
+│ 💬 Contactar con Soporte  [2]             │
+└────────────────────────────────────────────┘
+
+Actualización:
+• Función: updateUnreadBadge(count)
+• Cuenta: tickets.filter(t => t.client_unread === 1).length
+• Excluye: Tickets de categoría "facturacion"
+• Polling: Cada 15 segundos
+• Dos badges: Menú + Header
+
+═══════════════════════════════════════════════════════════════
+🔄 FLUJO DE MARCADO COMO LEÍDO
+═══════════════════════════════════════════════════════════════
+
+ADMIN DASHBOARD:
+
+1. Admin ve tabla de tickets
+   → Ticket no leído: Fondo azul + ● + "⚡ Nuevo mensaje"
+
+2. Admin hace clic en "👁️ Ver Nuevo"
+   → GET /api/tickets/:id?markAsRead=admin
+   → Backend: admin_unread = 0
+   → Modal se abre con detalles
+
+3. Admin cierra el modal
+   → closeTicketModal()
+   → setTimeout(() => loadTickets(), 300)
+   → Se recarga la tabla
+   → Ticket YA NO tiene fondo azul
+   → Badge del menú se actualiza: 🎫 Tickets [2] → [1]
+
+═══════════════════════════════════════════════════════════════
+
+CLIENT DASHBOARD:
+
+1. Cliente ve lista de tickets
+   → Ticket no leído: Fondo azul + borde + ● + "⚡ Mensaje nuevo sin leer"
+
+2. Cliente hace clic en el card del ticket
+   → GET /api/tickets/:id?markAsRead=client
+   → Backend: client_unread = 0
+   → Modal se abre con conversación
+
+3. Cliente cierra el modal (botón "← Volver")
+   → closeViewTicketModal()
+   → setTimeout(() => loadClientTickets(), 300)
+   → Se recarga la lista
+   → Ticket YA NO tiene fondo azul
+   → Badge del menú se actualiza: 💬 Contactar [2] → [1]
+
+═══════════════════════════════════════════════════════════════
+📊 CÓDIGO CLAVE IMPLEMENTADO
+═══════════════════════════════════════════════════════════════
+
+ADMIN - loadTickets():
+```javascript
+// ORDENAR por fecha descendente
+tickets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+// DETERMINAR si no leído
+const hasUnreadMessage = ticket.admin_unread === 1;
+
+// ESTILO con fondo azul
+const rowStyle = hasUnreadMessage 
+    ? 'background: linear-gradient(to right, #e8f4ff 0%, #f0f8ff 100%); 
+       border-left: 4px solid #0046FE; 
+       font-weight: 500;' 
+    : '';
+
+// INDICADOR visual
+${hasUnreadMessage ? '<span style="color: #0046FE; font-size: 1.3rem; 
+  animation: pulse 2s infinite;">●</span>' : ''}
+
+// TEXTO adicional
+${hasUnreadMessage ? '<span>⚡ Nuevo mensaje</span>' : ''}
+
+// BOTÓN destacado
+<button onclick="viewTicket(${ticket.id})" 
+  style="${hasUnreadMessage ? 'background: linear-gradient(135deg, #0046FE 0%, 
+  #0036C8 100%); color: white; font-weight: 600;' : ''}">
+  ${hasUnreadMessage ? '👁️ Ver Nuevo' : 'Ver'}
+</button>
+
+// ACTUALIZAR badge
+updateAdminTicketsBadge(unreadCount);
+```
+
+═══════════════════════════════════════════════════════════════
+
+CLIENT - displayClientTickets():
+```javascript
+// ORDENAR por fecha descendente
+tickets.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+// DETERMINAR si no leído
+const hasUnreadMessage = ticket.client_unread === 1;
+
+// ESTILO del card con fondo azul
+const cardStyle = hasUnreadMessage 
+    ? 'border: 3px solid #0046FE; 
+       background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%); 
+       box-shadow: 0 4px 12px rgba(0, 70, 254, 0.2); 
+       transform: scale(1.01);' 
+    : 'border: 2px solid #e8eaed;';
+
+// TÍTULO con indicador
+<h3>
+    Ticket #${ticket.id}
+    ${hasUnreadMessage ? '<span style="animation: pulse 2s infinite;">●</span>' : ''}
+</h3>
+
+// ESTADO de conversación
+${hasUnreadMessage ? 
+  '<span>
+     <span style="animation: pulse 2s infinite;">●</span>
+     ⚡ Mensaje nuevo sin leer
+   </span>' : ''}
+
+// ACTUALIZAR badges
+updateUnreadBadge(unreadCount);
+```
+
+═══════════════════════════════════════════════════════════════
+🎨 ANIMACIÓN CSS
+═══════════════════════════════════════════════════════════════
+
+```css
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Aplicado en: */
+animation: pulse 2s infinite;
+```
+
+Efecto: El punto azul ● pulsa suavemente para llamar la atención
+
+═══════════════════════════════════════════════════════════════
+🧪 PRUEBAS
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Crear ticket desde cliente
+   ✅ Ticket aparece primero en la tabla (más reciente)
+   ✅ Admin ve fondo azul gradiente
+   ✅ Admin ve punto animado ● junto al ID
+   ✅ Admin ve "⚡ Nuevo mensaje" bajo el asunto
+   ✅ Botón dice "👁️ Ver Nuevo" con fondo azul
+   ✅ Badge en menú muestra número: 🎫 Tickets [1]
+
+PASO 2: Admin abre ticket
+   ✅ Modal se abre con detalles
+   ✅ Backend marca como leído (admin_unread = 0)
+
+PASO 3: Admin cierra modal
+   ✅ Tabla se recarga automáticamente
+   ✅ Fondo azul DESAPARECE
+   ✅ Punto animado ● DESAPARECE
+   ✅ Botón cambia a "Ver" (gris)
+   ✅ Badge actualiza: [1] → [0] (desaparece)
+
+PASO 4: Admin responde
+   ✅ Cliente recibe email
+   ✅ Cliente ve badge: 💬 Contactar [1]
+
+PASO 5: Cliente abre "Mis Conversaciones"
+   ✅ Ticket aparece primero (más reciente)
+   ✅ Fondo azul gradiente con borde grueso
+   ✅ Punto animado ● junto al título
+   ✅ Estado: "⚡ Mensaje nuevo sin leer ●"
+   ✅ Card elevado (transform scale)
+
+PASO 6: Cliente abre ticket
+   ✅ Modal muestra conversación
+   ✅ Backend marca como leído (client_unread = 0)
+
+PASO 7: Cliente cierra modal
+   ✅ Lista se recarga automáticamente
+   ✅ Fondo azul DESAPARECE
+   ✅ Punto animado ● DESAPARECE
+   ✅ Estado: "💬 Respuesta enviada" (verde)
+   ✅ Badge actualiza: [1] → [0] (desaparece)
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ admin-dashboard/index.html
+   - Línea 1806: Ordenar tickets por fecha
+   - Línea 1821-1823: Fondo azul gradiente con borde
+   - Línea 1845: Punto animado junto al ID
+   - Línea 1850: Texto "⚡ Nuevo mensaje"
+   - Línea 1857-1863: Botón "👁️ Ver Nuevo" destacado
+   - Línea 1874: Llamada a updateAdminTicketsBadge()
+   - Línea 1885-1896: Nueva función updateAdminTicketsBadge()
+   - Línea 2101-2104: Recarga de tickets al cerrar modal
+
+✅ client-dashboard/index.html
+   - Línea 4977: Ordenar tickets por fecha
+   - Línea 4986: Llamada a updateUnreadBadge()
+   - Línea 5047: Estado "⚡ Mensaje nuevo sin leer" con animación
+   - Línea 5055-5057: Fondo azul gradiente con borde grueso
+   - Línea 5063-5066: Título con punto animado
+   - Línea 5294: Recarga de tickets al cerrar modal
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Orden cronológico: IMPLEMENTADO ✅
+• Fondo azul para no leídos: IMPLEMENTADO ✅
+• Indicadores visuales animados: IMPLEMENTADO ✅
+• Badges en menú: FUNCIONANDO ✅
+• Marcado como leído: FUNCIONANDO ✅
+• Actualización automática: ACTIVA (15s) ✅
+• Recarga al cerrar modal: FUNCIONANDO ✅
+
+Deploy: ~1-2 minutos en Vercel y Railway ⏱️
+
+TODO IMPLEMENTADO Y FUNCIONANDO 🚀
+
+═══════════════════════════════════════════════════════════════
+💡 DETALLES TÉCNICOS
+═══════════════════════════════════════════════════════════════
+
+ORDEN CRONOLÓGICO:
+• JavaScript: Array.sort() con comparación de fechas
+• new Date(b.created_at) - new Date(a.created_at)
+• Resultado: Más reciente primero
+
+FONDO AZUL:
+• CSS: linear-gradient() para efecto suave
+• Admin: Borde izquierdo de 4px
+• Cliente: Borde completo de 3px
+• Transform: scale(1.01) para elevar
+• Box-shadow: Para dar profundidad
+
+ANIMACIÓN PULSE:
+• Keyframes CSS con opacity
+• Duración: 2 segundos
+• Infinite loop
+• Aplicado a: Punto ● y estados
+
+POLLING:
+• setInterval() cada 15 segundos
+• Llama a loadTickets() o loadClientTickets()
+• Actualiza badges automáticamente
+• No requiere recarga de página
+
+MARCADO COMO LEÍDO:
+• Query param: ?markAsRead=admin o ?markAsRead=client
+• Backend actualiza: admin_unread o client_unread = 0
+• Frontend recarga: setTimeout(() => load(), 300)
+• Delay de 300ms para sincronización
+
+═══════════════════════════════════════════════════════════════
+

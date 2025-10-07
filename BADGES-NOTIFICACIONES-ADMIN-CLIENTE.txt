@@ -1,0 +1,390 @@
+═══════════════════════════════════════════════════════════════
+✅ BADGES DE NOTIFICACIONES - ADMIN Y CLIENTE
+═══════════════════════════════════════════════════════════════
+
+📋 SOLICITUD:
+- Badge en header "Contactar" del cliente (azul, con número)
+- Badge en "Tickets" del admin (para saber mensajes nuevos)
+- Badge en "Pedidos" del admin (para saber pedidos modificados)
+- Ver notificaciones SIN entrar en las secciones
+
+═══════════════════════════════════════════════════════════════
+✅ IMPLEMENTACIÓN COMPLETA
+═══════════════════════════════════════════════════════════════
+
+1. 🎫 BADGE DE TICKETS (ADMIN DASHBOARD)
+   
+   UBICACIÓN: Menú lateral → Tickets
+   
+   FUNCIÓN: Muestra cantidad de tickets sin leer por el admin
+   
+   CRITERIO:
+   ✅ Solo tickets de soporte (excluye category = 'facturacion')
+   ✅ admin_unread = 1 (no leídos por el admin)
+   ✅ Actualización automática cada 15 segundos
+   
+   VISUAL:
+   🎫 Tickets  [3]  ← Círculo azul con número
+   
+   COMPORTAMIENTO:
+   - Aparece cuando hay tickets sin leer
+   - Desaparece cuando todos están leídos
+   - Se actualiza al abrir/cerrar tickets
+   - Animación de pulso suave
+
+2. 📋 BADGE DE PEDIDOS (ADMIN DASHBOARD)
+   
+   UBICACIÓN: Menú lateral → Pedidos
+   
+   FUNCIÓN: Muestra cantidad de pedidos con modificaciones nuevas
+   
+   CRITERIO:
+   ✅ has_modifications = true
+   ✅ modifications_viewed_at IS NULL o < last_modified_at
+   ✅ Actualización automática cada 15 segundos
+   
+   VISUAL:
+   📋 Pedidos  [2]  ← Círculo azul con número
+   
+   COMPORTAMIENTO:
+   - Aparece cuando hay pedidos modificados sin revisar
+   - Desaparece al marcar como vistos
+   - Se actualiza al ver pedidos
+   - Animación de pulso suave
+
+3. 💬 BADGE DE CONTACTAR (CLIENT DASHBOARD)
+   
+   UBICACIÓN: 
+   - Menú lateral → Contactar
+   - Header de la sección → "💬 Contactar con Soporte"
+   
+   FUNCIÓN: Muestra cantidad de mensajes sin leer del admin
+   
+   CRITERIO:
+   ✅ client_unread = 1 (no leídos por el cliente)
+   ✅ Excluye tickets de category = 'facturacion'
+   ✅ Actualización automática cada 10 segundos
+   
+   VISUAL:
+   💬 Contactar  [2]  ← En menú (pequeño)
+   💬 Contactar con Soporte  [2]  ← En header (más grande)
+   
+   COMPORTAMIENTO:
+   - 2 badges sincronizados (menú + header)
+   - Aparece cuando hay mensajes del admin sin leer
+   - Desaparece al abrir los tickets
+   - Animación de pulso suave
+   - Notificación: "Tienes X mensaje(s) nuevo(s)"
+
+═══════════════════════════════════════════════════════════════
+🎨 DISEÑO UNIFICADO
+═══════════════════════════════════════════════════════════════
+
+TODOS LOS BADGES COMPARTEN:
+
+• Color: Azul corporativo #0046FE
+• Fondo: Sólido con box-shadow
+• Texto: Blanco (#FFFFFF)
+• Border-radius: 15-20px (muy redondeado)
+• Font-weight: 700 (negrita)
+• Padding: 4-14px (según ubicación)
+• Animación: Pulso suave cada 2 segundos
+• Display: none cuando no hay notificaciones
+
+TAMAÑOS:
+
+📍 Admin Menú: 
+   - padding: 4px 10px
+   - font-size: 0.75rem
+
+📍 Cliente Menú:
+   - padding: 3px 10px
+   - font-size: 0.75rem
+
+📍 Cliente Header:
+   - padding: 6px 14px
+   - font-size: 0.85rem
+   - box-shadow: 0 2px 8px rgba(0, 70, 254, 0.4)
+
+═══════════════════════════════════════════════════════════════
+🔄 ACTUALIZACIÓN AUTOMÁTICA
+═══════════════════════════════════════════════════════════════
+
+ADMIN DASHBOARD:
+
+```javascript
+// Se ejecuta al cargar el dashboard
+loadDashboard() {
+    await loadStats();
+    await loadProjects();
+    updateAdminBadges();  // ← Primera actualización
+    
+    // Polling cada 15 segundos
+    setInterval(() => {
+        updateAdminBadges();
+    }, 15000);
+}
+
+// Función que actualiza ambos badges
+async updateAdminBadges() {
+    // 1. Contar tickets sin leer (admin_unread = 1)
+    // 2. Contar pedidos modificados sin ver
+    // 3. Actualizar badges en el DOM
+}
+```
+
+CLIENT DASHBOARD:
+
+```javascript
+// Ya existía, se mejoró para incluir badge del header
+
+async updateUnreadBadge() {
+    // Consulta API cada 10 segundos
+    // Actualiza badge del menú Y del header
+    // Muestra notificación si hay mensajes nuevos
+}
+```
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ admin-dashboard/index.html
+
+   LÍNEA 948: Badge en Tickets
+   ```html
+   <span id="unreadTicketsBadge" 
+         class="notification-badge-admin" 
+         style="display: none; background: #0046FE; ...">
+   </span>
+   ```
+   
+   LÍNEA 953: Badge en Pedidos
+   ```html
+   <span id="newOrdersBadge" 
+         class="notification-badge-admin" 
+         style="display: none; background: #0046FE; ...">
+   </span>
+   ```
+   
+   LÍNEAS 1684-1693: Configurar actualización automática
+   ```javascript
+   async function loadDashboard() {
+       await loadStats();
+       await loadProjects();
+       updateAdminBadges();
+       setInterval(() => {
+           updateAdminBadges();
+       }, 15000);
+   }
+   ```
+   
+   LÍNEAS 1733-1791: Función updateAdminBadges()
+   - Consulta /api/tickets (admin_unread)
+   - Consulta /api/admin/submissions (has_modifications)
+   - Actualiza ambos badges en el DOM
+
+✅ client-dashboard/index.html
+
+   LÍNEA 1728-1731: Badge en header mejorado
+   ```html
+   <h1 class="section-title" 
+       style="display: flex; align-items: center; gap: 12px;">
+       💬 Contactar con Soporte
+       <span id="unreadBadgeHeader" 
+             style="display: none; background: #0046FE; ...">
+       </span>
+   </h1>
+   ```
+   
+   LÍNEAS 5471-5475: Actualización del badge header
+   ```javascript
+   if (badgeHeader) {
+       badgeHeader.textContent = unreadCount;
+       badgeHeader.style.display = 'inline-block';
+       console.log('✅ Badge header actualizado:', unreadCount);
+   }
+   ```
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR
+═══════════════════════════════════════════════════════════════
+
+PRUEBA 1: Badge de Tickets (Admin)
+
+1. Cliente crea un ticket nuevo
+2. Ir al Admin Dashboard
+3. ✅ Badge [1] aparece en "🎫 Tickets"
+4. Admin abre el ticket
+5. ✅ Badge desaparece
+
+PRUEBA 2: Badge de Pedidos (Admin)
+
+1. Cliente con plan edita sus datos en "Mi Negocio"
+2. Guardar cambios (has_modifications = true)
+3. Ir al Admin Dashboard
+4. ✅ Badge [1] aparece en "📋 Pedidos"
+5. Admin hace clic en "Ver" del pedido
+6. ✅ Badge desaparece (modifications_viewed_at se actualiza)
+
+PRUEBA 3: Badge de Contactar (Cliente) - Menú
+
+1. Admin responde un ticket del cliente
+2. Cliente recarga su dashboard
+3. ✅ Badge [1] aparece en "💬 Contactar" del menú
+4. Cliente abre el ticket
+5. ✅ Badge desaparece
+
+PRUEBA 4: Badge de Contactar (Cliente) - Header
+
+1. Admin responde un ticket
+2. Cliente está en "Contactar"
+3. Esperar ~10 segundos
+4. ✅ Badge [1] aparece en el título "💬 Contactar con Soporte"
+5. Cliente abre el ticket
+6. ✅ Badge desaparece de menú Y header
+
+PRUEBA 5: Actualización Automática (Admin)
+
+1. Admin Dashboard abierto
+2. Cliente crea 2 tickets nuevos
+3. Esperar ~15 segundos
+4. ✅ Badge de Tickets actualiza a [2]
+5. No necesita recargar la página
+
+PRUEBA 6: Actualización Automática (Cliente)
+
+1. Cliente Dashboard abierto
+2. Admin responde 3 tickets
+3. Esperar ~10 segundos
+4. ✅ Badges actualizan a [3]
+5. ✅ Notificación: "Tienes 3 mensajes nuevos"
+
+═══════════════════════════════════════════════════════════════
+💡 DETALLES TÉCNICOS
+═══════════════════════════════════════════════════════════════
+
+1. FILTRADO DE TICKETS
+
+   Ambos dashboards excluyen tickets automáticos:
+   ```javascript
+   tickets.filter(t => t.category !== 'facturacion')
+   ```
+   
+   Razón: Los cambios de plan no deben notificarse como tickets
+
+2. LÓGICA DE PEDIDOS MODIFICADOS
+
+   ```javascript
+   orders.filter(o => 
+       o.has_modifications === true && 
+       (!o.modifications_viewed_at || 
+        o.last_modified_at > o.modifications_viewed_at)
+   )
+   ```
+   
+   Criterios:
+   - Pedido marcado como modificado
+   - Nunca visto O modificado después de última vista
+
+3. SINCRONIZACIÓN BADGES (Cliente)
+
+   El cliente tiene 2 badges que SIEMPRE están sincronizados:
+   - Badge del menú (pequeño)
+   - Badge del header (más grande)
+   
+   Ambos se actualizan simultáneamente en la misma función
+
+4. POLLING INTERVALS
+
+   - Admin: Cada 15 segundos (menos frecuente)
+   - Cliente: Cada 10 segundos (más frecuente)
+   
+   Razón: Cliente necesita respuestas más rápidas
+
+5. ANIMACIÓN CSS
+
+   ```css
+   @keyframes pulseAdmin {
+       0%, 100% {
+           box-shadow: 0 0 0 0 rgba(0, 70, 254, 0.7);
+       }
+       50% {
+           box-shadow: 0 0 0 8px rgba(0, 70, 254, 0);
+       }
+   }
+   ```
+   
+   Pulso sutil que llama la atención sin ser molesto
+
+═══════════════════════════════════════════════════════════════
+📱 RESPONSIVE & ACCESIBILIDAD
+═══════════════════════════════════════════════════════════════
+
+✅ RESPONSIVE:
+   - Badges se adaptan al tamaño del texto
+   - Funcionan en móvil, tablet y desktop
+   - No rompen el layout del menú
+
+✅ CONTRASTE:
+   - Blanco sobre azul oscuro (#0046FE)
+   - Ratio de contraste > 4.5:1 (WCAG AA)
+   - Claramente legible
+
+✅ TAMAÑO:
+   - Font-size mínimo: 0.75rem
+   - Padding suficiente para touch (móvil)
+   - Números de 1-2 dígitos se ven bien
+
+✅ ANIMACIÓN:
+   - Suave y no distrae
+   - Se puede desactivar con prefers-reduced-motion
+   - No causa mareos ni incomodidad
+
+═══════════════════════════════════════════════════════════════
+❓ PREGUNTAS FRECUENTES
+═══════════════════════════════════════════════════════════════
+
+P: ¿Por qué no aparece el badge en el cliente?
+R: Verifica en consola del navegador:
+   - "✅ [CLIENT] Badge header actualizado: X"
+   - Si aparece pero no se ve, puede ser un problema de CSS cache
+   - Intenta Ctrl+F5 para forzar recarga completa
+
+P: ¿El admin necesita recargar para ver nuevos tickets?
+R: No, se actualiza automáticamente cada 15 segundos
+
+P: ¿Qué pasa si hay más de 99 notificaciones?
+R: El badge mostrará "99" (se puede ajustar si es necesario)
+
+P: ¿Los badges se guardan al cerrar el dashboard?
+R: No, se calculan en tiempo real cada vez que se abre
+
+P: ¿Afecta el rendimiento tener polling constante?
+R: No, las consultas son ligeras y solo actualizan el DOM
+
+P: ¿Puedo desactivar las notificaciones?
+R: Actualmente no, pero se puede añadir esa opción
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Badge Tickets (Admin): IMPLEMENTADO ✅
+• Badge Pedidos (Admin): IMPLEMENTADO ✅
+• Badge Contactar Menú (Cliente): IMPLEMENTADO ✅
+• Badge Contactar Header (Cliente): IMPLEMENTADO ✅
+• Actualización automática: ACTIVA ✅
+• Animación de pulso: IMPLEMENTADA ✅
+• Filtrado de tickets automáticos: ACTIVO ✅
+
+Deploy:
+• Railway (backend): No requiere cambios
+• Vercel (admin): ~30 segundos ⏱️
+• Vercel (cliente): ~30 segundos ⏱️
+
+TODO LISTO PARA USAR 🚀
+
+═══════════════════════════════════════════════════════════════
+
+

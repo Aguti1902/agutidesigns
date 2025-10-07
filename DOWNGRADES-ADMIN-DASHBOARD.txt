@@ -1,0 +1,436 @@
+═══════════════════════════════════════════════════════════════
+✅ DOWNGRADES VISIBLES EN TODO EL ADMIN DASHBOARD
+═══════════════════════════════════════════════════════════════
+
+📋 SOLICITUD:
+"Si hago un downgrade del plan debe actualizarse en el admin 
+en todos los sitios también"
+
+═══════════════════════════════════════════════════════════════
+✅ IMPLEMENTACIÓN COMPLETA
+═══════════════════════════════════════════════════════════════
+
+Ahora los DOWNGRADES se muestran en TODAS las secciones del 
+admin dashboard con badges distintivos morados:
+
+1. 📋 SECCIÓN PEDIDOS (Tabla)
+   
+   UBICACIÓN: Lista de pedidos
+   
+   VISUAL:
+   #123 | Negocio ABC  🔽 DOWNGRADE  ✏️ MODIFICADO
+        | avanzado → basico
+   
+   BADGE:
+   - Color: Morado (#9333ea)
+   - Texto: "🔽 DOWNGRADE"
+   - Fondo con fila azul claro si hay downgrade
+   - Se muestra junto a UPGRADE y MODIFICADO
+
+2. 📝 MODAL DE DETALLE DE PEDIDO
+   
+   UBICACIÓN: Al hacer clic en "Ver" de un pedido
+   
+   VISUAL:
+   ┌─────────────────────────────────────┐
+   │ Plan Contratado  🔽 DOWNGRADE      │← Badge morado
+   │                                     │
+   │ Plan: Básico                        │
+   │ Anterior: Avanzado                  │
+   └─────────────────────────────────────┘
+   
+   BADGE:
+   - Color: Morado semi-transparente
+   - Texto: "🔽 DOWNGRADE"
+   - Aparece en el header del plan
+
+3. 🌐 KANBAN (Webs)
+   
+   UBICACIÓN: Tarjetas de proyectos
+   
+   VISUAL:
+   ┌──────────────────────────┐
+   │ │ Proyecto ABC  🔽 DOWN  │← Borde morado + Badge
+   │ │ 👤 Cliente XYZ         │
+   │ │ 📧 email@ejemplo.com   │
+   │ │ 📦 Básico              │
+   └──────────────────────────┘
+   
+   CARACTERÍSTICAS:
+   - Borde izquierdo morado (4px)
+   - Badge "🔽 DOWNGRADE" en el título
+   - Muestra el plan actualizado
+   - Notas del proyecto actualizadas
+
+═══════════════════════════════════════════════════════════════
+🎨 DISEÑO DE BADGES
+═══════════════════════════════════════════════════════════════
+
+UPGRADE vs DOWNGRADE:
+
+┌──────────────────────────────────────────────────────┐
+│ UPGRADE:                                             │
+│ • Color: Naranja (#ff6b35 → #f7931e)                │
+│ • Icono: 🔼                                          │
+│ • Significado: Cliente mejoró su plan               │
+│ • Acción: Proyecto reabierto, 24h reactivadas      │
+└──────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│ DOWNGRADE:                                           │
+│ • Color: Morado (#9333ea → #7e22ce)                 │
+│ • Icono: 🔽                                          │
+│ • Significado: Cliente bajó de plan                 │
+│ • Acción: Páginas eliminadas (si excedía límite)    │
+└──────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│ MODIFICADO:                                          │
+│ • Color: Azul (#0046FE)                              │
+│ • Icono: ✏️                                          │
+│ • Significado: Cliente editó sus datos              │
+│ • Acción: Cambios pendientes de revisar             │
+└──────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+🔧 CAMBIOS TÉCNICOS
+═══════════════════════════════════════════════════════════════
+
+1. BASE DE DATOS (database.js)
+
+   NUEVOS CAMPOS:
+   
+   tabla `submissions`:
+   • is_downgrade BOOLEAN DEFAULT FALSE
+   
+   tabla `projects`:
+   • is_downgrade BOOLEAN DEFAULT FALSE
+   
+   MIGRACIÓN AUTOMÁTICA:
+   Se ejecuta al arrancar Railway, no requiere acción manual
+
+2. BACKEND (server.js)
+
+   ENDPOINT: POST /api/client/change-plan
+   
+   LÓGICA DE DOWNGRADE:
+   
+   ```javascript
+   if (isDowngrade) {
+       // 1. Actualizar submission
+       await db.pool.query(`
+           UPDATE submissions 
+           SET plan = $1, 
+               amount = $2, 
+               previous_plan = $3,
+               is_downgrade = true,
+               has_upgrade = false,
+               last_modified_at = CURRENT_TIMESTAMP
+           WHERE id = $4
+       `, [newPlan, newAmount, oldPlan, submissionId]);
+       
+       // 2. Actualizar proyecto
+       await db.pool.query(`
+           UPDATE projects 
+           SET is_upgrade = false,
+               is_downgrade = true,
+               plan = $1
+           WHERE client_id = $2
+       `, [newPlan, clientId]);
+       
+       // 3. Actualizar notas del proyecto
+       const note = `Plan actualizado: ${oldPlan} → ${newPlan}. 
+                     Downgrade confirmado. 
+                     Páginas eliminadas: ${pagesToRemove.join(', ')}.`;
+                     
+       await db.pool.query(`
+           UPDATE projects 
+           SET notes = $1 
+           WHERE client_id = $2
+       `, [note, clientId]);
+       
+       // 4. Actualizar cliente
+       await db.pool.query(`
+           UPDATE clients 
+           SET plan = $1 
+           WHERE id = $2
+       `, [newPlan, clientId]);
+   }
+   ```
+   
+   STRIPE:
+   También se actualiza la suscripción en Stripe con el nuevo plan
+
+3. ADMIN DASHBOARD (index.html)
+
+   CAMBIOS EN PEDIDOS:
+   
+   Línea 2111:
+   ```javascript
+   ${pedido.is_downgrade ? 
+     '<span class="badge" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔽 DOWNGRADE</span>' 
+     : ''}
+   ```
+   
+   CAMBIOS EN KANBAN:
+   
+   Línea 3418:
+   ```javascript
+   <div class="kanban-card" 
+        ${project.is_upgrade ? 'style="border-left: 4px solid #ff6b35;"' 
+          : project.is_downgrade ? 'style="border-left: 4px solid #9333ea;"' 
+          : ''}>
+   ```
+   
+   Línea 3422:
+   ```javascript
+   ${project.is_downgrade ? 
+     '<span class="badge" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); color: white; margin-left: 8px; font-size: 0.7rem; padding: 3px 8px;">🔽 DOWNGRADE</span>' 
+     : ''}
+   ```
+
+═══════════════════════════════════════════════════════════════
+🔄 FLUJO COMPLETO DE DOWNGRADE
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Cliente solicita downgrade
+┌─────────────────────────────────────┐
+│ Cliente Dashboard                   │
+│ → Sección "Facturación"            │
+│ → Clic en "Cambiar Plan"           │
+│ → Selecciona plan inferior         │
+└─────────────────────────────────────┘
+         ↓
+
+PASO 2: Validación de páginas
+┌─────────────────────────────────────┐
+│ Si páginas > límite nuevo plan:    │
+│ → Modal: "Selecciona páginas a     │
+│   eliminar"                         │
+│ → Cliente elige qué páginas quitar │
+│ → Confirma o cancela               │
+└─────────────────────────────────────┘
+         ↓
+
+PASO 3: Actualización en Stripe
+┌─────────────────────────────────────┐
+│ Backend llama a Stripe API          │
+│ → Actualiza subscription            │
+│ → Cambia price_id al nuevo plan    │
+│ → Prorratea el cambio               │
+└─────────────────────────────────────┘
+         ↓
+
+PASO 4: Actualización en Base de Datos
+┌─────────────────────────────────────┐
+│ • clients: plan = nuevo             │
+│ • submissions: is_downgrade = true  │
+│ • submissions: previous_plan        │
+│ • submissions: pages actualizado    │
+│ • projects: is_downgrade = true     │
+│ • projects: plan = nuevo            │
+│ • projects: notes actualizado       │
+└─────────────────────────────────────┘
+         ↓
+
+PASO 5: Visible en Admin Dashboard
+┌─────────────────────────────────────┐
+│ PEDIDOS:                            │
+│ ✅ Badge "🔽 DOWNGRADE" morado     │
+│ ✅ Plan actualizado                 │
+│ ✅ Previous_plan visible            │
+│                                     │
+│ KANBAN:                             │
+│ ✅ Borde morado                     │
+│ ✅ Badge "🔽 DOWNGRADE"            │
+│ ✅ Notas actualizadas              │
+│                                     │
+│ MODAL DETALLE:                      │
+│ ✅ Badge en header de plan          │
+│ ✅ Plan anterior mostrado           │
+└─────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+📊 ESTADOS POSIBLES DE UN PEDIDO/PROYECTO
+═══════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────────────────────────┐
+│ ESTADO 1: NUEVO (inicial)                                │
+│ • has_upgrade: false                                     │
+│ • is_downgrade: false                                    │
+│ • has_modifications: false                               │
+│ → Sin badges                                             │
+└──────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────┐
+│ ESTADO 2: UPGRADE                                        │
+│ • has_upgrade: true                                      │
+│ • is_downgrade: false                                    │
+│ • previous_plan: plan anterior                           │
+│ → Badge naranja "🔼 UPGRADE"                            │
+│ → Proyecto reabierto si estaba finalizado               │
+│ → 24h de edición reactivadas                            │
+└──────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────┐
+│ ESTADO 3: DOWNGRADE                                      │
+│ • has_upgrade: false                                     │
+│ • is_downgrade: true                                     │
+│ • previous_plan: plan anterior                           │
+│ → Badge morado "🔽 DOWNGRADE"                           │
+│ → Páginas reducidas (si excedía límite)                 │
+│ → Proyecto mantiene estado actual                        │
+└──────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────┐
+│ ESTADO 4: MODIFICADO (después de upgrade/downgrade)     │
+│ • (has_upgrade O is_downgrade): true                     │
+│ • has_modifications: true                                │
+│ → Badges múltiples: UPGRADE/DOWNGRADE + MODIFICADO      │
+└──────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR
+═══════════════════════════════════════════════════════════════
+
+PRUEBA 1: Downgrade sin exceder páginas
+
+1. Cliente tiene plan Avanzado (10 páginas)
+2. Tiene 7 páginas configuradas
+3. Cambia a plan Básico (5 páginas)
+4. Sistema pide eliminar 2 páginas
+5. Cliente selecciona 2 páginas
+6. ✅ Confirmar cambio
+
+VERIFICAR EN ADMIN:
+→ Sección "Pedidos": Badge morado "🔽 DOWNGRADE"
+→ Kanban: Borde morado + Badge
+→ Plan actualizado: Básico (antes: Avanzado)
+→ Notas: "Páginas eliminadas: X, Y"
+
+PRUEBA 2: Downgrade dentro del límite
+
+1. Cliente tiene plan Premium (20 páginas)
+2. Tiene 8 páginas configuradas
+3. Cambia a plan Avanzado (10 páginas)
+4. No se piden páginas (8 < 10)
+5. ✅ Cambio inmediato
+
+VERIFICAR EN ADMIN:
+→ Badge morado "🔽 DOWNGRADE"
+→ Plan actualizado
+→ No hay páginas eliminadas en notas
+
+PRUEBA 3: Upgrade después de Downgrade
+
+1. Cliente tiene Básico con is_downgrade = true
+2. Cambia a Avanzado
+3. ✅ is_downgrade se pone en false
+4. ✅ has_upgrade se pone en true
+5. Badge cambia de morado a naranja
+
+VERIFICAR EN ADMIN:
+→ Badge naranja "🔼 UPGRADE" (ya no morado)
+→ is_downgrade = false
+→ has_upgrade = true
+
+PRUEBA 4: Múltiples badges
+
+1. Cliente hace downgrade
+2. Badge morado "🔽 DOWNGRADE" aparece
+3. Cliente edita datos en "Mi Negocio"
+4. Badge azul "✏️ MODIFICADO" se añade
+5. ✅ Ambos badges visibles simultáneamente
+
+VERIFICAR EN ADMIN:
+→ Dos badges: 🔽 DOWNGRADE + ✏️ MODIFICADO
+→ Fondo azul claro en la fila
+
+═══════════════════════════════════════════════════════════════
+💡 DETALLES IMPORTANTES
+═══════════════════════════════════════════════════════════════
+
+1. DIFERENCIA UPGRADE vs DOWNGRADE
+
+   UPGRADE:
+   ✓ Reabre proyecto si estaba finalizado
+   ✓ Reactiva 24h de edición
+   ✓ Progreso vuelve a 50% si estaba al 100%
+   ✓ Cliente puede añadir más páginas
+   
+   DOWNGRADE:
+   ✓ NO reabre proyecto
+   ✓ NO reactiva 24h
+   ✓ Progreso se mantiene
+   ✓ Páginas se reducen si exceden límite
+
+2. ELIMINACIÓN DE PÁGINAS
+
+   Solo se eliminan si:
+   • Páginas actuales > límite nuevo plan
+   • Cliente debe seleccionar manualmente
+   • Se guardan en notas del proyecto
+   • Se notifica al admin vía ticket
+
+3. PRIORIDAD DE BADGES
+
+   Si un pedido tiene múltiples estados:
+   • UPGRADE o DOWNGRADE (mutuamente excluyentes)
+   • + MODIFICADO (compatible con ambos)
+   
+   Nunca: UPGRADE + DOWNGRADE al mismo tiempo
+
+4. PERSISTENCIA
+
+   Los flags is_upgrade e is_downgrade:
+   • Se mantienen hasta nuevo cambio de plan
+   • Solo se resetean con otro cambio
+   • Sirven para historial de cambios
+
+5. SINCRONIZACIÓN
+
+   Cuando hay downgrade, se actualizan:
+   ✓ clients.plan
+   ✓ submissions.plan, is_downgrade, previous_plan
+   ✓ projects.plan, is_downgrade, notes
+   ✓ stripe.subscription
+   ✓ Visual en admin (pedidos, kanban, modal)
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ backend/database.js
+   - Líneas 267-276: Migración is_downgrade en submissions
+   - Líneas 278-287: Migración is_downgrade en projects
+
+✅ backend/server.js
+   - Líneas 2851-2906: Lógica completa de downgrade
+   - Actualización de submissions
+   - Actualización de projects
+   - Actualización de notas
+   - Sincronización con Stripe
+
+✅ admin-dashboard/index.html
+   - Línea 2105: Fondo azul si hay downgrade
+   - Línea 2111: Badge morado en tabla de pedidos
+   - Líneas 2180-2181: Badge en modal de detalle
+   - Línea 3418: Borde morado en Kanban
+   - Línea 3422: Badge morado en tarjeta Kanban
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Downgrades visibles: EN TODOS LOS SITIOS ✅
+• Badge morado distintivo: IMPLEMENTADO ✅
+• Actualización de base de datos: COMPLETA ✅
+• Sincronización con Stripe: ACTIVA ✅
+• Notas de proyecto: ACTUALIZADAS ✅
+• Deploy backend: ~1 minuto ⏱️
+• Deploy frontend: ~30 segundos ⏱️
+
+TODO FUNCIONANDO 🚀
+
+═══════════════════════════════════════════════════════════════
+

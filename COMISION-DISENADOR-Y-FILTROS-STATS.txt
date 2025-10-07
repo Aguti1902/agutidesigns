@@ -1,0 +1,334 @@
+═══════════════════════════════════════════════════════════════
+💸 COMISIÓN DISEÑADOR Y FILTROS DE TIEMPO EN ESTADÍSTICAS
+═══════════════════════════════════════════════════════════════
+
+✅ IMPLEMENTADO COMPLETO EN EL ADMIN DASHBOARD
+
+═══════════════════════════════════════════════════════════════
+📊 NUEVA CARD: COMISIÓN DISEÑADOR
+═══════════════════════════════════════════════════════════════
+
+CARACTERÍSTICAS:
+
+• Card morada con gradiente (purple)
+• Calcula el 0.3% del neto después de impuestos y comisiones
+• Se actualiza automáticamente según el período filtrado
+
+UBICACIÓN:
+
+┌────────────────────────────────────────────────────────┐
+│ 💰 Ingresos Totales      💸 Comisión Diseñador       │
+│ 133€                     0.25€                         │
+│ Revenue acumulado        0.3% del neto                 │
+└────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+💰 CÁLCULO DE LA COMISIÓN
+═══════════════════════════════════════════════════════════════
+
+EJEMPLO: Cliente paga Plan Básico 35€/mes
+
+1. INGRESO BRUTO (lo que recibe Stripe):
+   Base: 35€
+   IVA (21%): 7.35€
+   Total: 42.35€
+
+2. COMISIÓN STRIPE:
+   1.5% + 0.25€ sobre total
+   (42.35 × 0.015) + 0.25 = 0.89€
+
+3. IMPUESTOS A PAGAR:
+   IVA a Hacienda: 7.35€
+   IRPF (15% sobre base): 35 × 0.15 = 5.25€
+
+4. NETO DESPUÉS DE TODO:
+   42.35 - 0.89 - 7.35 - 5.25 = 28.86€
+
+5. COMISIÓN DISEÑADOR (0.3%):
+   28.86 × 0.003 = 0.087€
+
+═══════════════════════════════════════════════════════════════
+📐 FÓRMULA SIMPLIFICADA
+═══════════════════════════════════════════════════════════════
+
+Para calcular rápidamente:
+
+Neto ≈ Revenue × 0.632 (63.2%)
+Comisión = Neto × 0.003 (0.3%)
+
+Desglose del 63.2%:
+• Stripe (1.5%): -0.015
+• IVA (21%): -0.21
+• IRPF (15%): -0.15
+• Neto: ≈ 63.2%
+
+CÓDIGO:
+```javascript
+const revenue = stats.revenue || 0;
+const netRevenue = revenue * 0.632;
+const designerCommission = netRevenue * 0.003;
+```
+
+═══════════════════════════════════════════════════════════════
+🔍 FILTROS DE TIEMPO IMPLEMENTADOS
+═══════════════════════════════════════════════════════════════
+
+BOTONES DE FILTRO RÁPIDO:
+
+┌─────────────────────────────────────────────────────────┐
+│ [ Hoy ] [ Esta Semana ] [Este Mes] [ Este Año ] [Todo] │
+│                             ↑ Activo por defecto        │
+└─────────────────────────────────────────────────────────┘
+
+SELECTOR DE RANGO PERSONALIZADO:
+
+┌──────────────────────────────────────────────────────────┐
+│ [📅 Fecha inicio] a [📅 Fecha fin] [📅 Filtrar]         │
+└──────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+⚙️ FUNCIONAMIENTO
+═══════════════════════════════════════════════════════════════
+
+1. FILTROS RÁPIDOS:
+
+   • Hoy: Desde las 00:00 hasta ahora
+   • Esta Semana: Últimos 7 días
+   • Este Mes: Últimos 30 días
+   • Este Año: Últimos 365 días
+   • Todo: Sin filtro de fecha
+
+2. FILTRO PERSONALIZADO:
+
+   • Selecciona fecha de inicio
+   • Selecciona fecha de fin
+   • Click en "📅 Filtrar"
+   • Validación:
+     - Ambas fechas requeridas
+     - Fecha inicio < Fecha fin
+
+3. ACTUALIZACIÓN AUTOMÁTICA:
+
+   • Al seleccionar filtro → Recarga estadísticas
+   • Se actualiza: Revenue, Comisión, Stats generales
+   • Los filtros persisten hasta cambiar
+
+═══════════════════════════════════════════════════════════════
+🎨 ESTILOS IMPLEMENTADOS
+═══════════════════════════════════════════════════════════════
+
+CARD PURPLE (Comisión Diseñador):
+```css
+.stat-card.purple {
+    background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
+}
+```
+
+BOTONES DE FILTRO:
+```css
+.btn-filter {
+    background: white;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    background: #f8f9fa;
+    border-color: #0046FE;
+    color: #0046FE;
+}
+
+.btn-filter.active {
+    background: #0046FE;
+    color: white;
+    border-color: #0046FE;
+}
+```
+
+═══════════════════════════════════════════════════════════════
+🔧 IMPLEMENTACIÓN TÉCNICA
+═══════════════════════════════════════════════════════════════
+
+FRONTEND (admin-dashboard/index.html):
+
+1. Nuevos elementos HTML:
+   • Card de comisión diseñador
+   • Botones de filtro rápido
+   • Inputs de fecha personalizada
+
+2. Nuevas funciones JavaScript:
+   • filterStats(filter) - Filtrar por período
+   • filterStatsByDateRange() - Filtrar por rango
+   • loadStats(startDate, endDate) - Cargar con filtros
+
+3. Variable global:
+   • currentStatsFilter = 'month' (por defecto)
+
+BACKEND (backend/server.js):
+
+1. Endpoint actualizado:
+   ```javascript
+   GET /api/admin/stats?filter=month
+   GET /api/admin/stats?startDate=2025-01-01&endDate=2025-12-31
+   ```
+
+2. Parámetros query:
+   • filter: today | week | month | year | all
+   • startDate: YYYY-MM-DD
+   • endDate: YYYY-MM-DD
+
+3. Lógica de filtrado:
+   • Calcula fechas según filtro
+   • Pasa dateFilter a db.getStats()
+
+DATABASE (backend/database.js):
+
+1. Función actualizada:
+   ```javascript
+   async function getStats(dateFilter = {})
+   ```
+
+2. Filtros SQL:
+   • WHERE created_at >= $1 AND created_at <= $2
+   • Aplicado a: submissions, clients, projects
+
+3. Queries afectadas:
+   • Total solicitudes
+   • Clientes activos
+   • Clientes sin plan
+   • Revenue total
+   • Proyectos en desarrollo
+   • Distribución de planes
+
+═══════════════════════════════════════════════════════════════
+🧪 PRUEBAS
+═══════════════════════════════════════════════════════════════
+
+PASO 1: Verificar card de comisión
+   ✅ Aparece en la sección de estadísticas
+   ✅ Tiene gradiente morado
+   ✅ Muestra valor en euros (ej: 0.25€)
+   ✅ Muestra texto: "0.3% del neto..."
+
+PASO 2: Probar filtros rápidos
+   ✅ Click en "Hoy" → Filtra por hoy
+   ✅ Click en "Esta Semana" → Últimos 7 días
+   ✅ Click en "Este Mes" → Últimos 30 días (activo por defecto)
+   ✅ Click en "Este Año" → Últimos 365 días
+   ✅ Click en "Todo" → Sin filtro
+   ✅ Botón activo se destaca en azul
+
+PASO 3: Probar filtro personalizado
+   ✅ Seleccionar fecha inicio
+   ✅ Seleccionar fecha fin
+   ✅ Click en "📅 Filtrar"
+   ✅ Estadísticas se actualizan
+   ✅ Validación de fechas funciona
+
+PASO 4: Verificar cálculos
+   ✅ Revenue se actualiza según período
+   ✅ Comisión = Revenue × 0.632 × 0.003
+   ✅ Otros stats se filtran correctamente
+
+═══════════════════════════════════════════════════════════════
+📊 EJEMPLO DE USO
+═══════════════════════════════════════════════════════════════
+
+ESCENARIO: Ver estadísticas de este mes
+
+1. Dashboard carga con filtro "Este Mes" activo
+2. Ve ingresos totales: 133€
+3. Ve comisión diseñador: 0.25€
+
+Cálculo:
+• Revenue: 133€
+• Neto: 133 × 0.632 = 84.06€
+• Comisión: 84.06 × 0.003 = 0.25€ ✅
+
+═══════════════════════════════════════════════════════════════
+
+ESCENARIO: Filtrar por trimestre específico
+
+1. Seleccionar fecha inicio: 2025-01-01
+2. Seleccionar fecha fin: 2025-03-31
+3. Click en "📅 Filtrar"
+4. Ve estadísticas del Q1 2025
+
+═══════════════════════════════════════════════════════════════
+💡 CONSIDERACIONES TÉCNICAS
+═══════════════════════════════════════════════════════════════
+
+CÁLCULO DE COMISIÓN:
+
+• Se usa 63.2% como factor de neto simplificado
+• Incluye:
+  - Comisión Stripe: ~1.5% + 0.25€
+  - IVA: 21%
+  - IRPF: 15%
+• Es una aproximación conservadora
+
+FILTROS DE FECHA:
+
+• Backend calcula fechas dinámicamente
+• Se incluye todo el día final (23:59:59)
+• Filtros se aplican a created_at en todas las tablas
+• Compatible con PostgreSQL
+
+VALIDACIÓN:
+
+• Frontend valida fechas antes de enviar
+• Backend valida formato de fechas
+• Errores muestran notificación al usuario
+
+═══════════════════════════════════════════════════════════════
+📋 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+✅ admin-dashboard/index.html
+   - Línea 982-1004: Header con filtros
+   - Línea 1039-1046: Nueva card de comisión
+   - Línea 297-299: Estilo .stat-card.purple
+   - Línea 393-415: Estilos .btn-filter
+   - Línea 1752-1857: Funciones de filtrado
+
+✅ backend/server.js
+   - Línea 755-794: Endpoint actualizado con filtros
+
+✅ backend/database.js
+   - Línea 479-547: Función getStats con dateFilter
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Card de comisión diseñador: IMPLEMENTADA ✅
+• Filtros de tiempo: IMPLEMENTADOS ✅
+• Filtro personalizado: IMPLEMENTADO ✅
+• Cálculo automático: FUNCIONANDO ✅
+• Validación de fechas: IMPLEMENTADA ✅
+
+Deploy: ~1-2 minutos en Railway y Vercel ⏱️
+
+TODO IMPLEMENTADO Y FUNCIONANDO 🚀
+
+═══════════════════════════════════════════════════════════════
+💰 TABLA DE COMISIONES POR PLAN
+═══════════════════════════════════════════════════════════════
+
+| Plan     | Precio | IVA   | Total | Neto  | Comisión |
+|----------|--------|-------|-------|-------|----------|
+| Básico   | 35€    | 7.35€ | 42€   | 27€   | 0.08€    |
+| Avanzado | 49€    | 10.29€| 59€   | 37€   | 0.11€    |
+| Premium  | 65€    | 13.65€| 79€   | 50€   | 0.15€    |
+
+Nota: Comisiones aproximadas. El cálculo exacto depende de
+las comisiones de Stripe que pueden variar ligeramente.
+
+═══════════════════════════════════════════════════════════════
+

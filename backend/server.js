@@ -391,15 +391,30 @@ app.post('/api/create-subscription', async (req, res) => {
                 console.log('📦 Cliente existente ID:', clientId);
                 console.log('🔗 Vinculando submission_id:', finalSubmissionId);
                 
-                // Actualizar plan, payment_date Y submission_id
-                await db.updateClient(existingClient.id, {
+                // Verificar si es un cambio de plan (para reiniciar ventana de edición 24h)
+                const isPlanChange = existingClient.plan && existingClient.plan !== plan;
+                
+                // Actualizar plan, payment_date, submission_id Y plan_change_at (si es cambio de plan)
+                const updateData = {
                     plan: plan,
+                    billing_cycle: billingCycle,
                     stripe_subscription_id: subscription.id,
                     payment_date: new Date().toISOString(),
                     submission_id: finalSubmissionId
-                });
+                };
+                
+                // Si es cambio de plan, actualizar plan_change_at para reiniciar ventana de edición
+                if (isPlanChange) {
+                    updateData.plan_change_at = new Date().toISOString();
+                    console.log('🔄 Cambio de plan detectado:', existingClient.plan, '→', plan, '- Reiniciando ventana de edición 24h');
+                }
+                
+                await db.updateClient(existingClient.id, updateData);
                 
                 console.log(`✅ Cliente ${clientId} actualizado con submission_id: ${finalSubmissionId}`);
+                if (isPlanChange) {
+                    console.log('⏰ plan_change_at actualizado - Temporizador de 24h reiniciado');
+                }
                 
                 // Verificar actualización
                 const updatedClient = await db.getClientById(clientId);
@@ -407,6 +422,8 @@ app.post('/api/create-subscription', async (req, res) => {
                     id: updatedClient.id,
                     submission_id: updatedClient.submission_id,
                     plan: updatedClient.plan,
+                    billing_cycle: updatedClient.billing_cycle,
+                    plan_change_at: updatedClient.plan_change_at,
                     website_status: updatedClient.website_status
                 });
             }

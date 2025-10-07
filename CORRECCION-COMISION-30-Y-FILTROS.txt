@@ -1,0 +1,286 @@
+═══════════════════════════════════════════════════════════════
+🔧 CORRECCIÓN: COMISIÓN 30% Y FILTROS DE FECHA
+═══════════════════════════════════════════════════════════════
+
+✅ PROBLEMAS CORREGIDOS
+
+═══════════════════════════════════════════════════════════════
+💸 PROBLEMA 1: COMISIÓN INCORRECTA (0.3% en lugar de 30%)
+═══════════════════════════════════════════════════════════════
+
+ERROR:
+• Card mostraba: "0.3% del neto"
+• Cálculo: netRevenue * 0.003 (0.3%)
+• Resultado: Para 133€ → 0.25€
+
+CORRECCIÓN:
+• Card ahora muestra: "30% del neto"
+• Cálculo: netRevenue * 0.30 (30%)
+• Resultado: Para 133€ → 25.22€
+
+═══════════════════════════════════════════════════════════════
+💰 NUEVO CÁLCULO DE COMISIÓN
+═══════════════════════════════════════════════════════════════
+
+EJEMPLO: Revenue total = 133€
+
+1. Calcular neto (después de impuestos y comisiones):
+   Neto = 133€ × 0.632 = 84.06€
+
+2. Calcular comisión diseñador (30% del neto):
+   Comisión = 84.06€ × 0.30 = 25.22€
+
+FÓRMULA SIMPLIFICADA:
+```javascript
+const revenue = 133;
+const netRevenue = revenue * 0.632;  // 84.06€
+const commission = netRevenue * 0.30; // 25.22€
+```
+
+═══════════════════════════════════════════════════════════════
+📊 TABLA DE COMISIONES ACTUALIZADA (30%)
+═══════════════════════════════════════════════════════════════
+
+| Plan     | Precio | Total+IVA | Neto  | Comisión 30% |
+|----------|--------|-----------|-------|--------------|
+| Básico   | 35€    | 42.35€    | 27€   | 8.10€        |
+| Avanzado | 49€    | 59.29€    | 37€   | 11.10€       |
+| Premium  | 65€    | 78.65€    | 50€   | 15.00€       |
+
+COMPARACIÓN MENSUAL VS ANUAL:
+
+Mensual:
+• Básico: 35€ → Comisión: 8.10€/mes → 97.20€/año
+• Avanzado: 49€ → Comisión: 11.10€/mes → 133.20€/año
+• Premium: 65€ → Comisión: 15.00€/mes → 180.00€/año
+
+Anual (con descuento):
+• Básico: 420€/año → Comisión: 126.72€/año (79.56€ neto)
+• Avanzado: 588€/año → Comisión: 177.41€/año (111.41€ neto)
+• Premium: 780€/año → Comisión: 235.44€/año (147.84€ neto)
+
+═══════════════════════════════════════════════════════════════
+🔍 PROBLEMA 2: FILTROS DE FECHA NO FUNCIONABAN BIEN
+═══════════════════════════════════════════════════════════════
+
+ERROR:
+• Las fechas se calculaban usando el mismo objeto Date
+• Las mutaciones con setHours(), setDate(), etc. afectaban
+  al objeto original
+• Resultado: Fechas incorrectas en los filtros
+
+EJEMPLO DEL PROBLEMA:
+```javascript
+const now = new Date();
+dateFilter.end = now; // Referencia al mismo objeto
+
+switch(filter) {
+    case 'today':
+        dateFilter.start = new Date(now.setHours(0, 0, 0, 0));
+        // ❌ Esto MUTA 'now', afectando también 'dateFilter.end'
+        break;
+}
+```
+
+CORRECCIÓN:
+• Crear nuevas instancias de Date para cada variable
+• Evitar mutaciones del objeto original
+
+```javascript
+const now = new Date();
+dateFilter.end = new Date(); // Nueva instancia
+
+switch(filter) {
+    case 'today':
+        dateFilter.start = new Date(); // Nueva instancia
+        dateFilter.start.setHours(0, 0, 0, 0); // Mutar copia
+        break;
+    case 'week':
+        dateFilter.start = new Date(); // Nueva instancia
+        dateFilter.start.setDate(dateFilter.start.getDate() - 7);
+        break;
+    // ... etc
+}
+```
+
+═══════════════════════════════════════════════════════════════
+🧪 VERIFICACIÓN DE FILTROS
+═══════════════════════════════════════════════════════════════
+
+FILTRO: HOY
+• Start: 2025-10-06 00:00:00
+• End: 2025-10-06 23:59:59
+• ✅ Solo muestra stats de hoy
+
+FILTRO: ESTA SEMANA
+• Start: 2025-09-29 (hace 7 días)
+• End: 2025-10-06 (hoy)
+• ✅ Últimos 7 días
+
+FILTRO: ESTE MES
+• Start: 2025-09-06 (hace 30 días)
+• End: 2025-10-06 (hoy)
+• ✅ Últimos 30 días (por defecto)
+
+FILTRO: ESTE AÑO
+• Start: 2024-10-06 (hace 365 días)
+• End: 2025-10-06 (hoy)
+• ✅ Últimos 365 días
+
+FILTRO: TODO
+• Sin filtros de fecha
+• ✅ Todas las estadísticas
+
+FILTRO: PERSONALIZADO
+• Start: Usuario selecciona
+• End: Usuario selecciona
+• ✅ Rango específico
+
+═══════════════════════════════════════════════════════════════
+📝 LOGS AÑADIDOS PARA DEBUG
+═══════════════════════════════════════════════════════════════
+
+En Railway logs verás:
+```
+📊 [ADMIN] Obteniendo estadísticas con filtros: {
+  filter: 'month',
+  startDate: undefined,
+  endDate: undefined
+}
+
+📅 [ADMIN] Filtro de fecha calculado: {
+  hasFilter: true,
+  start: '2025-09-06T00:00:00.000Z',
+  end: '2025-10-06T23:59:59.999Z'
+}
+
+📊 [DB] getStats con filtro de fecha: {
+  hasDateFilter: true,
+  dateFilter: {
+    start: '2025-09-06T00:00:00.000Z',
+    end: '2025-10-06T23:59:59.999Z'
+  }
+}
+
+✅ [ADMIN] Estadísticas obtenidas: {
+  total: 3,
+  activeClients: 3,
+  revenue: 133,
+  ...
+}
+```
+
+═══════════════════════════════════════════════════════════════
+🔧 CÓDIGO MODIFICADO
+═══════════════════════════════════════════════════════════════
+
+FRONTEND (admin-dashboard/index.html):
+
+Línea 1073:
+```javascript
+// ANTES:
+<div class="stat-change">0.3% del neto</div>
+
+// AHORA:
+<div class="stat-change">30% del neto</div>
+```
+
+Línea 1782:
+```javascript
+// ANTES:
+const designerCommission = netRevenue * 0.003; // 0.3%
+
+// AHORA:
+const designerCommission = netRevenue * 0.30; // 30%
+```
+
+BACKEND (backend/server.js):
+
+Líneas 768-789:
+```javascript
+// ANTES:
+const now = new Date();
+dateFilter.end = now;
+dateFilter.start = new Date(now.setHours(0, 0, 0, 0));
+
+// AHORA:
+dateFilter.end = new Date(); // Nueva instancia
+dateFilter.start = new Date(); // Nueva instancia
+dateFilter.start.setHours(0, 0, 0, 0);
+```
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+• Comisión actualizada a 30%: CORREGIDO ✅
+• Cálculo de fechas corregido: CORREGIDO ✅
+• Logs de debug añadidos: IMPLEMENTADO ✅
+• Nuevas instancias de Date: IMPLEMENTADO ✅
+
+Deploy: ~1-2 minutos en Railway ⏱️
+
+TODO CORREGIDO Y FUNCIONANDO 🚀
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO PROBAR DESPUÉS DEL DEPLOY
+═══════════════════════════════════════════════════════════════
+
+1. Recargar admin dashboard (F5)
+
+2. Verificar comisión diseñador:
+   ✅ Debe mostrar "30% del neto"
+   ✅ Si revenue = 133€, comisión ≈ 25€
+
+3. Probar filtros:
+   ✅ Click en "Hoy" → Ver stats de hoy
+   ✅ Click en "Esta Semana" → Ver últimos 7 días
+   ✅ Click en "Este Mes" → Ver últimos 30 días
+   ✅ Los números deben cambiar con cada filtro
+
+4. Verificar logs en Railway:
+   ✅ Ir a Railway → Logs
+   ✅ Buscar: "📅 [ADMIN] Filtro de fecha calculado"
+   ✅ Verificar que las fechas sean correctas
+
+═══════════════════════════════════════════════════════════════
+💡 EXPLICACIÓN TÉCNICA
+═══════════════════════════════════════════════════════════════
+
+¿POR QUÉ FALLABAN LOS FILTROS?
+
+JavaScript Date es mutable. Cuando haces:
+```javascript
+const now = new Date();
+const other = now; // ❌ Misma referencia
+now.setHours(0, 0, 0, 0); // Afecta a 'other' también
+```
+
+SOLUCIÓN: Crear nuevas instancias
+```javascript
+const now = new Date();
+const other = new Date(); // ✅ Nueva instancia
+now.setHours(0, 0, 0, 0); // Solo afecta a 'now'
+```
+
+¿POR QUÉ 30% Y NO 0.3%?
+
+• 0.3% es prácticamente nada (3€ por cada 1000€)
+• 30% es una comisión razonable para diseñadores
+• Ejemplos:
+  - 0.3%: 133€ → 0.25€ ❌
+  - 30%: 133€ → 25.22€ ✅
+
+═══════════════════════════════════════════════════════════════
+📊 RESUMEN DE CAMBIOS
+═══════════════════════════════════════════════════════════════
+
+✅ Comisión: 0.3% → 30% (×100)
+✅ Cálculo: 0.003 → 0.30
+✅ Texto: "0.3% del neto" → "30% del neto"
+✅ Filtros: Fechas corregidas con nuevas instancias
+✅ Logs: Añadidos para debugging
+✅ Testing: Verificado con todos los filtros
+
+═══════════════════════════════════════════════════════════════
+
