@@ -3,67 +3,99 @@ CONFIGURACIÓN DEL STRIPE CUSTOMER PORTAL
 
 URL: https://dashboard.stripe.com/test/settings/billing/portal
 
-PASOS:
-------
+NOTA IMPORTANTE:
+----------------
+✅ El mensaje de advertencia (6 meses) ya está implementado en el dashboard.
+   Se mostrará ANTES de redirigir al cliente a Stripe.
+   NO necesitas configurarlo en Stripe.
+
+PASOS (SIMPLIFICADOS):
+----------------------
 
 1. ACTIVAR EL CUSTOMER PORTAL
    - Click en "Activate test link" o "Activar enlace de prueba"
-   - Confirma la activación
+   - O si ya está activo, click en "Configure" / "Configurar"
 
-2. CONFIGURAR FUNCIONALIDADES
-   En la sección "Functionality":
+2. SECCIÓN "Cancelaciones" o "Cancellations"
+   
+   ✅ Activa: "Permitir que los clientes cancelen suscripciones"
+            o "Allow customers to cancel subscriptions"
+   
+   ✅ Selecciona: "Cancelar al final del período de facturación"
+                o "Cancel at period end"
+   
+   (NO selecciones "cancelar inmediatamente")
+
+3. SECCIÓN "Razones de cancelación" (OPCIONAL)
+   
+   Puedes activar:
+   - [x] "Solicitar motivo de cancelación"
+         o "Require customers to provide a reason"
+   
+   Stripe mostrará sus razones predefinidas:
+   • Demasiado caro
+   • No uso el servicio
+   • Encontré una alternativa mejor
+   • etc.
+
+4. SECCIÓN "Cupones de retención" (OPCIONAL)
+   
+   Si quieres ofrecer un descuento automático del 20%:
+   - Click en "Añadir restricciones a un cupón"
+   - Selecciona: "Oferta de retención 20%"
+   - Configura: "Descuento de 20% durante 3 meses"
+   
+   (Esto ya lo creaste antes)
+
+5. OTRAS CONFIGURACIONES RECOMENDADAS
    
    ✅ Customer information
-      - [x] Allow customers to update their email addresses
+      - [x] Permitir actualizar email
    
    ✅ Payment methods
-      - [x] Allow customers to update payment methods
-      - [x] Allow customers to remove payment methods
+      - [x] Permitir actualizar métodos de pago
+      - [x] Permitir eliminar métodos de pago
    
    ✅ Invoices
-      - [x] Allow customers to view invoice history
-   
-   ✅ Subscriptions
-      - [x] Allow customers to cancel subscriptions
-      - [x] Cancel immediately (or "at period end" - tú eliges)
+      - [x] Permitir ver historial de facturas
 
-3. CONFIGURAR MENSAJE DE ADVERTENCIA AL CANCELAR
-   En la sección "Subscription cancellation":
-   
-   - Marca: "Require customers to provide a reason"
-   - Marca: "Show retention offer" (opcional)
-   
-   - En "Cancellation message", añade:
-   
-   ```
-   ⚠️ IMPORTANTE: Al cancelar tu suscripción
-
-   • Tu sitio web se desactivará al final de tu período de facturación actual
-   • Guardaremos tu sitio web y todos tus datos durante 6 meses
-   • Podrás reactivar tu plan en cualquier momento durante esos 6 meses desde tu dashboard
-   • Después de 6 meses, tu sitio será eliminado permanentemente
-   
-   Si tienes alguna duda o problema, contacta con nuestro soporte antes de cancelar.
-   
-   ¿Estás seguro de que deseas continuar con la cancelación?
-   ```
-
-4. CONFIGURAR OPCIONES AVANZADAS (OPCIONAL)
+6. BRANDING (OPCIONAL)
    
    - URL de retorno: https://agutidesigns.vercel.app/client-dashboard/
-   - Colores del tema: Ajusta a tu marca (azul #0046FE)
+   - Color principal: #0046FE (azul corporativo)
+   - Logo: Sube tu logo si quieres
 
-5. GUARDAR CAMBIOS
+7. GUARDAR CAMBIOS
    - Click en "Save changes" o "Guardar cambios"
    - ¡Listo!
 
-NOTA IMPORTANTE:
+FLUJO COMPLETO:
+---------------
+
+1. Cliente → Dashboard → Facturación
+2. Cliente → Click en "💳 Gestionar en Stripe"
+3. ✅ APARECE MENSAJE con advertencia de 6 meses (desde nuestro dashboard)
+4. Cliente → Acepta → Redirige a Stripe Customer Portal
+5. Cliente → Ve opciones: Métodos de pago, facturas, cancelar
+6. Si cancela:
+   - Stripe → Envía webhook "customer.subscription.deleted"
+   - Backend → Detecta automáticamente
+   - Backend → Registra en tabla "cancellations"
+   - Cliente → Ve estado actualizado en dashboard
+   - Admin → Ve cancelación en su dashboard
+   - Web → Se mantiene activa hasta fin de período
+   - Después de 6 meses → Se elimina (implementaremos cron job)
+
+RESULTADO FINAL:
 ----------------
-Cuando un cliente cancele desde el Customer Portal:
-- Stripe enviará un webhook customer.subscription.deleted
-- Nuestro backend lo detectará automáticamente
-- Se registrará en la tabla 'cancellations' del admin dashboard
-- El cliente verá su estado actualizado en su dashboard
+✅ Cliente informado ANTES de ir a Stripe
+✅ Configuración de Stripe más simple
+✅ Todo funciona automáticamente
+✅ No se requiere configuración compleja en Stripe
 
-NO necesitas configurar nada más en el backend, todo está listo.
-
+¿PROBLEMAS?
+-----------
+Si no encuentras alguna opción:
+- Asegúrate de estar en el modo "Test" (esquina superior derecha)
+- Algunos planes de Stripe pueden tener opciones limitadas
+- Las opciones básicas (cancelar, métodos de pago, facturas) están en todos los planes
