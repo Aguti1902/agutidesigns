@@ -703,6 +703,16 @@ async function sendEmail(type, data) {
                 emailData = paymentFailedAdminEmail(data.client, data.attemptNumber);
                 break;
             
+            // Email personalizado (permite enviar HTML directo)
+            case 'custom':
+                emailData = {
+                    to: data.to,
+                    from: FROM_EMAIL,
+                    subject: data.subject,
+                    html: data.html
+                };
+                break;
+            
             default:
                 throw new Error(`Tipo de email no reconocido: ${type}`);
         }

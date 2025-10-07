@@ -2008,7 +2008,7 @@ app.patch('/api/client/website-status/:clientId', async (req, res) => {
             if (client) {
                 console.log(`📧 [CLIENT] Enviando email de notificación a ${client.email}`);
                 try {
-                    await emailService.sendEmail({
+                    await emailService.sendEmail('custom', {
                         to: client.email,
                         subject: '🎉 ¡Tu sitio web está listo! - agutidesigns',
                         html: `
@@ -2144,7 +2144,7 @@ app.post('/api/tickets', async (req, res) => {
         
         // Enviar email al admin notificando del nuevo ticket
         try {
-            await emailService.sendEmail({
+            await emailService.sendEmail('custom', {
                 to: 'info@agutidesigns.com',
                 subject: `🎫 Nuevo Ticket de Soporte #${ticket.id} - ${ticketData.priority.toUpperCase()}`,
                 html: `
@@ -2169,7 +2169,7 @@ app.post('/api/tickets', async (req, res) => {
         
         // Enviar confirmación al cliente
         try {
-            await emailService.sendEmail({
+            await emailService.sendEmail('custom', {
                 to: ticketData.client_email,
                 subject: `Ticket de Soporte #${ticket.id} - agutidesigns`,
                 html: `
@@ -2310,7 +2310,7 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         
         // Enviar email al admin notificando la nueva respuesta
         try {
-            await emailService.sendEmail({
+            await emailService.sendEmail('custom', {
                 to: 'info@agutidesigns.com',
                 subject: `🔔 Nueva Respuesta del Cliente - Ticket #${ticketId}`,
                 html: `
@@ -2383,7 +2383,7 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
         if (admin_response && ticket) {
             console.log('📧 [BACKEND] Enviando email al cliente:', ticket.client_email);
             try {
-                await emailService.sendEmail({
+                await emailService.sendEmail('custom', {
                     to: ticket.client_email,
                     subject: `Respuesta a tu Ticket #${ticketId} - agutidesigns`,
                     html: `
