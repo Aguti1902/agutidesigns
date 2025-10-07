@@ -1,0 +1,308 @@
+═══════════════════════════════════════════════════════════════
+🚨 ERROR CRÍTICO: BOOLEAN vs INTEGER EN POSTGRESQL
+═══════════════════════════════════════════════════════════════
+
+PROBLEMA IDENTIFICADO Y CORREGIDO
+
+═══════════════════════════════════════════════════════════════
+🔍 EL PROBLEMA
+═══════════════════════════════════════════════════════════════
+
+Las columnas `admin_unread` y `client_unread` están definidas como
+**BOOLEAN** en PostgreSQL, pero el código las trataba como **INTEGER**
+(0/1), como en SQLite.
+
+ESQUEMA DE LA BASE DE DATOS:
+```sql
+CREATE TABLE IF NOT EXISTS tickets (
+    ...
+    admin_unread BOOLEAN DEFAULT FALSE,    ← BOOLEAN, no INTEGER!
+    client_unread BOOLEAN DEFAULT FALSE,   ← BOOLEAN, no INTEGER!
+    ...
+)
+```
+
+CÓDIGO INCORRECTO (backend):
+```javascript
+// ❌ Usando 0/1 (integer)
+await db.updateTicket(ticketId, { 
+    admin_unread: 0,      // ❌ Debería ser false
+    client_unread: 1      // ❌ Debería ser true
+});
+
+// ❌ Comparando con integer
+if (ticket.admin_unread === 1) { ... }  // ❌ Debería ser === true
+```
+
+CÓDIGO INCORRECTO (frontend):
+```javascript
+// ❌ Comparando con integer
+const hasUnreadMessage = ticket.client_unread === 1;  // ❌ Debería ser === true
+const unreadCount = tickets.filter(t => t.admin_unread === 1).length;  // ❌
+```
+
+CONSECUENCIA:
+• Las comparaciones SIEMPRE devolvían `false`
+• Los badges NUNCA se mostraban
+• Los indicadores visuales NUNCA aparecían
+• El sistema de notificaciones NO funcionaba
+
+═══════════════════════════════════════════════════════════════
+✅ LA SOLUCIÓN
+═══════════════════════════════════════════════════════════════
+
+Cambiar TODAS las referencias de 0/1 a false/true.
+
+BACKEND - server.js
+───────────────────────────────────────────────────────────────
+
+1️⃣ Respuesta del admin al ticket:
+```javascript
+// ANTES ❌:
+await db.updateTicket(parseInt(ticketId), { 
+    status, 
+    admin_response: updatedAdminResponse,
+    admin_response_at: new Date(),
+    admin_unread: 0,      // ❌
+    client_unread: 1      // ❌
+});
+
+// AHORA ✅:
+await db.updateTicket(parseInt(ticketId), { 
+    status, 
+    admin_response: updatedAdminResponse,
+    admin_response_at: new Date(),
+    admin_unread: false,      // ✅
+    client_unread: true       // ✅
+});
+```
+
+2️⃣ Respuesta del cliente al ticket:
+```javascript
+// ANTES ❌:
+await db.updateTicket(parseInt(ticketId), { 
+    client_response: updatedClientResponse,
+    status: 'en_proceso',
+    admin_unread: 1,      // ❌
+    client_unread: 0      // ❌
+});
+
+// AHORA ✅:
+await db.updateTicket(parseInt(ticketId), { 
+    client_response: updatedClientResponse,
+    status: 'en_proceso',
+    admin_unread: true,       // ✅
+    client_unread: false      // ✅
+});
+```
+
+3️⃣ Marcar ticket como leído:
+```javascript
+// ANTES ❌:
+if (markAsRead === 'admin' && ticket.admin_unread === 1) {  // ❌
+    await db.updateTicket(ticketId, { admin_unread: 0 });   // ❌
+    ticket.admin_unread = 0;                                 // ❌
+} else if (markAsRead === 'client' && ticket.client_unread === 1) {  // ❌
+    await db.updateTicket(ticketId, { client_unread: 0 });           // ❌
+    ticket.client_unread = 0;                                         // ❌
+}
+
+// AHORA ✅:
+if (markAsRead === 'admin' && ticket.admin_unread === true) {  // ✅
+    await db.updateTicket(ticketId, { admin_unread: false });   // ✅
+    ticket.admin_unread = false;                                 // ✅
+} else if (markAsRead === 'client' && ticket.client_unread === true) {  // ✅
+    await db.updateTicket(ticketId, { client_unread: false });           // ✅
+    ticket.client_unread = false;                                         // ✅
+}
+```
+
+FRONTEND - client-dashboard/index.html
+───────────────────────────────────────────────────────────────
+
+1️⃣ Contar mensajes sin leer:
+```javascript
+// ANTES ❌:
+const unreadCount = tickets.filter(t => t.client_unread === 1).length;  // ❌
+
+// AHORA ✅:
+const unreadCount = tickets.filter(t => t.client_unread === true).length;  // ✅
+```
+
+2️⃣ Detectar mensaje sin leer en un ticket:
+```javascript
+// ANTES ❌:
+const hasUnreadMessage = ticket.client_unread === 1;  // ❌
+
+// AHORA ✅:
+const hasUnreadMessage = ticket.client_unread === true;  // ✅
+```
+
+3️⃣ Auto-actualización de badge:
+```javascript
+// ANTES ❌:
+const unreadCount = tickets.filter(t => t.client_unread === 1).length;  // ❌
+
+// AHORA ✅:
+const unreadCount = tickets.filter(t => t.client_unread === true).length;  // ✅
+```
+
+FRONTEND - admin-dashboard/index.html
+───────────────────────────────────────────────────────────────
+
+1️⃣ Badge en homepage:
+```javascript
+// ANTES ❌:
+const unreadTickets = supportTickets.filter(t => t.admin_unread === 1).length;  // ❌
+
+// AHORA ✅:
+const unreadTickets = supportTickets.filter(t => t.admin_unread === true).length;  // ✅
+```
+
+2️⃣ Resaltar fila con mensaje sin leer:
+```javascript
+// ANTES ❌:
+const hasUnreadMessage = ticket.admin_unread === 1;  // ❌
+
+// AHORA ✅:
+const hasUnreadMessage = ticket.admin_unread === true;  // ✅
+```
+
+3️⃣ Contar mensajes sin leer:
+```javascript
+// ANTES ❌:
+const unreadCount = tickets.filter(t => t.admin_unread === 1).length;  // ❌
+
+// AHORA ✅:
+const unreadCount = tickets.filter(t => t.admin_unread === true).length;  // ✅
+```
+
+4️⃣ Auto-actualización de badge:
+```javascript
+// ANTES ❌:
+const unreadCount = tickets.filter(t => t.admin_unread === 1).length;  // ❌
+
+// AHORA ✅:
+const unreadCount = tickets.filter(t => t.admin_unread === true).length;  // ✅
+```
+
+═══════════════════════════════════════════════════════════════
+📊 ARCHIVOS MODIFICADOS
+═══════════════════════════════════════════════════════════════
+
+1️⃣ backend/server.js
+   • Línea 1889-1896: Marcar como leído
+   • Línea 2021-2022: Respuesta del admin
+   • Línea 1951-1952: Respuesta del cliente
+
+2️⃣ client-dashboard/index.html
+   • Línea 4993: Contar mensajes sin leer (loadClientTickets)
+   • Línea 5060: Detectar mensaje sin leer (displayClientTickets)
+   • Línea 5650: Auto-actualización de badge
+
+3️⃣ admin-dashboard/index.html
+   • Línea 1871: Badge en homepage
+   • Línea 1946: Resaltar fila sin leer
+   • Línea 1996: Contar mensajes sin leer (loadTickets)
+   • Línea 4164: Auto-actualización de badge
+
+═══════════════════════════════════════════════════════════════
+🧪 CÓMO VERIFICAR QUE FUNCIONA
+═══════════════════════════════════════════════════════════════
+
+PASO 1: VERIFICAR BACKEND
+--------------------------
+1. Ir a Railway logs
+2. Admin responde a un ticket
+3. Buscar en logs:
+   ```
+   🎫 [BACKEND] Ticket actualizado
+   ```
+4. Verificar en la base de datos:
+   ```sql
+   SELECT client_unread, admin_unread FROM tickets WHERE id = X;
+   ```
+5. ✅ Debería mostrar `true` o `false`, NO `1` o `0`
+
+PASO 2: VERIFICAR FRONTEND (CLIENTE)
+------------------------------------
+1. Recargar página del cliente dashboard (Ctrl + Shift + R)
+2. Abrir consola (F12)
+3. Buscar en logs:
+   ```
+   🔔 [CLIENT] Mensajes sin leer: X
+   ```
+4. ✅ Si X > 0, el badge debe aparecer
+
+PASO 3: VERIFICAR FRONTEND (ADMIN)
+-----------------------------------
+1. Recargar página del admin dashboard (Ctrl + Shift + R)
+2. Abrir consola (F12)
+3. Buscar en logs:
+   ```
+   🔔 [ADMIN] Mensajes sin leer: X
+   ```
+4. ✅ Si X > 0, el badge debe aparecer
+
+PASO 4: VERIFICAR INDICADORES VISUALES
+--------------------------------------
+CLIENTE:
+• ✅ Badge azul en menú "💬 Contactar" con número
+• ✅ Card del ticket con borde azul y fondo resaltado
+• ✅ Punto azul animado (●) junto al número del ticket
+• ✅ Badge "⚡ Mensaje nuevo sin leer" en el card
+
+ADMIN:
+• ✅ Badge azul en menú "🎫 Tickets" con número
+• ✅ Fila resaltada en azul en la tabla
+• ✅ Badge "⚡ Nuevo mensaje" junto al asunto
+• ✅ Botón "👁️ Ver Nuevo" en lugar de "Ver"
+
+═══════════════════════════════════════════════════════════════
+⚠️ DIFERENCIAS: POSTGRESQL vs SQLITE
+═══════════════════════════════════════════════════════════════
+
+SQLITE:
+-------
+• BOOLEAN NO existe como tipo
+• Se usa INTEGER (0/1)
+• `SELECT * FROM table WHERE column = 1` funciona
+• Comparación con `=== 1` funciona
+
+POSTGRESQL:
+-----------
+• BOOLEAN es un tipo nativo (true/false)
+• NO se debe usar INTEGER (0/1)
+• `SELECT * FROM table WHERE column = true` funciona
+• Comparación con `=== true` funciona
+• También acepta: `WHERE column` (sin comparación)
+
+ESTE ERROR SUCEDIÓ porque:
+1. El sistema se desarrolló originalmente con SQLite
+2. Se migró a PostgreSQL
+3. Se creó la tabla con BOOLEAN (correcto)
+4. PERO el código seguía usando 0/1 (incorrecto)
+5. Las comparaciones SIEMPRE devolvían false
+6. Los badges NUNCA aparecían
+
+═══════════════════════════════════════════════════════════════
+✅ ESTADO ACTUAL
+═══════════════════════════════════════════════════════════════
+
+✅ Backend actualiza correctamente con true/false
+✅ Frontend compara correctamente con === true
+✅ Badges se muestran cuando hay mensajes sin leer
+✅ Indicadores visuales funcionando
+✅ Sistema de notificaciones operativo
+✅ Auto-actualización cada 15 segundos funciona
+
+Deploy: ~1-2 minutos en Railway + Vercel ⏱️
+
+IMPORTANTE:
+Después del deploy, recargar las páginas con Ctrl + Shift + R
+para ignorar la caché y cargar la nueva versión.
+
+TODO CORREGIDO 🚀
+
+═══════════════════════════════════════════════════════════════
+

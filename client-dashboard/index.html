@@ -2853,17 +2853,6 @@
             }
         }
         
-        // 🆕 Función para abrir el editor de WordPress
-        function openWordPressEditor() {
-            if (!currentClient || !currentClient.wordpress_url) {
-                showNotification('El acceso a WordPress no está disponible aún', 'warning');
-                return;
-            }
-            
-            console.log('🚀 Abriendo WordPress:', currentClient.wordpress_url);
-            window.open(currentClient.wordpress_url, '_blank');
-        }
-        
         // Cambiar entre tabs de la sección Contactar
         function switchContactTab(tabName) {
             // Actualizar estilos de tabs
@@ -6096,6 +6085,8 @@
                 loadProfile();
             } else if (section === 'seo') {
                 updateSEOMarketingSection();
+            } else if (section === 'sitio') {
+                loadWordPressCredentials();
             }
         };
 
@@ -6970,6 +6961,146 @@
                         <div style="color: #7f1d1d; font-size: 0.95rem; line-height: 1.5;">No se pudo conectar con el servidor. Verifica tu conexión e inténtalo nuevamente.</div>
                     </div>
                 `;
+            }
+        }
+
+        // ===== FUNCIONES PARA CREDENCIALES DE WORDPRESS =====
+        function togglePasswordVisibility() {
+            const passwordElement = document.getElementById('wpPassword');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const actualPassword = passwordElement.dataset.password;
+            
+            if (passwordElement.textContent === actualPassword) {
+                // Ocultar contraseña
+                passwordElement.textContent = '••••••••••••';
+                toggleBtn.textContent = '👁️ Mostrar';
+            } else {
+                // Mostrar contraseña
+                passwordElement.textContent = actualPassword;
+                toggleBtn.textContent = '🙈 Ocultar';
+            }
+        }
+
+        function copyToClipboard(text, fieldName) {
+            if (!text || text === '-') {
+                showNotification(`No hay ${fieldName} para copiar`, 'error');
+                return;
+            }
+            
+            // Crear un elemento temporal para copiar el texto
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-9999px';
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                showNotification(`${fieldName} copiado al portapapeles`, 'success');
+            } catch (err) {
+                showNotification(`Error al copiar ${fieldName}`, 'error');
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+
+        // Cargar credenciales de WordPress del proyecto
+        async function loadWordPressCredentials() {
+            if (!currentClient || !currentClient.id) {
+                console.log('[WP] No hay cliente actual');
+                return;
+            }
+
+            try {
+                console.log(`[WP] Cargando credenciales para cliente #${currentClient.id}...`);
+                
+                // Obtener proyecto del cliente
+                const response = await fetch(`${API_URL}/api/admin/projects/client/${currentClient.id}`);
+                
+                if (!response.ok) {
+                    throw new Error('No se pudo obtener el proyecto');
+                }
+                
+                const projects = await response.json();
+                
+                if (!projects || projects.length === 0) {
+                    console.log('[WP] No hay proyectos para este cliente');
+                    return;
+                }
+                
+                // Tomar el primer proyecto (asumiendo que cada cliente tiene un proyecto)
+                const project = projects[0];
+                console.log('[WP] Proyecto encontrado:', project);
+                
+                // Verificar si el proyecto está desplegado
+                if (project.is_deployed && project.wordpress_url) {
+                    console.log('[WP] Proyecto desplegado, mostrando credenciales');
+                    
+                    // Mostrar tarjeta de credenciales
+                    document.getElementById('wpCredentialsCard').style.display = 'block';
+                    
+                    // Agregar /wp-admin al final de la URL si no está
+                    let adminUrl = project.wordpress_url;
+                    if (!adminUrl.endsWith('/wp-admin') && !adminUrl.endsWith('/wp-admin/')) {
+                        adminUrl += (adminUrl.endsWith('/') ? 'wp-admin' : '/wp-admin');
+                    }
+                    
+                    // Rellenar credenciales
+                    document.getElementById('wpAdminUrl').textContent = adminUrl;
+                    document.getElementById('wpUsername').textContent = project.wordpress_username || 'N/A';
+                    document.getElementById('wpPassword').textContent = '••••••••••••';
+                    document.getElementById('wpPassword').dataset.password = project.wordpress_password || '';
+                } else {
+                    console.log('[WP] Proyecto no desplegado aún');
+                    document.getElementById('wpCredentialsCard').style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('[WP] Error cargando credenciales:', error);
+            }
+        }
+
+        // Modificar openWordPressEditor para usar las credenciales del proyecto
+        async function openWordPressEditor() {
+            if (!currentClient || !currentClient.id) {
+                showNotification('No se pudo identificar tu cuenta', 'error');
+                return;
+            }
+
+            try {
+                // Obtener proyecto del cliente
+                const response = await fetch(`${API_URL}/api/admin/projects/client/${currentClient.id}`);
+                
+                if (!response.ok) {
+                    throw new Error('No se pudo obtener el proyecto');
+                }
+                
+                const projects = await response.json();
+                
+                if (!projects || projects.length === 0 || !projects[0].is_deployed) {
+                    document.getElementById('wordpressMessage').style.display = 'block';
+                    return;
+                }
+                
+                const project = projects[0];
+                
+                if (project.wordpress_url) {
+                    // Abrir WordPress en una nueva pestaña
+                    let adminUrl = project.wordpress_url;
+                    if (!adminUrl.endsWith('/wp-admin') && !adminUrl.endsWith('/wp-admin/')) {
+                        adminUrl += (adminUrl.endsWith('/') ? 'wp-admin' : '/wp-admin');
+                    }
+                    
+                    window.open(adminUrl, '_blank');
+                    showNotification('Abriendo panel de WordPress...', 'success');
+                } else {
+                    document.getElementById('wordpressMessage').style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error abriendo WordPress:', error);
+                showNotification('Error al abrir WordPress', 'error');
             }
         }
     </script>
