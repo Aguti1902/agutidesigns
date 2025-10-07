@@ -1,0 +1,289 @@
+📧 INTEGRACIÓN DE EMAILS EN SERVER.JS
+==========================================
+
+⚠️ IMPORTANTE: Estos son los cambios que debes hacer en backend/server.js
+
+==========================================
+1. IMPORTAR EL SERVICIO DE EMAILS AL INICIO
+==========================================
+
+Añade esta línea después de las otras importaciones (línea ~10):
+
+const emailService = require('./email-service');
+
+
+==========================================
+2. WEBHOOK: invoice.payment_succeeded
+==========================================
+
+Busca el case 'invoice.payment_succeeded' y añade DESPUÉS de crear el cliente:
+
+// Enviar email de bienvenida
+await emailService.sendEmail('welcome', {
+    email: customerEmail,
+    full_name: `${account_first_name} ${account_last_name}`,
+    first_name: account_first_name,
+    business_name: submission?.business_name || 'tu empresa'
+});
+
+// Enviar email de confirmación de pago
+await emailService.sendEmail('payment-success', {
+    email: customerEmail,
+    full_name: `${account_first_name} ${account_last_name}`,
+    plan,
+    payment_date: new Date().toLocaleDateString('es-ES')
+});
+
+// Notificar al admin
+await emailService.sendEmail('admin-new-client', {
+    email: customerEmail,
+    full_name: `${account_first_name} ${account_last_name}`,
+    business_name: submission?.business_name || 'Sin nombre',
+    plan
+});
+
+await emailService.sendEmail('admin-new-payment', {
+    client: {
+        full_name: `${account_first_name} ${account_last_name}`,
+        email: customerEmail,
+        plan
+    },
+    amount: (subscription.items.data[0].price.unit_amount / 100).toFixed(2)
+});
+
+
+==========================================
+3. WEBHOOK: invoice.payment_failed
+==========================================
+
+Busca el case 'invoice.payment_failed' y AÑADE este case completo:
+
+case 'invoice.payment_failed':
+    const failedInvoice = event.data.object;
+    const attemptCount = failedInvoice.attempt_count;
+    
+    console.log(`❌ [WEBHOOK] Pago fallido - Intento ${attemptCount}/3`);
+    
+    try {
+        // Buscar cliente por customer ID de Stripe
+        const failedClientResult = await db.pool.query(
+            'SELECT * FROM clients WHERE stripe_customer_id = $1',
+            [failedInvoice.customer]
+        );
+        
+        if (failedClientResult.rows.length > 0) {
+            const client = failedClientResult.rows[0];
+            
+            // Enviar email al cliente según el número de intento
+            await emailService.sendEmail('payment-failed', {
+                client: {
+                    email: client.email,
+                    full_name: client.full_name,
+                    plan: client.plan,
+                    failure_reason: failedInvoice.last_payment_error?.message || 'Fondos insuficientes'
+                },
+                attemptNumber: attemptCount
+            });
+            
+            // Notificar al admin
+            await emailService.sendEmail('admin-payment-failed', {
+                client: {
+                    email: client.email,
+                    full_name: client.full_name,
+                    plan: client.plan,
+                    failure_reason: failedInvoice.last_payment_error?.message || 'Fondos insuficientes'
+                },
+                attemptNumber: attemptCount
+            });
+            
+            console.log(`✅ [WEBHOOK] Emails de pago fallido enviados (intento ${attemptCount})`);
+        }
+    } catch (error) {
+        console.error('❌ [WEBHOOK] Error procesando pago fallido:', error);
+    }
+    break;
+
+
+==========================================
+4. WEBHOOK: customer.subscription.deleted
+==========================================
+
+Busca el case 'customer.subscription.deleted' y añade DESPUÉS de actualizar la BD:
+
+// Enviar email de servicio suspendido
+if (client) {
+    await emailService.sendEmail('service-suspended', {
+        email: client.email,
+        full_name: client.full_name,
+        business_name: client.business_name
+    });
+}
+
+
+==========================================
+5. WEBHOOK: customer.subscription.updated (CANCELACIÓN)
+==========================================
+
+Busca donde se detecta cancel_at_period_end === true y añade DESPUÉS de actualizar:
+
+// Enviar email de cancelación
+await emailService.sendEmail('subscription-cancelled', {
+    email: client.email,
+    full_name: client.full_name,
+    subscription_end_date: endDate.toLocaleDateString('es-ES', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    })
+});
+
+
+==========================================
+6. ENDPOINT: Activar web (cuando el admin entrega)
+==========================================
+
+Busca el endpoint PUT /api/client/website-status/:clientId y añade DESPUÉS de actualizar:
+
+// Enviar email de web entregada
+const client = await db.getClientById(clientId);
+if (client && status === 'activo') {
+    await emailService.sendEmail('website-delivered', {
+        email: client.email,
+        full_name: client.full_name,
+        business_name: client.business_name,
+        website_url: client.website_url,
+        wordpress_url: client.wordpress_url,
+        wordpress_username: client.wordpress_username,
+        wordpress_password: client.wordpress_password
+    });
+}
+
+
+==========================================
+7. ENDPOINT: Admin responde a ticket
+==========================================
+
+Busca el endpoint PATCH /api/tickets/:ticketId (donde el admin responde) y añade:
+
+// Enviar email al cliente
+const ticket = await db.getTicketById(ticketId);
+const client = await db.getClientById(ticket.client_id);
+
+if (client && admin_response) {
+    await emailService.sendEmail('ticket-response', {
+        client: {
+            email: client.email,
+            full_name: client.full_name
+        },
+        ticket: {
+            id: ticketId,
+            subject: ticket.subject,
+            admin_response: admin_response
+        }
+    });
+}
+
+
+==========================================
+8. ENDPOINT: Nuevo ticket creado
+==========================================
+
+Busca el endpoint POST /api/tickets y añade DESPUÉS de crear el ticket:
+
+// Notificar al admin
+const createdTicket = await db.getTicketById(ticketId);
+await emailService.sendEmail('admin-new-ticket', {
+    client: {
+        full_name: data.client_name,
+        email: data.client_email
+    },
+    ticket: {
+        id: ticketId,
+        subject: data.subject,
+        category: data.category,
+        priority: data.priority,
+        description: data.description
+    }
+});
+
+
+==========================================
+9. FUNCIÓN AUTOMÁTICA: Recordatorios de renovación
+==========================================
+
+Añade esta función NUEVA al final del archivo (antes de module.exports):
+
+// Función para enviar recordatorios de renovación
+async function sendRenewalReminders() {
+    try {
+        const now = new Date();
+        const clients = await db.getAllClients();
+        
+        for (const client of clients) {
+            if (client.payment_date && client.subscription_status === 'active') {
+                const paymentDate = new Date(client.payment_date);
+                const nextBilling = new Date(paymentDate);
+                nextBilling.setDate(nextBilling.getDate() + 30); // Asumiendo renovación mensual
+                
+                const daysUntilRenewal = Math.ceil((nextBilling - now) / (1000 * 60 * 60 * 24));
+                
+                // Enviar recordatorios a los 7, 3 y 1 días
+                if ([7, 3, 1].includes(daysUntilRenewal)) {
+                    await emailService.sendEmail('renewal-reminder', {
+                        client: {
+                            email: client.email,
+                            full_name: client.full_name,
+                            next_billing_date: nextBilling.toLocaleDateString('es-ES'),
+                            plan_price: client.plan === 'basico' ? '35€' : 
+                                       client.plan === 'avanzado' ? '49€' : '65€'
+                        },
+                        daysLeft: daysUntilRenewal
+                    });
+                    
+                    console.log(`✅ Recordatorio de renovación enviado a ${client.email} (${daysUntilRenewal} días)`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error enviando recordatorios:', error);
+    }
+}
+
+// Ejecutar recordatorios cada 12 horas
+setInterval(sendRenewalReminders, 12 * 60 * 60 * 1000);
+
+
+==========================================
+10. RESUMEN DE TRIGGERS
+==========================================
+
+✅ EMAILS AL CLIENTE:
+1. Bienvenida → Después de registrarse y pagar
+2. Confirmación de pago → Después de pagar
+3. Web entregada → Cuando admin activa la web
+4. Respuesta a ticket → Cuando admin responde
+5. Recordatorios (7,3,1 días) → Automático cada 12h
+6. Pago fallido (1,2,3 intentos) → Webhook de Stripe
+7. Servicio suspendido → Webhook de Stripe
+8. Suscripción cancelada → Webhook de Stripe
+
+✅ EMAILS AL ADMIN:
+1. Nuevo cliente → Después del pago
+2. Nuevo pago → Después del pago
+3. Nuevo ticket → Al crear ticket
+4. Pago fallido → Webhook de Stripe
+5. Cliente suspendido → Webhook de Stripe
+
+
+==========================================
+NOTA FINAL
+==========================================
+
+⚠️ Después de hacer estos cambios:
+1. Guarda server.js
+2. Haz commit y push
+3. Railway redeployará automáticamente
+4. Los emails empezarán a enviarse automáticamente
+
+🎉 ¡Sistema completo de emails configurado!
+
