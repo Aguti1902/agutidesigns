@@ -977,8 +977,7 @@
             }
 
             .sidebar-logo img {
-                height: 40px;
-                filter: brightness(0) invert(1); /* Asegurar que sea blanco */
+                height: 35px;
             }
 
             .sidebar-logo p {
@@ -1124,7 +1123,19 @@
             }
 
             .dashboard-header {
-                display: none; /* Ocultar header en móvil */
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+                padding: 20px;
+            }
+
+            .header-left h1 {
+                font-size: 1.5rem;
+            }
+
+            /* Ocultar header-right en móvil */
+            .header-right {
+                display: none;
             }
 
             /* STATS */

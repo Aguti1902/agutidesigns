@@ -684,8 +684,7 @@
             }
 
             .sidebar-logo img {
-                height: 40px;
-                filter: brightness(0) invert(1); /* Asegurar que sea blanco */
+                height: 35px;
             }
 
             .close-menu-btn {
@@ -847,7 +846,19 @@
             }
 
             .dashboard-header {
-                display: none; /* Ocultar header en móvil */
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .header-logo img {
+                height: 35px;
+            }
+
+            /* Ocultar info de usuario y logout en header móvil */
+            .header-user {
+                display: none;
             }
 
             /* MAIN CONTENT */
