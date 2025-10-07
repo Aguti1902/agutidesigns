@@ -760,14 +760,50 @@
                 color: #333;
             }
 
-            /* Grids */
+            /* Grids - CARRUSEL EN MÓVIL */
             .style-cards-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 15px;
+                padding: 0 0 20px 0;
+                scrollbar-width: none; /* Firefox */
+            }
+
+            .style-cards-grid::-webkit-scrollbar {
+                display: none; /* Chrome, Safari */
             }
 
             .style-card {
+                min-width: 85%;
+                scroll-snap-align: center;
                 padding: 15px;
+                flex-shrink: 0;
+            }
+
+            /* Indicadores de carrusel */
+            .carousel-indicators {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 15px;
+            }
+
+            .carousel-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #ddd;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .carousel-dot.active {
+                background: #0046FE;
+                width: 24px;
+                border-radius: 4px;
             }
 
             /* Pages checkboxes */
@@ -1490,6 +1526,17 @@
                                 <div class="style-description">Exclusivo, lujoso, sofisticado</div>
                             </div>
                         </div>
+                    </div>
+                    <!-- Indicadores de carrusel (solo móvil) -->
+                    <div class="carousel-indicators" id="styleCarouselIndicators" style="display: none;">
+                        <span class="carousel-dot active" data-index="0"></span>
+                        <span class="carousel-dot" data-index="1"></span>
+                        <span class="carousel-dot" data-index="2"></span>
+                        <span class="carousel-dot" data-index="3"></span>
+                        <span class="carousel-dot" data-index="4"></span>
+                        <span class="carousel-dot" data-index="5"></span>
+                        <span class="carousel-dot" data-index="6"></span>
+                        <span class="carousel-dot" data-index="7"></span>
                     </div>
                     <span class="helper-text">Haz clic en el estilo que más te guste</span>
                 </div>
@@ -3056,6 +3103,69 @@ Genera una descripción profesional y atractiva para CADA servicio.
         }
         
         // CSS para spinner (ya añadido arriba con slideOut)
+
+        // ==========================================
+        // CARRUSEL DE ESTILOS (MÓVIL)
+        // ==========================================
+        function initStyleCarousel() {
+            const carousel = document.querySelector('.style-cards-grid');
+            const indicators = document.getElementById('styleCarouselIndicators');
+            const dots = indicators.querySelectorAll('.carousel-dot');
+            const cards = carousel.querySelectorAll('.style-card');
+
+            // Mostrar indicadores solo en móvil
+            function updateCarouselDisplay() {
+                if (window.innerWidth <= 768) {
+                    indicators.style.display = 'flex';
+                } else {
+                    indicators.style.display = 'none';
+                }
+            }
+
+            // Actualizar indicador activo basado en scroll
+            function updateActiveIndicator() {
+                if (window.innerWidth > 768) return;
+
+                const scrollLeft = carousel.scrollLeft;
+                const cardWidth = cards[0].offsetWidth + 15; // width + gap
+                const currentIndex = Math.round(scrollLeft / cardWidth);
+
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // Navegar al hacer clic en un indicador
+            dots.forEach((dot) => {
+                dot.addEventListener('click', () => {
+                    const index = parseInt(dot.dataset.index);
+                    const cardWidth = cards[0].offsetWidth + 15;
+                    carousel.scrollTo({
+                        left: index * cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Event listeners
+            carousel.addEventListener('scroll', updateActiveIndicator);
+            window.addEventListener('resize', updateCarouselDisplay);
+            
+            // Inicializar
+            updateCarouselDisplay();
+            updateActiveIndicator();
+        }
+
+        // Inicializar carrusel cuando DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initStyleCarousel);
+        } else {
+            initStyleCarousel();
+        }
     </script>
 </body>
 </html> 
