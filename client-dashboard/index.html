@@ -2256,8 +2256,18 @@
         // ============================================
 
         // Inicializar Google Sign-In cuando el script de Google cargue
-        window.onload = function () {
-            if (window.google) {
+        function initializeGoogleSignIn() {
+            console.log('🔍 Intentando inicializar Google Sign-In...');
+            
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.error('❌ Google Sign-In script no cargado aún, reintentando...');
+                setTimeout(initializeGoogleSignIn, 500);
+                return;
+            }
+
+            try {
+                console.log('✅ Google object detectado');
+                
                 google.accounts.id.initialize({
                     client_id: '27242010279-amuh9oqm83sdi24hq65ptdqaotpkk094.apps.googleusercontent.com',
                     callback: handleGoogleCallback,
@@ -2265,8 +2275,16 @@
                     cancel_on_tap_outside: true
                 });
 
+                console.log('✅ Google initialize() completado');
+
+                const buttonContainer = document.getElementById('googleSignInButton');
+                if (!buttonContainer) {
+                    console.error('❌ Contenedor googleSignInButton no encontrado');
+                    return;
+                }
+
                 google.accounts.id.renderButton(
-                    document.getElementById('googleSignInButton'),
+                    buttonContainer,
                     {
                         theme: 'outline',
                         size: 'large',
@@ -2277,9 +2295,18 @@
                     }
                 );
 
-                console.log('✅ Google Sign-In inicializado');
+                console.log('✅ Google Sign-In inicializado correctamente');
+            } catch (error) {
+                console.error('❌ Error inicializando Google Sign-In:', error);
             }
-        };
+        }
+
+        // Intentar inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+        } else {
+            initializeGoogleSignIn();
+        }
 
         // Callback cuando el usuario se autentica con Google
         async function handleGoogleCallback(response) {
