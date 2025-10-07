@@ -33,8 +33,8 @@ function createEmailLayout(content, preheader = '') {
         .header { background: linear-gradient(135deg, #0046FE 0%, #0035c9 100%); padding: 40px 20px; text-align: center; }
         .logo { color: white; font-size: 2rem; font-weight: 700; text-decoration: none; }
         .content { padding: 40px 30px; }
-        .button { display: inline-block; background: #0046FE; color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 1.1rem; margin: 20px 0; }
-        .button:hover { background: #0035c9; }
+        .button { display: inline-block; background: #0046FE; color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 1.1rem; margin: 20px 0; }
+        .button:hover { background: #0035c9; color: #ffffff !important; }
         .footer { background: #f9f9f9; padding: 30px; text-align: center; color: #666; font-size: 0.9rem; }
         .divider { border-top: 2px solid #e8eaed; margin: 30px 0; }
         h1 { color: #333; font-size: 1.8rem; margin: 0 0 20px 0; }
@@ -90,7 +90,7 @@ function welcomeEmail(clientData) {
         <p>Puedes seguir el progreso de tu sitio web en tiempo real desde tu panel de control:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button">🚀 Acceder a Mi Dashboard</a>
+            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">🚀 Acceder a Mi Dashboard</a>
         </div>
         
         <p><strong>Tus credenciales de acceso:</strong></p>
@@ -164,7 +164,7 @@ function paymentSuccessEmail(clientData) {
         4️⃣ Recibirás acceso completo cuando esté listo</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button">📊 Ver Mi Dashboard</a>
+            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">📊 Ver Mi Dashboard</a>
         </div>
         
         <p><strong>💡 Tip:</strong> Revisa tu correo para encontrar la factura de Stripe con todos los detalles del pago.</p>
@@ -199,7 +199,7 @@ function websiteDeliveredEmail(clientData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="${clientData.website_url}" class="button">🌐 Ver Mi Sitio Web</a>
+            <a href="${clientData.website_url}" class="button" style="color: #ffffff;">🌐 Ver Mi Sitio Web</a>
         </div>
         
         <h3>🔑 Acceso a WordPress</h3>
@@ -217,7 +217,7 @@ function websiteDeliveredEmail(clientData) {
         4️⃣ Contacta al soporte si necesitas ayuda</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/" class="button">📊 Ir a Mi Dashboard</a>
+            <a href="https://agutidesigns.vercel.app/" class="button" style="color: #ffffff;">📊 Ir a Mi Dashboard</a>
         </div>
         
         <p>¡Felicidades por tu nuevo sitio web! 🎉</p>
@@ -247,7 +247,7 @@ function ticketResponseEmail(clientData, ticketData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#contactar" class="button">💬 Ver Conversación Completa</a>
+            <a href="https://agutidesigns.vercel.app/#contactar" class="button" style="color: #ffffff;">💬 Ver Conversación Completa</a>
         </div>
         
         <p>Si tienes más preguntas, no dudes en responder desde tu dashboard.</p>
@@ -297,7 +297,7 @@ function renewalReminderEmail(clientData, daysLeft) {
         <p>Asegúrate de que tu tarjeta tenga fondos suficientes para evitar interrupciones en tu servicio.</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button">💳 Gestionar Método de Pago</a>
+            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">💳 Gestionar Método de Pago</a>
         </div>
         
         <p><strong>¿Necesitas cambiar tu plan?</strong> Puedes hacerlo desde tu dashboard en cualquier momento.</p>
@@ -337,7 +337,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p>Te recomendamos actualizar tu método de pago para evitar futuros problemas:</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button">💳 Actualizar Método de Pago</a>
+                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">💳 Actualizar Método de Pago</a>
             </div>
             
             <p>Si necesitas ayuda, estamos disponibles para asistirte.</p>
@@ -374,7 +374,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p><strong>Te quedan aproximadamente 2 días</strong> antes del último intento.</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.2rem;">💳 ACTUALIZAR TARJETA AHORA</a>
+                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.2rem; color: #ffffff;">💳 ACTUALIZAR TARJETA AHORA</a>
             </div>
             
             <p>Si tienes problemas o necesitas ayuda, contáctanos de inmediato: <strong>info@agutidesigns.es</strong></p>
@@ -412,7 +412,7 @@ function paymentFailedEmail(clientData, attemptNumber) {
             <p>Actualiza tu método de pago <strong>AHORA</strong> para evitar la suspensión:</p>
             
             <div style="text-align: center;">
-                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.3rem; padding: 20px 50px;">💳 EVITAR SUSPENSIÓN - ACTUALIZAR PAGO</a>
+                <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="background: #dc2626; font-size: 1.3rem; padding: 20px 50px; color: #ffffff;">💳 EVITAR SUSPENSIÓN - ACTUALIZAR PAGO</a>
             </div>
             
             <div class="info-box">
@@ -457,7 +457,7 @@ function serviceSuspendedEmail(clientData) {
         <p>Puedes reactivar tu servicio en cualquier momento actualizando tu método de pago:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button">🔄 Reactivar Mi Servicio</a>
+            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Servicio</a>
         </div>
         
         <h3>💬 ¿Necesitas ayuda?</h3>
@@ -503,7 +503,7 @@ function subscriptionCancelledEmail(clientData) {
         <p>Si decides reactivar tu suscripción, puedes hacerlo fácilmente:</p>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns.vercel.app/#facturacion" class="button">🔄 Reactivar Mi Suscripción</a>
+            <a href="https://agutidesigns.vercel.app/#facturacion" class="button" style="color: #ffffff;">🔄 Reactivar Mi Suscripción</a>
         </div>
         
         <p>Lamentamos verte partir, pero esperamos volver a trabajar juntos en el futuro.</p>
@@ -539,7 +539,7 @@ function newClientAdminEmail(clientData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/" class="button">📊 Ver en Admin Dashboard</a>
+            <a href="https://agutidesigns-admin.vercel.app/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
         </div>
     `;
     
@@ -567,7 +567,7 @@ function newPaymentAdminEmail(clientData, amount) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/" class="button">📊 Ver en Admin Dashboard</a>
+            <a href="https://agutidesigns-admin.vercel.app/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
         </div>
     `;
     
@@ -607,7 +607,7 @@ function newTicketAdminEmail(clientData, ticketData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/#tickets" class="button">💬 Responder Ticket</a>
+            <a href="https://agutidesigns-admin.vercel.app/#tickets" class="button" style="color: #ffffff;">💬 Responder Ticket</a>
         </div>
     `;
     

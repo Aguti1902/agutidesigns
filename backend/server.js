@@ -3446,12 +3446,18 @@ app.get('/api/client/invoices/:clientId', async (req, res) => {
         }
         
         // Obtener facturas de Stripe
+        console.log(`🔍 [INVOICES] Buscando facturas para Stripe Customer: ${client.stripe_customer_id}`);
         const invoices = await stripe.invoices.list({
             customer: client.stripe_customer_id,
             limit: 100
         });
         
-        console.log(`✅ [INVOICES] ${invoices.data.length} facturas encontradas`);
+        console.log(`✅ [INVOICES] ${invoices.data.length} facturas encontradas en Stripe`);
+        
+        // Debug: Mostrar todas las facturas antes de filtrar
+        invoices.data.forEach((inv, i) => {
+            console.log(`📄 [INVOICE ${i+1}] ID: ${inv.id} | Amount Paid: ${inv.amount_paid} | Amount Due: ${inv.amount_due} | Status: ${inv.status} | Number: ${inv.number}`);
+        });
         
         // Filtrar y formatear datos - SOLO facturas con pago real (excluir ajustes de 0€)
         const formattedInvoices = invoices.data
@@ -3460,7 +3466,13 @@ app.get('/api/client/invoices/:clientId', async (req, res) => {
                 // O facturas pendientes con monto a pagar > 0
                 const hasRealAmount = (invoice.amount_due > 0 || invoice.amount_paid > 0);
                 const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
-                return hasRealAmount && isNotFullyRefunded;
+                const passFilter = hasRealAmount && isNotFullyRefunded;
+                
+                if (!passFilter) {
+                    console.log(`❌ [FILTER] Factura ${invoice.id} RECHAZADA - hasRealAmount: ${hasRealAmount}, isNotFullyRefunded: ${isNotFullyRefunded}`);
+                }
+                
+                return passFilter;
             })
             .map(invoice => {
                 // Obtener el monto base (sin IVA)
@@ -3484,6 +3496,8 @@ app.get('/api/client/invoices/:clientId', async (req, res) => {
                     period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
                 };
             });
+        
+        console.log(`🎯 [INVOICES] ${formattedInvoices.length} facturas pasaron el filtro (de ${invoices.data.length} totales)`);
         
         res.json({ invoices: formattedInvoices });
         
