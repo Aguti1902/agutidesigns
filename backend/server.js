@@ -536,43 +536,99 @@ app.post('/webhook', async (req, res) => {
 
         case 'customer.subscription.updated':
             const updatedSubscription = event.data.object;
-            console.log(`🔄 [WEBHOOK] Suscripción actualizada: ${updatedSubscription.id}`);
-            console.log(`📊 [WEBHOOK] Estado: ${updatedSubscription.status}, Cancel at end: ${updatedSubscription.cancel_at_period_end}`);
+            console.log(`\n🔄 [WEBHOOK] ========== SUBSCRIPTION UPDATED ==========`);
+            console.log(`📊 [WEBHOOK] Subscription ID: ${updatedSubscription.id}`);
+            console.log(`📊 [WEBHOOK] Customer ID: ${updatedSubscription.customer}`);
+            console.log(`📊 [WEBHOOK] Estado: ${updatedSubscription.status}`);
+            console.log(`📊 [WEBHOOK] Cancel at period end: ${updatedSubscription.cancel_at_period_end}`);
+            console.log(`📊 [WEBHOOK] Current period end: ${new Date(updatedSubscription.current_period_end * 1000).toISOString()}`);
             
             // Si está marcada para cancelar al final del período
             if (updatedSubscription.cancel_at_period_end === true) {
+                console.log(`🚫 [WEBHOOK] ¡Detectada cancelación! Buscando cliente...`);
                 try {
                     // Buscar cliente por stripe_subscription_id
                     const clientResult = await db.pool.query(
-                        'SELECT id, email, full_name FROM clients WHERE stripe_subscription_id = $1',
+                        'SELECT id, email, full_name, subscription_status FROM clients WHERE stripe_subscription_id = $1',
                         [updatedSubscription.id]
                     );
+                    
+                    console.log(`🔍 [WEBHOOK] Clientes encontrados: ${clientResult.rows.length}`);
                     
                     if (clientResult.rows.length > 0) {
                         const client = clientResult.rows[0];
                         const endDate = new Date(updatedSubscription.current_period_end * 1000);
                         
-                        console.log(`🚫 [WEBHOOK] Marcando cliente ${client.email} como cancelado (expira: ${endDate})`);
+                        console.log(`👤 [WEBHOOK] Cliente encontrado:`);
+                        console.log(`   - ID: ${client.id}`);
+                        console.log(`   - Email: ${client.email}`);
+                        console.log(`   - Estado actual: ${client.subscription_status}`);
+                        console.log(`   - Fecha de expiración: ${endDate.toISOString()}`);
                         
                         // Actualizar cliente como cancelado
-                        await db.pool.query(`
-                            UPDATE clients
-                            SET 
-                                subscription_status = 'cancelled',
-                                cancelled_at = CURRENT_TIMESTAMP,
-                                cancellation_reason = 'Cancelado desde Stripe Customer Portal',
-                                subscription_end_date = $1
-                            WHERE id = $2
-                        `, [endDate, client.id]);
-                        
-                        console.log(`✅ [WEBHOOK] Cliente #${client.id} (${client.email}) marcado como cancelado`);
+                        try {
+                            await db.pool.query(`
+                                UPDATE clients
+                                SET 
+                                    subscription_status = 'cancelled',
+                                    cancelled_at = CURRENT_TIMESTAMP,
+                                    cancellation_reason = 'Cancelado desde Stripe Customer Portal',
+                                    subscription_end_date = $1
+                                WHERE id = $2
+                            `, [endDate, client.id]);
+                            
+                            console.log(`✅ [WEBHOOK] Cliente #${client.id} (${client.email}) ACTUALIZADO como cancelado`);
+                        } catch (updateError) {
+                            console.error(`❌ [WEBHOOK] Error en UPDATE:`, updateError);
+                            console.error(`   Mensaje: ${updateError.message}`);
+                            console.error(`   Código: ${updateError.code}`);
+                            // Si las columnas no existen, aún no se hizo redeploy
+                            if (updateError.code === '42703') {
+                                console.error(`⚠️ [WEBHOOK] Las columnas de cancelación NO EXISTEN. DEBES HACER REDEPLOY DE RAILWAY!`);
+                            }
+                        }
                     } else {
                         console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${updatedSubscription.id}`);
+                        console.warn(`💡 [WEBHOOK] Buscando por customer_id como alternativa...`);
+                        
+                        // Intentar buscar por stripe_customer_id
+                        const clientByCustomer = await db.pool.query(
+                            'SELECT id, email, full_name FROM clients WHERE stripe_customer_id = $1',
+                            [updatedSubscription.customer]
+                        );
+                        
+                        if (clientByCustomer.rows.length > 0) {
+                            console.log(`✅ [WEBHOOK] Cliente encontrado por customer_id!`);
+                            const client = clientByCustomer.rows[0];
+                            const endDate = new Date(updatedSubscription.current_period_end * 1000);
+                            
+                            try {
+                                await db.pool.query(`
+                                    UPDATE clients
+                                    SET 
+                                        subscription_status = 'cancelled',
+                                        cancelled_at = CURRENT_TIMESTAMP,
+                                        cancellation_reason = 'Cancelado desde Stripe Customer Portal',
+                                        subscription_end_date = $1
+                                    WHERE id = $2
+                                `, [endDate, client.id]);
+                                
+                                console.log(`✅ [WEBHOOK] Cliente #${client.id} ACTUALIZADO como cancelado (via customer_id)`);
+                            } catch (updateError) {
+                                console.error(`❌ [WEBHOOK] Error en UPDATE:`, updateError.message);
+                            }
+                        } else {
+                            console.error(`❌ [WEBHOOK] No se encontró cliente ni por subscription_id ni por customer_id`);
+                        }
                     }
                 } catch (dbError) {
-                    console.error('❌ [WEBHOOK] Error actualizando cliente cancelado:', dbError);
+                    console.error('❌ [WEBHOOK] Error en proceso de cancelación:', dbError);
+                    console.error('   Stack:', dbError.stack);
                 }
+            } else {
+                console.log(`ℹ️ [WEBHOOK] No es una cancelación (cancel_at_period_end = false)`);
             }
+            console.log(`========== FIN WEBHOOK ==========\n`);
             break;
 
         case 'customer.subscription.deleted':
