@@ -3807,10 +3807,11 @@
         // Variables para edición
         let currentPages = [];
         let pageLimit = 5;
-        
+
         function cancelEditSection(section) {
-            document.querySelectorAll('.cancel-step').forEach(step => step.style.display = 'none');
-            document.getElementById('cancelStep1').style.display = 'block';
+            // Mostrar campos y ocultar inputs
+            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
+            document.querySelectorAll(`.input-${section}`).forEach(input => input.style.display = 'none');
             document.getElementById('confirmCancel').checked = false;
             document.getElementById('btnConfirmCancel').disabled = true;
             
@@ -6566,7 +6567,6 @@
             
             if (section === 'facturacion') {
                 loadInvoices();
-                updateCancellationUI(); // Actualizar estado de cancelación
             } else if (section === 'perfil') {
                 loadProfile();
             }
