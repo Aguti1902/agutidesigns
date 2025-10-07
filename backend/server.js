@@ -625,8 +625,96 @@ app.post('/webhook', async (req, res) => {
                     console.error('❌ [WEBHOOK] Error en proceso de cancelación:', dbError);
                     console.error('   Stack:', dbError.stack);
                 }
+            } else if (updatedSubscription.cancel_at_period_end === false && updatedSubscription.status === 'active') {
+                // 🔄 REACTIVACIÓN: El cliente reactivó su plan cancelado
+                console.log(`♻️ [WEBHOOK] ¡Detectada REACTIVACIÓN! Buscando cliente...`);
+                try {
+                    // Buscar cliente por stripe_subscription_id
+                    const clientResult = await db.pool.query(
+                        'SELECT id, email, full_name, subscription_status FROM clients WHERE stripe_subscription_id = $1',
+                        [updatedSubscription.id]
+                    );
+                    
+                    console.log(`🔍 [WEBHOOK] Clientes encontrados: ${clientResult.rows.length}`);
+                    
+                    if (clientResult.rows.length > 0) {
+                        const client = clientResult.rows[0];
+                        
+                        console.log(`👤 [WEBHOOK] Cliente encontrado:`);
+                        console.log(`   - ID: ${client.id}`);
+                        console.log(`   - Email: ${client.email}`);
+                        console.log(`   - Estado actual: ${client.subscription_status}`);
+                        
+                        // Solo reactivar si estaba cancelado
+                        if (client.subscription_status === 'cancelled') {
+                            console.log(`♻️ [WEBHOOK] ¡Cliente estaba cancelado! Reactivando...`);
+                            
+                            try {
+                                await db.pool.query(`
+                                    UPDATE clients
+                                    SET 
+                                        subscription_status = 'active',
+                                        cancelled_at = NULL,
+                                        cancellation_reason = NULL,
+                                        subscription_end_date = NULL
+                                    WHERE id = $1
+                                `, [client.id]);
+                                
+                                console.log(`✅ [WEBHOOK] Cliente #${client.id} (${client.email}) REACTIVADO exitosamente`);
+                                console.log(`   ✅ subscription_status: cancelled → active`);
+                                console.log(`   ✅ cancelled_at: limpiado`);
+                                console.log(`   ✅ cancellation_reason: limpiado`);
+                                console.log(`   ✅ subscription_end_date: limpiado`);
+                            } catch (updateError) {
+                                console.error(`❌ [WEBHOOK] Error en UPDATE (reactivación):`, updateError);
+                                console.error(`   Mensaje: ${updateError.message}`);
+                            }
+                        } else {
+                            console.log(`ℹ️ [WEBHOOK] Cliente ya estaba activo (${client.subscription_status}), sin cambios`);
+                        }
+                    } else {
+                        console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${updatedSubscription.id}`);
+                        console.warn(`💡 [WEBHOOK] Buscando por customer_id como alternativa...`);
+                        
+                        // Intentar buscar por stripe_customer_id
+                        const clientByCustomer = await db.pool.query(
+                            'SELECT id, email, full_name, subscription_status FROM clients WHERE stripe_customer_id = $1',
+                            [updatedSubscription.customer]
+                        );
+                        
+                        if (clientByCustomer.rows.length > 0) {
+                            console.log(`✅ [WEBHOOK] Cliente encontrado por customer_id!`);
+                            const client = clientByCustomer.rows[0];
+                            
+                            if (client.subscription_status === 'cancelled') {
+                                console.log(`♻️ [WEBHOOK] ¡Cliente estaba cancelado! Reactivando...`);
+                                
+                                try {
+                                    await db.pool.query(`
+                                        UPDATE clients
+                                        SET 
+                                            subscription_status = 'active',
+                                            cancelled_at = NULL,
+                                            cancellation_reason = NULL,
+                                            subscription_end_date = NULL
+                                        WHERE id = $1
+                                    `, [client.id]);
+                                    
+                                    console.log(`✅ [WEBHOOK] Cliente #${client.id} REACTIVADO (via customer_id)`);
+                                } catch (updateError) {
+                                    console.error(`❌ [WEBHOOK] Error en UPDATE:`, updateError.message);
+                                }
+                            }
+                        } else {
+                            console.error(`❌ [WEBHOOK] No se encontró cliente ni por subscription_id ni por customer_id`);
+                        }
+                    }
+                } catch (dbError) {
+                    console.error('❌ [WEBHOOK] Error en proceso de reactivación:', dbError);
+                    console.error('   Stack:', dbError.stack);
+                }
             } else {
-                console.log(`ℹ️ [WEBHOOK] No es una cancelación (cancel_at_period_end = false)`);
+                console.log(`ℹ️ [WEBHOOK] Sin cambios relevantes (cancel_at_period_end: ${updatedSubscription.cancel_at_period_end}, status: ${updatedSubscription.status})`);
             }
             console.log(`========== FIN WEBHOOK ==========\n`);
             break;
