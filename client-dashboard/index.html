@@ -3949,13 +3949,17 @@
                 
                 const result = await response.json();
                 
-                if (result.coupon_applied) {
+                if (response.ok && result.coupon_applied) {
                     alert('🎉 ¡Descuento Aplicado!\n\nHemos aplicado un 20% de descuento a tu suscripción por los próximos 3 meses. ¡Gracias por quedarte con nosotros!');
                     closeCancelModal();
                     // Recargar datos del cliente
                     setTimeout(() => location.reload(), 2000);
+                } else if (result.invalid_subscription) {
+                    // Suscripción inválida - recargar para actualizar UI
+                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    throw new Error('No se pudo aplicar el descuento');
+                    throw new Error(result.error || 'No se pudo aplicar el descuento');
                 }
                 
             } catch (error) {
@@ -3989,7 +3993,7 @@
                 
                 const result = await response.json();
                 
-                if (result.success) {
+                if (response.ok && result.success) {
                     const effectiveDate = new Date(result.effective_date).toLocaleDateString('es-ES', { 
                         day: 'numeric', 
                         month: 'long', 
@@ -4001,6 +4005,10 @@
                     
                     // Recargar página después de 2 segundos
                     setTimeout(() => location.reload(), 2000);
+                } else if (result.invalid_subscription) {
+                    // Suscripción inválida - recargar para actualizar UI
+                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     throw new Error(result.error || 'Error desconocido');
                 }
@@ -4030,11 +4038,15 @@
                 
                 const result = await response.json();
                 
-                if (result.success) {
+                if (response.ok && result.success) {
                     alert('✅ ¡Suscripción Reactivada!\n\nTu suscripción ha sido reactivada exitosamente. La renovación automática continuará normalmente.');
                     
                     // Recargar página después de 2 segundos
                     setTimeout(() => location.reload(), 2000);
+                } else if (result.invalid_subscription) {
+                    // Suscripción inválida - recargar para actualizar UI
+                    alert('⚠️ Suscripción Inactiva\n\n' + result.error + '\n\nSe actualizará tu dashboard...');
+                    setTimeout(() => location.reload(), 1500);
                 } else {
                     throw new Error(result.error || 'Error desconocido');
                 }
@@ -4061,7 +4073,15 @@
             const cancelSection = document.getElementById('cancelPlanSection');
             const reactivateSection = document.getElementById('reactivatePlanSection');
             
-            if (!currentClient || !currentClient.plan) {
+            // Ocultar si no hay cliente o plan
+            if (!currentClient || !currentClient.plan || currentClient.plan === 'sin_plan') {
+                cancellationCard.style.display = 'none';
+                return;
+            }
+            
+            // Ocultar si no hay stripe_subscription_id (suscripción inactiva)
+            if (!currentClient.stripe_subscription_id) {
+                console.log('⚠️ [CANCEL] Cliente sin suscripción activa, ocultando botón de cancelar');
                 cancellationCard.style.display = 'none';
                 return;
             }
