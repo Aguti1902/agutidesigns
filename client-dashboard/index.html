@@ -2181,7 +2181,7 @@
     </div>
 
     <!-- Widget de Chat Flotante -->
-    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: block;">
+    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none;">
         <div id="chatButton" onclick="toggleChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 70, 254, 0.4); transition: all 0.3s ease;">
             <span id="chatButtonIcon" style="font-size: 1.8rem;">💬</span>
         </div>
@@ -2333,6 +2333,9 @@
         async function showDashboard() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboardPage').style.display = 'block';
+            
+            // Mostrar chat widget de soporte
+            document.getElementById('chatWidget').style.display = 'block';
 
             // Cargar datos del cliente
             document.getElementById('userName').textContent = currentClient.full_name || 'Usuario';
@@ -3063,6 +3066,9 @@
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('dashboardPage').style.display = 'none';
             document.getElementById('loginForm').reset();
+            
+            // Ocultar chat widget
+            document.getElementById('chatWidget').style.display = 'none';
         }
 
         // Mostrar sección
