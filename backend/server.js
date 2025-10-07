@@ -142,13 +142,7 @@ app.use(fileUpload({
 // Servir archivos estáticos del dashboard
 app.use('/admin', express.static(path.join(__dirname, '../admin-dashboard')));
 
-// ===== IMPORTAR RUTAS EXTERNAS =====
-const cancellationRoutes = require('./routes/cancellations');
-
 // ===== RUTAS API =====
-
-// Rutas de cancelación
-app.use('/api', cancellationRoutes);
 
 // 1. OBTENER CLAVE PÚBLICA DE STRIPE
 app.get('/api/config', (req, res) => {
@@ -400,9 +394,6 @@ app.post('/api/create-subscription', async (req, res) => {
                 // Verificar si es un cambio de plan (para reiniciar ventana de edición 24h)
                 const isPlanChange = existingClient.plan && existingClient.plan !== plan;
                 
-                // Verificar si es una reactivación (plan era 'sin_plan' o null)
-                const isReactivation = !existingClient.plan || existingClient.plan === 'sin_plan';
-                
                 // Actualizar plan, payment_date, submission_id Y plan_change_at (si es cambio de plan)
                 const updateData = {
                     plan: plan,
@@ -412,26 +403,17 @@ app.post('/api/create-subscription', async (req, res) => {
                     submission_id: finalSubmissionId
                 };
                 
-                // Si es cambio de plan o reactivación, actualizar plan_change_at para reiniciar ventana de edición
-                if (isPlanChange || isReactivation) {
+                // Si es cambio de plan, actualizar plan_change_at para reiniciar ventana de edición
+                if (isPlanChange) {
                     updateData.plan_change_at = new Date().toISOString();
-                    updateData.website_status = 'en_construccion';
-                    
-                    if (isReactivation) {
-                        console.log('✨ Reactivación detectada: sin_plan → ' + plan + ' - Reactivando web y temporizador 24h');
-                    } else {
-                        console.log('🔄 Cambio de plan detectado:', existingClient.plan, '→', plan, '- Reiniciando ventana de edición 24h');
-                    }
+                    console.log('🔄 Cambio de plan detectado:', existingClient.plan, '→', plan, '- Reiniciando ventana de edición 24h');
                 }
                 
                 await db.updateClient(existingClient.id, updateData);
                 
                 console.log(`✅ Cliente ${clientId} actualizado con submission_id: ${finalSubmissionId}`);
-                if (isPlanChange || isReactivation) {
+                if (isPlanChange) {
                     console.log('⏰ plan_change_at actualizado - Temporizador de 24h reiniciado');
-                    if (isReactivation) {
-                        console.log('🌐 website_status actualizado a: en_construccion');
-                    }
                 }
                 
                 // Verificar actualización
@@ -553,47 +535,8 @@ app.post('/webhook', async (req, res) => {
             break;
 
         case 'customer.subscription.updated':
-            console.log(`🔄 [WEBHOOK] Suscripción actualizada: ${event.data.object.id}`);
-            // Aquí podrías actualizar el plan si cambia
-            break;
-
         case 'customer.subscription.deleted':
-            console.log(`🚫 [WEBHOOK] Suscripción cancelada: ${event.data.object.id}`);
-            
-            // Buscar cliente por subscription_id
-            const cancelledSubscription = event.data.object;
-            const clientBySub = await db.getClientBySubscriptionId(cancelledSubscription.id);
-            
-            if (clientBySub) {
-                console.log(`📝 [WEBHOOK] Cliente encontrado: ${clientBySub.email} (ID: ${clientBySub.id})`);
-                
-                // Registrar cancelación en la tabla de cancelaciones
-                await db.createCancellation({
-                    client_id: clientBySub.id,
-                    subscription_id: cancelledSubscription.id,
-                    cancelled_at: new Date(),
-                    effective_date: new Date(cancelledSubscription.current_period_end * 1000),
-                    reason: 'cancelled_via_stripe_portal',
-                    reason_details: 'Cliente canceló desde el Customer Portal de Stripe',
-                    cancelled_by: 'customer',
-                    reactivated: false,
-                    coupon_applied: false
-                });
-                
-                // Actualizar cliente en DB
-                await db.updateClient(clientBySub.id, {
-                    cancellation_scheduled: true,
-                    cancellation_effective_date: new Date(cancelledSubscription.current_period_end * 1000),
-                    cancellation_reason: 'cancelled_via_stripe_portal'
-                });
-                
-                console.log(`✅ [WEBHOOK] Cancelación registrada. Web se desactivará el: ${new Date(cancelledSubscription.current_period_end * 1000).toLocaleString('es-ES')}`);
-                
-                // TODO: Enviar email de confirmación al cliente
-                // TODO: Notificar al admin en el dashboard
-            } else {
-                console.warn(`⚠️ [WEBHOOK] No se encontró cliente con subscription_id: ${cancelledSubscription.id}`);
-            }
+            console.log(`Suscripción actualizada: ${event.type}`);
             break;
 
         default:
@@ -603,32 +546,7 @@ app.post('/webhook', async (req, res) => {
     res.json({ received: true });
 });
 
-// 4. CREAR STRIPE CUSTOMER PORTAL SESSION
-app.post('/api/create-portal-session', async (req, res) => {
-    try {
-        const { customerId, returnUrl } = req.body;
-        
-        console.log('💳 [PORTAL] Creando sesión del Customer Portal para:', customerId);
-        
-        if (!customerId) {
-            return res.status(400).json({ error: 'Customer ID no proporcionado' });
-        }
-        
-        const portalSession = await stripe.billingPortal.sessions.create({
-            customer: customerId,
-            return_url: returnUrl || 'https://agutidesigns.vercel.app/client-dashboard/',
-        });
-        
-        console.log('✅ [PORTAL] Sesión creada:', portalSession.url);
-        res.json({ url: portalSession.url });
-        
-    } catch (error) {
-        console.error('❌ [PORTAL] Error creando sesión:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// 5. OBTENER DATOS DE UNA SESIÓN
+// 4. OBTENER DATOS DE UNA SESIÓN
 app.get('/api/session/:sessionId', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
@@ -916,42 +834,6 @@ app.get('/api/admin/stats', async (req, res) => {
         res.json(stats);
     } catch (error) {
         console.error('❌ [ADMIN] Error obteniendo estadísticas:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// 🐛 DEBUG: Endpoint temporal para ver datos del cliente
-app.get('/api/debug-client/:clientId', async (req, res) => {
-    try {
-        const { clientId } = req.params;
-        console.log('🐛 [DEBUG] Consultando cliente #' + clientId);
-        
-        const client = await db.getClientById(clientId);
-        
-        if (!client) {
-            return res.status(404).json({ error: 'Cliente no encontrado' });
-        }
-        
-        console.log('🐛 [DEBUG] Cliente encontrado:', {
-            id: client.id,
-            email: client.email,
-            plan: client.plan,
-            stripe_subscription_id: client.stripe_subscription_id,
-            payment_date: client.payment_date,
-            created_at: client.created_at
-        });
-        
-        res.json({
-            id: client.id,
-            email: client.email,
-            plan: client.plan,
-            stripe_subscription_id: client.stripe_subscription_id,
-            payment_date: client.payment_date,
-            created_at: client.created_at,
-            all_fields: Object.keys(client)
-        });
-    } catch (error) {
-        console.error('🐛 [DEBUG] Error:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -4248,6 +4130,108 @@ app.post('/api/create-customer-portal-session', async (req, res) => {
         
     } catch (error) {
         console.error('❌ [PORTAL] Error creando sesión:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
+// 🚫 ENDPOINTS DE CANCELACIONES
+// ============================================
+
+// Obtener todas las cancelaciones (para admin dashboard)
+app.get('/api/admin/cancelaciones', async (req, res) => {
+    try {
+        console.log('🚫 [ADMIN] Obteniendo cancelaciones...');
+        
+        // Obtener todos los clientes cancelados
+        const result = await pool.query(`
+            SELECT 
+                id, email, full_name, business_name, plan, 
+                subscription_status, cancelled_at, cancellation_reason, subscription_end_date
+            FROM clients
+            WHERE subscription_status = 'cancelled'
+            ORDER BY cancelled_at DESC
+        `);
+        
+        const cancellations = result.rows;
+        
+        // Calcular estadísticas
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const stats = {
+            total: cancellations.length,
+            pending: cancellations.filter(c => c.subscription_end_date && new Date(c.subscription_end_date) > now).length,
+            thisMonth: cancellations.filter(c => c.cancelled_at && new Date(c.cancelled_at) >= startOfMonth).length,
+            lostRevenue: cancellations.reduce((sum, c) => {
+                const planPrices = { basico: 35, avanzado: 49, premium: 65 };
+                return sum + (planPrices[c.plan] || 0);
+            }, 0)
+        };
+        
+        console.log('✅ [ADMIN] Cancelaciones obtenidas:', { total: stats.total, stats });
+        
+        res.json({ cancellations, stats });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error obteniendo cancelaciones:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Cancelar suscripción de un cliente (desde admin dashboard)
+app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
+    try {
+        const clientId = parseInt(req.params.clientId);
+        const { reason } = req.body;
+        
+        console.log(`🚫 [ADMIN] Cancelando suscripción del cliente #${clientId}`);
+        
+        // Obtener cliente
+        const client = await db.getClientById(clientId);
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        
+        // Calcular fecha de expiración (30 días desde ahora o próxima fecha de facturación)
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30);
+        
+        // Actualizar estado del cliente
+        await pool.query(`
+            UPDATE clients
+            SET 
+                subscription_status = 'cancelled',
+                cancelled_at = CURRENT_TIMESTAMP,
+                cancellation_reason = $1,
+                subscription_end_date = $2
+            WHERE id = $3
+        `, [reason || 'Cancelado desde panel de admin', endDate, clientId]);
+        
+        // Si el cliente tiene stripe_customer_id, cancelar también en Stripe
+        if (client.stripe_customer_id && client.stripe_subscription_id) {
+            try {
+                console.log(`💳 [STRIPE] Cancelando suscripción en Stripe: ${client.stripe_subscription_id}`);
+                await stripe.subscriptions.update(client.stripe_subscription_id, {
+                    cancel_at_period_end: true
+                });
+                console.log('✅ [STRIPE] Suscripción marcada para cancelar al final del período');
+            } catch (stripeError) {
+                console.error('⚠️ [STRIPE] Error cancelando en Stripe:', stripeError.message);
+                // Continuar aunque falle Stripe, ya que el cliente está cancelado en nuestra DB
+            }
+        }
+        
+        console.log(`✅ [ADMIN] Cliente #${clientId} marcado como cancelado`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Suscripción cancelada exitosamente',
+            subscription_end_date: endDate
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error cancelando suscripción:', error);
         res.status(500).json({ error: error.message });
     }
 });

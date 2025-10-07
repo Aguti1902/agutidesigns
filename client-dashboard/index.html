@@ -1770,6 +1770,20 @@
                         </button>
                     </div>
 
+                    <div class="card" style="border: 2px solid #fecaca; background: #fef2f2;">
+                        <h3 class="card-title" style="color: #dc2626;">⚠️ Cancelar Plan</h3>
+                        <p style="color: #666; margin-bottom: 15px;">
+                            Si cancelas tu plan, tu sitio web se desactivará automáticamente cuando finalice tu período de facturación actual.
+                        </p>
+                        <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #ea580c; font-weight: 600; font-size: 0.9rem;">
+                                ⚠️ <strong>Importante:</strong> Esta acción cancelará tu suscripción y tu web quedará desactivada al finalizar el período de pago actual.
+                            </p>
+                        </div>
+                        <button class="btn-action secondary" onclick="openCancelSubscriptionModal()" style="background: #dc2626; color: white; border: none;">
+                            <span style="margin-right: 8px;">🚫</span> Cancelar Mi Suscripción
+                        </button>
+                    </div>
                 </div>
 
                 <!-- CONTACTAR -->
@@ -2348,16 +2362,12 @@
                         }
                         
                         document.getElementById('btnChangePlan').textContent = 'Cambiar Plan';
-                        document.getElementById('btnChangePlan').style.background = '#0046FE';
                     } else {
-                        document.getElementById('currentPlan').innerHTML = '<span style="color: #dc2626;">Sin plan activo</span>';
-                        document.getElementById('planPrice').innerHTML = '<span style="color: #dc2626;">Tu web está inactiva</span>';
+                        document.getElementById('currentPlan').textContent = 'Sin plan activo';
+                        document.getElementById('planPrice').textContent = '-';
                         document.getElementById('renovacionInfo').style.display = 'none';
                         document.getElementById('nextBillingInfo').style.display = 'none';
-                        document.getElementById('btnChangePlan').textContent = '✨ Reactivar Mi Web';
-                        document.getElementById('btnChangePlan').style.background = '#10b981';
-                        document.getElementById('btnChangePlan').style.fontSize = '1.1rem';
-                        document.getElementById('btnChangePlan').style.fontWeight = '700';
+                        document.getElementById('btnChangePlan').textContent = 'Contratar Plan';
                     }
 
                     // Establecer límite de páginas según plan
@@ -3238,6 +3248,32 @@
             }
         }
 
+        // Abrir modal de cancelación de suscripción
+        async function openCancelSubscriptionModal() {
+            const confirmed = await showConfirmationModal(
+                '⚠️ Cancelar Suscripción',
+                `<div style="text-align: left;">
+                    <p style="margin-bottom: 15px;"><strong>¿Estás seguro de que deseas cancelar tu suscripción?</strong></p>
+                    <div style="background: #fff7ed; border: 2px solid #fb923c; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                        <p style="margin: 0 0 10px 0; color: #ea580c; font-weight: 600;">⚠️ Consecuencias de cancelar:</p>
+                        <ul style="margin: 0; padding-left: 20px; color: #666;">
+                            <li>Tu sitio web se desactivará al finalizar tu período de facturación actual</li>
+                            <li>Perderás acceso a todas las funcionalidades premium</li>
+                            <li>Tus datos se conservarán por 30 días por si deseas reactivar</li>
+                        </ul>
+                    </div>
+                    <p style="color: #666;">Serás redirigido al portal de Stripe para completar la cancelación.</p>
+                </div>`,
+                'Continuar con la cancelación',
+                'No, mantener mi plan'
+            );
+
+            if (confirmed) {
+                // Redirigir al portal de Stripe donde puede cancelar
+                await openStripePortal();
+            }
+        }
+
         async function selectPlanAndCheckout(plan) {
             console.log('💳 [INICIO] Seleccionando plan:', plan, 'Billing:', modalBillingCycle);
             console.log('💳 [INICIO] currentClient:', currentClient);
@@ -3264,41 +3300,9 @@
                 console.log(`💳 [BILLING] Ciclo solicitado: "${modalBillingCycle}"`);
                 console.log(`📊 [RESUMEN] ${currentPlan ? `Plan actual: ${currentPlan}` : 'SIN PLAN'} → Nuevo plan: ${plan}`);
                 
-                // Si no tiene plan, redirigir a checkout normal (reactivación)
-                if (!currentPlan || currentPlan === 'sin_plan') {
-                    console.log('🆕 Cliente sin plan, preparando reactivación');
-                    
-                    const planNames = {
-                        'basico': 'Básico',
-                        'avanzado': 'Avanzado',
-                        'premium': 'Premium'
-                    };
-                    
-                    const prices = {
-                        'monthly': { basico: '35€', avanzado: '49€', premium: '65€' },
-                        'annual': { basico: '28€', avanzado: '39€', premium: '52€' }
-                    };
-                    
-                    const cycleText = modalBillingCycle === 'annual' ? 'anual' : 'mensual';
-                    const planName = planNames[plan];
-                    const price = prices[modalBillingCycle][plan];
-                    const totalText = modalBillingCycle === 'annual' ? 
-                        `(${parseInt(price) * 12}€/año + IVA)` : 
-                        `(${price}/mes + IVA)`;
-                    
-                    const confirmed = window.confirm(
-                        `✨ Reactivar tu Sitio Web\n\n` +
-                        `Plan seleccionado: ${planName} ${cycleText}\n` +
-                        `Precio: ${price}/mes ${totalText}\n\n` +
-                        `Tu sitio web se reactivará inmediatamente después del pago.\n\n` +
-                        `¿Deseas continuar al checkout?`
-                    );
-                    
-                    if (!confirmed) {
-                        console.log('❌ Usuario canceló la reactivación');
-                        return;
-                    }
-                    
+                // Si no tiene plan, redirigir a checkout normal (nuevo cliente)
+                if (!currentPlan) {
+                    console.log('🆕 Cliente sin plan, redirigir a checkout');
                     await redirectToCheckout(plan, dashboardData);
                     return;
                 }
@@ -3768,69 +3772,10 @@
             openPlanModal();
         }
 
-        // ===== STRIPE CUSTOMER PORTAL =====
-        
-        // Función para abrir el Stripe Customer Portal (gestión de suscripción, métodos de pago, cancelación, etc.)
-        async function openStripePortal() {
-            try {
-                if (!currentClient || !currentClient.id) {
-                    alert('❌ Error\n\nNo se pudo obtener la información del cliente. Por favor, recarga la página e intenta de nuevo.');
-                    return;
-                }
-                
-                // Mostrar mensaje informativo ANTES de redirigir
-                const confirmed = window.confirm(
-                    '💳 Portal de Gestión de Stripe\n\n' +
-                    'Vas a ser redirigido al portal de Stripe donde podrás:\n\n' +
-                    '• Gestionar tus métodos de pago\n' +
-                    '• Ver tu historial de facturas\n' +
-                    '• Cancelar tu suscripción si lo deseas\n\n' +
-                    '⚠️ IMPORTANTE: Si decides cancelar tu suscripción:\n\n' +
-                    '• Tu sitio web se desactivará al final de tu período actual\n' +
-                    '• Guardaremos tu sitio y datos durante 6 meses\n' +
-                    '• Podrás reactivar en cualquier momento durante esos 6 meses\n' +
-                    '• Después de 6 meses, se eliminará permanentemente\n\n' +
-                    '¿Deseas continuar al portal de Stripe?'
-                );
-                
-                if (!confirmed) {
-                    console.log('💳 [STRIPE] Usuario canceló la apertura del portal');
-                    return;
-                }
-                
-                console.log('💳 [STRIPE] Abriendo Customer Portal para cliente #' + currentClient.id);
-                
-                const response = await fetch(`${API_URL}/api/create-portal-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerId: currentClient.stripe_customer_id,
-                        returnUrl: window.location.href
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.url) {
-                    console.log('✅ [STRIPE] Redirigiendo a Customer Portal...');
-                    window.location.href = result.url;
-                } else {
-                    throw new Error('No se recibió URL del portal');
-                }
-                
-            } catch (error) {
-                console.error('❌ [STRIPE] Error abriendo portal:', error);
-                alert('❌ Error\n\nNo se pudo abrir el portal de Stripe. Por favor, contacta con soporte.');
-            }
-        }
-
         // Variables para edición
         let currentPages = [];
         let pageLimit = 5;
 
-        function cancelEditSection(section) {
-            // Mostrar campos y ocultar inputs
-            document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
         function cancelEditSection(section) {
             // Mostrar campos y ocultar inputs
             document.querySelectorAll(`.field-${section}`).forEach(field => field.style.display = 'block');
@@ -6326,6 +6271,8 @@
                 loadInvoices();
             } else if (section === 'perfil') {
                 loadProfile();
+            } else if (section === 'seo') {
+                updateSEOMarketingSection();
             }
         };
 

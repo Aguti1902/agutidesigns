@@ -229,17 +229,6 @@ async function initializeTables() {
             console.log('⚠️ Migración modifications_viewed_at en submissions ya aplicada');
         }
 
-        // 🆕 MIGRACIÓN: Agregar campo billing_cycle a clients
-        try {
-            await client.query(`
-                ALTER TABLE clients 
-                ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'monthly'
-            `);
-            console.log('✅ Migración: Campo billing_cycle añadido a clients');
-        } catch (e) {
-            console.log('⚠️ Migración billing_cycle en clients ya aplicada');
-        }
-
         // 🆕 MIGRACIÓN: Agregar campos para integración con Mailchimp
         try {
             await client.query(`
@@ -320,40 +309,18 @@ async function initializeTables() {
             console.log('⚠️ Migración is_downgrade en projects ya aplicada');
         }
 
-        // 🆕 MIGRACIÓN: Crear tabla de cancelaciones
-        try {
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS cancellations (
-                    id SERIAL PRIMARY KEY,
-                    client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE,
-                    subscription_id VARCHAR(255),
-                    cancelled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    effective_date TIMESTAMP,
-                    reason VARCHAR(255),
-                    reason_details TEXT,
-                    cancelled_by VARCHAR(20),
-                    reactivated BOOLEAN DEFAULT FALSE,
-                    reactivated_at TIMESTAMP,
-                    coupon_applied BOOLEAN DEFAULT FALSE,
-                    coupon_code VARCHAR(50)
-                )
-            `);
-            console.log('✅ Migración: Tabla cancellations creada');
-        } catch (e) {
-            console.log('⚠️ Migración tabla cancellations ya aplicada');
-        }
-
-        // 🆕 MIGRACIÓN: Agregar campos de cancelación a clients
+        // 🆕 MIGRACIÓN: Agregar campos de cancelación para clients
         try {
             await client.query(`
                 ALTER TABLE clients 
-                ADD COLUMN IF NOT EXISTS cancellation_scheduled BOOLEAN DEFAULT FALSE,
-                ADD COLUMN IF NOT EXISTS cancellation_effective_date TIMESTAMP,
-                ADD COLUMN IF NOT EXISTS cancellation_reason VARCHAR(255)
+                ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'active',
+                ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP,
+                ADD COLUMN IF NOT EXISTS cancellation_reason TEXT,
+                ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP
             `);
             console.log('✅ Migración: Campos de cancelación añadidos a clients');
         } catch (e) {
-            console.log('⚠️ Migración campos de cancelación en clients ya aplicada');
+            console.log('⚠️ Migración de cancelación en clients ya aplicada');
         }
 
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
@@ -725,52 +692,18 @@ async function updateClient(clientId, updates) {
         fields.push(`submission_id = $${paramCount++}`);
         values.push(updates.submission_id);
     }
-    if (updates.website_status !== undefined) {
-        fields.push(`website_status = $${paramCount++}`);
-        values.push(updates.website_status);
-    }
-    if (updates.plan_change_at !== undefined) {
-        fields.push(`plan_change_at = $${paramCount++}`);
-        values.push(updates.plan_change_at);
-    }
-    if (updates.billing_cycle !== undefined) {
-        fields.push(`billing_cycle = $${paramCount++}`);
-        values.push(updates.billing_cycle);
-    }
-    if (updates.cancellation_scheduled !== undefined) {
-        fields.push(`cancellation_scheduled = $${paramCount++}`);
-        values.push(updates.cancellation_scheduled);
-    }
-    if (updates.cancellation_effective_date !== undefined) {
-        fields.push(`cancellation_effective_date = $${paramCount++}`);
-        values.push(updates.cancellation_effective_date);
-    }
-    if (updates.cancellation_reason !== undefined) {
-        fields.push(`cancellation_reason = $${paramCount++}`);
-        values.push(updates.cancellation_reason);
-    }
     
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(clientId);
-    
-    console.log('🔧 [DB] updateClient - Campos a actualizar:', fields.join(', '));
-    console.log('🔧 [DB] updateClient - Valores:', values.slice(0, -1));
     
     await pool.query(
         `UPDATE clients SET ${fields.join(', ')} WHERE id = $${paramCount}`,
         values
     );
-    
-    console.log('✅ [DB] Cliente #' + clientId + ' actualizado exitosamente');
 }
 
 async function getClientByEmail(email) {
     const result = await pool.query('SELECT * FROM clients WHERE email = $1', [email]);
-    return result.rows[0];
-}
-
-async function getClientBySubscriptionId(subscriptionId) {
-    const result = await pool.query('SELECT * FROM clients WHERE stripe_subscription_id = $1', [subscriptionId]);
     return result.rows[0];
 }
 
@@ -1100,125 +1033,6 @@ async function getClientWithDetails(clientId) {
     return client;
 }
 
-// ===== FUNCIONES DE CANCELACIÓN =====
-
-async function createCancellation(data) {
-    const result = await pool.query(`
-        INSERT INTO cancellations (
-            client_id, subscription_id, effective_date, reason, 
-            reason_details, cancelled_by, coupon_applied, coupon_code
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING *
-    `, [
-        data.client_id,
-        data.subscription_id,
-        data.effective_date,
-        data.reason,
-        data.reason_details || null,
-        data.cancelled_by,
-        data.coupon_applied || false,
-        data.coupon_code || null
-    ]);
-    return result.rows[0];
-}
-
-async function getAllCancellations() {
-    const result = await pool.query(`
-        SELECT 
-            ca.id,
-            ca.client_id,
-            ca.subscription_id,
-            ca.cancelled_at,
-            ca.effective_date,
-            ca.reason,
-            ca.reason_details,
-            ca.cancelled_by,
-            ca.reactivated,
-            ca.reactivated_at,
-            ca.coupon_applied,
-            ca.coupon_code,
-            c.email,
-            c.full_name,
-            c.plan,
-            s.business_name
-        FROM cancellations ca
-        LEFT JOIN clients c ON ca.client_id = c.id
-        LEFT JOIN submissions s ON c.submission_id = s.id
-        ORDER BY ca.cancelled_at DESC
-    `);
-    return result.rows;
-}
-
-async function getCancellationByClientId(clientId) {
-    const result = await pool.query(`
-        SELECT * FROM cancellations 
-        WHERE client_id = $1 AND reactivated = FALSE
-        ORDER BY cancelled_at DESC 
-        LIMIT 1
-    `, [clientId]);
-    return result.rows[0] || null;
-}
-
-async function reactivateCancellation(cancellationId) {
-    await pool.query(`
-        UPDATE cancellations 
-        SET reactivated = TRUE, reactivated_at = CURRENT_TIMESTAMP
-        WHERE id = $1
-    `, [cancellationId]);
-    
-    // También actualizar campos en clients
-    const cancellation = await pool.query('SELECT client_id FROM cancellations WHERE id = $1', [cancellationId]);
-    if (cancellation.rows.length > 0) {
-        await pool.query(`
-            UPDATE clients 
-            SET cancellation_scheduled = FALSE, 
-                cancellation_effective_date = NULL,
-                cancellation_reason = NULL
-            WHERE id = $1
-        `, [cancellation.rows[0].client_id]);
-    }
-}
-
-async function getCancellationStats() {
-    // Total de cancelaciones
-    const totalResult = await pool.query('SELECT COUNT(*) as count FROM cancellations WHERE reactivated = FALSE');
-    
-    // Cancelaciones por razón
-    const byReasonResult = await pool.query(`
-        SELECT reason, COUNT(*) as count 
-        FROM cancellations 
-        WHERE reactivated = FALSE
-        GROUP BY reason
-        ORDER BY count DESC
-    `);
-    
-    // Reactivaciones
-    const reactivatedResult = await pool.query('SELECT COUNT(*) as count FROM cancellations WHERE reactivated = TRUE');
-    
-    // Valor perdido (revenue lost)
-    const revenueLostResult = await pool.query(`
-        SELECT SUM(
-            CASE 
-                WHEN c.plan = 'basico' THEN 35
-                WHEN c.plan = 'avanzado' THEN 49
-                WHEN c.plan = 'premium' THEN 65
-                ELSE 0
-            END
-        ) as revenue_lost
-        FROM cancellations ca
-        LEFT JOIN clients c ON ca.client_id = c.id
-        WHERE ca.reactivated = FALSE
-    `);
-    
-    return {
-        total: parseInt(totalResult.rows[0].count),
-        by_reason: byReasonResult.rows,
-        reactivated: parseInt(reactivatedResult.rows[0].count),
-        revenue_lost: parseFloat(revenueLostResult.rows[0].revenue_lost || 0)
-    };
-}
-
 module.exports = {
     pool,
     db: pool, // Alias para compatibilidad
@@ -1235,7 +1049,6 @@ module.exports = {
     getAllClients,
     getClientWithDetails,
     getClientByEmail,
-    getClientBySubscriptionId,
     getClientById,
     updateWebsiteStatus,
     getClientDashboardData,
@@ -1252,10 +1065,5 @@ module.exports = {
     getProjectById,
     updateProject,
     deleteProject,
-    getProjectStats,
-    createCancellation,
-    getAllCancellations,
-    getCancellationByClientId,
-    reactivateCancellation,
-    getCancellationStats
+    getProjectStats
 };
