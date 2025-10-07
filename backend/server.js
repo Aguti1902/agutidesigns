@@ -2341,9 +2341,11 @@ app.post('/api/tickets', async (req, res) => {
         console.log('✅ [BACKEND] Ticket creado en BD, ID:', ticket.id);
         
         // Enviar email al admin notificando del nuevo ticket
+        const adminEmail = process.env.ADMIN_EMAIL || 'info@agutidesigns.es';
+        console.log('📧 [EMAIL] Enviando notificación de ticket al admin:', adminEmail);
         try {
             await emailService.sendEmail('custom', {
-                to: 'info@agutidesigns.com',
+                to: adminEmail,
                 subject: `🎫 Nuevo Ticket de Soporte #${ticket.id} - ${ticketData.priority.toUpperCase()}`,
                 html: `
                     <h2>Nuevo Ticket de Soporte</h2>
@@ -2509,7 +2511,7 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         // Enviar email al admin notificando la nueva respuesta
         try {
             await emailService.sendEmail('custom', {
-                to: 'info@agutidesigns.com',
+                to: process.env.ADMIN_EMAIL || 'info@agutidesigns.es',
                 subject: `🔔 Nueva Respuesta del Cliente - Ticket #${ticketId}`,
                 html: `
                     <h2>El cliente ha respondido</h2>
@@ -4493,7 +4495,7 @@ app.post('/api/admin/fix-tracking', async (req, res) => {
         console.log('🔧 [ADMIN] Sincronizando pedidos con estado real del cliente...');
         
         // 1️⃣ Obtener el cliente por email
-        const email = 'info@agutidesigns.com';
+        const email = process.env.ADMIN_EMAIL || 'info@agutidesigns.es';
         const clientResult = await db.pool.query(`SELECT * FROM clients WHERE email = $1`, [email]);
         
         if (clientResult.rows.length === 0) {
