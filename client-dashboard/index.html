@@ -2277,31 +2277,63 @@
                     console.log('📊 subscription_status:', currentClient.subscription_status);
                     console.log('📊 subscription_end_date:', currentClient.subscription_end_date);
                     
-                    // 🚨 DETECTAR SI LA SUSCRIPCIÓN ESTÁ CANCELADA
+                    // 🚨 DETECTAR ESTADO DE LA SUSCRIPCIÓN
                     const isCancelled = currentClient.subscription_status === 'cancelled';
-                    console.log('🚨 ¿Suscripción cancelada?', isCancelled);
+                    const now = new Date();
+                    const endDate = currentClient.subscription_end_date ? new Date(currentClient.subscription_end_date) : null;
+                    const isExpired = isCancelled && endDate && now > endDate;
+                    const daysLeft = endDate ? Math.ceil((endDate - now) / (1000 * 60 * 60 * 24)) : 0;
                     
-                    if (isCancelled && currentClient.subscription_end_date) {
-                        // Mostrar banner rojo con countdown
-                        const endDate = new Date(currentClient.subscription_end_date);
-                        const now = new Date();
-                        const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+                    console.log('🚨 Estado suscripción:', {
+                        status: currentClient.subscription_status,
+                        isCancelled,
+                        isExpired,
+                        daysLeft,
+                        endDate: endDate?.toISOString()
+                    });
+                    
+                    if (isExpired) {
+                        // ❌ SUSCRIPCIÓN EXPIRADA - Acceso limitado
+                        console.log('❌ Suscripción EXPIRADA - Aplicando restricciones');
                         
-                        console.log('⏰ Días restantes hasta cancelación:', daysLeft);
+                        // Mostrar banner de expiración (diferente al de cancelación)
+                        document.getElementById('cancelledBanner').style.display = 'block';
+                        document.getElementById('cancelledBanner').style.background = 'rgba(239, 68, 68, 0.1)';
+                        document.getElementById('cancelledBanner').style.borderBottom = '2px solid rgba(239, 68, 68, 0.3)';
+                        document.getElementById('cancelledBanner').querySelector('strong').style.color = '#dc2626';
+                        document.getElementById('daysRemaining').textContent = '❌ Tu suscripción ha expirado';
+                        document.getElementById('daysRemaining').style.color = '#dc2626';
+                        document.getElementById('daysRemaining').parentElement.querySelector('span:last-child').style.display = 'none';
+                        
+                        // Ocultar botón "Cambiar Plan" y mostrar solo reactivar
+                        document.getElementById('btnChangePlan').style.display = 'none';
+                        document.getElementById('nextBillingInfo').style.display = 'none';
+                        document.getElementById('cancellationInfo').style.display = 'none';
+                        document.getElementById('cancelPlanCard').style.display = 'none';
+                        document.getElementById('reactivatePlanCard').style.display = 'block';
+                        
+                        // Aplicar restricciones de suscripción expirada
+                        applyExpiredSubscriptionRestrictions();
+                        
+                    } else if (isCancelled && endDate) {
+                        // ⏰ SUSCRIPCIÓN CANCELADA pero aún activa
+                        console.log('⏰ Suscripción cancelada pero aún activa por', daysLeft, 'días');
                         
                         document.getElementById('cancelledBanner').style.display = 'block';
+                        document.getElementById('cancelledBanner').style.background = 'rgba(0, 70, 254, 0.1)';
+                        document.getElementById('cancelledBanner').style.borderBottom = '2px solid rgba(0, 70, 254, 0.3)';
+                        document.getElementById('cancelledBanner').querySelector('strong').style.color = '#0046FE';
                         document.getElementById('daysRemaining').textContent = 
                             daysLeft > 1 ? `Te quedan ${daysLeft} días` :
                             daysLeft === 1 ? `Te queda 1 día` :
                             `Finaliza hoy`;
-                        
+                        document.getElementById('daysRemaining').style.color = '#1e40af';
+                        document.getElementById('daysRemaining').parentElement.querySelector('span:last-child').style.display = 'inline';
                         document.getElementById('cancellationDate').textContent = 
                             endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
                         
-                        // Ocultar botón "Cambiar Plan" (no tiene sentido si está cancelado)
+                        // Ocultar botón "Cambiar Plan"
                         document.getElementById('btnChangePlan').style.display = 'none';
-                        
-                        // Mostrar info de cancelación en lugar de próximo cobro
                         document.getElementById('nextBillingInfo').style.display = 'none';
                         document.getElementById('cancellationInfo').style.display = 'block';
                         document.getElementById('cancellationEndDate').textContent = 
@@ -2311,16 +2343,15 @@
                         document.getElementById('cancelPlanCard').style.display = 'none';
                         document.getElementById('reactivatePlanCard').style.display = 'block';
                         
-                        console.log('✅ Banner de cancelación mostrado');
                     } else {
-                        // Suscripción activa: ocultar banner y mostrar opciones normales
+                        // ✅ SUSCRIPCIÓN ACTIVA
+                        console.log('✅ Suscripción activa');
+                        
                         document.getElementById('cancelledBanner').style.display = 'none';
                         document.getElementById('btnChangePlan').style.display = 'inline-block';
                         document.getElementById('cancellationInfo').style.display = 'none';
                         document.getElementById('cancelPlanCard').style.display = 'block';
                         document.getElementById('reactivatePlanCard').style.display = 'none';
-                        
-                        console.log('✅ Suscripción activa, mostrando opciones normales');
                     }
                 }
 
@@ -3100,6 +3131,100 @@
         }
         
         // Aplicar restricciones para usuarios sin plan
+        function applyExpiredSubscriptionRestrictions() {
+            console.log('❌ Aplicando restricciones de suscripción EXPIRADA');
+            
+            // Bloquear TODAS las secciones excepto Mi Negocio y Facturación
+            const restrictedSections = ['resumen', 'sitio', 'estadisticas', 'tutoriales', 'dominio', 'seo', 'contactar'];
+            restrictedSections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    // Añadir overlay específico para suscripción expirada
+                    addExpiredOverlay(section, sectionId);
+                }
+            });
+            
+            // Actualizar estadísticas en resumen
+            document.getElementById('visitsCount').innerHTML = '❌';
+            document.getElementById('siteStatus').textContent = 'Expirado';
+            
+            // Deshabilitar botones de acciones rápidas
+            const btnEditSite = document.getElementById('btnEditSite');
+            if (btnEditSite) {
+                btnEditSite.innerHTML = '❌ Suscripción Expirada';
+                btnEditSite.disabled = true;
+                btnEditSite.style.opacity = '0.5';
+                btnEditSite.style.cursor = 'not-allowed';
+            }
+            
+            // Ocultar soporte (no pueden crear tickets si no tienen plan activo)
+            document.getElementById('supportWithPlan').style.display = 'none';
+            document.getElementById('supportNoPlan').style.display = 'block';
+            
+            console.log('✅ Restricciones de expiración aplicadas - Solo acceso a Mi Negocio y Facturación');
+        }
+        
+        function addExpiredOverlay(section, sectionId) {
+            // Si ya existe un overlay, no añadir otro
+            if (section.querySelector('.expired-overlay')) return;
+            
+            section.style.position = 'relative';
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'expired-overlay';
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(5px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                border-radius: 12px;
+                padding: 40px;
+                text-align: center;
+            `;
+            
+            const sectionNames = {
+                'resumen': 'Resumen',
+                'sitio': 'Mi Sitio Web',
+                'estadisticas': 'Estadísticas',
+                'tutoriales': 'Tutoriales',
+                'dominio': 'Dominio & Hosting',
+                'seo': 'SEO & Marketing',
+                'contactar': 'Soporte'
+            };
+            
+            overlay.innerHTML = `
+                <div style="font-size: 4rem; margin-bottom: 20px; filter: grayscale(1); opacity: 0.5;">🔒</div>
+                <h2 style="color: #dc2626; margin: 0 0 15px 0; font-size: 1.8rem;">
+                    ❌ Suscripción Expirada
+                </h2>
+                <p style="color: #666; margin-bottom: 25px; font-size: 1.1rem; max-width: 500px; line-height: 1.6;">
+                    Tu acceso a <strong>${sectionNames[sectionId] || 'esta sección'}</strong> ha expirado.
+                    <br>Reactiva tu suscripción para continuar disfrutando de todos los beneficios.
+                </p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                    <button onclick="openStripePortal()" style="background: #0046FE; color: white; border: none; padding: 14px 35px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 70, 254, 0.3); transition: all 0.3s ease;">
+                        🔄 Reactivar Suscripción
+                    </button>
+                    <button onclick="showSection('facturacion')" style="background: white; color: #0046FE; border: 2px solid #0046FE; padding: 14px 35px; border-radius: 10px; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;">
+                        Ver Planes
+                    </button>
+                </div>
+                <p style="color: #999; margin-top: 20px; font-size: 0.9rem;">
+                    💡 Tus datos están seguros. Puedes verlos en "Mi Negocio".
+                </p>
+            `;
+            
+            section.appendChild(overlay);
+        }
+
         function applyFreePlanRestrictions() {
             console.log('🔒 Aplicando restricciones de plan gratuito');
             
