@@ -967,13 +967,44 @@
             }
 
             .sidebar-logo {
-                display: block;
-                padding: 0 20px 20px 20px;
-                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 2px solid #e5e7eb;
+                background: linear-gradient(135deg, #0046FE 0%, #0035c9 100%);
+                position: relative;
             }
 
             .sidebar-logo img {
-                height: 40px;
+                height: 35px;
+            }
+
+            .sidebar-logo p {
+                color: white !important;
+                margin: 5px 0 0 0 !important;
+                font-size: 0.75rem !important;
+                font-weight: 600 !important;
+            }
+
+            .close-menu-btn {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: white;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                font-size: 1.2rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .close-menu-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: rotate(90deg);
             }
 
             .sidebar-divider {
@@ -1014,7 +1045,21 @@
 
             .btn-logout {
                 display: block;
-                margin: 10px 15px;
+                margin: auto 15px 15px 15px;
+                background: #fee2e2;
+                color: #dc2626;
+                font-weight: 600;
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: 2px solid #fecaca;
+                transition: all 0.3s ease;
+                font-size: 0.95rem;
+            }
+
+            .btn-logout:hover {
+                background: #fecaca;
+                border-color: #dc2626;
+                transform: translateY(-2px);
             }
 
             /* Botón hamburger */
@@ -1413,8 +1458,11 @@
             <!-- SIDEBAR -->
             <div class="sidebar">
                 <div class="sidebar-logo">
-                    <img src="/images/Logo.svg" alt="agutidesigns">
-                    <p>Panel de Administración</p>
+                    <div>
+                        <img src="/images/Logo.svg" alt="agutidesigns">
+                        <p>Panel de Administración</p>
+                    </div>
+                    <button class="close-menu-btn" onclick="toggleMobileMenu()">✕</button>
                 </div>
                 
                 <div class="sidebar-nav">

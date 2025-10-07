@@ -767,8 +767,9 @@
                 overflow-y: hidden;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
-                gap: 15px;
-                padding: 0 0 20px 0;
+                gap: 12px;
+                padding: 0 15px 20px 15px;
+                margin: 0 -15px; /* Quitar márgenes del form-body */
                 scrollbar-width: none; /* Firefox */
             }
 
@@ -777,10 +778,28 @@
             }
 
             .style-card {
-                min-width: 85%;
+                min-width: 80%;
+                max-width: 80%;
                 scroll-snap-align: center;
-                padding: 15px;
+                padding: 12px;
                 flex-shrink: 0;
+            }
+
+            .style-preview {
+                height: 180px !important;
+                padding: 15px !important;
+            }
+
+            .style-info {
+                padding: 12px !important;
+            }
+
+            .style-name {
+                font-size: 0.95rem !important;
+            }
+
+            .style-description {
+                font-size: 0.8rem !important;
             }
 
             /* Indicadores de carrusel */

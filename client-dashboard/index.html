@@ -674,13 +674,37 @@
             }
 
             .sidebar-logo {
-                display: block;
-                padding: 0 20px 20px 20px;
-                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 2px solid #e5e7eb;
+                background: linear-gradient(135deg, #0046FE 0%, #0035c9 100%);
+                position: relative;
             }
 
             .sidebar-logo img {
-                height: 40px;
+                height: 35px;
+            }
+
+            .close-menu-btn {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: white;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                font-size: 1.2rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+
+            .close-menu-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: rotate(90deg);
             }
 
             .sidebar-menu {
@@ -724,9 +748,48 @@
                 margin: 10px 20px;
             }
 
+            /* Info de usuario en el menú */
+            .sidebar-user-info {
+                padding: 15px 20px;
+                margin: auto 15px 10px 15px;
+                background: linear-gradient(135deg, #f0f7ff 0%, #e0f0ff 100%);
+                border-radius: 12px;
+                border: 2px solid #0046FE;
+            }
+
+            .sidebar-user-info .user-name {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #1B1B1B;
+                margin-bottom: 5px;
+            }
+
+            .sidebar-user-info .user-plan {
+                font-size: 0.85rem;
+                color: #0046FE;
+                font-weight: 600;
+                background: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                display: inline-block;
+            }
+
             .btn-logout {
                 display: block;
-                margin: 10px 15px;
+                margin: 0 15px 15px 15px;
+                background: #fee2e2;
+                color: #dc2626;
+                font-weight: 600;
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: 2px solid #fecaca;
+                transition: all 0.3s ease;
+            }
+
+            .btn-logout:hover {
+                background: #fecaca;
+                border-color: #dc2626;
+                transform: translateY(-2px);
             }
 
             /* Botón hamburger */
@@ -1215,6 +1278,13 @@
         <div class="dashboard-container">
             <!-- Sidebar -->
             <div class="sidebar">
+                <!-- Logo y botón cerrar -->
+                <div class="sidebar-logo">
+                    <img src="/images/Logo.svg" alt="agutidesigns">
+                    <button class="close-menu-btn" onclick="toggleMobileMenu()">✕</button>
+                </div>
+
+                <!-- Menú de navegación -->
                 <ul class="sidebar-menu">
                     <li><button class="active" onclick="showSection('resumen')"><span class="menu-icon">🏠</span><span>Resumen</span></button></li>
                     <li><button onclick="showSection('negocio')"><span class="menu-icon">🏢</span><span>Mi Negocio</span></button></li>
@@ -1227,6 +1297,15 @@
                     <li><button onclick="showSection('seo')"><span class="menu-icon">🚀</span><span>SEO & Marketing</span></button></li>
                     <li><button onclick="showSection('perfil')"><span class="menu-icon">👤</span><span>Mi Perfil</span></button></li>
                 </ul>
+
+                <!-- Info de usuario -->
+                <div class="sidebar-user-info">
+                    <div class="user-name" id="sidebarUserName">Cargando...</div>
+                    <div class="user-plan" id="sidebarUserPlan">Plan Básico</div>
+                </div>
+
+                <!-- Botón cerrar sesión -->
+                <button class="btn-logout" onclick="logout()">🚪 Cerrar Sesión</button>
             </div>
 
             <!-- Main Content -->
@@ -2789,6 +2868,7 @@
 
             // Cargar datos del cliente
             document.getElementById('userName').textContent = currentClient.full_name || 'Usuario';
+            document.getElementById('sidebarUserName').textContent = currentClient.full_name || 'Usuario';
             
             // Verificar si tiene plan activo
             const hasPlan = currentClient.plan && currentClient.plan !== 'null';
@@ -2798,6 +2878,7 @@
             // Mostrar plan
             if (hasPlan) {
                 document.getElementById('userPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
+                document.getElementById('sidebarUserPlan').textContent = `Plan ${capitalize(currentClient.plan)}`;
                 document.getElementById('noPlanBanner').style.display = 'none';
                 // Mostrar soporte para clientes con plan
                 document.getElementById('supportWithPlan').style.display = 'block';
@@ -2810,6 +2891,7 @@
                 console.log('✅ Todas las secciones desbloqueadas para cliente con plan');
             } else {
                 document.getElementById('userPlan').textContent = 'Sin plan activo';
+                document.getElementById('sidebarUserPlan').textContent = 'Sin plan activo';
                 document.getElementById('noPlanBanner').style.display = 'block';
                 applyFreePlanRestrictions();
                 console.log('🔒 Aplicando restricciones de plan gratuito');
@@ -4333,6 +4415,7 @@
                 
                 // 🔥 ACTUALIZAR el texto del plan en el header INMEDIATAMENTE
                 document.getElementById('userPlan').textContent = `Plan ${capitalize(newPlan)}`;
+                document.getElementById('sidebarUserPlan').textContent = `Plan ${capitalize(newPlan)}`;
                 console.log('✅ Texto del plan actualizado en header:', newPlan);
                 
                 if (result.isUpgrade) {
