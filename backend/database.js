@@ -182,6 +182,21 @@ async function initializeTables() {
             console.log('⚠️ Migración is_upgrade en projects ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campos de WordPress y despliegue manual
+        try {
+            await client.query(`
+                ALTER TABLE projects 
+                ADD COLUMN IF NOT EXISTS wordpress_url TEXT,
+                ADD COLUMN IF NOT EXISTS wordpress_username TEXT,
+                ADD COLUMN IF NOT EXISTS wordpress_password TEXT,
+                ADD COLUMN IF NOT EXISTS is_deployed BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS deployed_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campos de WordPress añadidos a projects');
+        } catch (e) {
+            console.log('⚠️ Migración WordPress en projects ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campos de upgrade a submissions
         try {
             await client.query(`
@@ -920,6 +935,26 @@ async function updateProject(projectId, updates) {
     if (updates.project_name !== undefined) {
         fields.push(`project_name = $${paramCount++}`);
         values.push(updates.project_name);
+    }
+    if (updates.wordpress_url !== undefined) {
+        fields.push(`wordpress_url = $${paramCount++}`);
+        values.push(updates.wordpress_url);
+    }
+    if (updates.wordpress_username !== undefined) {
+        fields.push(`wordpress_username = $${paramCount++}`);
+        values.push(updates.wordpress_username);
+    }
+    if (updates.wordpress_password !== undefined) {
+        fields.push(`wordpress_password = $${paramCount++}`);
+        values.push(updates.wordpress_password);
+    }
+    if (updates.is_deployed !== undefined) {
+        fields.push(`is_deployed = $${paramCount++}`);
+        values.push(updates.is_deployed);
+    }
+    if (updates.deployed_at !== undefined) {
+        fields.push(`deployed_at = $${paramCount++}`);
+        values.push(updates.deployed_at);
     }
     
     fields.push('updated_at = CURRENT_TIMESTAMP');

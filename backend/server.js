@@ -2212,6 +2212,52 @@ app.patch('/api/admin/projects/:id', async (req, res) => {
     }
 });
 
+// Desplegar proyecto manualmente
+app.post('/api/admin/projects/:id/deploy', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { wordpress_url, wordpress_username, wordpress_password } = req.body;
+        
+        console.log(`🚀 [ADMIN] Desplegando proyecto #${id}...`);
+        
+        // Obtener el proyecto
+        const project = await db.getProjectById(id);
+        if (!project) {
+            return res.status(404).json({ error: 'Proyecto no encontrado' });
+        }
+        
+        // Actualizar proyecto con credenciales y marcar como desplegado
+        await db.updateProject(id, {
+            wordpress_url,
+            wordpress_username,
+            wordpress_password,
+            is_deployed: true,
+            deployed_at: new Date()
+        });
+        
+        // Actualizar el website_status del cliente a 'activo'
+        if (project.client_id) {
+            await db.pool.query(
+                'UPDATE clients SET website_status = $1 WHERE id = $2',
+                ['activo', project.client_id]
+            );
+            console.log(`✅ [ADMIN] Cliente #${project.client_id} marcado como activo`);
+        }
+        
+        const updatedProject = await db.getProjectById(id);
+        console.log(`✅ [ADMIN] Proyecto #${id} desplegado exitosamente`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Proyecto desplegado exitosamente',
+            project: updatedProject 
+        });
+    } catch (error) {
+        console.error('❌ [ADMIN] Error desplegando proyecto:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Eliminar proyecto
 app.delete('/api/admin/projects/:id', async (req, res) => {
     try {
