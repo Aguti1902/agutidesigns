@@ -1523,6 +1523,87 @@ app.post('/api/auth/reset-password', async (req, res) => {
     }
 });
 
+// ==========================================
+// OPENAI - GENERACIÓN DE TEXTOS PARA FORMULARIO
+// ==========================================
+
+app.post('/api/generate-text', async (req, res) => {
+    try {
+        const { prompt, businessName, sector, tone = 'profesional' } = req.body;
+        
+        if (!prompt) {
+            return res.status(400).json({ error: 'Prompt requerido' });
+        }
+        
+        console.log('🤖 [OPENAI] Generando texto para:', businessName || 'N/A');
+        
+        // Inicializar OpenAI
+        const OpenAI = require('openai');
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+        });
+        
+        // Construir el prompt contextualizado
+        const contextualPrompt = `
+Eres un copywriter experto que ayuda a empresas a crear contenido web profesional.
+
+CONTEXTO:
+- Negocio: ${businessName || 'No especificado'}
+- Sector: ${sector || 'No especificado'}
+- Tono deseado: ${tone}
+
+TAREA:
+${prompt}
+
+IMPORTANTE:
+- Responde SOLO con el texto solicitado, sin introducciones ni explicaciones
+- Usa un tono ${tone} y apropiado para el sector
+- Máximo 150 palabras
+- En español
+- Sin comillas ni formato especial
+        `.trim();
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system",
+                    content: "Eres un experto copywriter que crea textos profesionales para sitios web. Siempre respondes solo con el texto solicitado, sin explicaciones adicionales."
+                },
+                {
+                    role: "user",
+                    content: contextualPrompt
+                }
+            ],
+            max_tokens: 300,
+            temperature: 0.7
+        });
+        
+        const generatedText = completion.choices[0].message.content.trim();
+        
+        console.log('✅ [OPENAI] Texto generado exitosamente');
+        
+        res.json({ 
+            success: true, 
+            text: generatedText 
+        });
+        
+    } catch (error) {
+        console.error('❌ [OPENAI] Error:', error.message);
+        
+        // Error específico de API key
+        if (error.status === 401) {
+            return res.status(500).json({ 
+                error: 'Error de configuración de OpenAI. Contacta al administrador.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Error al generar texto. Intenta de nuevo.' 
+        });
+    }
+});
+
 // Obtener datos del dashboard del cliente
 app.get('/api/client/dashboard/:clientId', async (req, res) => {
     try {

@@ -2341,9 +2341,79 @@
         document.head.appendChild(style);
 
         // Función para generar textos con IA (placeholder)
-        function generateAITexts(type) {
-            alert('Función de generación con IA en desarrollo.\nPor ahora, escribe los textos manualmente o déjalos en blanco.');
-            // Aquí integrarías tu API de IA (OpenAI, etc.)
+        async function generateAITexts(type) {
+            const API_URL = 'https://agutidesigns-production.up.railway.app';
+            
+            // Obtener datos del formulario
+            const businessName = document.querySelector('input[name="business_name"]').value;
+            const businessDescription = document.querySelector('textarea[name="business_description"]').value;
+            const sector = document.querySelector('select[name="industry"]').value;
+            
+            if (!businessName || !businessDescription) {
+                alert('⚠️ Por favor, completa primero el nombre y descripción de tu negocio en el Paso 1.');
+                return;
+            }
+            
+            let prompt = '';
+            let targetField = null;
+            
+            // Definir prompts según el tipo
+            if (type === 'general') {
+                prompt = `Genera textos completos para una página web profesional incluyendo:
+1. Título principal (H1) atractivo
+2. Subtítulo descriptivo
+3. Sección "Sobre Nosotros" (2-3 párrafos)
+4. Sección "Servicios" (descripción breve)
+5. Llamada a la acción (CTA)`;
+                targetField = document.querySelector('textarea[name="web_texts"]');
+            } else if (type === 'menu') {
+                prompt = `Genera un menú de restaurante completo con platos organizados por categorías (Entrantes, Principales, Postres, Bebidas). Incluye nombre del plato, breve descripción y precio sugerido.`;
+                targetField = document.querySelector('textarea[name="menu_content"]');
+            }
+            
+            if (!prompt || !targetField) {
+                alert('❌ Error: Tipo de texto no reconocido');
+                return;
+            }
+            
+            // Mostrar loading
+            const originalValue = targetField.value;
+            targetField.value = '⏳ Generando con IA...';
+            targetField.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/generate-text`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        businessName: businessName,
+                        sector: sector,
+                        tone: 'profesional'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    targetField.value = data.text;
+                    targetField.style.borderColor = '#0046FE';
+                    
+                    // Efecto de éxito
+                    setTimeout(() => {
+                        targetField.style.borderColor = '#e8eaed';
+                    }, 2000);
+                } else {
+                    targetField.value = originalValue;
+                    alert('❌ ' + (data.error || 'Error al generar el texto. Intenta de nuevo.'));
+                }
+            } catch (error) {
+                targetField.value = originalValue;
+                alert('❌ Error de conexión. Por favor, intenta de nuevo.');
+                console.error('Error:', error);
+            } finally {
+                targetField.disabled = false;
+            }
         }
 
         // Mejorar feedback de archivos subidos
