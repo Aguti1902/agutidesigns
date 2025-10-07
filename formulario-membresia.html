@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Membresía - agutidesigns</title>
-    <!-- Google Sign-In -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
 
@@ -1390,15 +1388,6 @@
                 <h2 class="step-title">Crea tu Cuenta</h2>
                 <p class="step-description">Solo necesitamos estos datos para tu dashboard</p>
 
-                <!-- Opción de registro con Google -->
-                <div style="text-align: center; margin-bottom: 35px;">
-                    <button type="button" class="btn-google" onclick="registerWithGoogle()" style="display: inline-flex; align-items: center; gap: 12px; padding: 14px 35px; background: white; color: #333; border: 2px solid #e0e0e0; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-                        Continuar con Google
-                    </button>
-                    <p style="margin: 25px 0; color: #999; font-size: 0.95rem; font-weight: 500;">O crea tu cuenta manualmente:</p>
-                </div>
-
                 <div class="form-group">
                     <label class="form-label">Nombre <span class="required">*</span></label>
                     <input type="text" class="form-input" name="first_name" required placeholder="Tu nombre">
@@ -2585,92 +2574,6 @@
                 }
             }
         });
-
-        // ============================================
-        // 🔐 GOOGLE SIGN-IN - REGISTRO EN FORMULARIO
-        // ============================================
-
-        // Inicializar Google Sign-In
-        function initializeGoogleSignIn() {
-            console.log('🔍 Inicializando Google Sign-In para formulario...');
-            
-            if (typeof google === 'undefined' || !google.accounts) {
-                console.log('⏳ Google Sign-In script aún no cargado, reintentando...');
-                setTimeout(initializeGoogleSignIn, 500);
-                return;
-            }
-
-            try {
-                google.accounts.id.initialize({
-                    client_id: '27242010279-amuh9oqm83sdi24hq65ptdqaotpkk094.apps.googleusercontent.com',
-                    callback: handleGoogleRegistration,
-                    auto_select: false
-                });
-                
-                console.log('✅ Google Sign-In inicializado en formulario');
-            } catch (error) {
-                console.error('❌ Error inicializando Google Sign-In:', error);
-            }
-        }
-
-        // Iniciar cuando el DOM esté listo
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
-        } else {
-            initializeGoogleSignIn();
-        }
-
-        // Función llamada por el botón "Continuar con Google"
-        function registerWithGoogle() {
-            console.log('🔐 Usuario hizo click en "Continuar con Google"');
-            
-            if (typeof google === 'undefined' || !google.accounts) {
-                alert('⚠️ Google Sign-In aún no está listo. Por favor, intenta de nuevo en un momento.');
-                return;
-            }
-
-            // Solicitar autenticación de Google
-            google.accounts.id.prompt();
-        }
-
-        // Callback cuando el usuario se autentica con Google
-        function handleGoogleRegistration(response) {
-            try {
-                console.log('✅ Token de Google recibido, decodificando...');
-                
-                // Decodificar el JWT de Google para obtener los datos del usuario
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                console.log('✅ Datos de Google:', payload);
-
-                // Pre-rellenar los campos del formulario
-                const firstName = payload.given_name || '';
-                const lastName = payload.family_name || '';
-                const email = payload.email || '';
-
-                // Rellenar los campos
-                document.querySelector('input[name="first_name"]').value = firstName;
-                document.querySelector('input[name="last_name"]').value = lastName;
-                document.querySelector('input[name="email"]').value = email;
-
-                // Generar una contraseña aleatoria (el usuario no necesita saberla si usa Google)
-                const randomPassword = 'Google_' + Math.random().toString(36).substring(2, 15);
-                document.querySelector('input[name="password"]').value = randomPassword;
-                document.querySelector('input[name="password_confirm"]').value = randomPassword;
-
-                // Guardar el token de Google para enviar al backend
-                window.googleCredential = response.credential;
-                window.isGoogleUser = true;
-
-                console.log('✅ Formulario pre-rellenado con datos de Google');
-                
-                // Mostrar mensaje de éxito
-                alert('✅ ¡Perfecto! Hemos pre-rellenado tus datos con Google.\n\nAhora continúa completando el resto del formulario.');
-                
-            } catch (error) {
-                console.error('❌ Error procesando autenticación de Google:', error);
-                alert('❌ Error al procesar los datos de Google. Por favor, intenta de nuevo o completa el formulario manualmente.');
-            }
-        }
 
         // Función para mostrar/ocultar contraseña
         function togglePasswordVisibility(inputId) {
