@@ -808,7 +808,7 @@ async function createTicket(data) {
             subject, category, description, priority, status,
             admin_unread, client_unread
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        RETURNING id
+        RETURNING *
     `, [
         data.client_id,
         data.client_email,
@@ -822,7 +822,7 @@ async function createTicket(data) {
         true,  // admin_unread: true (el admin tiene un ticket nuevo sin leer)
         false  // client_unread: false (el cliente acaba de crearlo, ya lo conoce)
     ]);
-    return result.rows[0].id;
+    return result.rows[0];
 }
 
 async function getAllTickets() {

@@ -2337,7 +2337,7 @@ app.post('/api/tickets', async (req, res) => {
         });
         
         // Crear ticket en la BD
-        const ticket = db.createTicket(ticketData);
+        const ticket = await db.createTicket(ticketData);
         console.log('✅ [BACKEND] Ticket creado en BD, ID:', ticket.id);
         
         // Enviar email al admin notificando del nuevo ticket
