@@ -4043,18 +4043,32 @@
                     deployButton.style.cursor = 'pointer';
                     deployButton.style.background = '#0046FE'; // Azul corporativo
                     deployButton.textContent = '👁️ Ver Proyecto Desplegado';
-                    deployButton.title = 'Ir a la sección de Webs Desplegadas';
-                    deployButton.onclick = () => {
+                    deployButton.title = 'Ir a la sección de Webs Desplegadas y abrir gestión';
+                    deployButton.onclick = async () => {
+                        console.log('🚀 [KANBAN] Abriendo proyecto desplegado para cliente #', clientId);
                         closeProjectModal();
                         showSection('webs-desplegadas');
-                        // Esperar a que la sección se cargue y hacer scroll al proyecto
+                        
+                        // Esperar a que la sección se cargue completamente
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        
+                        // Hacer scroll al proyecto
+                        const projectCard = document.querySelector(`[data-client-id="${clientId}"]`);
+                        if (projectCard) {
+                            projectCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Añadir animación de resaltado
+                            projectCard.style.transition = 'all 0.3s ease';
+                            projectCard.style.boxShadow = '0 0 20px rgba(0, 70, 254, 0.5)';
+                            setTimeout(() => {
+                                projectCard.style.boxShadow = '';
+                            }, 2000);
+                        }
+                        
+                        // Esperar un momento y abrir el modal de gestión
                         setTimeout(() => {
-                            const projectCard = document.querySelector(`[data-client-id="${clientId}"]`);
-                            if (projectCard) {
-                                projectCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                projectCard.style.animation = 'highlight 1s ease-in-out';
-                            }
-                        }, 300);
+                            console.log('⚙️ [KANBAN] Abriendo modal de gestión para cliente #', clientId);
+                            editWebManagement(clientId);
+                        }, 800);
                     };
                 } else {
                     // No tiene WordPress - botón activo para crear
