@@ -3204,6 +3204,8 @@ app.post('/api/client/change-plan', async (req, res) => {
                 await db.createTicket({
                     client_id: clientId,
                     client_email: client.email,
+                    client_name: client.full_name,
+                    business_name: submission?.business_name || null,
                     subject: `🔽 Downgrade de plan: ${oldPlan} → ${newPlan}`,
                     description: `El cliente ha bajado de plan.\n\nPáginas eliminadas:\n${pagesToRemove.map(p => `- ${p}`).join('\n')}\n\nPáginas activas:\n${remainingPages.map(p => `- ${p}`).join('\n')}`,
                     category: 'facturacion',

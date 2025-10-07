@@ -778,8 +778,9 @@ async function createTicket(data) {
     const result = await pool.query(`
         INSERT INTO tickets (
             client_id, client_email, client_name, business_name,
-            subject, category, description, priority, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            subject, category, description, priority, status,
+            admin_unread, client_unread
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING id
     `, [
         data.client_id,
@@ -790,7 +791,9 @@ async function createTicket(data) {
         data.category,
         data.description,
         data.priority || 'media',
-        data.status || 'abierto'
+        data.status || 'abierto',
+        true,  // admin_unread: true (el admin tiene un ticket nuevo sin leer)
+        false  // client_unread: false (el cliente acaba de crearlo, ya lo conoce)
     ]);
     return result.rows[0].id;
 }
