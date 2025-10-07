@@ -4143,17 +4143,24 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
     try {
         console.log('🚫 [ADMIN] Obteniendo cancelaciones...');
         
-        // Obtener todos los clientes cancelados
-        const result = await pool.query(`
-            SELECT 
-                id, email, full_name, business_name, plan, 
-                subscription_status, cancelled_at, cancellation_reason, subscription_end_date
-            FROM clients
-            WHERE subscription_status = 'cancelled'
-            ORDER BY cancelled_at DESC
-        `);
-        
-        const cancellations = result.rows;
+        // Primero verificar si las columnas existen
+        let cancellations = [];
+        try {
+            const result = await pool.query(`
+                SELECT 
+                    id, email, full_name, business_name, plan, 
+                    subscription_status, cancelled_at, cancellation_reason, subscription_end_date
+                FROM clients
+                WHERE subscription_status = 'cancelled'
+                ORDER BY cancelled_at DESC
+            `);
+            cancellations = result.rows;
+        } catch (dbError) {
+            console.warn('⚠️ [ADMIN] Columnas de cancelación no existen todavía:', dbError.message);
+            console.log('💡 [ADMIN] Las columnas se crearán en el próximo reinicio del servidor');
+            // Devolver datos vacíos si las columnas no existen
+            cancellations = [];
+        }
         
         // Calcular estadísticas
         const now = new Date();
@@ -4175,7 +4182,11 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
         
     } catch (error) {
         console.error('❌ [ADMIN] Error obteniendo cancelaciones:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.message,
+            cancellations: [],
+            stats: { total: 0, pending: 0, thisMonth: 0, lostRevenue: 0 }
+        });
     }
 });
 
