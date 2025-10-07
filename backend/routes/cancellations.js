@@ -284,5 +284,70 @@ router.post('/admin/cancel-subscription/:clientId', async (req, res) => {
     }
 });
 
+// 6. LIMPIAR SUBSCRIPTIONS INVÁLIDOS (Admin)
+router.post('/admin/clean-invalid-subscriptions', async (req, res) => {
+    try {
+        console.log('🧹 [ADMIN] Limpiando subscriptions inválidos...');
+        
+        // Obtener todos los clientes con subscription_id
+        const clients = await db.getAllClients();
+        const clientsWithSubscription = clients.filter(c => c.stripe_subscription_id);
+        
+        console.log('📊 [ADMIN] Clientes con subscription_id:', clientsWithSubscription.length);
+        
+        let invalid = 0;
+        let valid = 0;
+        const results = [];
+        
+        for (const client of clientsWithSubscription) {
+            try {
+                // Intentar obtener la subscription de Stripe
+                await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+                valid++;
+                results.push({
+                    client_id: client.id,
+                    email: client.email,
+                    subscription_id: client.stripe_subscription_id,
+                    status: 'valid'
+                });
+            } catch (error) {
+                // Subscription no existe, limpiar
+                console.log(`❌ Subscription inválida para cliente #${client.id} (${client.email}): ${client.stripe_subscription_id}`);
+                
+                await db.updateClient(client.id, {
+                    stripe_subscription_id: null,
+                    plan: 'sin_plan',
+                    website_status: 'inactivo'
+                });
+                
+                invalid++;
+                results.push({
+                    client_id: client.id,
+                    email: client.email,
+                    subscription_id: client.stripe_subscription_id,
+                    status: 'cleaned'
+                });
+            }
+        }
+        
+        console.log('✅ [ADMIN] Limpieza completada');
+        console.log(`   - Válidas: ${valid}`);
+        console.log(`   - Limpiadas: ${invalid}`);
+        
+        res.json({
+            success: true,
+            total: clientsWithSubscription.length,
+            valid: valid,
+            invalid: invalid,
+            cleaned: invalid,
+            results: results
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error limpiando subscriptions:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
 
