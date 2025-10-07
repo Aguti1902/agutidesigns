@@ -6,6 +6,8 @@
     <title>Mi Dashboard - agutidesigns</title>
     <!-- jsPDF para generar informes PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -117,6 +119,27 @@
             background: #0036C8;
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 70, 254, 0.25);
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0 0 0;
+            color: #94a3b8;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .login-divider span {
+            padding: 0 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .error-message {
@@ -677,6 +700,14 @@
 
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
             </form>
+
+            <!-- Separador -->
+            <div class="login-divider">
+                <span>O</span>
+            </div>
+
+            <!-- Google Sign-In Button -->
+            <div id="googleSignInButton" style="display: flex; justify-content: center; margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -2219,6 +2250,105 @@
                 console.error('Error:', error);
             }
         });
+
+        // ============================================
+        // 🔐 GOOGLE SIGN-IN - LOGIN (Solo usuarios existentes)
+        // ============================================
+
+        // Inicializar Google Sign-In
+        function initializeGoogleSignIn() {
+            console.log('🔍 Inicializando Google Sign-In para login...');
+            
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.log('⏳ Google Sign-In script aún no cargado, reintentando...');
+                setTimeout(initializeGoogleSignIn, 500);
+                return;
+            }
+
+            try {
+                google.accounts.id.initialize({
+                    client_id: '27242010279-amuh9oqm83sdi24hq65ptdqaotpkk094.apps.googleusercontent.com',
+                    callback: handleGoogleLogin,
+                    auto_select: false
+                });
+
+                google.accounts.id.renderButton(
+                    document.getElementById('googleSignInButton'),
+                    {
+                        theme: 'outline',
+                        size: 'large',
+                        width: '100%',
+                        text: 'signin_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left'
+                    }
+                );
+                
+                console.log('✅ Google Sign-In inicializado en login');
+            } catch (error) {
+                console.error('❌ Error inicializando Google Sign-In:', error);
+            }
+        }
+
+        // Iniciar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+        } else {
+            initializeGoogleSignIn();
+        }
+
+        // Callback cuando el usuario intenta login con Google
+        async function handleGoogleLogin(response) {
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                console.log('🔐 [GOOGLE LOGIN] Token recibido, verificando en backend...');
+                
+                const res = await fetch(`${API_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Usuario existe y tiene cuenta
+                    if (data.user && data.user.id) {
+                        console.log('✅ [GOOGLE LOGIN] Usuario autenticado:', data.user.email);
+                        
+                        // Guardar cliente en sessionStorage
+                        sessionStorage.setItem('client', JSON.stringify(data.user));
+                        currentClient = data.user;
+                        
+                        // Mostrar dashboard
+                        showDashboard();
+                    } else {
+                        // Usuario autenticado en Google pero sin cuenta completa
+                        console.log('⚠️ [GOOGLE LOGIN] Usuario nuevo detectado, redirigiendo a formulario');
+                        errorDiv.innerHTML = `
+                            <strong>¡Bienvenido!</strong><br>
+                            No tienes una cuenta todavía. Te redirigiremos al formulario para completar tu registro con Google.
+                        `;
+                        errorDiv.style.display = 'block';
+                        
+                        // Redirigir al formulario después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = '/formulario-membresia.html';
+                        }, 2000);
+                    }
+                } else {
+                    // Error en la autenticación
+                    console.error('❌ [GOOGLE LOGIN] Error:', data.error);
+                    errorDiv.innerHTML = data.error || 'Error al autenticar con Google. Por favor, intenta de nuevo.';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('❌ [GOOGLE LOGIN] Error de conexión:', error);
+                errorDiv.textContent = 'Error de conexión con Google. Por favor, intenta de nuevo.';
+                errorDiv.style.display = 'block';
+            }
+        }
 
         // Mostrar dashboard
         async function showDashboard() {

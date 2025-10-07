@@ -49,7 +49,9 @@ function createEmailLayout(content, preheader = '') {
     <div style="display: none; max-height: 0px; overflow: hidden;">${preheader}</div>
     <div class="container">
         <div class="header">
-            <a href="https://agutidesigns.es" class="logo">agutidesigns</a>
+            <a href="https://agutidesigns.es" style="display: inline-block;">
+                <img src="https://agutidesigns.vercel.app/images/Logo%20blanco.svg" alt="agutidesigns" style="height: 50px; width: auto; display: block;">
+            </a>
         </div>
         <div class="content">
             ${content}
