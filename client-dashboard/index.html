@@ -698,17 +698,17 @@
         </div>
 
         <!-- Banner de Cuenta Cancelada (visible en todas las páginas) -->
-        <div id="cancelledBanner" style="display: none; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 12px 20px; text-align: center; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2); position: sticky; top: 0; z-index: 999; border-bottom: 2px solid #b91c1c;">
+        <div id="cancelledBanner" style="display: none; background: rgba(0, 70, 254, 0.1); backdrop-filter: blur(10px); color: #0046FE; padding: 12px 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 70, 254, 0.15); position: sticky; top: 0; z-index: 999; border-bottom: 2px solid rgba(0, 70, 254, 0.3);">
             <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 300px;">
                     <span style="font-size: 1.2rem;">⚠️</span>
                     <div style="text-align: left;">
-                        <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">Suscripción cancelada</strong>
-                        <span style="font-size: 0.85rem; opacity: 0.95;" id="daysRemaining"></span>
-                        <span style="font-size: 0.85rem; opacity: 0.95;"> · Finaliza: <span id="cancellationDate"></span></span>
+                        <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px; color: #0046FE;">Suscripción cancelada</strong>
+                        <span style="font-size: 0.85rem; opacity: 0.85; color: #1e40af;" id="daysRemaining"></span>
+                        <span style="font-size: 0.85rem; opacity: 0.85; color: #1e40af;"> · Finaliza: <span id="cancellationDate"></span></span>
                     </div>
                 </div>
-                <button onclick="openStripePortal()" style="background: white; color: #dc2626; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; white-space: nowrap;">
+                <button onclick="openStripePortal()" style="background: #0046FE; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 70, 254, 0.3); transition: all 0.3s ease; white-space: nowrap;">
                     🔄 Reactivar Plan
                 </button>
             </div>
