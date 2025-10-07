@@ -962,37 +962,37 @@
                 </div>
                 
                 <div class="sidebar-nav">
-                    <div class="nav-item active" onclick="showSection('estadisticas')">
+                    <div class="nav-item active" onclick="showSection('estadisticas', event)">
                         <span class="icon">📊</span>
                         <span>Estadísticas</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('webs')">
+                    <div class="nav-item" onclick="showSection('webs', event)">
                         <span class="icon">🌐</span>
                         <span>Webs (Kanban)</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('tickets')">
+                    <div class="nav-item" onclick="showSection('tickets', event)">
                         <span class="icon">🎫</span>
                         <span>Tickets</span>
                         <span id="unreadTicketsBadge" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
                     </div>
-                    <div class="nav-item" onclick="showSection('pedidos')">
+                    <div class="nav-item" onclick="showSection('pedidos', event)">
                         <span class="icon">📋</span>
                         <span>Pedidos</span>
                         <span id="newOrdersBadge" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
                     </div>
-                    <div class="nav-item" onclick="showSection('clientes')">
+                    <div class="nav-item" onclick="showSection('clientes', event)">
                         <span class="icon">👥</span>
                         <span>Clientes</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('videos')">
+                    <div class="nav-item" onclick="showSection('videos', event)">
                         <span class="icon">🎥</span>
                         <span>Videos</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('webs-desplegadas')">
+                    <div class="nav-item" onclick="showSection('webs-desplegadas', event)">
                         <span class="icon">🚀</span>
                         <span>Webs Desplegadas</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('facturas')">
+                    <div class="nav-item" onclick="showSection('facturas', event)">
                         <span class="icon">🧾</span>
                         <span>Facturas</span>
                     </div>
@@ -1700,14 +1700,39 @@
         }
 
         // ===== NAVEGACIÓN =====
-        function showSection(sectionName) {
+        function showSection(sectionName, event = null) {
+            console.log(`🔀 [ADMIN] showSection('${sectionName}') llamada`, event ? 'con evento' : 'programáticamente');
+            
             // Ocultar todas las secciones
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
             // Mostrar sección seleccionada
-            document.getElementById(`section-${sectionName}`).classList.add('active');
-            event.target.closest('.nav-item').classList.add('active');
+            const targetSection = document.getElementById(`section-${sectionName}`);
+            if (!targetSection) {
+                console.error(`❌ [ADMIN] Sección no encontrada: section-${sectionName}`);
+                return;
+            }
+            targetSection.classList.add('active');
+            
+            // Activar elemento del menú SOLO si hay un evento (click desde el menú)
+            if (event && event.target) {
+                const navItem = event.target.closest('.nav-item');
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            } else {
+                // Si se llama programáticamente, buscar y activar el nav-item correspondiente
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    const onclick = item.getAttribute('onclick');
+                    if (onclick && onclick.includes(`'${sectionName}'`)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            console.log(`✅ [ADMIN] Sección '${sectionName}' activada`);
             
             // Cargar datos específicos
             switch(sectionName) {
@@ -2531,7 +2556,7 @@
                                     🔄 Reintentar
                                 </button>
                             </td>
-                        </tr>
+                    </tr>
                     `;
                 }
             }
