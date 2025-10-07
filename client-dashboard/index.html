@@ -698,20 +698,18 @@
         </div>
 
         <!-- Banner de Cuenta Cancelada (visible en todas las páginas) -->
-        <div id="cancelledBanner" style="display: none; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #7f1d1d;">
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <span>⚠️</span>
-                    <span>Tu suscripción ha sido cancelada</span>
-                </h3>
-                <p style="margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600;">
-                    <span id="daysRemaining"></span>
-                </p>
-                <p style="margin: 0; font-size: 0.95rem; opacity: 0.95;">
-                    Tu sitio web se desactivará automáticamente el <strong id="cancellationDate"></strong>
-                </p>
-                <button onclick="openStripePortal()" style="margin-top: 15px; background: white; color: #dc2626; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease;">
-                    🔄 Reactivar Mi Plan Ahora
+        <div id="cancelledBanner" style="display: none; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 12px 20px; text-align: center; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2); position: sticky; top: 0; z-index: 999; border-bottom: 2px solid #b91c1c;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 300px;">
+                    <span style="font-size: 1.2rem;">⚠️</span>
+                    <div style="text-align: left;">
+                        <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">Suscripción cancelada</strong>
+                        <span style="font-size: 0.85rem; opacity: 0.95;" id="daysRemaining"></span>
+                        <span style="font-size: 0.85rem; opacity: 0.95;"> · Finaliza: <span id="cancellationDate"></span></span>
+                    </div>
+                </div>
+                <button onclick="openStripePortal()" style="background: white; color: #dc2626; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.3s ease; white-space: nowrap;">
+                    🔄 Reactivar Plan
                 </button>
             </div>
         </div>
@@ -2293,12 +2291,12 @@
                         
                         document.getElementById('cancelledBanner').style.display = 'block';
                         document.getElementById('daysRemaining').textContent = 
-                            daysLeft > 1 ? `⏰ Te quedan ${daysLeft} días de servicio` :
-                            daysLeft === 1 ? `⏰ Te queda 1 día de servicio` :
-                            `⏰ Tu suscripción finaliza hoy`;
+                            daysLeft > 1 ? `Te quedan ${daysLeft} días` :
+                            daysLeft === 1 ? `Te queda 1 día` :
+                            `Finaliza hoy`;
                         
                         document.getElementById('cancellationDate').textContent = 
-                            endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+                            endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
                         
                         // Ocultar botón "Cambiar Plan" (no tiene sentido si está cancelado)
                         document.getElementById('btnChangePlan').style.display = 'none';
