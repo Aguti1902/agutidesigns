@@ -2463,6 +2463,16 @@
                         (!pedido.modifications_viewed_at || 
                          new Date(pedido.modifications_viewed_at) < new Date(pedido.last_modified_at));
                     
+                    // Debug para pedidos con modificaciones
+                    if (pedido.has_modifications) {
+                        console.log(`🔍 [DEBUG] Pedido #${pedido.id}:`, {
+                            has_modifications: pedido.has_modifications,
+                            modifications_viewed_at: pedido.modifications_viewed_at,
+                            last_modified_at: pedido.last_modified_at,
+                            hasUnviewedModifications: hasUnviewedModifications
+                        });
+                    }
+                    
                     return `
                     <tr style="${pedido.has_upgrade || pedido.is_downgrade || hasUnviewedModifications ? 'background: #f0f9ff;' : ''}">
                         <td><strong>#${pedido.id}</strong></td>
@@ -2499,14 +2509,20 @@
                 console.log('👁️ [ADMIN] Marcando pedido #', id, 'como visto y redirigiendo...');
                 
                 // Marcar como visto antes de redirigir
-                await fetch(`${API_URL}/api/admin/submissions/${id}/mark-viewed`, {
+                const response = await fetch(`${API_URL}/api/admin/submissions/${id}/mark-viewed`, {
                     method: 'POST'
                 });
                 
-                console.log('✅ [ADMIN] Pedido marcado como visto');
+                const result = await response.json();
+                console.log('✅ [ADMIN] Pedido marcado como visto - Respuesta:', result);
+                
+                if (!response.ok) {
+                    console.error('❌ [ADMIN] Error en respuesta del servidor:', response.status, result);
+                }
                 
                 // Guardar el timestamp en localStorage para recargar al volver
                 localStorage.setItem('pedidoViewed', Date.now().toString());
+                console.log('💾 [ADMIN] Timestamp guardado en localStorage:', Date.now());
                 
                 // Redirigir a la página de detalles
                 window.location.href = `/admin-dashboard/pedido-detalle.html?id=${id}`;
@@ -4337,6 +4353,23 @@
         
         // Actualizaciones periódicas cada 10 segundos
         autoUpdateIntervalAdmin = setInterval(updateAdminUnreadBadge, 10000); // 10 segundos
+
+        // 🆕 Detectar si volvemos de ver un pedido (desde pedido-detalle.html)
+        const pedidoViewedOnLoad = localStorage.getItem('pedidoViewed');
+        if (pedidoViewedOnLoad) {
+            const viewedTime = parseInt(pedidoViewedOnLoad);
+            // Si se vio hace menos de 30 segundos, redirigir a pedidos
+            if (Date.now() - viewedTime < 30000) {
+                console.log('🔄 [ADMIN] Detectado pedido recién visto, redirigiendo a sección Pedidos...');
+                localStorage.removeItem('pedidoViewed');
+                // Pequeño delay para que la página cargue completamente
+                setTimeout(() => {
+                    showSection('pedidos');
+                }, 100);
+            } else {
+                localStorage.removeItem('pedidoViewed');
+            }
+        }
 
         // ===== FORMATEADORES =====
         function formatPlan(plan) {

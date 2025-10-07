@@ -617,9 +617,27 @@ app.post('/api/admin/submissions/:id/mark-viewed', async (req, res) => {
     try {
         const submissionId = req.params.id;
         console.log(`👁️ [ADMIN] Marcando pedido #${submissionId} como visto`);
+        
+        // Obtener datos antes de actualizar (para debug)
+        const beforeUpdate = await db.getSubmission(submissionId);
+        console.log(`🔍 [DEBUG] Antes de marcar como visto:`, {
+            has_modifications: beforeUpdate?.has_modifications,
+            modifications_viewed_at: beforeUpdate?.modifications_viewed_at,
+            last_modified_at: beforeUpdate?.last_modified_at
+        });
+        
         await db.markSubmissionAsViewed(submissionId);
-        console.log(`✅ [ADMIN] Pedido #${submissionId} marcado como visto`);
-        res.json({ success: true });
+        
+        // Verificar después de actualizar
+        const afterUpdate = await db.getSubmission(submissionId);
+        console.log(`🔍 [DEBUG] Después de marcar como visto:`, {
+            has_modifications: afterUpdate?.has_modifications,
+            modifications_viewed_at: afterUpdate?.modifications_viewed_at,
+            last_modified_at: afterUpdate?.last_modified_at
+        });
+        
+        console.log(`✅ [ADMIN] Pedido #${submissionId} marcado como visto exitosamente`);
+        res.json({ success: true, timestamp: afterUpdate?.modifications_viewed_at });
     } catch (error) {
         console.error(`❌ [ADMIN] Error marcando pedido #${req.params.id} como visto:`, error);
         res.status(500).json({ error: error.message });
