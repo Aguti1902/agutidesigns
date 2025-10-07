@@ -1178,7 +1178,10 @@
                 <!-- SECCIÓN: TICKETS -->
                 <div class="section" id="section-tickets">
                     <div class="content-header">
-                        <h1>🎫 Sistema de Tickets</h1>
+                        <h1 style="display: flex; align-items: center; gap: 12px;">
+                            🎫 Sistema de Tickets
+                            <span id="unreadTicketsBadgeHeader" style="display: none; background: #0046FE; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 70, 254, 0.4); animation: pulseAdmin 2s infinite;"></span>
+                        </h1>
                         <p>Gestiona las solicitudes de soporte</p>
                     </div>
 
@@ -2140,17 +2143,31 @@
             }
         }
         
-        // 🔔 Función auxiliar para actualizar badge de tickets en el menú
+        // 🔔 Función auxiliar para actualizar badge de tickets en el menú Y header
         function updateAdminTicketsBadge(count) {
-            const badge = document.getElementById('unreadTicketsBadge');
-            if (badge) {
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.style.display = 'inline-block';
-                    console.log('🔔 [ADMIN] Badge de tickets actualizado:', count);
-                } else {
-                    badge.style.display = 'none';
+            // Badge en el menú lateral
+            const badgeMenu = document.getElementById('unreadTicketsBadge');
+            // Badge en el header de la sección
+            const badgeHeader = document.getElementById('unreadTicketsBadgeHeader');
+            
+            if (count > 0) {
+                // Actualizar badge del menú
+                if (badgeMenu) {
+                    badgeMenu.textContent = count;
+                    badgeMenu.style.display = 'inline-block';
                 }
+                
+                // Actualizar badge del header
+                if (badgeHeader) {
+                    badgeHeader.textContent = `${count} ${count === 1 ? 'nuevo' : 'nuevos'}`;
+                    badgeHeader.style.display = 'inline-block';
+                }
+                
+                console.log('🔔 [ADMIN] Badge de tickets actualizado:', count, count === 1 ? 'ticket nuevo' : 'tickets nuevos');
+            } else {
+                // Ocultar ambos badges
+                if (badgeMenu) badgeMenu.style.display = 'none';
+                if (badgeHeader) badgeHeader.style.display = 'none';
             }
         }
 
