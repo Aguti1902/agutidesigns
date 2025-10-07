@@ -2231,6 +2231,19 @@ app.get('/api/admin/projects/status/:status', async (req, res) => {
     }
 });
 
+// Estadísticas de proyectos (DEBE IR ANTES de la ruta con :id)
+app.get('/api/admin/projects/stats', async (req, res) => {
+    try {
+        console.log('📊 [ADMIN] Obteniendo estadísticas de proyectos...');
+        const stats = await db.getProjectStats();
+        console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);
+        res.json(stats);
+    } catch (error) {
+        console.error('❌ [ADMIN] Error obteniendo estadísticas de proyectos:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Obtener un proyecto por ID
 app.get('/api/admin/projects/:id', async (req, res) => {
     try {
@@ -2275,19 +2288,6 @@ app.delete('/api/admin/projects/:id', async (req, res) => {
         res.json({ success: true, message: 'Proyecto eliminado' });
     } catch (error) {
         console.error('❌ [ADMIN] Error eliminando proyecto:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Estadísticas de proyectos
-app.get('/api/admin/projects/stats', async (req, res) => {
-    try {
-        console.log('📊 [ADMIN] Obteniendo estadísticas de proyectos...');
-        const stats = await db.getProjectStats();
-        console.log('✅ [ADMIN] Estadísticas obtenidas:', stats);
-        res.json(stats);
-    } catch (error) {
-        console.error('❌ [ADMIN] Error obteniendo estadísticas de proyectos:', error);
         res.status(500).json({ error: error.message });
     }
 });
