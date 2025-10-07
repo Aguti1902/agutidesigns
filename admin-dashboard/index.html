@@ -1868,7 +1868,7 @@
                     
                     // Filtrar tickets de soporte (excluir facturación) y contar sin leer
                     const supportTickets = allTickets.filter(t => t.category !== 'facturacion');
-                    const unreadTickets = supportTickets.filter(t => t.admin_unread === 1).length;
+                    const unreadTickets = supportTickets.filter(t => t.admin_unread === true).length;
                     
                     const ticketsBadge = document.getElementById('unreadTicketsBadge');
                     if (ticketsBadge) {
@@ -1943,7 +1943,7 @@
 
                 tbody.innerHTML = tickets.map(ticket => {
                     // 🔵 Determinar si hay mensaje sin leer del cliente
-                    const hasUnreadMessage = ticket.admin_unread === 1;
+                    const hasUnreadMessage = ticket.admin_unread === true;
                     const rowStyle = hasUnreadMessage 
                         ? 'background: linear-gradient(to right, #e8f4ff 0%, #f0f8ff 100%); border-left: 4px solid #0046FE; font-weight: 500; transition: all 0.3s;' 
                         : 'transition: all 0.3s;';
@@ -1993,7 +1993,7 @@
                 }).join('');
                 
                 // 🔔 Contar mensajes sin leer del admin
-                const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
+                const unreadCount = tickets.filter(t => t.admin_unread === true).length;
                 console.log('🔔 [ADMIN] Mensajes sin leer:', unreadCount);
                 
                 // Actualizar badge del menú "Tickets"
@@ -4161,7 +4161,7 @@
                 const tickets = allTickets.filter(t => t.category !== 'facturacion');
                 
                 // Contar mensajes sin leer del admin
-                const unreadCount = tickets.filter(t => t.admin_unread === 1).length;
+                const unreadCount = tickets.filter(t => t.admin_unread === true).length;
                 console.log('🔔 [AUTO-UPDATE ADMIN] Mensajes sin leer:', unreadCount);
                 
                 // Actualizar badge en el menú

@@ -4990,7 +4990,7 @@
                 console.log('🎫 [CLIENT] Tickets después de filtrar y ordenar:', tickets.length);
                 
                 // 🔔 Contar mensajes sin leer
-                const unreadCount = tickets.filter(t => t.client_unread === 1).length;
+                const unreadCount = tickets.filter(t => t.client_unread === true).length;
                 console.log('🔔 [CLIENT] Mensajes sin leer:', unreadCount);
                 
                 // 🔔 Actualizar badge en el menú
@@ -5057,7 +5057,7 @@
                 });
 
                 const hasResponse = ticket.admin_response && ticket.admin_response.trim() !== '';
-                const hasUnreadMessage = ticket.client_unread === 1;
+                const hasUnreadMessage = ticket.client_unread === true;
                 
                 // Determinar el badge de estado de la conversación
                 let conversationStatus;
@@ -5647,7 +5647,7 @@
                 console.log('🔔 [AUTO-UPDATE] Total tickets:', allTickets.length, '| Tickets de soporte:', tickets.length);
                 
                 // Contar mensajes sin leer
-                const unreadCount = tickets.filter(t => t.client_unread === 1).length;
+                const unreadCount = tickets.filter(t => t.client_unread === true).length;
                 console.log('🔔 [AUTO-UPDATE] Mensajes sin leer:', unreadCount);
                 
                 // Actualizar badges (menú y header de la sección)

@@ -1886,14 +1886,14 @@ app.get('/api/tickets/:id', async (req, res) => {
         }
         
         // Si se solicita marcar como leído, actualizar según quién lo lea
-        if (markAsRead === 'admin' && ticket.admin_unread === 1) {
+        if (markAsRead === 'admin' && ticket.admin_unread === true) {
             console.log('👁️ [BACKEND] Marcando ticket como leído por admin');
-            await db.updateTicket(ticketId, { admin_unread: 0 });
-            ticket.admin_unread = 0;
-        } else if (markAsRead === 'client' && ticket.client_unread === 1) {
+            await db.updateTicket(ticketId, { admin_unread: false });
+            ticket.admin_unread = false;
+        } else if (markAsRead === 'client' && ticket.client_unread === true) {
             console.log('👁️ [BACKEND] Marcando ticket como leído por cliente');
-            await db.updateTicket(ticketId, { client_unread: 0 });
-            ticket.client_unread = 0;
+            await db.updateTicket(ticketId, { client_unread: false });
+            ticket.client_unread = false;
         }
         
         console.log('✅ [BACKEND] Ticket encontrado:', ticket.id);
@@ -1948,8 +1948,8 @@ app.post('/api/tickets/:ticketId/client-response', async (req, res) => {
         await db.updateTicket(parseInt(ticketId), { 
             client_response: updatedClientResponse,
             status: 'en_proceso',
-            admin_unread: 1,      // Admin tiene mensaje nuevo sin leer
-            client_unread: 0      // Cliente lo acaba de enviar/leer
+            admin_unread: true,       // Admin tiene mensaje nuevo sin leer
+            client_unread: false      // Cliente lo acaba de enviar/leer
         });
         
         const ticket = await db.getTicketById(parseInt(ticketId));
@@ -2018,8 +2018,8 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
             status, 
             admin_response: updatedAdminResponse,
             admin_response_at: new Date(),
-            admin_unread: 0,      // Admin lo acaba de leer/responder
-            client_unread: 1      // Cliente tiene mensaje nuevo sin leer
+            admin_unread: false,      // Admin lo acaba de leer/responder
+            client_unread: true       // Cliente tiene mensaje nuevo sin leer
         });
         console.log('🎫 [BACKEND] Ticket actualizado');
         
