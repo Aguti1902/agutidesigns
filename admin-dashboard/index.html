@@ -1890,6 +1890,9 @@
                 case 'facturas':
                     loadAllInvoices();
                     break;
+                case 'cancelaciones':
+                    loadCancellations();
+                    break;
             }
         }
 
@@ -3386,6 +3389,15 @@
                                     🚀 Activar Web
                                 </button>
                             ` : ''}
+                            ${!web.cancellation_scheduled ? `
+                                <button class="btn-web-action" onclick="adminCancelSubscription(${web.id}, '${(web.full_name || web.business_name || 'Cliente').replace(/'/g, "\\'")}')" style="background: #dc2626; font-weight: 600;">
+                                    🚫 Cancelar Plan
+                                </button>
+                            ` : `
+                                <span style="padding: 8px 12px; background: #fee2e2; color: #dc2626; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+                                    ❌ Cancelado
+                                </span>
+                            `}
                         </div>
                     </div>
                 `;
@@ -3856,6 +3868,206 @@
             document.getElementById('paidInvoices').textContent = paidInvoices;
             document.getElementById('pendingInvoices').textContent = pendingInvoices;
             document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)}€`;
+        }
+
+        // ===== FUNCIONES DE CANCELACIONES =====
+
+        async function loadCancellations() {
+            try {
+                console.log('🚫 [ADMIN] Cargando cancelaciones...');
+                
+                const tbody = document.getElementById('cancellationsTable');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><div class="loader"><div class="spinner"></div><p>Cargando cancelaciones...</p></div></td></tr>';
+                
+                // Cargar cancelaciones
+                const [cancellationsRes, statsRes] = await Promise.all([
+                    fetch(`${API_URL}/api/admin/cancellations`),
+                    fetch(`${API_URL}/api/admin/cancellations/stats`)
+                ]);
+                
+                const cancellations = await cancellationsRes.json();
+                const stats = await statsRes.json();
+                
+                console.log('✅ [ADMIN] Cancelaciones:', cancellations.length, '| Stats:', stats);
+                
+                // Actualizar estadísticas
+                document.getElementById('totalCancellations').textContent = stats.total;
+                document.getElementById('reactivatedCount').textContent = stats.reactivated;
+                document.getElementById('revenueLost').textContent = `${stats.revenue_lost.toFixed(0)}€`;
+                
+                // Calcular tasa de churn (asumiendo 3 clientes activos por ahora)
+                const activeClients = 3; // Esto debería venir de las stats generales
+                const churnRate = activeClients > 0 ? ((stats.total / (activeClients + stats.total)) * 100).toFixed(1) : 0;
+                document.getElementById('churnRate').textContent = `${churnRate}%`;
+                
+                // Renderizar gráfico de razones
+                renderCancellationReasonsChart(stats.by_reason);
+                
+                // Renderizar tabla
+                if (cancellations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No hay cancelaciones registradas</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = cancellations.map(c => {
+                    const reasonLabel = {
+                        'muy_caro': '💰 Muy caro',
+                        'no_necesito': '❌ No lo necesito',
+                        'otra_plataforma': '🔄 Cambio de plataforma',
+                        'problemas_tecnicos': '🔧 Problemas técnicos',
+                        'otro': '💬 Otro motivo'
+                    };
+                    
+                    const effectiveDate = new Date(c.effective_date);
+                    const isActive = !c.reactivated && effectiveDate > new Date();
+                    
+                    return `
+                        <tr>
+                            <td><strong>#${c.id}</strong></td>
+                            <td>
+                                ${c.business_name || c.full_name || 'N/A'}
+                                <br><small style="color: #999;">${c.email}</small>
+                            </td>
+                            <td><span class="badge badge-blue">${formatPlan(c.plan)}</span></td>
+                            <td>${reasonLabel[c.reason] || c.reason}</td>
+                            <td>${formatDate(c.cancelled_at)}</td>
+                            <td>${formatDate(c.effective_date)}</td>
+                            <td>
+                                ${c.reactivated ? 
+                                    '<span class="badge badge-success">🔄 Reactivada</span>' : 
+                                    (isActive ? 
+                                        '<span class="badge badge-warning">⏳ Pendiente</span>' : 
+                                        '<span class="badge badge-danger">❌ Cancelada</span>'
+                                    )
+                                }
+                            </td>
+                            <td>
+                                ${c.reason_details ? 
+                                    `<button class="btn-secondary" onclick="showCancellationDetails(${c.id}, '${c.reason}', '${(c.reason_details || '').replace(/'/g, "\\'")}')">👁️ Ver</button>` : 
+                                    '<small style="color: #999;">Sin detalles</small>'
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando cancelaciones:', error);
+                const tbody = document.getElementById('cancellationsTable');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: red;">Error al cargar cancelaciones</td></tr>';
+            }
+        }
+
+        function renderCancellationReasonsChart(byReason) {
+            const container = document.getElementById('cancellationReasonsChart');
+            
+            if (!byReason || byReason.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;"><p>No hay datos suficientes</p></div>';
+                return;
+            }
+            
+            const reasonLabels = {
+                'muy_caro': '💰 Muy caro',
+                'no_necesito': '❌ No lo necesito',
+                'otra_plataforma': '🔄 Cambio de plataforma',
+                'problemas_tecnicos': '🔧 Problemas técnicos',
+                'otro': '💬 Otro motivo'
+            };
+            
+            const total = byReason.reduce((sum, item) => sum + parseInt(item.count), 0);
+            
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    ${byReason.map(item => {
+                        const percentage = ((parseInt(item.count) / total) * 100).toFixed(1);
+                        const colors = {
+                            'muy_caro': '#f59e0b',
+                            'no_necesito': '#dc2626',
+                            'otra_plataforma': '#8b5cf6',
+                            'problemas_tecnicos': '#0046FE',
+                            'otro': '#6b7280'
+                        };
+                        const color = colors[item.reason] || '#6b7280';
+                        
+                        return `
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-weight: 600; color: #1a1a1a;">${reasonLabels[item.reason] || item.reason}</span>
+                                    <span style="color: #666;">${item.count} (${percentage}%)</span>
+                                </div>
+                                <div style="background: #e5e7eb; border-radius: 10px; height: 12px; overflow: hidden;">
+                                    <div style="background: ${color}; height: 100%; width: ${percentage}%; border-radius: 10px; transition: width 0.5s ease;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function showCancellationDetails(id, reason, details) {
+            const reasonLabels = {
+                'muy_caro': '💰 Muy caro',
+                'no_necesito': '❌ No lo necesito',
+                'otra_plataforma': '🔄 Cambio de plataforma',
+                'problemas_tecnicos': '🔧 Problemas técnicos',
+                'otro': '💬 Otro motivo'
+            };
+            
+            showCustomModal(
+                `Detalles de Cancelación #${id}`,
+                `<strong>Razón:</strong> ${reasonLabels[reason] || reason}<br><br><strong>Detalles adicionales:</strong><br>${details || 'Sin detalles adicionales'}`,
+                'Cerrar'
+            );
+        }
+
+        async function adminCancelSubscription(clientId, clientName) {
+            try {
+                // Confirmar con el admin
+                const reason = prompt(`¿Por qué cancelas la suscripción de ${clientName}?\\n\\nMotivos comunes:\\n- impago\\n- solicitud del cliente\\n- problemas técnicos\\n- otro`);
+                
+                if (!reason || reason.trim() === '') return;
+                
+                const confirm = window.confirm(`¿Estás seguro de que quieres cancelar la suscripción de ${clientName}?\\n\\nEl cliente mantendrá acceso hasta el final de su período actual.`);
+                
+                if (!confirm) return;
+                
+                console.log('🚫 [ADMIN] Cancelando suscripción del cliente #' + clientId);
+                
+                const response = await fetch(`${API_URL}/api/admin/cancel-subscription/${clientId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reason: 'admin_manual',
+                        reason_details: reason
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const effectiveDate = new Date(result.effective_date).toLocaleDateString('es-ES');
+                    showCustomModal(
+                        '✅ Suscripción Cancelada',
+                        `La suscripción de ${clientName} ha sido cancelada.\\n\\nFecha efectiva: ${effectiveDate}\\n\\nEl cliente ha sido notificado automáticamente.`,
+                        'Entendido'
+                    );
+                    
+                    // Recargar webs desplegadas y cancelaciones
+                    loadWebsDesplegadas();
+                    loadCancellations();
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
+                }
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cancelando suscripción:', error);
+                showCustomModal(
+                    '❌ Error',
+                    'Hubo un problema al cancelar la suscripción. Verifica los logs.',
+                    'Cerrar'
+                );
+            }
         }
 
         function exportInvoices() {
