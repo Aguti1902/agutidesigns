@@ -4051,6 +4051,8 @@
                 
                 // 5️⃣ Mostrar/ocultar botón "Crear en Webs Desplegadas" o "Ver Proyecto Desplegado"
                 const deployButton = document.getElementById('deployWebButton');
+                const currentClientId = project.client_id; // Capturar el client_id en el scope local
+                
                 if (clientHasWordPress) {
                     // Ya tiene WordPress configurado - cambiar a "Ver Proyecto Desplegado"
                     deployButton.style.display = 'block';
@@ -4061,7 +4063,7 @@
                     deployButton.textContent = '👁️ Ver Proyecto Desplegado';
                     deployButton.title = 'Ir a la sección de Webs Desplegadas y abrir gestión';
                     deployButton.onclick = async () => {
-                        console.log('🚀 [KANBAN] Abriendo proyecto desplegado para cliente #', clientId);
+                        console.log('🚀 [KANBAN] Abriendo proyecto desplegado para cliente #', currentClientId);
                         closeProjectModal();
                         showSection('webs-desplegadas');
                         
@@ -4069,7 +4071,7 @@
                         await new Promise(resolve => setTimeout(resolve, 500));
                         
                         // Hacer scroll al proyecto
-                        const projectCard = document.querySelector(`[data-client-id="${clientId}"]`);
+                        const projectCard = document.querySelector(`[data-client-id="${currentClientId}"]`);
                         if (projectCard) {
                             projectCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             // Añadir animación de resaltado
@@ -4082,8 +4084,8 @@
                         
                         // Esperar un momento y abrir el modal de gestión
                         setTimeout(() => {
-                            console.log('⚙️ [KANBAN] Abriendo modal de gestión para cliente #', clientId);
-                            editWebManagement(clientId);
+                            console.log('⚙️ [KANBAN] Abriendo modal de gestión para cliente #', currentClientId);
+                            editWebManagement(currentClientId);
                         }, 800);
                     };
                 } else {
