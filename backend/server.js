@@ -42,6 +42,7 @@ const bcrypt = require('bcryptjs');
 const db = require('./database');
 const emailService = require('./email-service');
 const googleAuth = require('./google-auth');
+const OpenAI = require('openai');
 
 // Google Analytics Data API
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
@@ -1537,8 +1538,15 @@ app.post('/api/generate-text', async (req, res) => {
         
         console.log('🤖 [OPENAI] Generando texto para:', businessName || 'N/A');
         
+        // Verificar que la API key está configurada
+        if (!process.env.OPENAI_API_KEY) {
+            console.error('❌ [OPENAI] OPENAI_API_KEY no configurada');
+            return res.status(500).json({ 
+                error: 'Generación de IA no disponible. Contacta al administrador.' 
+            });
+        }
+        
         // Inicializar OpenAI
-        const OpenAI = require('openai');
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
