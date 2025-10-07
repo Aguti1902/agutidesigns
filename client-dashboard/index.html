@@ -699,6 +699,12 @@
                 </div>
 
                 <button type="submit" class="btn-login">Iniciar Sesión</button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" onclick="showForgotPasswordModal(); return false;" style="color: #0046FE; text-decoration: none; font-size: 0.9rem; font-weight: 500;">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
             </form>
 
             <!-- Separador -->
@@ -708,6 +714,48 @@
 
             <!-- Google Sign-In Button -->
             <div id="googleSignInButton" style="display: flex; justify-content: center; margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Olvidé mi contraseña -->
+    <div id="forgotPasswordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 20px;">
+            <div style="background: white; border-radius: 16px; padding: 40px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">🔐</div>
+                    <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 1.5rem;">¿Olvidaste tu contraseña?</h2>
+                    <p style="color: #64748b; margin: 0; font-size: 0.9rem;">Te enviaremos un enlace para restablecerla</p>
+                </div>
+                
+                <div id="forgotPasswordError" style="display: none; background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;"></div>
+                <div id="forgotPasswordSuccess" style="display: none; background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;"></div>
+                
+                <form id="forgotPasswordForm" onsubmit="handleForgotPassword(event)">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 600; font-size: 0.9rem;">Email</label>
+                        <input type="email" id="forgotPasswordEmail" required 
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: all 0.3s; box-sizing: border-box;"
+                               placeholder="tu@email.com"
+                               onfocus="this.style.borderColor='#0046FE'"
+                               onblur="this.style.borderColor='#e2e8f0'">
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 30px;">
+                        <button type="button" onclick="closeForgotPasswordModal()" 
+                                style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s;"
+                                onmouseover="this.style.background='#e2e8f0'"
+                                onmouseout="this.style.background='#f1f5f9'">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="sendResetEmailBtn"
+                                style="flex: 1; padding: 12px; background: #0046FE; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s;"
+                                onmouseover="this.style.background='#0035c9'"
+                                onmouseout="this.style.background='#0046FE'">
+                            Enviar Enlace
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -2250,6 +2298,68 @@
                 console.error('Error:', error);
             }
         });
+
+        // ============================================
+        // 🔐 FORGOT PASSWORD
+        // ============================================
+
+        function showForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'flex';
+            document.getElementById('forgotPasswordEmail').value = '';
+            document.getElementById('forgotPasswordError').style.display = 'none';
+            document.getElementById('forgotPasswordSuccess').style.display = 'none';
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgotPasswordModal').style.display = 'none';
+        }
+
+        async function handleForgotPassword(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('forgotPasswordEmail').value;
+            const errorDiv = document.getElementById('forgotPasswordError');
+            const successDiv = document.getElementById('forgotPasswordSuccess');
+            const submitBtn = document.getElementById('sendResetEmailBtn');
+            
+            // Ocultar mensajes previos
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successDiv.textContent = '✅ ' + data.message;
+                    successDiv.style.display = 'block';
+                    
+                    // Cerrar modal después de 3 segundos
+                    setTimeout(() => {
+                        closeForgotPasswordModal();
+                    }, 3000);
+                } else {
+                    errorDiv.textContent = data.error || 'Error al enviar el email';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Error de conexión. Por favor, intenta de nuevo.';
+                errorDiv.style.display = 'block';
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Enlace';
+            }
+        }
 
         // ============================================
         // 🔐 GOOGLE SIGN-IN - LOGIN (Solo usuarios existentes)
