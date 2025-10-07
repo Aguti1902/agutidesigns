@@ -11,15 +11,26 @@ router.post('/client/cancel-subscription', async (req, res) => {
         const { client_id, reason, reason_details, apply_coupon } = req.body;
         
         console.log('🚫 [CLIENT] Cancelando suscripción para cliente #' + client_id);
+        console.log('📋 [CLIENT] Datos recibidos:', { client_id, reason, apply_coupon });
         
         // Obtener cliente
         const client = await db.getClientById(client_id);
         if (!client) {
+            console.error('❌ [CLIENT] Cliente no encontrado:', client_id);
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
         
+        console.log('👤 [CLIENT] Cliente obtenido:', {
+            id: client.id,
+            email: client.email,
+            plan: client.plan,
+            stripe_subscription_id: client.stripe_subscription_id,
+            payment_date: client.payment_date
+        });
+        
         if (!client.stripe_subscription_id) {
-            return res.status(400).json({ error: 'Cliente no tiene suscripción activa' });
+            console.error('❌ [CLIENT] Cliente no tiene subscription_id en DB');
+            return res.status(400).json({ error: 'Cliente no tiene suscripción activa en la base de datos. Por favor, contacta con soporte.' });
         }
         
         let coupon_applied = false;
