@@ -25,6 +25,18 @@ router.post('/client/cancel-subscription', async (req, res) => {
         let coupon_applied = false;
         let coupon_code = null;
         
+        // Verificar que la suscripción existe en Stripe
+        let subscription;
+        try {
+            console.log('🔍 [STRIPE] Verificando suscripción:', client.stripe_subscription_id);
+            subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+        } catch (stripeError) {
+            console.error('❌ [STRIPE] Suscripción no encontrada en Stripe:', stripeError.message);
+            return res.status(400).json({ 
+                error: 'La suscripción no existe en Stripe. Puede que ya haya sido cancelada o eliminada. Por favor, contacta con soporte.' 
+            });
+        }
+        
         // Si el cliente aceptó el cupón, aplicarlo ANTES de cancelar
         if (apply_coupon) {
             try {
@@ -44,12 +56,10 @@ router.post('/client/cancel-subscription', async (req, res) => {
                 });
             } catch (couponError) {
                 console.error('❌ [STRIPE] Error aplicando cupón:', couponError);
-                // Continuar con la cancelación aunque falle el cupón
+                return res.status(500).json({ error: 'Error aplicando descuento: ' + couponError.message });
             }
         }
         
-        // Obtener la suscripción de Stripe
-        const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
         const current_period_end = new Date(subscription.current_period_end * 1000);
         
         // Cancelar suscripción en Stripe (al final del período)
@@ -119,6 +129,17 @@ router.post('/client/reactivate-subscription', async (req, res) => {
         
         if (!client.stripe_subscription_id) {
             return res.status(400).json({ error: 'Cliente no tiene suscripción' });
+        }
+        
+        // Verificar que la suscripción existe en Stripe
+        try {
+            console.log('🔍 [STRIPE] Verificando suscripción:', client.stripe_subscription_id);
+            await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+        } catch (stripeError) {
+            console.error('❌ [STRIPE] Suscripción no encontrada en Stripe:', stripeError.message);
+            return res.status(400).json({ 
+                error: 'La suscripción no existe en Stripe. Por favor, contacta con soporte.' 
+            });
         }
         
         // Reactivar en Stripe
@@ -208,8 +229,18 @@ router.post('/admin/cancel-subscription/:clientId', async (req, res) => {
             return res.status(400).json({ error: 'Cliente no tiene suscripción activa' });
         }
         
-        // Obtener la suscripción de Stripe
-        const subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+        // Verificar que la suscripción existe en Stripe
+        let subscription;
+        try {
+            console.log('🔍 [STRIPE] Verificando suscripción:', client.stripe_subscription_id);
+            subscription = await stripe.subscriptions.retrieve(client.stripe_subscription_id);
+        } catch (stripeError) {
+            console.error('❌ [STRIPE] Suscripción no encontrada en Stripe:', stripeError.message);
+            return res.status(400).json({ 
+                error: 'La suscripción no existe en Stripe. Puede que ya haya sido cancelada o eliminada.' 
+            });
+        }
+        
         const current_period_end = new Date(subscription.current_period_end * 1000);
         
         // Cancelar suscripción en Stripe

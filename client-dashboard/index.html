@@ -3942,11 +3942,7 @@
                 const result = await response.json();
                 
                 if (result.coupon_applied) {
-                    showCustomModal(
-                        '🎉 ¡Descuento Aplicado!',
-                        'Hemos aplicado un 20% de descuento a tu suscripción por los próximos 3 meses. ¡Gracias por quedarte con nosotros!',
-                        '✅ Entendido'
-                    );
+                    alert('🎉 ¡Descuento Aplicado!\n\nHemos aplicado un 20% de descuento a tu suscripción por los próximos 3 meses. ¡Gracias por quedarte con nosotros!');
                     closeCancelModal();
                     // Recargar datos del cliente
                     setTimeout(() => location.reload(), 2000);
@@ -3956,11 +3952,7 @@
                 
             } catch (error) {
                 console.error('❌ [CLIENT] Error aplicando descuento:', error);
-                showCustomModal(
-                    '❌ Error',
-                    'Hubo un problema al aplicar el descuento. Por favor, contacta con soporte.',
-                    'Cerrar'
-                );
+                alert('❌ Error\n\nHubo un problema al aplicar el descuento: ' + error.message + '\n\nPor favor, contacta con soporte.');
             }
         }
 
@@ -3988,11 +3980,7 @@
                         year: 'numeric' 
                     });
                     
-                    showCustomModal(
-                        '✅ Suscripción Cancelada',
-                        `Tu suscripción ha sido cancelada. Mantendrás acceso completo hasta el ${effectiveDate}.<br><br>Puedes reactivar tu plan en cualquier momento desde la sección de Facturación.`,
-                        'Entendido'
-                    );
+                    alert(`✅ Suscripción Cancelada\n\nTu suscripción ha sido cancelada. Mantendrás acceso completo hasta el ${effectiveDate}.\n\nPuedes reactivar tu plan en cualquier momento desde la sección de Facturación.`);
                     closeCancelModal();
                     
                     // Recargar página después de 2 segundos
@@ -4003,23 +3991,14 @@
                 
             } catch (error) {
                 console.error('❌ [CLIENT] Error cancelando suscripción:', error);
-                showCustomModal(
-                    '❌ Error',
-                    'Hubo un problema al cancelar tu suscripción. Por favor, contacta con soporte.',
-                    'Cerrar'
-                );
+                alert('❌ Error\n\nHubo un problema al cancelar tu suscripción: ' + error.message + '\n\nPor favor, contacta con soporte.');
             }
         }
 
         async function reactivateSubscription() {
             try {
                 // Confirmar con el usuario
-                const confirm = await showCustomConfirm(
-                    '🔄 Reactivar Suscripción',
-                    '¿Estás seguro de que quieres reactivar tu suscripción? La renovación automática se reanudará.',
-                    'Sí, Reactivar',
-                    'Cancelar'
-                );
+                const confirm = window.confirm('🔄 Reactivar Suscripción\n\n¿Estás seguro de que quieres reactivar tu suscripción? La renovación automática se reanudará.');
                 
                 if (!confirm) return;
                 
@@ -4036,11 +4015,7 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showCustomModal(
-                        '✅ ¡Suscripción Reactivada!',
-                        'Tu suscripción ha sido reactivada exitosamente. La renovación automática continuará normalmente.',
-                        'Entendido'
-                    );
+                    alert('✅ ¡Suscripción Reactivada!\n\nTu suscripción ha sido reactivada exitosamente. La renovación automática continuará normalmente.');
                     
                     // Recargar página después de 2 segundos
                     setTimeout(() => location.reload(), 2000);
@@ -4050,11 +4025,7 @@
                 
             } catch (error) {
                 console.error('❌ [CLIENT] Error reactivando suscripción:', error);
-                showCustomModal(
-                    '❌ Error',
-                    'Hubo un problema al reactivar tu suscripción. Por favor, contacta con soporte.',
-                    'Cerrar'
-                );
+                alert('❌ Error\n\nHubo un problema al reactivar tu suscripción: ' + error.message + '\n\nPor favor, contacta con soporte.');
             }
         }
 
