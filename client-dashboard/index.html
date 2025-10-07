@@ -3768,15 +3768,47 @@
             openPlanModal();
         }
 
-        // ===== FUNCIONES DE CANCELACIÓN =====
+        // ===== STRIPE CUSTOMER PORTAL =====
         
-        let selectedCancelReason = null;
-        let currentCancelStep = 1;
+        // Función para abrir el Stripe Customer Portal (gestión de suscripción, métodos de pago, cancelación, etc.)
+        async function openStripePortal() {
+            try {
+                if (!currentClient || !currentClient.id) {
+                    alert('❌ Error\n\nNo se pudo obtener la información del cliente. Por favor, recarga la página e intenta de nuevo.');
+                    return;
+                }
+                
+                console.log('💳 [STRIPE] Abriendo Customer Portal para cliente #' + currentClient.id);
+                
+                const response = await fetch(`${API_URL}/api/create-portal-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerId: currentClient.stripe_customer_id,
+                        returnUrl: window.location.href
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.url) {
+                    console.log('✅ [STRIPE] Redirigiendo a Customer Portal...');
+                    window.location.href = result.url;
+                } else {
+                    throw new Error('No se recibió URL del portal');
+                }
+                
+            } catch (error) {
+                console.error('❌ [STRIPE] Error abriendo portal:', error);
+                alert('❌ Error\n\nNo se pudo abrir el portal de Stripe. Por favor, contacta con soporte.');
+            }
+        }
 
-        function openCancelModal() {
-            // Resetear estado
-            selectedCancelReason = null;
-            currentCancelStep = 1;
+        // Variables para edición
+        let currentPages = [];
+        let pageLimit = 5;
+        
+        function cancelEditSection(section) {
             document.querySelectorAll('.cancel-step').forEach(step => step.style.display = 'none');
             document.getElementById('cancelStep1').style.display = 'block';
             document.getElementById('confirmCancel').checked = false;
