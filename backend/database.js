@@ -348,6 +348,29 @@ async function initializeTables() {
             console.log('⚠️ Índice google_id ya existe');
         }
 
+        // 🆕 MIGRACIÓN: Crear tabla de tokens de reset de contraseña
+        try {
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                    id SERIAL PRIMARY KEY,
+                    email VARCHAR(255) NOT NULL,
+                    token VARCHAR(255) NOT NULL UNIQUE,
+                    expires_at TIMESTAMP NOT NULL,
+                    used BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_reset_tokens_email ON password_reset_tokens(email);
+                CREATE INDEX IF NOT EXISTS idx_reset_tokens_token ON password_reset_tokens(token);
+            `);
+            
+            console.log('✅ Migración: Tabla password_reset_tokens creada');
+        } catch (e) {
+            console.log('⚠️ Migración password_reset_tokens ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
@@ -1065,6 +1088,44 @@ async function getClientWithDetails(clientId) {
     return client;
 }
 
+// =====================
+// PASSWORD RESET TOKENS
+// =====================
+
+async function createPasswordResetToken(email, token, expiresAt) {
+    const result = await pool.query(`
+        INSERT INTO password_reset_tokens (email, token, expires_at)
+        VALUES ($1, $2, $3)
+        RETURNING id
+    `, [email, token, expiresAt]);
+    return result.rows[0].id;
+}
+
+async function getPasswordResetToken(token) {
+    const result = await pool.query(`
+        SELECT * FROM password_reset_tokens
+        WHERE token = $1 AND used = FALSE AND expires_at > NOW()
+        ORDER BY created_at DESC
+        LIMIT 1
+    `, [token]);
+    return result.rows[0];
+}
+
+async function markTokenAsUsed(token) {
+    await pool.query(`
+        UPDATE password_reset_tokens
+        SET used = TRUE
+        WHERE token = $1
+    `, [token]);
+}
+
+async function deleteExpiredTokens() {
+    await pool.query(`
+        DELETE FROM password_reset_tokens
+        WHERE expires_at < NOW() OR used = TRUE
+    `);
+}
+
 module.exports = {
     pool,
     db: pool, // Alias para compatibilidad
@@ -1097,5 +1158,9 @@ module.exports = {
     getProjectById,
     updateProject,
     deleteProject,
-    getProjectStats
+    getProjectStats,
+    createPasswordResetToken,
+    getPasswordResetToken,
+    markTokenAsUsed,
+    deleteExpiredTokens
 };
