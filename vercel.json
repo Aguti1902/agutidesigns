@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/",
+      "source": "/formulario",
       "destination": "/formulario-membresia.html"
     },
     {
