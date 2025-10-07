@@ -740,6 +740,10 @@ async function updateClient(clientId, updates) {
         fields.push(`submission_id = $${paramCount++}`);
         values.push(updates.submission_id);
     }
+    if (updates.password !== undefined) {
+        fields.push(`password = $${paramCount++}`);
+        values.push(updates.password);
+    }
     
     fields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(clientId);
