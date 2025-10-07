@@ -323,6 +323,31 @@ async function initializeTables() {
             console.log('⚠️ Migración de cancelación en clients ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campos para Google OAuth
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE,
+                ADD COLUMN IF NOT EXISTS picture TEXT,
+                ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false,
+                ADD COLUMN IF NOT EXISTS first_name VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS last_name VARCHAR(255)
+            `);
+            console.log('✅ Migración: Campos de Google OAuth añadidos a clients');
+        } catch (e) {
+            console.log('⚠️ Migración Google OAuth en clients ya aplicada');
+        }
+
+        // Crear índice para google_id si no existe
+        try {
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_clients_google_id ON clients(google_id)
+            `);
+            console.log('✅ Índice para google_id creado');
+        } catch (e) {
+            console.log('⚠️ Índice google_id ya existe');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
