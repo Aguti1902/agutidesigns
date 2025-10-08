@@ -583,8 +583,8 @@
             const activeToggle = document.querySelector('.toggle-option.active');
             const billingCycle = activeToggle.getAttribute('data-period'); // 'monthly' o 'annual'
             
-            // Redirigir al formulario con plan y billing_cycle
-            window.location.href = `/formulario-membresia.html?plan=${plan}&billing=${billingCycle}`;
+            // Redirigir al formulario en el subdominio con plan y billing_cycle
+            window.location.href = `https://formulario.agutidesigns.es?plan=${plan}&billing=${billingCycle}`;
         }
     </script>
 </body>
