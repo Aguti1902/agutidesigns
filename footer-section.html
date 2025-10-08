@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footer - agutidesigns</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .footer {
+            background: #0051ff !important;
+            color: #FEFAF5 !important;
+            padding: 60px 20px 30px !important;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        /* Columna Logo y Descripción */
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .footer-logo {
+            width: 180px;
+            height: auto;
+        }
+
+        .footer-description {
+            color: rgba(254, 250, 245, 0.9) !important;
+            font-size: 0.95rem !important;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .footer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(254, 250, 245, 0.9) !important;
+            font-size: 0.9rem !important;
+        }
+
+        .footer-contact-item strong {
+            color: #E5FC63 !important;
+        }
+
+        /* Columnas de enlaces */
+        .footer-column h4 {
+            color: #E5FC63 !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 20px !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(254, 250, 245, 0.9) !important;
+            text-decoration: none;
+            font-size: 0.9rem !important;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: #E5FC63 !important;
+            transform: translateX(5px);
+        }
+
+        /* Métodos de Pago */
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .payment-icon {
+            background: #FEFAF5;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-icon:hover {
+            transform: translateY(-3px);
+        }
+
+        .payment-icon img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Badges de Seguridad */
+        .security-badges {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .security-badge {
+            background: rgba(254, 250, 245, 0.1);
+            border: 1px solid rgba(254, 250, 245, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #E5FC63 !important;
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            border-top: 1px solid rgba(254, 250, 245, 0.2);
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-legal {
+            color: rgba(254, 250, 245, 0.7) !important;
+            font-size: 0.85rem !important;
+        }
+
+        .footer-legal strong {
+            color: #FEFAF5 !important;
+        }
+
+        .footer-credits {
+            color: rgba(254, 250, 245, 0.7) !important;
+            font-size: 0.85rem !important;
+        }
+
+        .footer-credits a {
+            color: #E5FC63 !important;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-credits a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .footer {
+                padding: 40px 15px 20px !important;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .footer-logo {
+                width: 150px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .payment-icons {
+                justify-content: center;
+            }
+
+            .security-badges {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Columna 1: Logo y Descripción -->
+                <div class="footer-brand">
+                    <img src="https://agutidesigns.es/wp-content/uploads/2025/01/Logo-blanco.png" alt="agutidesigns" class="footer-logo">
+                    <p class="footer-description">
+                        Tu web profesional por suscripción. Diseño, hosting, dominio y soporte continuo en un único pago mensual. Sin inversión inicial, sin sorpresas.
+                    </p>
+                    <div class="footer-contact">
+                        <div class="footer-contact-item">
+                            <strong>📧</strong> info@agutidesigns.es
+                        </div>
+                        <div class="footer-contact-item">
+                            <strong>📍</strong> Cornellà de Llobregat, Barcelona
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Enlaces Rápidos -->
+                <div class="footer-column">
+                    <h4>Navegación</h4>
+                    <ul class="footer-links">
+                        <li><a href="#planes">Planes y Precios</a></li>
+                        <li><a href="#calculadora">Calculadora</a></li>
+                        <li><a href="#faqs">Preguntas Frecuentes</a></li>
+                        <li><a href="https://formulario.agutidesigns.es">Crear mi Web</a></li>
+                        <li><a href="https://panel.agutidesigns.es">Acceder al Panel</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Legal -->
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="/aviso-legal">Aviso Legal</a></li>
+                        <li><a href="/politica-privacidad">Política de Privacidad</a></li>
+                        <li><a href="/politica-cookies">Política de Cookies</a></li>
+                        <li><a href="/terminos-condiciones">Términos y Condiciones</a></li>
+                        <li><a href="/politica-devolucion">Política de Devolución</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 4: Métodos de Pago -->
+                <div class="footer-column">
+                    <h4>Métodos de Pago</h4>
+                    <div class="payment-methods">
+                        <div class="payment-icons">
+                            <!-- Visa -->
+                            <div class="payment-icon">
+                                <svg viewBox="0 0 48 32" width="40" height="27">
+                                    <rect fill="#0066B2" width="48" height="32" rx="4"/>
+                                    <path fill="#FFFFFF" d="M18.5 11.5h-3l-1.9 9h3l1.9-9zm7.9 5.8l1.6-4.4.9 4.4h-2.5zm3.4 3.2h2.8l-2.4-9h-2.6c-.6 0-1.1.3-1.3.9l-4.6 8.1h3.2l.6-1.8h3.9l.4 1.8zm-9.1-5.9c0-2.4-3.3-2.5-3.3-3.6 0-.3.3-.7 1-.8.3 0 1.3-.1 2.4.4l.4-2c-.6-.2-1.4-.4-2.4-.4-2.5 0-4.3 1.3-4.3 3.2 0 1.4 1.2 2.2 2.2 2.6 1 .5 1.3.8 1.3 1.2 0 .6-.8.9-1.5.9-1.3 0-2-.2-3.1-.7l-.4 2.1c.7.3 2 .6 3.4.6 2.7 0 4.4-1.3 4.4-3.3z"/>
+                                </svg>
+                            </div>
+                            <!-- Mastercard -->
+                            <div class="payment-icon">
+                                <svg viewBox="0 0 48 32" width="40" height="27">
+                                    <rect fill="#EB001B" x="12" y="4" width="12" height="24" rx="2"/>
+                                    <rect fill="#F79E1B" x="24" y="4" width="12" height="24" rx="2"/>
+                                    <path fill="#FF5F00" d="M24 16c0-3.9 1.8-7.4 4.6-9.7-2-1.5-4.5-2.3-7.2-2.3C14.3 4 9 9.3 9 16s5.3 12 11.4 12c2.7 0 5.2-.8 7.2-2.3-2.8-2.3-4.6-5.8-4.6-9.7z"/>
+                                </svg>
+                            </div>
+                            <!-- American Express -->
+                            <div class="payment-icon">
+                                <svg viewBox="0 0 48 32" width="40" height="27">
+                                    <rect fill="#006FCF" width="48" height="32" rx="4"/>
+                                    <text x="24" y="22" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="bold" font-size="10">AMEX</text>
+                                </svg>
+                            </div>
+                            <!-- PayPal -->
+                            <div class="payment-icon">
+                                <svg viewBox="0 0 48 32" width="40" height="27">
+                                    <rect fill="#003087" width="48" height="32" rx="4"/>
+                                    <path fill="#FFFFFF" d="M20 12c0-1.1-.9-2-2-2h-4c-.3 0-.5.2-.5.5l-1.5 9c0 .3.2.5.5.5h1.5c.3 0 .5-.2.5-.5l.4-2.5h1.6c2.2 0 4-1.8 4-4zm-3.5 1.5c-.2 1.1-1.1 1.9-2.2 1.9h-1l.5-3.2c0-.1.1-.2.3-.2h.4c1 0 1.8.8 2 1.5zm10.5-1.5c0-1.1-.9-2-2-2h-4c-.3 0-.5.2-.5.5l-1.5 9c0 .3.2.5.5.5h1.5c.3 0 .5-.2.5-.5l.4-2.5h1.6c2.2 0 4-1.8 4-4zm-3.5 1.5c-.2 1.1-1.1 1.9-2.2 1.9h-1l.5-3.2c0-.1.1-.2.3-.2h.4c1 0 1.8.8 2 1.5z"/>
+                                    <path fill="#009CDE" d="M35 12h-2c-.2 0-.4.1-.5.3l-2.5 3.7-1-3.7c-.1-.2-.3-.3-.5-.3h-2c-.3 0-.5.3-.4.6l1.9 5.6-1.8 2.5c-.2.2 0 .6.3.6h2c.2 0 .4-.1.5-.3l6.3-9.1c.2-.3 0-.7-.3-.7z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Badges de Seguridad -->
+                        <div class="security-badges">
+                            <div class="security-badge">
+                                🔒 SSL Seguro
+                            </div>
+                            <div class="security-badge">
+                                ✓ Pago 100% Seguro
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="footer-legal">
+                    <strong>agutidesigns</strong> - Alejandro Gutiérrez Gómez<br>
+                    NIF: 48063365N | Avinguda Porta Diagonal nº30, 08940, Cornellà de Llobregat, Barcelona
+                </div>
+                <div class="footer-credits">
+                    © 2025 agutidesigns. Todos los derechos reservados.
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
