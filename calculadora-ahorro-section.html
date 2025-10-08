@@ -293,23 +293,205 @@
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
         }
 
+        /* Mobile Tabs */
+        .mobile-tabs {
+            display: none;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mobile-tab {
+            flex: 1;
+            padding: 15px;
+            background: #ffffff;
+            border: 2px solid rgba(0, 81, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .mobile-tab.active {
+            background: #0051ff;
+            color: #ffffff !important;
+            border-color: #0051ff;
+            box-shadow: 0 4px 15px rgba(0, 81, 255, 0.3);
+        }
+
+        .comparison-card {
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card.hidden-mobile {
+            display: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .calculator-section {
-                padding: 60px 15px !important;
+                padding: 40px 15px !important;
             }
 
             .calculator-card {
-                padding: 30px 20px;
+                padding: 25px 15px;
+                border-radius: 20px;
             }
 
-            .comparison-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
+            .calculator-header {
+                margin-bottom: 25px;
+            }
+
+            .calculator-title {
+                font-size: 1.8rem !important;
+            }
+
+            .calculator-description {
+                font-size: 0.9rem !important;
+            }
+
+            .input-section {
+                padding: 20px 15px;
+                margin-bottom: 25px;
+            }
+
+            .input-label {
+                font-size: 1rem !important;
+                margin-bottom: 12px !important;
             }
 
             .plan-selector {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .plan-option {
+                padding: 18px 15px;
+                border-radius: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .plan-option .plan-name {
+                font-size: 1.1rem !important;
+                margin-bottom: 0 !important;
+                text-align: left;
+            }
+
+            .plan-option .plan-pages {
+                display: none;
+            }
+
+            .plan-option .plan-price {
+                font-size: 1.5rem !important;
+            }
+
+            /* Mostrar tabs en móvil, ocultar grid */
+            .mobile-tabs {
+                display: flex;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .comparison-card {
+                border-radius: 15px;
+                padding: 25px 15px;
+            }
+
+            .comparison-badge {
+                font-size: 0.75rem;
+                padding: 6px 15px;
+                margin-bottom: 15px;
+            }
+
+            .comparison-title {
+                font-size: 1.3rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            .cost-item {
+                padding: 10px 0;
+                font-size: 0.85rem;
+            }
+
+            .cost-label {
+                font-size: 0.85rem !important;
+            }
+
+            .cost-value {
+                font-size: 0.9rem !important;
+            }
+
+            .total-cost {
+                padding: 15px;
+                margin-top: 15px;
+            }
+
+            .total-label {
+                font-size: 0.75rem !important;
+            }
+
+            .total-amount {
+                font-size: 2rem !important;
+            }
+
+            /* Result Section Mobile */
+            .result-section {
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+
+            .result-title {
+                font-size: 1.5rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            .result-highlight {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .result-months {
+                font-size: 3.5rem !important;
+            }
+
+            .result-text {
+                font-size: 1rem !important;
+                margin-top: 8px;
+            }
+
+            .savings-amount {
+                font-size: 1.5rem !important;
+                margin-top: 12px;
+            }
+
+            .result-description {
+                font-size: 0.9rem !important;
+                line-height: 1.5;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calculator-title {
+                font-size: 1.5rem !important;
+            }
+
+            .plan-option .plan-name {
+                font-size: 1rem !important;
+            }
+
+            .plan-option .plan-price {
+                font-size: 1.3rem !important;
+            }
+
+            .comparison-title {
+                font-size: 1.2rem !important;
             }
 
             .result-months {
@@ -350,9 +532,15 @@
                     </div>
                 </div>
 
+                <!-- Tabs para móvil -->
+                <div class="mobile-tabs">
+                    <div class="mobile-tab active" data-view="traditional">❌ Tradicional</div>
+                    <div class="mobile-tab" data-view="membership">✅ Membresía</div>
+                </div>
+
                 <div class="comparison-grid">
                     <!-- Web Tradicional -->
-                    <div class="comparison-card traditional">
+                    <div class="comparison-card traditional" id="traditional-card">
                         <span class="comparison-badge traditional">❌ Web Tradicional</span>
                         <h4 class="comparison-title">Pago Único</h4>
                         <div class="cost-breakdown">
@@ -384,7 +572,7 @@
                     </div>
 
                     <!-- Membresía agutidesigns -->
-                    <div class="comparison-card membership">
+                    <div class="comparison-card membership hidden-mobile" id="membership-card">
                         <span class="comparison-badge membership">✅ Membresía agutidesigns</span>
                         <h4 class="comparison-title">Pago Mensual</h4>
                         <div class="cost-breakdown">
@@ -498,6 +686,49 @@
 
         // Inicializar con el plan básico
         updateCalculations('basico', 35);
+
+        // Funcionalidad de tabs para móvil
+        const mobileTabs = document.querySelectorAll('.mobile-tab');
+        const traditionalCard = document.getElementById('traditional-card');
+        const membershipCard = document.getElementById('membership-card');
+
+        mobileTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remover clase active de todos los tabs
+                mobileTabs.forEach(t => t.classList.remove('active'));
+                
+                // Añadir clase active al tab clickeado
+                this.classList.add('active');
+                
+                // Obtener la vista a mostrar
+                const view = this.getAttribute('data-view');
+                
+                // Mostrar/ocultar cards según la vista
+                if (view === 'traditional') {
+                    traditionalCard.classList.remove('hidden-mobile');
+                    membershipCard.classList.add('hidden-mobile');
+                } else {
+                    traditionalCard.classList.add('hidden-mobile');
+                    membershipCard.classList.remove('hidden-mobile');
+                }
+            });
+        });
+
+        // Detectar si estamos en móvil y ajustar visibilidad inicial
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                // En móvil, mostrar solo tradicional por defecto
+                membershipCard.classList.add('hidden-mobile');
+            } else {
+                // En desktop, mostrar ambas
+                traditionalCard.classList.remove('hidden-mobile');
+                membershipCard.classList.remove('hidden-mobile');
+            }
+        }
+
+        // Ejecutar al cargar y al redimensionar
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
     </script>
 </body>
 </html>
