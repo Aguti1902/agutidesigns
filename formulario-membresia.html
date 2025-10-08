@@ -2982,6 +2982,10 @@ Genera una descripción profesional y atractiva para CADA servicio.
             const planParam = urlParams.get('plan');
             const billingParam = urlParams.get('billing'); // 'monthly' o 'annual'
             
+            console.log('🔍 [FORM] URL actual:', window.location.href);
+            console.log('🔍 [FORM] Plan desde URL:', planParam);
+            console.log('🔍 [FORM] Billing desde URL:', billingParam);
+            
             if (planParam && ['basico', 'avanzado', 'premium'].includes(planParam)) {
                 const planPrices = {
                     monthly: {
@@ -3003,18 +3007,27 @@ Genera una descripción profesional y atractiva para CADA servicio.
                 sessionStorage.setItem('billing_cycle', billing);
                 
                 // Actualizar input hidden
-                document.getElementById('selectedPlan').value = planParam;
+                const selectedPlanInput = document.getElementById('selectedPlan');
+                if (selectedPlanInput) {
+                    selectedPlanInput.value = planParam;
+                    console.log('✅ [FORM] Input hidden actualizado:', planParam);
+                }
                 
                 // Actualizar texto visible
                 const displayText = document.getElementById('planDisplayText');
                 if (displayText) {
                     displayText.textContent = planPrices[billing][planParam];
+                    console.log('✅ [FORM] Texto visible actualizado:', planPrices[billing][planParam]);
+                } else {
+                    console.error('❌ [FORM] No se encontró elemento planDisplayText');
                 }
                 
                 // Actualizar contador de páginas
                 updatePageCounter();
                 
-                console.log(`✅ Plan detectado desde URL: ${planParam} (${billing})`);
+                console.log(`✅ [FORM] Plan detectado y guardado: ${planParam} (${billing})`);
+            } else {
+                console.log('⚠️ [FORM] No hay plan válido en URL o plan no reconocido');
             }
         }
 
