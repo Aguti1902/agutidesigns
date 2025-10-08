@@ -2998,8 +2998,9 @@ Genera una descripción profesional y atractiva para CADA servicio.
                 
                 const billing = billingParam === 'annual' ? 'annual' : 'monthly';
                 
-                // Guardar billing_cycle en variable global
+                // Guardar billing_cycle en variable global Y sessionStorage
                 window.selectedBilling = billing;
+                sessionStorage.setItem('billing_cycle', billing);
                 
                 // Actualizar input hidden
                 document.getElementById('selectedPlan').value = planParam;
@@ -3012,6 +3013,8 @@ Genera una descripción profesional y atractiva para CADA servicio.
                 
                 // Actualizar contador de páginas
                 updatePageCounter();
+                
+                console.log(`✅ Plan detectado desde URL: ${planParam} (${billing})`);
             }
         }
 
