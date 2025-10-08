@@ -107,6 +107,10 @@ const allowedOrigins = [
     'http://localhost:5500',
     'https://agutidesigns.vercel.app',
     'https://agutidesigns.vercel.app/',
+    'https://agutidesigns.es',
+    'https://formulario.agutidesigns.es',
+    'https://panel.agutidesigns.es',
+    'https://admin.agutidesigns.es',
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
