@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ahorro - agutidesigns</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Bebas+Neue&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .calculator-section {
+            background: #1B1B1B !important;
+            padding: 80px 20px !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calculator-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 81, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(229, 252, 99, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            color: #E5FC63 !important;
+            font-size: clamp(2rem, 5vw, 3.5rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            color: #FEFAF5 !important;
+            font-size: 1.2rem !important;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        /* Calculator Card */
+        .calculator-card {
+            background: rgba(254, 250, 245, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(229, 252, 99, 0.2);
+            border-radius: 30px;
+            padding: 50px 40px;
+            margin-bottom: 40px;
+        }
+
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .calculator-title {
+            color: #E5FC63 !important;
+            font-size: clamp(1.5rem, 3vw, 2rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 15px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+        }
+
+        .calculator-description {
+            color: rgba(254, 250, 245, 0.8) !important;
+            font-size: 1rem !important;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .input-label {
+            color: #E5FC63 !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 15px !important;
+            display: block;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .plan-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .plan-option {
+            background: rgba(254, 250, 245, 0.05);
+            border: 2px solid rgba(254, 250, 245, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .plan-option:hover {
+            transform: translateY(-3px);
+            border-color: rgba(229, 252, 99, 0.5);
+            background: rgba(229, 252, 99, 0.1);
+        }
+
+        .plan-option.active {
+            background: #E5FC63 !important;
+            border-color: #E5FC63 !important;
+            box-shadow: 0 8px 25px rgba(229, 252, 99, 0.3);
+        }
+
+        .plan-option.active .plan-name,
+        .plan-option.active .plan-price {
+            color: #1B1B1B !important;
+        }
+
+        .plan-name {
+            color: #FEFAF5 !important;
+            font-size: 1.2rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 10px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+        }
+
+        .plan-price {
+            color: #E5FC63 !important;
+            font-size: 2rem !important;
+            font-weight: 800 !important;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        .plan-pages {
+            color: rgba(254, 250, 245, 0.6) !important;
+            font-size: 0.85rem !important;
+            margin-top: 5px;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        /* Comparison Section */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .comparison-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card.traditional {
+            border-color: rgba(241, 37, 14, 0.3);
+        }
+
+        .comparison-card.membership {
+            border-color: rgba(0, 154, 98, 0.3);
+        }
+
+        .comparison-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .comparison-badge.traditional {
+            background: rgba(241, 37, 14, 0.2);
+            color: #F1250E !important;
+        }
+
+        .comparison-badge.membership {
+            background: rgba(0, 154, 98, 0.2);
+            color: #009A62 !important;
+        }
+
+        .comparison-title {
+            color: #FEFAF5 !important;
+            font-size: 1.5rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+        }
+
+        .cost-breakdown {
+            margin-bottom: 20px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(254, 250, 245, 0.1);
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .cost-label {
+            color: rgba(254, 250, 245, 0.7) !important;
+            font-size: 0.9rem !important;
+        }
+
+        .cost-value {
+            color: #FEFAF5 !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+        }
+
+        .total-cost {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .total-label {
+            color: rgba(254, 250, 245, 0.6) !important;
+            font-size: 0.85rem !important;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .total-amount {
+            color: #FEFAF5 !important;
+            font-size: 2.5rem !important;
+            font-weight: 800 !important;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        .total-amount.traditional {
+            color: #F1250E !important;
+        }
+
+        .total-amount.membership {
+            color: #009A62 !important;
+        }
+
+        /* Result Section */
+        .result-section {
+            background: linear-gradient(135deg, #009A62 0%, #00b872 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 154, 98, 0.3);
+        }
+
+        .result-title {
+            color: #FEFAF5 !important;
+            font-size: clamp(1.5rem, 3vw, 2rem) !important;
+            font-weight: 800 !important;
+            margin-bottom: 20px !important;
+            font-family: 'Soulcraft', 'Bebas Neue', sans-serif !important;
+        }
+
+        .result-highlight {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .result-months {
+            color: #E5FC63 !important;
+            font-size: 4rem !important;
+            font-weight: 800 !important;
+            line-height: 1;
+            font-family: 'Bebas Neue', sans-serif !important;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-text {
+            color: #FEFAF5 !important;
+            font-size: 1.2rem !important;
+            margin-top: 10px;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        .savings-amount {
+            color: #E5FC63 !important;
+            font-size: 2rem !important;
+            font-weight: 800 !important;
+            margin-top: 15px;
+            font-family: 'Bebas Neue', sans-serif !important;
+        }
+
+        .result-description {
+            color: rgba(254, 250, 245, 0.9) !important;
+            font-size: 1rem !important;
+            line-height: 1.6;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+        }
+
+        /* CTA Button */
+        .calculator-cta {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #E5FC63 !important;
+            color: #1B1B1B !important;
+            padding: 18px 50px !important;
+            border-radius: 50px !important;
+            font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            text-decoration: none !important;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 25px rgba(229, 252, 99, 0.4) !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 35px rgba(229, 252, 99, 0.6) !important;
+            background: #d4eb52 !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calculator-section {
+                padding: 60px 15px !important;
+            }
+
+            .calculator-card {
+                padding: 30px 20px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .plan-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .result-months {
+                font-size: 3rem !important;
+            }
+
+            .cta-button {
+                padding: 16px 40px !important;
+                font-size: 1rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="calculator-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">¿Cuánto Tardas en Recuperar tu Inversión?</h2>
+                <p class="section-subtitle">
+                    Descubre cuánto dinero ahorras con nuestro modelo de suscripción 
+                    comparado con una web tradicional.
+                </p>
+            </div>
+
+            <div class="calculator-card">
+                <div class="calculator-header">
+                    <h3 class="calculator-title">Calculadora de Ahorro</h3>
+                    <p class="calculator-description">
+                        Selecciona tu plan y descubre la diferencia
+                    </p>
+                </div>
+
+                <div class="input-section">
+                    <label class="input-label">Selecciona tu plan:</label>
+                    <div class="plan-selector">
+                        <div class="plan-option active" data-plan="basico" data-monthly="35" data-pages="5">
+                            <div class="plan-name">Plan Básico</div>
+                            <div class="plan-price">35€/mes</div>
+                            <div class="plan-pages">Hasta 5 páginas</div>
+                        </div>
+                        <div class="plan-option" data-plan="avanzado" data-monthly="49" data-pages="10">
+                            <div class="plan-name">Plan Avanzado</div>
+                            <div class="plan-price">49€/mes</div>
+                            <div class="plan-pages">Hasta 10 páginas</div>
+                        </div>
+                        <div class="plan-option" data-plan="premium" data-monthly="65" data-pages="20">
+                            <div class="plan-name">Plan Premium</div>
+                            <div class="plan-price">65€/mes</div>
+                            <div class="plan-pages">Hasta 20 páginas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-grid">
+                    <!-- Web Tradicional -->
+                    <div class="comparison-card traditional">
+                        <span class="comparison-badge traditional">❌ Web Tradicional</span>
+                        <h4 class="comparison-title">Pago Único</h4>
+                        <div class="cost-breakdown">
+                            <div class="cost-item">
+                                <span class="cost-label">Diseño web</span>
+                                <span class="cost-value" id="traditional-design">2.500€</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Hosting anual</span>
+                                <span class="cost-value">120€</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Dominio anual</span>
+                                <span class="cost-value">15€</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Certificado SSL</span>
+                                <span class="cost-value">50€</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Mantenimiento anual</span>
+                                <span class="cost-value">300€</span>
+                            </div>
+                        </div>
+                        <div class="total-cost">
+                            <div class="total-label">Coste Primer Año</div>
+                            <div class="total-amount traditional" id="traditional-total">2.985€</div>
+                        </div>
+                    </div>
+
+                    <!-- Membresía agutidesigns -->
+                    <div class="comparison-card membership">
+                        <span class="comparison-badge membership">✅ Membresía agutidesigns</span>
+                        <h4 class="comparison-title">Pago Mensual</h4>
+                        <div class="cost-breakdown">
+                            <div class="cost-item">
+                                <span class="cost-label">Diseño web</span>
+                                <span class="cost-value">Incluido</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Hosting</span>
+                                <span class="cost-value">Incluido</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Dominio</span>
+                                <span class="cost-value">Incluido</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">SSL + Copias</span>
+                                <span class="cost-value">Incluido</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Soporte continuo</span>
+                                <span class="cost-value">Incluido</span>
+                            </div>
+                        </div>
+                        <div class="total-cost">
+                            <div class="total-label">Coste Primer Año</div>
+                            <div class="total-amount membership" id="membership-total">420€</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="result-section">
+                    <h3 class="result-title">💰 Resultado del Análisis</h3>
+                    <div class="result-highlight">
+                        <div class="result-months" id="months-result">7</div>
+                        <div class="result-text">
+                            meses para igualar el coste de una web tradicional
+                        </div>
+                        <div class="savings-amount" id="savings-result">
+                            Ahorras 2.565€ el primer año
+                        </div>
+                    </div>
+                    <p class="result-description">
+                        Con nuestra membresía, empiezas sin inversión inicial y tienes todo incluido. 
+                        Después del primer año, sigues ahorrando cada mes mientras tu web está 
+                        siempre actualizada y con soporte continuo.
+                    </p>
+                </div>
+
+                <div class="calculator-cta">
+                    <a href="https://formulario.agutidesigns.es" class="cta-button">
+                        🚀 Empezar Ahora Sin Inversión Inicial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Datos de costes tradicionales según páginas
+        const traditionalCosts = {
+            basico: { design: 2500, hosting: 120, domain: 15, ssl: 50, maintenance: 300 },
+            avanzado: { design: 3500, hosting: 150, domain: 15, ssl: 50, maintenance: 450 },
+            premium: { design: 5000, hosting: 200, domain: 15, ssl: 50, maintenance: 600 }
+        };
+
+        // Elementos del DOM
+        const planOptions = document.querySelectorAll('.plan-option');
+        const traditionalDesign = document.getElementById('traditional-design');
+        const traditionalTotal = document.getElementById('traditional-total');
+        const membershipTotal = document.getElementById('membership-total');
+        const monthsResult = document.getElementById('months-result');
+        const savingsResult = document.getElementById('savings-result');
+
+        // Función para actualizar cálculos
+        function updateCalculations(plan, monthlyPrice) {
+            const costs = traditionalCosts[plan];
+            
+            // Calcular total tradicional
+            const traditionalYearCost = costs.design + costs.hosting + costs.domain + costs.ssl + costs.maintenance;
+            
+            // Calcular total membresía (12 meses)
+            const membershipYearCost = monthlyPrice * 12;
+            
+            // Calcular meses para igualar
+            const monthsToEqual = Math.ceil(traditionalYearCost / monthlyPrice);
+            
+            // Calcular ahorro
+            const savings = traditionalYearCost - membershipYearCost;
+            
+            // Actualizar UI
+            traditionalDesign.textContent = costs.design.toLocaleString('es-ES') + '€';
+            traditionalTotal.textContent = traditionalYearCost.toLocaleString('es-ES') + '€';
+            membershipTotal.textContent = membershipYearCost.toLocaleString('es-ES') + '€';
+            monthsResult.textContent = monthsToEqual;
+            savingsResult.textContent = `Ahorras ${savings.toLocaleString('es-ES')}€ el primer año`;
+        }
+
+        // Event listeners para los planes
+        planOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remover clase active de todas las opciones
+                planOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Añadir clase active a la opción seleccionada
+                this.classList.add('active');
+                
+                // Obtener datos del plan
+                const plan = this.getAttribute('data-plan');
+                const monthlyPrice = parseInt(this.getAttribute('data-monthly'));
+                
+                // Actualizar cálculos
+                updateCalculations(plan, monthlyPrice);
+            });
+        });
+
+        // Inicializar con el plan básico
+        updateCalculations('basico', 35);
+    </script>
+</body>
+</html>
+
