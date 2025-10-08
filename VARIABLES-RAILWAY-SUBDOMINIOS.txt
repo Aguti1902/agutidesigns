@@ -1,0 +1,51 @@
+🔧 VARIABLES DE RAILWAY PARA SUBDOMINIOS
+
+Ve a: https://railway.app → Tu proyecto → Variables
+
+======================================
+📝 VARIABLES A AÑADIR/ACTUALIZAR:
+======================================
+
+FRONTEND_URL=https://formulario.agutidesigns.es
+
+CLIENT_DASHBOARD_URL=https://panel.agutidesigns.es
+
+ADMIN_DASHBOARD_URL=https://admin.agutidesigns.es
+
+ALLOWED_ORIGINS=https://agutidesigns.es,https://formulario.agutidesigns.es,https://panel.agutidesigns.es,https://admin.agutidesigns.es
+
+======================================
+✅ VERIFICAR QUE ESTAS YA EXISTAN:
+======================================
+
+API_URL=https://agutidesigns-production.up.railway.app
+
+STRIPE_SECRET_KEY=sk_...
+STRIPE_PUBLIC_KEY=pk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+DATABASE_URL=[tu URL de PostgreSQL]
+
+SENDGRID_API_KEY=SG...
+
+ADMIN_EMAIL=info@agutidesigns.es
+
+OPENAI_API_KEY=sk-...
+
+GOOGLE_APPLICATION_CREDENTIALS_JSON=[tu JSON de Google Analytics]
+
+======================================
+📋 RESUMEN:
+======================================
+
+Total de variables: ~15-20
+Nuevas/Actualizadas: 4 (FRONTEND_URL, CLIENT_DASHBOARD_URL, ADMIN_DASHBOARD_URL, ALLOWED_ORIGINS)
+Existentes a verificar: 11+
+
+⚠️ IMPORTANTE:
+- NO borres ninguna variable existente
+- Solo AÑADE o ACTUALIZA las 4 mencionadas arriba
+- Railway se redesplegará automáticamente
+
+⏱️ Tiempo estimado: 2 minutos
+
