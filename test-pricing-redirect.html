@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Redirección de Planes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .toggle-option {
+            padding: 10px 30px;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            background: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-option.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .plan-btn {
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .plan-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .result {
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .info {
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test de Redirección de Planes</h1>
+
+        <div class="test-section">
+            <h3 style="margin-bottom: 15px;">1. Selecciona el ciclo de facturación:</h3>
+            <div class="toggle-container">
+                <div class="toggle-option active" data-period="monthly" onclick="toggleBilling(this)">
+                    Mensual
+                </div>
+                <div class="toggle-option" data-period="annual" onclick="toggleBilling(this)">
+                    Anual
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 style="margin-bottom: 15px;">2. Selecciona un plan:</h3>
+            <div class="plans-grid">
+                <button class="plan-btn" onclick="testSelectPlan('basico')">
+                    Plan Básico
+                </button>
+                <button class="plan-btn" onclick="testSelectPlan('avanzado')">
+                    Plan Avanzado
+                </button>
+                <button class="plan-btn" onclick="testSelectPlan('premium')">
+                    Plan Premium
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3 style="margin-bottom: 15px;">3. URL Generada:</h3>
+            <div class="result" id="generatedUrl">
+                Selecciona un plan para ver la URL...
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>ℹ️ Instrucciones:</strong><br>
+            1. Elige Mensual o Anual<br>
+            2. Haz click en cualquier plan<br>
+            3. Verifica que la URL se genera correctamente<br>
+            4. El botón te redirigirá al formulario con los parámetros correctos
+        </div>
+    </div>
+
+    <script>
+        function toggleBilling(element) {
+            // Remover clase active de todos
+            document.querySelectorAll('.toggle-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            // Añadir clase active al clickeado
+            element.classList.add('active');
+            
+            // Actualizar URL si hay un plan seleccionado
+            const lastPlan = document.querySelector('.result').dataset.lastPlan;
+            if (lastPlan) {
+                testSelectPlan(lastPlan, false);
+            }
+        }
+
+        function testSelectPlan(plan, redirect = true) {
+            // Detectar si el toggle está en mensual o anual
+            const activeToggle = document.querySelector('.toggle-option.active');
+            const billingCycle = activeToggle.getAttribute('data-period');
+            
+            // Generar URL
+            const url = `https://formulario.agutidesigns.es?plan=${plan}&billing=${billingCycle}`;
+            
+            // Mostrar URL generada
+            const resultDiv = document.getElementById('generatedUrl');
+            resultDiv.textContent = url;
+            resultDiv.dataset.lastPlan = plan;
+            
+            console.log('🎯 Plan seleccionado:', plan);
+            console.log('💳 Billing cycle:', billingCycle);
+            console.log('🔗 URL generada:', url);
+            
+            // Redirigir después de 2 segundos si redirect es true
+            if (redirect) {
+                resultDiv.innerHTML = `
+                    <strong>URL generada:</strong><br>
+                    ${url}<br><br>
+                    <strong style="color: #4caf50;">✅ Redirigiendo en 3 segundos...</strong>
+                `;
+                
+                let countdown = 3;
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        resultDiv.innerHTML = `
+                            <strong>URL generada:</strong><br>
+                            ${url}<br><br>
+                            <strong style="color: #4caf50;">✅ Redirigiendo en ${countdown} segundos...</strong>
+                        `;
+                    } else {
+                        clearInterval(countdownInterval);
+                        window.location.href = url;
+                    }
+                }, 1000);
+            }
+        }
+
+        // Log inicial
+        console.log('🧪 Página de test cargada');
+        console.log('📍 Dominio del formulario: https://formulario.agutidesigns.es');
+    </script>
+</body>
+</html>
+

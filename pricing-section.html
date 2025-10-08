@@ -583,8 +583,15 @@
             const activeToggle = document.querySelector('.toggle-option.active');
             const billingCycle = activeToggle.getAttribute('data-period'); // 'monthly' o 'annual'
             
+            console.log('🎯 [PRICING] Plan seleccionado:', plan);
+            console.log('💳 [PRICING] Billing cycle:', billingCycle);
+            
             // Redirigir al formulario en el subdominio con plan y billing_cycle
-            window.location.href = `https://formulario.agutidesigns.es?plan=${plan}&billing=${billingCycle}`;
+            // Usar /formulario-membresia.html temporalmente hasta que Vercel actualice
+            const url = `https://formulario.agutidesigns.es/formulario-membresia.html?plan=${plan}&billing=${billingCycle}`;
+            console.log('🔗 [PRICING] Redirigiendo a:', url);
+            
+            window.location.href = url;
         }
     </script>
 </body>
