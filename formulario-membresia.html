@@ -3033,7 +3033,11 @@ Genera una descripción profesional y atractiva para CADA servicio.
 
         // Inicializar
         showStep(1);
-        detectPlanFromURL();
+        
+        // Detectar plan desde URL después de que el DOM esté listo
+        setTimeout(() => {
+            detectPlanFromURL();
+        }, 100);
 
         // ========================================
         // DOMAIN AVAILABILITY CHECKER
