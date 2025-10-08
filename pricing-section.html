@@ -443,7 +443,11 @@
                         </ul>
                     </div>
                     
-                    <button onclick="selectPlan('basico')" class="plan-button">Elegir Plan Básico</button>
+                    <a href="https://formulario.agutidesigns.es/formulario-membresia.html?plan=basico&billing=monthly" 
+                       class="plan-button" 
+                       id="btn-basico">
+                        Elegir Plan Básico
+                    </a>
                 </div>
 
                 <!-- Plan Avanzado (Featured) -->
@@ -478,7 +482,11 @@
                         </ul>
                     </div>
                     
-                    <button onclick="selectPlan('avanzado')" class="plan-button">Elegir Plan Avanzado</button>
+                    <a href="https://formulario.agutidesigns.es/formulario-membresia.html?plan=avanzado&billing=monthly" 
+                       class="plan-button" 
+                       id="btn-avanzado">
+                        Elegir Plan Avanzado
+                    </a>
                 </div>
 
                 <!-- Plan Premium -->
@@ -512,7 +520,11 @@
                         </ul>
                     </div>
                     
-                    <button onclick="selectPlan('premium')" class="plan-button">Elegir Plan Premium</button>
+                    <a href="https://formulario.agutidesigns.es/formulario-membresia.html?plan=premium&billing=monthly" 
+                       class="plan-button" 
+                       id="btn-premium">
+                        Elegir Plan Premium
+                    </a>
                 </div>
             </div>
             
@@ -553,6 +565,9 @@
                         periodText.textContent = 'mensual';
                     }
                 });
+                
+                // Actualizar los enlaces de los botones
+                updatePlanLinks(period);
             });
         });
 
@@ -577,21 +592,17 @@
             }
         }
 
-        // Función para seleccionar plan con billing_cycle
-        function selectPlan(plan) {
-            // Detectar si el toggle está en mensual o anual
-            const activeToggle = document.querySelector('.toggle-option.active');
-            const billingCycle = activeToggle.getAttribute('data-period'); // 'monthly' o 'annual'
+        // Función para actualizar los enlaces de los planes según billing cycle
+        function updatePlanLinks(billing) {
+            const plans = ['basico', 'avanzado', 'premium'];
             
-            console.log('🎯 [PRICING] Plan seleccionado:', plan);
-            console.log('💳 [PRICING] Billing cycle:', billingCycle);
-            
-            // Redirigir al formulario en el subdominio con plan y billing_cycle
-            // Usar /formulario-membresia.html temporalmente hasta que Vercel actualice
-            const url = `https://formulario.agutidesigns.es/formulario-membresia.html?plan=${plan}&billing=${billingCycle}`;
-            console.log('🔗 [PRICING] Redirigiendo a:', url);
-            
-            window.location.href = url;
+            plans.forEach(plan => {
+                const btnElement = document.getElementById(`btn-${plan}`);
+                if (btnElement) {
+                    btnElement.href = `https://formulario.agutidesigns.es/formulario-membresia.html?plan=${plan}&billing=${billing}`;
+                    console.log(`🔗 [PRICING] Enlace actualizado para ${plan}:`, btnElement.href);
+                }
+            });
         }
     </script>
 </body>
