@@ -14,23 +14,10 @@
         }
 
         .calculator-section {
-            background: #1B1B1B !important;
+            background: transparent !important;
             padding: 80px 20px !important;
             position: relative;
             overflow: hidden;
-        }
-
-        .calculator-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 81, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(229, 252, 99, 0.1) 0%, transparent 50%);
-            pointer-events: none;
         }
 
         .container {
@@ -46,7 +33,7 @@
         }
 
         .section-title {
-            color: #E5FC63 !important;
+            color: #0051ff !important;
             font-size: clamp(2rem, 5vw, 3.5rem) !important;
             font-weight: 800 !important;
             margin-bottom: 20px !important;
@@ -57,7 +44,7 @@
         }
 
         .section-subtitle {
-            color: #FEFAF5 !important;
+            color: #1B1B1B !important;
             font-size: 1.2rem !important;
             max-width: 700px;
             margin: 0 auto;
@@ -67,12 +54,12 @@
 
         /* Calculator Card */
         .calculator-card {
-            background: rgba(254, 250, 245, 0.05);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(229, 252, 99, 0.2);
+            background: #ffffff;
+            border: 3px solid #0051ff;
             border-radius: 30px;
             padding: 50px 40px;
             margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0, 81, 255, 0.15);
         }
 
         .calculator-header {
@@ -81,7 +68,7 @@
         }
 
         .calculator-title {
-            color: #E5FC63 !important;
+            color: #0051ff !important;
             font-size: clamp(1.5rem, 3vw, 2rem) !important;
             font-weight: 800 !important;
             margin-bottom: 15px !important;
@@ -89,21 +76,21 @@
         }
 
         .calculator-description {
-            color: rgba(254, 250, 245, 0.8) !important;
+            color: #1B1B1B !important;
             font-size: 1rem !important;
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
         }
 
         /* Input Section */
         .input-section {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 81, 255, 0.05);
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 40px;
         }
 
         .input-label {
-            color: #E5FC63 !important;
+            color: #0051ff !important;
             font-size: 1.1rem !important;
             font-weight: 700 !important;
             margin-bottom: 15px !important;
@@ -119,8 +106,8 @@
         }
 
         .plan-option {
-            background: rgba(254, 250, 245, 0.05);
-            border: 2px solid rgba(254, 250, 245, 0.2);
+            background: #ffffff;
+            border: 2px solid rgba(0, 81, 255, 0.2);
             border-radius: 15px;
             padding: 20px;
             cursor: pointer;
@@ -130,23 +117,24 @@
 
         .plan-option:hover {
             transform: translateY(-3px);
-            border-color: rgba(229, 252, 99, 0.5);
-            background: rgba(229, 252, 99, 0.1);
+            border-color: #0051ff;
+            background: rgba(0, 81, 255, 0.05);
         }
 
         .plan-option.active {
-            background: #E5FC63 !important;
-            border-color: #E5FC63 !important;
-            box-shadow: 0 8px 25px rgba(229, 252, 99, 0.3);
+            background: #0051ff !important;
+            border-color: #0051ff !important;
+            box-shadow: 0 8px 25px rgba(0, 81, 255, 0.3);
         }
 
         .plan-option.active .plan-name,
-        .plan-option.active .plan-price {
-            color: #1B1B1B !important;
+        .plan-option.active .plan-price,
+        .plan-option.active .plan-pages {
+            color: #FEFAF5 !important;
         }
 
         .plan-name {
-            color: #FEFAF5 !important;
+            color: #1B1B1B !important;
             font-size: 1.2rem !important;
             font-weight: 700 !important;
             margin-bottom: 10px !important;
@@ -154,14 +142,14 @@
         }
 
         .plan-price {
-            color: #E5FC63 !important;
+            color: #0051ff !important;
             font-size: 2rem !important;
             font-weight: 800 !important;
             font-family: 'Bebas Neue', sans-serif !important;
         }
 
         .plan-pages {
-            color: rgba(254, 250, 245, 0.6) !important;
+            color: #666 !important;
             font-size: 0.85rem !important;
             margin-top: 5px;
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
@@ -176,7 +164,7 @@
         }
 
         .comparison-card {
-            background: rgba(0, 0, 0, 0.3);
+            background: #ffffff;
             border-radius: 20px;
             padding: 30px;
             border: 2px solid transparent;
@@ -184,11 +172,11 @@
         }
 
         .comparison-card.traditional {
-            border-color: rgba(241, 37, 14, 0.3);
+            border-color: #F1250E;
         }
 
         .comparison-card.membership {
-            border-color: rgba(0, 154, 98, 0.3);
+            border-color: #009A62;
         }
 
         .comparison-badge {
@@ -212,7 +200,7 @@
         }
 
         .comparison-title {
-            color: #FEFAF5 !important;
+            color: #1B1B1B !important;
             font-size: 1.5rem !important;
             font-weight: 800 !important;
             margin-bottom: 20px !important;
@@ -228,23 +216,23 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid rgba(254, 250, 245, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
         }
 
         .cost-label {
-            color: rgba(254, 250, 245, 0.7) !important;
+            color: #666 !important;
             font-size: 0.9rem !important;
         }
 
         .cost-value {
-            color: #FEFAF5 !important;
+            color: #1B1B1B !important;
             font-size: 1rem !important;
             font-weight: 600 !important;
         }
 
         .total-cost {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 81, 255, 0.05);
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
@@ -252,7 +240,7 @@
         }
 
         .total-label {
-            color: rgba(254, 250, 245, 0.6) !important;
+            color: #666 !important;
             font-size: 0.85rem !important;
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -261,7 +249,7 @@
         }
 
         .total-amount {
-            color: #FEFAF5 !important;
+            color: #1B1B1B !important;
             font-size: 2.5rem !important;
             font-weight: 800 !important;
             font-family: 'Bebas Neue', sans-serif !important;
@@ -293,14 +281,14 @@
         }
 
         .result-highlight {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 20px;
         }
 
         .result-months {
-            color: #E5FC63 !important;
+            color: #FEFAF5 !important;
             font-size: 4rem !important;
             font-weight: 800 !important;
             line-height: 1;
@@ -316,7 +304,7 @@
         }
 
         .savings-amount {
-            color: #E5FC63 !important;
+            color: #FEFAF5 !important;
             font-size: 2rem !important;
             font-weight: 800 !important;
             margin-top: 15px;
@@ -324,7 +312,7 @@
         }
 
         .result-description {
-            color: rgba(254, 250, 245, 0.9) !important;
+            color: #FEFAF5 !important;
             font-size: 1rem !important;
             line-height: 1.6;
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
@@ -338,8 +326,8 @@
 
         .cta-button {
             display: inline-block;
-            background: #E5FC63 !important;
-            color: #1B1B1B !important;
+            background: #0051ff !important;
+            color: #FEFAF5 !important;
             padding: 18px 50px !important;
             border-radius: 50px !important;
             font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace !important;
@@ -348,7 +336,7 @@
             text-transform: uppercase !important;
             text-decoration: none !important;
             letter-spacing: 1px;
-            box-shadow: 0 8px 25px rgba(229, 252, 99, 0.4) !important;
+            box-shadow: 0 8px 25px rgba(0, 81, 255, 0.4) !important;
             transition: all 0.3s ease !important;
             cursor: pointer;
             border: none;
@@ -356,8 +344,8 @@
 
         .cta-button:hover {
             transform: translateY(-3px) !important;
-            box-shadow: 0 12px 35px rgba(229, 252, 99, 0.6) !important;
-            background: #d4eb52 !important;
+            box-shadow: 0 12px 35px rgba(0, 81, 255, 0.6) !important;
+            background: #0046dd !important;
         }
 
         /* Responsive */
@@ -438,7 +426,7 @@
                         <div class="cost-breakdown">
                             <div class="cost-item">
                                 <span class="cost-label">Diseño web</span>
-                                <span class="cost-value" id="traditional-design">2.500€</span>
+                                <span class="cost-value" id="traditional-design">1.500€</span>
                             </div>
                             <div class="cost-item">
                                 <span class="cost-label">Hosting anual</span>
@@ -459,7 +447,7 @@
                         </div>
                         <div class="total-cost">
                             <div class="total-label">Coste Primer Año</div>
-                            <div class="total-amount traditional" id="traditional-total">2.985€</div>
+                            <div class="total-amount traditional" id="traditional-total">1.985€</div>
                         </div>
                     </div>
 
@@ -500,12 +488,12 @@
                 <div class="result-section">
                     <h3 class="result-title">💰 Resultado del Análisis</h3>
                     <div class="result-highlight">
-                        <div class="result-months" id="months-result">7</div>
+                        <div class="result-months" id="months-result">5</div>
                         <div class="result-text">
                             meses para igualar el coste de una web tradicional
                         </div>
                         <div class="savings-amount" id="savings-result">
-                            Ahorras 2.565€ el primer año
+                            Ahorras 1.565€ el primer año
                         </div>
                     </div>
                     <p class="result-description">
@@ -527,9 +515,9 @@
     <script>
         // Datos de costes tradicionales según páginas
         const traditionalCosts = {
-            basico: { design: 2500, hosting: 120, domain: 15, ssl: 50, maintenance: 300 },
-            avanzado: { design: 3500, hosting: 150, domain: 15, ssl: 50, maintenance: 450 },
-            premium: { design: 5000, hosting: 200, domain: 15, ssl: 50, maintenance: 600 }
+            basico: { design: 1500, hosting: 120, domain: 15, ssl: 50, maintenance: 300 },
+            avanzado: { design: 2500, hosting: 150, domain: 15, ssl: 50, maintenance: 450 },
+            premium: { design: 4000, hosting: 200, domain: 15, ssl: 50, maintenance: 600 }
         };
 
         // Elementos del DOM
