@@ -3368,8 +3368,9 @@ app.post('/api/client/change-plan', async (req, res) => {
         
         // 2️⃣ Obtener submission y páginas actuales
         let currentPages = [];
+        let submission = null; // Definir fuera del if para que esté disponible en todo el scope
         if (client.submission_id) {
-            const submission = await db.getSubmission(client.submission_id);
+            submission = await db.getSubmission(client.submission_id);
             if (submission && submission.pages) {
                 currentPages = Array.isArray(submission.pages) ? submission.pages : JSON.parse(submission.pages || '[]');
             }
