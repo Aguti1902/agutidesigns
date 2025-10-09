@@ -382,6 +382,31 @@ async function initializeTables() {
             console.log('⚠️ Migración password_reset_tokens ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Crear tabla videos
+        try {
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS videos (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    url TEXT NOT NULL,
+                    category VARCHAR(100),
+                    duration VARCHAR(20),
+                    thumbnail_url TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_videos_category ON videos(category);
+            `);
+            
+            console.log('✅ Migración: Tabla videos creada');
+        } catch (e) {
+            console.log('⚠️ Migración videos ya aplicada');
+        }
+
         console.log('✅ Tablas PostgreSQL inicializadas correctamente');
     } catch (error) {
         console.error('❌ Error inicializando tablas:', error);
@@ -1141,6 +1166,60 @@ async function deleteExpiredTokens() {
     `);
 }
 
+// ========== FUNCIONES DE VIDEOS ==========
+
+async function createVideo(videoData) {
+    const { title, description, url, category, duration, thumbnail_url } = videoData;
+    
+    const result = await pool.query(`
+        INSERT INTO videos (title, description, url, category, duration, thumbnail_url)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+    `, [title, description, url, category, duration, thumbnail_url]);
+    
+    return result.rows[0];
+}
+
+async function getAllVideos() {
+    const result = await pool.query(`
+        SELECT * FROM videos
+        ORDER BY created_at DESC
+    `);
+    return result.rows;
+}
+
+async function getVideosByCategory(category) {
+    const result = await pool.query(`
+        SELECT * FROM videos
+        WHERE category = $1
+        ORDER BY created_at DESC
+    `, [category]);
+    return result.rows;
+}
+
+async function getVideoById(id) {
+    const result = await pool.query('SELECT * FROM videos WHERE id = $1', [id]);
+    return result.rows[0];
+}
+
+async function updateVideo(id, videoData) {
+    const { title, description, url, category, duration, thumbnail_url } = videoData;
+    
+    const result = await pool.query(`
+        UPDATE videos
+        SET title = $1, description = $2, url = $3, category = $4, 
+            duration = $5, thumbnail_url = $6, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $7
+        RETURNING *
+    `, [title, description, url, category, duration, thumbnail_url, id]);
+    
+    return result.rows[0];
+}
+
+async function deleteVideo(id) {
+    await pool.query('DELETE FROM videos WHERE id = $1', [id]);
+}
+
 module.exports = {
     pool,
     db: pool, // Alias para compatibilidad
@@ -1177,5 +1256,12 @@ module.exports = {
     createPasswordResetToken,
     getPasswordResetToken,
     markTokenAsUsed,
-    deleteExpiredTokens
+    deleteExpiredTokens,
+    // Videos
+    createVideo,
+    getAllVideos,
+    getVideosByCategory,
+    getVideoById,
+    updateVideo,
+    deleteVideo
 };

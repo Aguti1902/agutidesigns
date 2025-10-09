@@ -4854,6 +4854,97 @@ app.delete('/api/admin/cleanup-all', async (req, res) => {
     }
 });
 
+// ========== ENDPOINTS DE VIDEOS ==========
+
+// Obtener todos los videos
+app.get('/api/videos', async (req, res) => {
+    try {
+        const videos = await db.getAllVideos();
+        res.json(videos);
+    } catch (error) {
+        console.error('❌ [VIDEOS] Error obteniendo videos:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Obtener videos por categoría
+app.get('/api/videos/category/:category', async (req, res) => {
+    try {
+        const { category } = req.params;
+        const videos = await db.getVideosByCategory(category);
+        res.json(videos);
+    } catch (error) {
+        console.error('❌ [VIDEOS] Error obteniendo videos por categoría:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Crear un nuevo video
+app.post('/api/admin/videos', async (req, res) => {
+    try {
+        const { title, description, url, category, duration, thumbnail_url } = req.body;
+        
+        console.log('📹 [ADMIN] Creando nuevo video:', title);
+        
+        const video = await db.createVideo({
+            title,
+            description,
+            url,
+            category,
+            duration,
+            thumbnail_url
+        });
+        
+        console.log('✅ [ADMIN] Video creado exitosamente:', video.id);
+        res.json({ success: true, video });
+    } catch (error) {
+        console.error('❌ [ADMIN] Error creando video:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Actualizar un video
+app.put('/api/admin/videos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, url, category, duration, thumbnail_url } = req.body;
+        
+        console.log(`📹 [ADMIN] Actualizando video #${id}`);
+        
+        const video = await db.updateVideo(id, {
+            title,
+            description,
+            url,
+            category,
+            duration,
+            thumbnail_url
+        });
+        
+        console.log('✅ [ADMIN] Video actualizado exitosamente');
+        res.json({ success: true, video });
+    } catch (error) {
+        console.error('❌ [ADMIN] Error actualizando video:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Eliminar un video
+app.delete('/api/admin/videos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        console.log(`🗑️ [ADMIN] Eliminando video #${id}`);
+        
+        await db.deleteVideo(id);
+        
+        console.log('✅ [ADMIN] Video eliminado exitosamente');
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ [ADMIN] Error eliminando video:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 🧪 ENDPOINT DE TEST: Forzar modificación en un pedido
 app.post('/api/admin/force-modification/:submissionId', async (req, res) => {
     try {
