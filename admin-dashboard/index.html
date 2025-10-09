@@ -2579,7 +2579,18 @@
                 // 3. BADGE DE CANCELACIONES NUEVAS
                 try {
                     const cancelResponse = await fetch(`${API_URL}/api/admin/cancelaciones`);
+                    
+                    if (!cancelResponse.ok) {
+                        throw new Error(`HTTP ${cancelResponse.status}`);
+                    }
+                    
                     const cancelaciones = await cancelResponse.json();
+                    
+                    // Verificar que sea un array
+                    if (!Array.isArray(cancelaciones)) {
+                        console.warn('⚠️ [ADMIN] Cancelaciones no es un array:', cancelaciones);
+                        return;
+                    }
                     
                     // Contar cancelaciones de hoy (últimas 24 horas)
                     const today = new Date();
@@ -3265,13 +3276,13 @@
                 
                 // Redirigir a la página de detalles
                 console.log('🔀 [ADMIN] Redirigiendo a pedido-detalle.html?id=' + id);
-                window.location.href = `pedido-detalle.html?id=${id}`;
+                window.location.href = `https://admin.agutidesigns.es/pedido-detalle.html?id=${id}`;
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error marcando como visto:', error);
                 console.error('❌ [ADMIN] Stack trace:', error.stack);
                 // Redirigir de todas formas
-                window.location.href = `pedido-detalle.html?id=${id}`;
+                window.location.href = `https://admin.agutidesigns.es/pedido-detalle.html?id=${id}`;
             }
         }
 
