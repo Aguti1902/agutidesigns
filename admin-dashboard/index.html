@@ -1535,15 +1535,6 @@
 
             <!-- MAIN CONTENT -->
             <div class="main-content">
-                <!-- HEADER GLOBAL -->
-                <div style="background: white; padding: 20px 30px; margin: -30px -30px 30px -30px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
-                    <img src="https://agutidesigns.es/wp-content/uploads/2025/01/Logo.svg" alt="agutidesigns" style="height: 40px;" onerror="this.src='https://agutidesigns.vercel.app/images/Logo.svg'">
-                    <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
-                        <span style="color: #666; font-size: 0.9rem;">👨‍💼 Admin</span>
-                        <button onclick="logout()" style="padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cerrar Sesión</button>
-                    </div>
-                </div>
-                
                 <!-- SECCIÓN: ESTADÍSTICAS -->
                 <div class="section active" id="section-estadisticas">
                     <div class="content-header">
@@ -3260,6 +3251,9 @@
                     `;
                 }
             }
+            
+            // Actualizar badges después de cargar pedidos
+            updateAdminBadges();
         }
 
         async function viewPedido(id) {

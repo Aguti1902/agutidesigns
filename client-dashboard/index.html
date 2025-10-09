@@ -4406,7 +4406,7 @@
                     if (!confirmed) return;
                     
                     // Procesar cambio de ciclo (sin cambio de plan)
-                    await processPlanChange(plan, null);
+                    await processPlanChange(plan, null, dashboardData);
                     return;
                 }
                 
@@ -4431,7 +4431,7 @@
                     const confirmed = await showUpgradeModal(currentPlan, plan, planLimits[plan]);
                     if (!confirmed) return;
                     
-                    await processPlanChange(plan, null);
+                    await processPlanChange(plan, null, dashboardData);
                     return;
                 }
                 
@@ -4446,13 +4446,13 @@
                         const pagesToRemove = await showPageSelectorModal(currentPages, currentPages.length - newLimit, newLimit);
                         if (!pagesToRemove) return; // Usuario canceló
                         
-                        await processPlanChange(plan, pagesToRemove);
+                        await processPlanChange(plan, pagesToRemove, dashboardData);
                     } else {
                         // No excede límite, downgrade directo
                         const confirmed = await showDowngradeModal(currentPlan, plan);
                         if (!confirmed) return;
                         
-                        await processPlanChange(plan, null);
+                        await processPlanChange(plan, null, dashboardData);
                     }
                     return;
                 }
@@ -4468,7 +4468,7 @@
         }
         
         // Función helper para procesar cambio de plan
-        async function processPlanChange(newPlan, pagesToRemove) {
+        async function processPlanChange(newPlan, pagesToRemove, dashboardData = null) {
             try {
                 showLoading('Procesando cambio de plan...');
                 
