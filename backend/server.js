@@ -4756,6 +4756,69 @@ app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
     }
 });
 
+// ==========================================
+// 🗑️ ENDPOINT DE LIMPIEZA TOTAL (ADMIN ONLY)
+// ==========================================
+app.delete('/api/admin/cleanup-all', async (req, res) => {
+    try {
+        console.log('🗑️ [ADMIN] ========== LIMPIEZA TOTAL INICIADA ==========');
+        
+        const deletedData = {
+            tickets: 0,
+            projects: 0,
+            submissions: 0,
+            clients: 0,
+            tokens: 0
+        };
+        
+        // 1. Eliminar todos los tickets
+        const ticketsResult = await db.pool.query('DELETE FROM tickets RETURNING id');
+        deletedData.tickets = ticketsResult.rows.length;
+        console.log(`🗑️ [ADMIN] Tickets eliminados: ${deletedData.tickets}`);
+        
+        // 2. Eliminar todos los proyectos
+        const projectsResult = await db.pool.query('DELETE FROM projects RETURNING id');
+        deletedData.projects = projectsResult.rows.length;
+        console.log(`🗑️ [ADMIN] Proyectos eliminados: ${deletedData.projects}`);
+        
+        // 3. Eliminar todas las submissions
+        const submissionsResult = await db.pool.query('DELETE FROM submissions RETURNING id');
+        deletedData.submissions = submissionsResult.rows.length;
+        console.log(`🗑️ [ADMIN] Submissions eliminados: ${deletedData.submissions}`);
+        
+        // 4. Eliminar todos los tokens de reset password
+        const tokensResult = await db.pool.query('DELETE FROM password_reset_tokens RETURNING id');
+        deletedData.tokens = tokensResult.rows.length;
+        console.log(`🗑️ [ADMIN] Tokens de reset eliminados: ${deletedData.tokens}`);
+        
+        // 5. Eliminar todos los clientes (excepto admin si existe)
+        const clientsResult = await db.pool.query(`
+            DELETE FROM clients 
+            WHERE email != 'admin@agutidesigns.es' 
+            RETURNING id
+        `);
+        deletedData.clients = clientsResult.rows.length;
+        console.log(`🗑️ [ADMIN] Clientes eliminados: ${deletedData.clients}`);
+        
+        console.log('✅ [ADMIN] ========== LIMPIEZA TOTAL COMPLETADA ==========');
+        console.log('📊 [ADMIN] Resumen:', deletedData);
+        
+        res.json({
+            success: true,
+            message: 'Base de datos limpiada exitosamente',
+            deleted: deletedData,
+            note: 'Los clientes siguen existiendo en Stripe. Para cancelar suscripciones, hazlo manualmente desde Stripe.'
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error en limpieza total:', error);
+        res.status(500).json({ 
+            error: error.message,
+            note: 'La limpieza puede haber sido parcial. Revisa los logs.'
+        });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
