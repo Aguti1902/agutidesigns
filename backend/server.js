@@ -4854,6 +4854,36 @@ app.delete('/api/admin/cleanup-all', async (req, res) => {
     }
 });
 
+// 🧪 ENDPOINT DE TEST: Forzar modificación en un pedido
+app.post('/api/admin/force-modification/:submissionId', async (req, res) => {
+    try {
+        const submissionId = req.params.submissionId;
+        
+        console.log(`🧪 [TEST] Forzando modificación en submission #${submissionId}`);
+        
+        await pool.query(`
+            UPDATE submissions 
+            SET has_modifications = TRUE,
+                last_modified_at = CURRENT_TIMESTAMP,
+                modifications_viewed_at = NULL
+            WHERE id = $1
+        `, [submissionId]);
+        
+        const result = await pool.query('SELECT id, business_name, has_modifications, last_modified_at, modifications_viewed_at FROM submissions WHERE id = $1', [submissionId]);
+        
+        console.log(`✅ [TEST] Modificación forzada exitosamente:`, result.rows[0]);
+        
+        res.json({ 
+            success: true, 
+            message: 'Modificación forzada para testing',
+            submission: result.rows[0]
+        });
+    } catch (error) {
+        console.error('❌ [TEST] Error forzando modificación:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
