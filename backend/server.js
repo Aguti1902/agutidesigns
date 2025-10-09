@@ -2161,7 +2161,6 @@ app.patch('/api/admin/website-management/:clientId', async (req, res) => {
                 ga_property_id = COALESCE($4, ga_property_id),
                 wordpress_username = COALESCE($5, wordpress_username),
                 wordpress_password = COALESCE($6, wordpress_password),
-                is_deployed = TRUE,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $7
         `, [
@@ -4698,7 +4697,9 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
         
         console.log('✅ [ADMIN] Cancelaciones obtenidas:', { total: stats.total, stats });
         
-        res.json({ cancellations, stats });
+        // Devolver solo el array de cancelaciones para el badge
+        // Si necesitas stats, crear un endpoint separado /api/admin/cancelaciones/stats
+        res.json(cancellations);
         
     } catch (error) {
         console.error('❌ [ADMIN] Error obteniendo cancelaciones:', error);
