@@ -229,6 +229,17 @@ async function initializeTables() {
             console.log('⚠️ Migración modifications_viewed_at en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo admin_viewed_at para badge de notificaciones
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS admin_viewed_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campo admin_viewed_at añadido a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración admin_viewed_at en submissions ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campos para integración con Mailchimp
         try {
             await client.query(`
