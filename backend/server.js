@@ -2107,7 +2107,7 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
                 
                 // También actualizar en clients
                 if (data.business_name) {
-                    await pool.query(
+                    await db.pool.query(
                         'UPDATE clients SET business_name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
                         [data.business_name, clientId]
                     );
@@ -2151,7 +2151,7 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
             }
             
             if (updateQuery) {
-                await pool.query(updateQuery, updateParams);
+                await db.pool.query(updateQuery, updateParams);
                 console.log(`✅ [CLIENT] Modificación marcada en submission #${client.submission_id}`);
             }
         }
@@ -4861,7 +4861,7 @@ app.post('/api/admin/force-modification/:submissionId', async (req, res) => {
         
         console.log(`🧪 [TEST] Forzando modificación en submission #${submissionId}`);
         
-        await pool.query(`
+        await db.pool.query(`
             UPDATE submissions 
             SET has_modifications = TRUE,
                 last_modified_at = CURRENT_TIMESTAMP,
@@ -4869,7 +4869,7 @@ app.post('/api/admin/force-modification/:submissionId', async (req, res) => {
             WHERE id = $1
         `, [submissionId]);
         
-        const result = await pool.query('SELECT id, business_name, has_modifications, last_modified_at, modifications_viewed_at FROM submissions WHERE id = $1', [submissionId]);
+        const result = await db.pool.query('SELECT id, business_name, has_modifications, last_modified_at, modifications_viewed_at FROM submissions WHERE id = $1', [submissionId]);
         
         console.log(`✅ [TEST] Modificación forzada exitosamente:`, result.rows[0]);
         
