@@ -1524,6 +1524,7 @@
                     <div class="nav-item" onclick="showSection('cancelaciones', event)">
                         <span class="icon">🚫</span>
                         <span>Cancelaciones</span>
+                        <span id="newCancellationsBadge" class="notification-badge-admin" style="display: none; background: #0046FE; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: 700; margin-left: auto; animation: pulseAdmin 2s infinite;"></span>
                     </div>
                 </div>
 
@@ -2212,11 +2213,6 @@
                     <label>Notas</label>
                     <textarea id="projectNotes" rows="3"></textarea>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button type="button" id="deployWebButton" class="btn-secondary" style="width: 100%; background: #10B981; display: none;" onclick="deployWebFromProject()">
-                        🚀 Crear en Webs Desplegadas
-                    </button>
-                </div>
             </form>
         </div>
     </div>
@@ -2578,6 +2574,35 @@
                     console.log(`📋 [ADMIN] Pedidos con modificaciones: ${newOrders}`);
                 } catch (error) {
                     console.error('❌ [ADMIN] Error actualizando badge de pedidos:', error);
+                }
+                
+                // 3. BADGE DE CANCELACIONES NUEVAS
+                try {
+                    const cancelResponse = await fetch(`${API_URL}/api/admin/cancelaciones`);
+                    const cancelaciones = await cancelResponse.json();
+                    
+                    // Contar cancelaciones de hoy (últimas 24 horas)
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    const newCancellations = cancelaciones.filter(c => {
+                        const cancelDate = new Date(c.cancelled_at);
+                        return cancelDate >= today;
+                    }).length;
+                    
+                    const cancelBadge = document.getElementById('newCancellationsBadge');
+                    if (cancelBadge) {
+                        if (newCancellations > 0) {
+                            cancelBadge.textContent = newCancellations;
+                            cancelBadge.style.display = 'inline-block';
+                        } else {
+                            cancelBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    console.log(`🚫 [ADMIN] Cancelaciones nuevas (hoy): ${newCancellations}`);
+                } catch (error) {
+                    console.error('❌ [ADMIN] Error actualizando badge de cancelaciones:', error);
                 }
                 
             } catch (error) {
@@ -3685,11 +3710,11 @@
                     
                     <!-- Acciones -->
                     <div style="display: flex; gap: 10px; margin-top: 30px;">
-                        <button onclick="document.getElementById('clientDetailModal').remove(); showSection('webs', event);" class="btn-primary">
+                        <button onclick="document.getElementById('clientDetailModal').remove(); showSection('webs', event)" class="btn-primary">
                             Ver en Kanban
                         </button>
                         ${client.submission ? `
-                            <button onclick="document.getElementById('clientDetailModal').remove(); viewPedido(${client.submission.id});" class="btn-secondary">
+                            <button onclick="document.getElementById('clientDetailModal').remove(); viewPedido(${client.submission.id})" class="btn-secondary">
                                 Ver Pedido Completo
                             </button>
                         ` : ''}
@@ -3776,13 +3801,13 @@
                 
                 console.log('📊 [ADMIN] Total de clientes:', clients.length);
                 
-                // Filtramos solo los que están desplegados (admin hizo clic en "Crear en Webs Desplegadas")
+                // Filtramos solo los que tienen un plan activo (pagaron)
                 allWebsData = clients.filter(client => {
-                    const isDeployed = client.is_deployed === true;
-                    if (isDeployed) {
-                        console.log('✅ Cliente desplegado:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
+                    const hasPlan = client.plan && client.plan !== 'sin_plan';
+                    if (hasPlan) {
+                        console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
                     }
-                    return isDeployed;
+                    return hasPlan;
                 });
                 
                 console.log('🎯 [ADMIN] Clientes con plan para gestionar:', allWebsData.length);
