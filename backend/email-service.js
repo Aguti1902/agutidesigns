@@ -265,7 +265,7 @@ function ticketResponseEmail(clientData, ticketData) {
 
 // 5. Reset de contraseña
 function passwordResetEmail(email, resetToken) {
-    const resetUrl = `https://agutidesigns.es/reset-password?token=${resetToken}`;
+    const resetUrl = `https://formulario.agutidesigns.es/reset-password?token=${resetToken}`;
     
     const content = `
         <h1>🔐 Restablece tu contraseña</h1>
