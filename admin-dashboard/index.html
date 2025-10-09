@@ -4474,8 +4474,18 @@
                 console.log('🔍 [DEBUG] Primer elemento:', cancelaciones?.[0]);
                 
                 // Actualizar estadísticas
-                const totalCancelled = cancelaciones.filter(c => c.subscription_status === 'canceled').length;
-                const pendingCancellation = cancelaciones.filter(c => c.subscription_status === 'active' && c.cancelled_at).length;
+                // Canceladas: subscription_status puede ser 'canceled', 'cancelled', o tener cancelled_at
+                const totalCancelled = cancelaciones.filter(c => 
+                    c.subscription_status === 'canceled' || 
+                    c.subscription_status === 'cancelled' || 
+                    (c.cancelled_at && c.subscription_end_date && new Date(c.subscription_end_date) < new Date())
+                ).length;
+                
+                // Pendientes: tienen cancelled_at pero aún están activas (no han expirado)
+                const pendingCancellation = cancelaciones.filter(c => 
+                    c.cancelled_at && 
+                    (!c.subscription_end_date || new Date(c.subscription_end_date) >= new Date())
+                ).length;
                 
                 const now = new Date();
                 const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -4484,10 +4494,10 @@
                     return cancelDate >= startOfMonth;
                 }).length;
                 
-                // Calcular ingresos perdidos (solo suscripciones actualmente canceladas)
+                // Calcular ingresos perdidos (todas las cancelaciones, no solo expiradas)
                 const planPrices = { basico: 35, avanzado: 49, premium: 65 };
                 const lostRevenue = cancelaciones
-                    .filter(c => c.subscription_status === 'canceled')
+                    .filter(c => c.cancelled_at) // Todas las que tienen cancelación
                     .reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);
                 
                 document.getElementById('totalCancelledCount').textContent = totalCancelled;
@@ -4510,8 +4520,14 @@
                     tbody.innerHTML = cancelaciones.map(c => {
                     const cancelDate = new Date(c.cancelled_at);
                     const endDate = c.subscription_end_date ? new Date(c.subscription_end_date) : null;
-                    const status = c.subscription_status === 'canceled' ? 'Cancelada' : 'Pendiente de expirar';
-                    const statusColor = c.subscription_status === 'canceled' ? '#EF4444' : '#F59E0B';
+                    
+                    // Determinar si está cancelada o pendiente de expirar
+                    const isCancelled = c.subscription_status === 'canceled' || 
+                                      c.subscription_status === 'cancelled' ||
+                                      (c.subscription_end_date && new Date(c.subscription_end_date) < new Date());
+                    
+                    const status = isCancelled ? 'Cancelada' : 'Pendiente de expirar';
+                    const statusColor = isCancelled ? '#EF4444' : '#F59E0B';
                     
                     return `
                         <tr>
@@ -4538,7 +4554,7 @@
                                 </div>
                             </td>
                             <td>
-                                <button onclick="viewClientDetails(${c.id})" style="padding: 6px 12px; background: #0046FE; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                <button onclick="viewClient(${c.id})" style="padding: 6px 12px; background: #0046FE; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
                                     Ver Cliente
                                 </button>
                             </td>
