@@ -50,7 +50,7 @@ function createEmailLayout(content, preheader = '') {
     <div class="container">
         <div class="header">
             <a href="https://agutidesigns.es" style="display: inline-block;">
-                <img src="https://agutidesigns.es/images/Logo%20blanco.png" alt="agutidesigns" style="height: 50px; width: auto; display: block; margin: 0 auto;">
+                <img src="https://agutidesigns.vercel.app/images/Logo%20blanco.png" alt="agutidesigns" style="height: 50px; width: auto; display: block; margin: 0 auto;">
             </a>
         </div>
         <div class="content">
@@ -265,7 +265,7 @@ function ticketResponseEmail(clientData, ticketData) {
 
 // 5. Reset de contraseña
 function passwordResetEmail(email, resetToken) {
-    const resetUrl = `https://formulario.agutidesigns.es/reset-password?token=${resetToken}`;
+    const resetUrl = `https://panel.agutidesigns.es/reset-password?token=${resetToken}`;
     
     const content = `
         <h1>🔐 Restablece tu contraseña</h1>
