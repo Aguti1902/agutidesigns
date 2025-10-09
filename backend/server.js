@@ -3507,13 +3507,13 @@ app.post('/api/client/change-plan', async (req, res) => {
             [newPlan, clientId]
         );
         
-        // 7️⃣ Si es upgrade, resetear payment_date para reactivar 24h
+        // 7️⃣ Si es upgrade, actualizar plan_change_at para reactivar 24h de edición
         if (isUpgrade) {
             await db.pool.query(
-                'UPDATE clients SET payment_date = CURRENT_TIMESTAMP WHERE id = $1',
+                'UPDATE clients SET plan_change_at = CURRENT_TIMESTAMP WHERE id = $1',
                 [clientId]
             );
-            console.log(`⏰ [PLAN] Contador de 24h reactivado para edición`);
+            console.log(`⏰ [PLAN] plan_change_at actualizado - Contador de 24h reactivado para edición`);
             
             // 8️⃣ Actualizar el pedido existente con el nuevo plan (NO crear uno nuevo)
             if (client.submission_id) {
