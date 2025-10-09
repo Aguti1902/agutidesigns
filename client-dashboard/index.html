@@ -7337,7 +7337,7 @@
             }
         });
 
-        // Cargar facturas y perfil cuando se muestra la sección correspondiente
+        // Cargar facturas, perfil y videos cuando se muestra la sección correspondiente
         const originalShowSection = showSection;
         showSection = function(section) {
             originalShowSection(section);
@@ -7348,6 +7348,8 @@
                 loadProfile();
             } else if (section === 'seo') {
                 updateSEOMarketingSection();
+            } else if (section === 'tutoriales') {
+                loadClientVideos();
             }
         };
 
@@ -8017,15 +8019,6 @@
             iframe.src = '';
             modal.style.display = 'none';
         }
-        
-        // Cargar videos cuando se muestra la sección
-        const originalShowSection = showSection;
-        showSection = function(sectionName, event) {
-            originalShowSection(sectionName, event);
-            if (sectionName === 'tutoriales') {
-                loadClientVideos();
-            }
-        };
     </script>
 </body>
 </html> 
