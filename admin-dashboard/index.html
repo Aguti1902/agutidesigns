@@ -2584,6 +2584,19 @@
                         const isModified = o.has_modifications === true && 
                                          (!o.modifications_viewed_at || o.last_modified_at > o.modifications_viewed_at);
                         
+                        // Debug detallado para cada pedido
+                        if (isNew || isModified) {
+                            console.log(`🔔 [BADGE] Pedido #${o.id} cuenta para badge:`, {
+                                business_name: o.business_name,
+                                isNew,
+                                isModified,
+                                admin_viewed_at: o.admin_viewed_at,
+                                has_modifications: o.has_modifications,
+                                modifications_viewed_at: o.modifications_viewed_at,
+                                last_modified_at: o.last_modified_at
+                            });
+                        }
+                        
                         return isNew || isModified;
                     }).length;
                     
