@@ -157,6 +157,14 @@
             height: 45px;
             margin-bottom: 12px;
         }
+        
+        .sidebar-logo .logo-mobile {
+            display: none; /* Ocultar logo blanco en desktop */
+        }
+        
+        .sidebar-logo .logo-desktop {
+            display: block; /* Mostrar logo azul en desktop */
+        }
 
         .sidebar-logo p {
             color: #666;
@@ -909,11 +917,14 @@
            ================================== */
         
         .sidebar .sidebar-logo {
-            display: none;
+            display: flex; /* Mostrar siempre */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
 
         .close-menu-btn {
-            display: none;
+            display: none; /* Ocultar en desktop */
         }
 
         .hamburger-btn {
@@ -999,6 +1010,14 @@
 
             .sidebar-logo img {
                 height: 35px;
+            }
+            
+            .sidebar-logo .logo-desktop {
+                display: none !important; /* Ocultar logo azul en móvil */
+            }
+            
+            .sidebar-logo .logo-mobile {
+                display: block !important; /* Mostrar logo blanco en móvil */
             }
 
             .sidebar-logo p {
@@ -1480,7 +1499,8 @@
             <div class="sidebar">
                 <div class="sidebar-logo">
                     <div>
-                        <img src="../images/logo-blanco.svg" alt="agutidesigns">
+                        <img src="https://agutidesigns.es/wp-content/uploads/2025/01/Logo.svg" alt="agutidesigns" class="logo-desktop" onerror="this.src='https://agutidesigns.vercel.app/images/Logo.svg'">
+                        <img src="../images/logo-blanco.svg" alt="agutidesigns" class="logo-mobile">
                         <p>Panel de Administración</p>
                     </div>
                     <button class="close-menu-btn" onclick="toggleMobileMenu()">✕</button>
