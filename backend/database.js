@@ -298,17 +298,6 @@ async function initializeTables() {
             console.log('⚠️ Migración plan_change_at en clients ya aplicada');
         }
 
-        // 🆕 MIGRACIÓN: Agregar campo is_deployed para controlar visualización en "Webs Desplegadas"
-        try {
-            await client.query(`
-                ALTER TABLE clients 
-                ADD COLUMN IF NOT EXISTS is_deployed BOOLEAN DEFAULT FALSE
-            `);
-            console.log('✅ Migración: Campo is_deployed añadido a clients');
-        } catch (e) {
-            console.log('⚠️ Migración is_deployed en clients ya aplicada');
-        }
-
         // 🆕 MIGRACIÓN: Agregar campo is_downgrade para projects
         try {
             await client.query(`
@@ -567,7 +556,7 @@ async function updateSubmissionStatus(id, status, stripeSessionId = null) {
 
 async function markSubmissionAsViewed(id) {
     await pool.query(
-        'UPDATE submissions SET modifications_viewed_at = CURRENT_TIMESTAMP WHERE id = $1',
+        'UPDATE submissions SET admin_viewed_at = CURRENT_TIMESTAMP, modifications_viewed_at = CURRENT_TIMESTAMP WHERE id = $1',
         [id]
     );
 }

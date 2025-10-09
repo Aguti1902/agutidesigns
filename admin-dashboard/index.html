@@ -3234,6 +3234,7 @@
                                 ${pedido.has_upgrade ? '<span class="badge" style="background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔼 UPGRADE</span>' : ''}
                                 ${pedido.is_downgrade ? '<span class="badge" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); color: white; font-size: 0.7rem; padding: 3px 8px;">🔽 DOWNGRADE</span>' : ''}
                                 ${hasUnviewedModifications ? '<span class="badge" style="background: #0046FE; color: white; font-size: 0.7rem; padding: 3px 8px;">✏️ MODIFICADO</span>' : ''}
+                                ${pedido.has_modifications && !hasUnviewedModifications ? '<span class="badge" style="background: #6B7280; color: white; font-size: 0.7rem; padding: 3px 8px;">✅ VISTO</span>' : ''}
                             </div>
                         </td>
                         <td>${pedido.email}</td>
