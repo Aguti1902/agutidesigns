@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpieza de Base de Datos - agutidesigns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #1B1B1B;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .warning {
+            background: #FFF3CD;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .warning h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning p {
+            color: #856404;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .info {
+            background: #E7F3FF;
+            border-left: 4px solid #0046FE;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info h3 {
+            color: #0046FE;
+            margin-bottom: 10px;
+        }
+
+        .info ul {
+            margin-left: 20px;
+            color: #0046FE;
+        }
+
+        .info li {
+            margin: 5px 0;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:disabled {
+            background: #FCA5A5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6B7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4B5563;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #D1FAE5;
+            border-left: 4px solid #10B981;
+            color: #065F46;
+            display: block;
+        }
+
+        .result.error {
+            background: #FEE2E2;
+            border-left: 4px solid #EF4444;
+            color: #991B1B;
+            display: block;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+        }
+
+        .result pre {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ Limpieza de Base de Datos</h1>
+        <p style="text-align: center; color: #666; margin-top: 10px;">Panel de administración - agutidesigns</p>
+
+        <div class="warning">
+            <h3>⚠️ ADVERTENCIA</h3>
+            <p><strong>Esta acción es IRREVERSIBLE.</strong> Se eliminarán TODOS los datos de la base de datos:</p>
+        </div>
+
+        <div class="info">
+            <h3>📋 Se eliminará:</h3>
+            <ul>
+                <li>✅ Todos los tickets</li>
+                <li>✅ Todos los proyectos (Kanban)</li>
+                <li>✅ Todas las submissions del formulario</li>
+                <li>✅ Todos los tokens de reset password</li>
+                <li>✅ Todos los clientes (excepto admin)</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>ℹ️ NO se eliminará:</h3>
+            <ul>
+                <li>❌ La cuenta de admin@agutidesigns.es</li>
+                <li>❌ Suscripciones en Stripe (debes cancelarlas manualmente)</li>
+            </ul>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-secondary" onclick="window.close()">Cancelar</button>
+            <button class="btn-danger" id="cleanupBtn" onclick="cleanupDatabase()">🗑️ Limpiar Todo</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Limpiando base de datos...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+
+        async function cleanupDatabase() {
+            // Confirmación doble
+            const confirm1 = window.confirm('⚠️ ¿Estás SEGURO de que quieres eliminar TODOS los datos?\n\nEsta acción NO se puede deshacer.');
+            if (!confirm1) return;
+
+            const confirm2 = window.confirm('⚠️ ÚLTIMA CONFIRMACIÓN:\n\n¿REALMENTE quieres BORRAR TODA LA BASE DE DATOS?\n\nClientes, proyectos, tickets... TODO será eliminado.');
+            if (!confirm2) return;
+
+            // Deshabilitar botón y mostrar loading
+            const btn = document.getElementById('cleanupBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            loading.classList.add('active');
+            result.style.display = 'none';
+
+            try {
+                console.log('🗑️ Iniciando limpieza...');
+                
+                const response = await fetch(`${API_URL}/api/admin/cleanup-all`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('📊 Respuesta:', data);
+
+                loading.classList.remove('active');
+
+                if (response.ok && data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ Limpieza Completada</h3>
+                        <p>${data.message}</p>
+                        <pre>${JSON.stringify(data.deleted, null, 2)}</pre>
+                        <p style="margin-top: 10px;"><strong>Nota:</strong> ${data.note}</p>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                loading.classList.remove('active');
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ Error en la Limpieza</h3>
+                    <p>${error.message}</p>
+                    <p style="margin-top: 10px;">Revisa los logs de Railway para más detalles.</p>
+                `;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+
