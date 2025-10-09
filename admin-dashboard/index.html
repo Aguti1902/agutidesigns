@@ -1535,6 +1535,15 @@
 
             <!-- MAIN CONTENT -->
             <div class="main-content">
+                <!-- HEADER GLOBAL -->
+                <div style="background: white; padding: 20px 30px; margin: -30px -30px 30px -30px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+                    <img src="https://agutidesigns.es/wp-content/uploads/2025/01/Logo.svg" alt="agutidesigns" style="height: 40px;" onerror="this.src='https://agutidesigns.vercel.app/images/Logo.svg'">
+                    <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+                        <span style="color: #666; font-size: 0.9rem;">👨‍💼 Admin</span>
+                        <button onclick="logout()" style="padding: 8px 16px; background: #EF4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cerrar Sesión</button>
+                    </div>
+                </div>
+                
                 <!-- SECCIÓN: ESTADÍSTICAS -->
                 <div class="section active" id="section-estadisticas">
                     <div class="content-header">
@@ -2550,16 +2559,22 @@
                     console.error('❌ [ADMIN] Error actualizando badge de tickets:', error);
                 }
                 
-                // 2. BADGE DE PEDIDOS MODIFICADOS
+                // 2. BADGE DE PEDIDOS NUEVOS Y MODIFICADOS
                 try {
                     const ordersResponse = await fetch(`${API_URL}/api/admin/submissions`);
                     const orders = await ordersResponse.json();
                     
-                    // Contar pedidos con modificaciones no vistas
-                    const newOrders = orders.filter(o => 
-                        o.has_modifications === true && 
-                        (!o.modifications_viewed_at || o.last_modified_at > o.modifications_viewed_at)
-                    ).length;
+                    // Contar pedidos nuevos (nunca vistos) + pedidos modificados no vistos
+                    const newOrders = orders.filter(o => {
+                        // Pedido nuevo: nunca ha sido visto
+                        const isNew = !o.admin_viewed_at;
+                        
+                        // Pedido modificado: tiene modificaciones Y no han sido vistas
+                        const isModified = o.has_modifications === true && 
+                                         (!o.modifications_viewed_at || o.last_modified_at > o.modifications_viewed_at);
+                        
+                        return isNew || isModified;
+                    }).length;
                     
                     const ordersBadge = document.getElementById('newOrdersBadge');
                     if (ordersBadge) {
@@ -2571,7 +2586,7 @@
                         }
                     }
                     
-                    console.log(`📋 [ADMIN] Pedidos con modificaciones: ${newOrders}`);
+                    console.log(`📋 [ADMIN] Pedidos nuevos/modificados: ${newOrders}`);
                 } catch (error) {
                     console.error('❌ [ADMIN] Error actualizando badge de pedidos:', error);
                 }
