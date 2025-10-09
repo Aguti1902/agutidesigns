@@ -2161,6 +2161,7 @@ app.patch('/api/admin/website-management/:clientId', async (req, res) => {
                 ga_property_id = COALESCE($4, ga_property_id),
                 wordpress_username = COALESCE($5, wordpress_username),
                 wordpress_password = COALESCE($6, wordpress_password),
+                is_deployed = TRUE,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $7
         `, [

@@ -3240,13 +3240,13 @@
                 
                 // Redirigir a la página de detalles
                 console.log('🔀 [ADMIN] Redirigiendo a pedido-detalle.html?id=' + id);
-                window.location.href = `/admin-dashboard/pedido-detalle.html?id=${id}`;
+                window.location.href = `pedido-detalle.html?id=${id}`;
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error marcando como visto:', error);
                 console.error('❌ [ADMIN] Stack trace:', error.stack);
                 // Redirigir de todas formas
-                window.location.href = `/admin-dashboard/pedido-detalle.html?id=${id}`;
+                window.location.href = `pedido-detalle.html?id=${id}`;
             }
         }
 
@@ -3685,11 +3685,11 @@
                     
                     <!-- Acciones -->
                     <div style="display: flex; gap: 10px; margin-top: 30px;">
-                        <button onclick="window.location.href='/admin#section-webs'" class="btn-primary">
+                        <button onclick="document.getElementById('clientDetailModal').remove(); showSection('webs', event);" class="btn-primary">
                             Ver en Kanban
                         </button>
                         ${client.submission ? `
-                            <button onclick="viewSubmissionDetails(${client.submission.id})" class="btn-secondary">
+                            <button onclick="document.getElementById('clientDetailModal').remove(); viewPedido(${client.submission.id});" class="btn-secondary">
                                 Ver Pedido Completo
                             </button>
                         ` : ''}
@@ -3776,13 +3776,13 @@
                 
                 console.log('📊 [ADMIN] Total de clientes:', clients.length);
                 
-                // Filtramos solo los que tienen un plan activo (pagaron)
+                // Filtramos solo los que están desplegados (admin hizo clic en "Crear en Webs Desplegadas")
                 allWebsData = clients.filter(client => {
-                    const hasPlan = client.plan && client.plan !== 'sin_plan';
-                    if (hasPlan) {
-                        console.log('✅ Cliente con plan:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
+                    const isDeployed = client.is_deployed === true;
+                    if (isDeployed) {
+                        console.log('✅ Cliente desplegado:', client.email, '- Plan:', client.plan, '- WordPress:', client.wordpress_url || 'No configurado');
                     }
-                    return hasPlan;
+                    return isDeployed;
                 });
                 
                 console.log('🎯 [ADMIN] Clientes con plan para gestionar:', allWebsData.length);
