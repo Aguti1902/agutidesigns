@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Dashboard - agutidesigns</title>
-    <link rel="icon" type="image/png" href="../images/favicon2.png">
+    <link rel="icon" type="image/png" href="https://agutidesigns.vercel.app/images/favicon2.png">
     <!-- jsPDF para generar informes PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -1184,8 +1184,21 @@
     </style>
 </head>
 <body>
+    <!-- LOADER INICIAL -->
+    <div id="pageLoader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0046FE 0%, #0035c9 100%); display: flex; align-items: center; justify-content: center; z-index: 99999;">
+        <div style="text-align: center;">
+            <div style="width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="color: white; font-size: 1.1rem; font-weight: 600; margin: 0;">Cargando...</p>
+        </div>
+    </div>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
     <!-- LOGIN PAGE -->
-    <div id="loginPage">
+    <div id="loginPage" style="display: none;">
         <div class="login-logo">
             <img src="https://agutidesigns.es/wp-content/uploads/2025/01/Logo.svg" alt="agutidesigns" onerror="this.src='https://agutidesigns.vercel.app/images/Logo.svg'">
             <p>Tu web profesional por suscripción</p>
@@ -6131,6 +6144,8 @@
                 }
                 
                 showDashboard();
+                // Ocultar loader
+                document.getElementById('pageLoader').style.display = 'none';
                 return;
             }
 
@@ -6162,11 +6177,20 @@
                             sessionStorage.removeItem('clientCredentials');
                             currentClient = data.client;
                             showDashboard();
+                            // Ocultar loader
+                            document.getElementById('pageLoader').style.display = 'none';
                         }
                     } catch (error) {
                         console.error('Error en auto-login:', error);
+                        // Ocultar loader y mostrar login
+                        document.getElementById('pageLoader').style.display = 'none';
+                        document.getElementById('loginPage').style.display = 'flex';
                     }
                 }
+            } else {
+                // Sin sesión ni credenciales, mostrar login
+                document.getElementById('pageLoader').style.display = 'none';
+                document.getElementById('loginPage').style.display = 'flex';
             }
         });
 
