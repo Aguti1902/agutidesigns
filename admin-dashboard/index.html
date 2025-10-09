@@ -4496,12 +4496,18 @@
                 document.getElementById('lostRevenueAmount').textContent = `${lostRevenue}€`;
                 
                 // Renderizar tabla
+                console.log('🔍 [DEBUG] Verificando longitud:', cancelaciones.length);
+                
                 if (cancelaciones.length === 0) {
+                    console.log('⚠️ [ADMIN] Array vacío, mostrando mensaje');
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No hay cancelaciones registradas</td></tr>';
                     return;
                 }
                 
-                tbody.innerHTML = cancelaciones.map(c => {
+                console.log('🔍 [DEBUG] Iniciando renderizado de tabla...');
+                
+                try {
+                    tbody.innerHTML = cancelaciones.map(c => {
                     const cancelDate = new Date(c.cancelled_at);
                     const endDate = c.subscription_end_date ? new Date(c.subscription_end_date) : null;
                     const status = c.subscription_status === 'canceled' ? 'Cancelada' : 'Pendiente de expirar';
@@ -4541,6 +4547,12 @@
                 }).join('');
                 
                 console.log(`✅ [ADMIN] ${cancelaciones.length} cancelaciones renderizadas`);
+                console.log('🔍 [DEBUG] HTML generado, longitud:', tbody.innerHTML.length);
+                
+                } catch (renderError) {
+                    console.error('❌ [ADMIN] Error renderizando tabla:', renderError);
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #EF4444;">Error renderizando: ${renderError.message}</td></tr>`;
+                }
                 
             } catch (error) {
                 console.error('❌ [ADMIN] Error cargando cancelaciones:', error);
