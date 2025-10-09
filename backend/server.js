@@ -2096,31 +2096,63 @@ app.patch('/api/client/update-info/:clientId', async (req, res) => {
             let updateParams = [];
             
             if (section === 'negocio') {
-                updateQuery = 'UPDATE submissions SET business_name = ?, industry = ?, business_description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateQuery = `UPDATE submissions 
+                    SET business_name = $1, industry = $2, business_description = $3, 
+                        has_modifications = TRUE, 
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        modifications_viewed_at = NULL,
+                        updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $4`;
                 updateParams = [data.business_name, data.industry, data.business_description, client.submission_id];
                 
                 // También actualizar en clients
                 if (data.business_name) {
-                    const stmtClient = db.db.prepare('UPDATE clients SET business_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-                    stmtClient.run(data.business_name, clientId);
+                    await pool.query(
+                        'UPDATE clients SET business_name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+                        [data.business_name, clientId]
+                    );
                 }
             } else if (section === 'contacto') {
-                updateQuery = 'UPDATE submissions SET email_contact = ?, phone_number = ?, whatsapp_number = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateQuery = `UPDATE submissions 
+                    SET email_contact = $1, phone_number = $2, whatsapp_number = $3, 
+                        has_modifications = TRUE, 
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        modifications_viewed_at = NULL,
+                        updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $4`;
                 updateParams = [data.email_contact, data.phone_number, data.whatsapp_number, client.submission_id];
             } else if (section === 'paginas') {
-                updateQuery = 'UPDATE submissions SET pages = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateQuery = `UPDATE submissions 
+                    SET pages = $1, 
+                        has_modifications = TRUE, 
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        modifications_viewed_at = NULL,
+                        updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $2`;
                 updateParams = [JSON.stringify(data.pages), client.submission_id];
             } else if (section === 'dominio') {
-                updateQuery = 'UPDATE submissions SET domain_name = ?, keywords = ?, design_style = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateQuery = `UPDATE submissions 
+                    SET domain_name = $1, keywords = $2, design_style = $3, 
+                        has_modifications = TRUE, 
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        modifications_viewed_at = NULL,
+                        updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $4`;
                 updateParams = [data.domain_name, data.keywords, data.design_style, client.submission_id];
             } else if (section === 'fiscal') {
-                updateQuery = 'UPDATE submissions SET cif_nif = ?, razon_social = ?, direccion_fiscal = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+                updateQuery = `UPDATE submissions 
+                    SET cif_nif = $1, razon_social = $2, direccion_fiscal = $3, 
+                        has_modifications = TRUE, 
+                        last_modified_at = CURRENT_TIMESTAMP,
+                        modifications_viewed_at = NULL,
+                        updated_at = CURRENT_TIMESTAMP 
+                    WHERE id = $4`;
                 updateParams = [data.cif_nif, data.razon_social, data.direccion_fiscal, client.submission_id];
             }
             
             if (updateQuery) {
-                const stmt = db.db.prepare(updateQuery);
-                stmt.run(...updateParams);
+                await pool.query(updateQuery, updateParams);
+                console.log(`✅ [CLIENT] Modificación marcada en submission #${client.submission_id}`);
             }
         }
 
