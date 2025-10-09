@@ -4459,12 +4459,19 @@
                 console.log('🚫 [ADMIN] Cargando cancelaciones...');
                 
                 const tbody = document.getElementById('cancellationsTable');
+                console.log('🔍 [DEBUG] tbody element:', tbody);
+                
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><div class="loader"><div class="spinner"></div><p>Cargando cancelaciones...</p></div></td></tr>';
                 
                 const response = await fetch(`${API_URL}/api/admin/cancelaciones`);
+                console.log('🔍 [DEBUG] Response status:', response.status);
+                
                 const cancelaciones = await response.json();
                 
                 console.log(`✅ [ADMIN] Datos de cancelaciones:`, cancelaciones);
+                console.log('🔍 [DEBUG] Es array?', Array.isArray(cancelaciones));
+                console.log('🔍 [DEBUG] Longitud:', cancelaciones?.length);
+                console.log('🔍 [DEBUG] Primer elemento:', cancelaciones?.[0]);
                 
                 // Actualizar estadísticas
                 const totalCancelled = cancelaciones.filter(c => c.subscription_status === 'canceled').length;
