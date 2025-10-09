@@ -2640,9 +2640,29 @@
                         return cancelDate >= today;
                     }).length;
                     
+                    // Verificar si el admin ya vio las cancelaciones
+                    const cancellationViewed = localStorage.getItem('cancellationViewed');
+                    let shouldShowBadge = newCancellations > 0;
+                    
+                    if (cancellationViewed && newCancellations > 0) {
+                        const viewedTime = parseInt(cancellationViewed);
+                        // Si la última cancelación es anterior a cuando se vio, no mostrar badge
+                        const latestCancellation = cancelaciones
+                            .filter(c => new Date(c.cancelled_at) >= today)
+                            .sort((a, b) => new Date(b.cancelled_at) - new Date(a.cancelled_at))[0];
+                        
+                        if (latestCancellation) {
+                            const cancelTime = new Date(latestCancellation.cancelled_at).getTime();
+                            if (cancelTime < viewedTime) {
+                                shouldShowBadge = false;
+                                console.log('🚫 [ADMIN] Cancelaciones ya vistas, ocultando badge');
+                            }
+                        }
+                    }
+                    
                     const cancelBadge = document.getElementById('newCancellationsBadge');
                     if (cancelBadge) {
-                        if (newCancellations > 0) {
+                        if (shouldShowBadge) {
                             cancelBadge.textContent = newCancellations;
                             cancelBadge.style.display = 'inline-block';
                         } else {
@@ -2650,7 +2670,7 @@
                         }
                     }
                     
-                    console.log(`🚫 [ADMIN] Cancelaciones nuevas (hoy): ${newCancellations}`);
+                    console.log(`🚫 [ADMIN] Cancelaciones nuevas (hoy): ${newCancellations}${shouldShowBadge ? '' : ' (ya vistas)'}`);
                 } catch (error) {
                     console.error('❌ [ADMIN] Error actualizando badge de cancelaciones:', error);
                 }
@@ -3624,6 +3644,14 @@
             try {
                 console.log(`👁️ [ADMIN] Cargando detalles del cliente #${id}`);
                 
+                // Si estamos en la sección de cancelaciones, marcar como visto
+                const currentSection = document.querySelector('.section.active');
+                if (currentSection && currentSection.id === 'section-cancelaciones') {
+                    console.log('🚫 [ADMIN] Viendo cliente desde Cancelaciones, actualizando badge...');
+                    // Guardar en localStorage que se vio una cancelación
+                    localStorage.setItem('cancellationViewed', Date.now().toString());
+                }
+                
                 // Mostrar modal con loader
                 const modal = document.createElement('div');
                 modal.id = 'clientDetailModal';
@@ -3668,7 +3696,7 @@
                 // Renderizar contenido del modal
                 const content = modal.querySelector('div');
                 content.innerHTML = `
-                    <button onclick="document.getElementById('clientDetailModal').remove()" 
+                    <button onclick="closeClientModal()" 
                             style="position: absolute; top: 20px; right: 20px; background: #f0f0f0; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">
                         ✕
                     </button>
@@ -3766,15 +3794,15 @@
                     
                     <!-- Acciones -->
                     <div style="display: flex; gap: 10px; margin-top: 30px;">
-                        <button onclick="document.getElementById('clientDetailModal').remove(); showSection('webs', event)" class="btn-primary">
+                        <button onclick="closeClientModal(); showSection('webs', event)" class="btn-primary">
                             Ver en Kanban
                         </button>
                         ${client.submission ? `
-                            <button onclick="document.getElementById('clientDetailModal').remove(); viewPedido(${client.submission.id})" class="btn-secondary">
+                            <button onclick="closeClientModal(); viewPedido(${client.submission.id})" class="btn-secondary">
                                 Ver Pedido Completo
                             </button>
                         ` : ''}
-                        <button onclick="document.getElementById('clientDetailModal').remove()" class="btn-secondary" style="background: #999;">
+                        <button onclick="closeClientModal()" class="btn-secondary" style="background: #999;">
                             Cerrar
                         </button>
                     </div>
@@ -3784,6 +3812,16 @@
                 console.error('❌ [ADMIN] Error cargando cliente:', error);
                 showNotification('Error cargando datos del cliente', 'error');
                 document.getElementById('clientDetailModal')?.remove();
+            }
+        }
+        
+        // Función helper para cerrar modal de cliente y actualizar badges
+        function closeClientModal() {
+            document.getElementById('clientDetailModal')?.remove();
+            // Si se vio desde cancelaciones, actualizar badge
+            if (localStorage.getItem('cancellationViewed')) {
+                console.log('🔄 [ADMIN] Actualizando badges después de ver cliente...');
+                updateAdminBadges();
             }
         }
 
