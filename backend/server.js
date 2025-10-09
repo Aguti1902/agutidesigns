@@ -885,6 +885,7 @@ app.post('/api/admin/submissions/:id/mark-viewed', async (req, res) => {
         // Obtener datos antes de actualizar (para debug)
         const beforeUpdate = await db.getSubmission(submissionId);
         console.log(`🔍 [DEBUG] Antes de marcar como visto:`, {
+            admin_viewed_at: beforeUpdate?.admin_viewed_at,
             has_modifications: beforeUpdate?.has_modifications,
             modifications_viewed_at: beforeUpdate?.modifications_viewed_at,
             last_modified_at: beforeUpdate?.last_modified_at
@@ -895,6 +896,7 @@ app.post('/api/admin/submissions/:id/mark-viewed', async (req, res) => {
         // Verificar después de actualizar
         const afterUpdate = await db.getSubmission(submissionId);
         console.log(`🔍 [DEBUG] Después de marcar como visto:`, {
+            admin_viewed_at: afterUpdate?.admin_viewed_at,
             has_modifications: afterUpdate?.has_modifications,
             modifications_viewed_at: afterUpdate?.modifications_viewed_at,
             last_modified_at: afterUpdate?.last_modified_at
