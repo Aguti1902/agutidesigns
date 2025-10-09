@@ -4453,6 +4453,95 @@
             }
         }
 
+        // ===== CANCELACIONES =====
+        async function loadCancellations() {
+            try {
+                console.log('🚫 [ADMIN] Cargando cancelaciones...');
+                
+                const tbody = document.getElementById('cancellationsTable');
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;"><div class="loader"><div class="spinner"></div><p>Cargando cancelaciones...</p></div></td></tr>';
+                
+                const response = await fetch(`${API_URL}/api/admin/cancelaciones`);
+                const cancelaciones = await response.json();
+                
+                console.log(`✅ [ADMIN] Datos de cancelaciones:`, cancelaciones);
+                
+                // Actualizar estadísticas
+                const totalCancelled = cancelaciones.filter(c => c.subscription_status === 'canceled').length;
+                const pendingCancellation = cancelaciones.filter(c => c.subscription_status === 'active' && c.cancelled_at).length;
+                
+                const now = new Date();
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                const cancelledThisMonth = cancelaciones.filter(c => {
+                    const cancelDate = new Date(c.cancelled_at);
+                    return cancelDate >= startOfMonth;
+                }).length;
+                
+                // Calcular ingresos perdidos (solo suscripciones actualmente canceladas)
+                const planPrices = { basico: 35, avanzado: 49, premium: 65 };
+                const lostRevenue = cancelaciones
+                    .filter(c => c.subscription_status === 'canceled')
+                    .reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);
+                
+                document.getElementById('totalCancelledCount').textContent = totalCancelled;
+                document.getElementById('pendingCancellationCount').textContent = pendingCancellation;
+                document.getElementById('cancelledThisMonthCount').textContent = cancelledThisMonth;
+                document.getElementById('lostRevenueAmount').textContent = `${lostRevenue}€`;
+                
+                // Renderizar tabla
+                if (cancelaciones.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No hay cancelaciones registradas</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = cancelaciones.map(c => {
+                    const cancelDate = new Date(c.cancelled_at);
+                    const endDate = c.subscription_end_date ? new Date(c.subscription_end_date) : null;
+                    const status = c.subscription_status === 'canceled' ? 'Cancelada' : 'Pendiente de expirar';
+                    const statusColor = c.subscription_status === 'canceled' ? '#EF4444' : '#F59E0B';
+                    
+                    return `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>
+                                <div style="font-weight: 600;">${c.full_name || c.business_name}</div>
+                                <div style="font-size: 0.85rem; color: #666;">${c.email}</div>
+                            </td>
+                            <td>
+                                <span style="padding: 4px 12px; background: #e8f4ff; color: #0046FE; border-radius: 12px; font-size: 0.85rem; font-weight: 600; text-transform: capitalize;">
+                                    ${c.plan}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="padding: 4px 12px; background: ${statusColor}20; color: ${statusColor}; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                                    ${status}
+                                </span>
+                            </td>
+                            <td>${cancelDate.toLocaleDateString('es-ES')}</td>
+                            <td>${endDate ? endDate.toLocaleDateString('es-ES') : '-'}</td>
+                            <td>
+                                <div style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${c.cancellation_reason || 'No especificada'}">
+                                    ${c.cancellation_reason || 'No especificada'}
+                                </div>
+                            </td>
+                            <td>
+                                <button onclick="viewClientDetails(${c.id})" style="padding: 6px 12px; background: #0046FE; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                                    Ver Cliente
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                console.log(`✅ [ADMIN] ${cancelaciones.length} cancelaciones renderizadas`);
+                
+            } catch (error) {
+                console.error('❌ [ADMIN] Error cargando cancelaciones:', error);
+                const tbody = document.getElementById('cancellationsTable');
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #EF4444;">Error al cargar cancelaciones: ${error.message}</td></tr>`;
+            }
+        }
+
         function filterInvoicesByPeriod(period) {
             currentPeriod = period;
             console.log(`📅 [ADMIN] Filtrando facturas por: ${period}`);
