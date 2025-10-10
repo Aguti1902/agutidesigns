@@ -481,12 +481,36 @@
             const urlParams = new URLSearchParams(window.location.search);
             const transactionId = urlParams.get('session_id') || '';
             
-            console.log('🎯 Disparando evento de conversión de Google Ads', { transactionId });
+            // Obtener el plan y billing_cycle del cliente
+            const plan = data?.plan || submissionData?.plan || 'basico';
+            const billingCycle = data?.billing_cycle || submissionData?.billing_cycle || 'monthly';
             
-            // Disparar evento de conversión
+            // Definir precios por plan (mensual)
+            const planPrices = {
+                'basico': 35.0,
+                'avanzado': 49.0,
+                'premium': 65.0
+            };
+            
+            // Calcular el valor de la conversión
+            let conversionValue = planPrices[plan] || 35.0;
+            
+            // Si es anual, multiplicar por 12
+            if (billingCycle === 'annual') {
+                conversionValue = conversionValue * 12;
+            }
+            
+            console.log('🎯 Disparando evento de conversión de Google Ads', { 
+                transactionId, 
+                plan, 
+                billingCycle, 
+                conversionValue 
+            });
+            
+            // Disparar evento de conversión con el valor real
             gtag('event', 'conversion', {
                 'send_to': 'AW-17641289817/qddYCJSY1KobENnwgtxB',
-                'value': 1.0,
+                'value': conversionValue,
                 'currency': 'EUR',
                 'transaction_id': transactionId
             });
