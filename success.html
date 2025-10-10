@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>¡Pago Exitoso! - agutidesigns</title>
     <link rel="icon" type="image/png" href="images/favicon2.png">
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PQTBG3ZZ');</script>
+    <!-- End Google Tag Manager -->
+    
+    <!-- Google Ads Global Site Tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17641289817"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-17641289817');
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -256,6 +274,11 @@
     </style>
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQTBG3ZZ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
     <!-- Logo centrado arriba -->
     <div class="logo">
         <img src="/images/Logo.svg" alt="agutidesigns">
@@ -408,6 +431,9 @@
 
                                  <button class="btn-home" onclick="accessDashboard()">Acceder a Mi Dashboard</button>
             `;
+            
+            // Disparar evento de conversión de Google Ads
+            fireGoogleAdsConversion();
         }
 
         function displayGenericSuccess() {
@@ -444,6 +470,26 @@
 
                 <button class="btn-home" onclick="window.location.href='https://panel.agutidesigns.es'">Acceder a Mi Dashboard</button>
             `;
+            
+            // Disparar evento de conversión de Google Ads
+            fireGoogleAdsConversion();
+        }
+
+        // Función para disparar el evento de conversión de Google Ads
+        function fireGoogleAdsConversion() {
+            // Obtener el subscriptionId como transaction_id
+            const urlParams = new URLSearchParams(window.location.search);
+            const transactionId = urlParams.get('session_id') || '';
+            
+            console.log('🎯 Disparando evento de conversión de Google Ads', { transactionId });
+            
+            // Disparar evento de conversión
+            gtag('event', 'conversion', {
+                'send_to': 'AW-17641289817/qddYCJSY1KobENnwgtxB',
+                'value': 1.0,
+                'currency': 'EUR',
+                'transaction_id': transactionId
+            });
         }
 
         // Cargar datos cuando se carga la página
