@@ -7995,6 +7995,9 @@
                 const response = await fetch(`${API_URL}/api/videos`);
                 allClientVideos = await response.json();
                 
+                // Ordenar videos por display_order
+                allClientVideos.sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
+                
                 if (allClientVideos.length === 0) {
                     videosGrid.innerHTML = `
                         <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
@@ -8024,6 +8027,7 @@
                 videosGrid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
                         <p style="font-size: 1.2rem; margin-bottom: 10px;">📹 No hay videos en esta categoría</p>
+                        <p style="color: #aaa; font-size: 1rem;">Próximamente...</p>
                     </div>
                 `;
                 return;
@@ -8032,6 +8036,10 @@
             videosGrid.innerHTML = videos.map(video => `
                 <div class="video-card" onclick="openVideoPlayer('${video.url}', '${video.title.replace(/'/g, "\\'")}', '${(video.description || '').replace(/'/g, "\\'")}')">
                     <div class="video-thumbnail" style="position: relative; padding-top: 56.25%; background: #f0f0f0; overflow: hidden;">
+                        <!-- Widget numerado -->
+                        <div style="position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #0046FE, #0056FF); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; box-shadow: 0 3px 10px rgba(0, 70, 254, 0.5); z-index: 10;">
+                            ${video.display_order || '?'}
+                        </div>
                         ${video.thumbnail_url 
                             ? `<img src="${video.thumbnail_url}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; opacity: 0.9;">▶️</div>`
@@ -8063,6 +8071,8 @@
                 displayVideos(allClientVideos);
             } else {
                 const filtered = allClientVideos.filter(v => v.category === category);
+                // Ordenar los filtrados también
+                filtered.sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
                 displayVideos(filtered);
             }
         }
