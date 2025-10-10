@@ -4944,6 +4944,51 @@ app.delete('/api/admin/videos/:id', async (req, res) => {
     }
 });
 
+// 🔧 ENDPOINT DE MIGRACIÓN: Añadir columna display_order
+app.post('/api/admin/migrate-display-order', async (req, res) => {
+    try {
+        console.log('🔧 [MIGRACIÓN] Añadiendo columna display_order a videos...');
+        
+        // Añadir columna si no existe
+        await db.pool.query(`
+            ALTER TABLE videos 
+            ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 999
+        `);
+        console.log('✅ [MIGRACIÓN] Columna añadida');
+        
+        // Asignar valores de orden
+        const updateResult = await db.pool.query(`
+            UPDATE videos 
+            SET display_order = (
+                SELECT COUNT(*) + 1 
+                FROM videos v2 
+                WHERE v2.created_at < videos.created_at
+            )
+            WHERE display_order IS NULL OR display_order = 999
+        `);
+        console.log(`✅ [MIGRACIÓN] ${updateResult.rowCount} videos actualizados`);
+        
+        // Obtener resultados
+        const videos = await db.pool.query(`
+            SELECT id, title, display_order 
+            FROM videos 
+            ORDER BY display_order
+        `);
+        
+        console.log('✅ [MIGRACIÓN] Migración completada exitosamente');
+        
+        res.json({ 
+            success: true, 
+            message: 'Migración completada',
+            videosUpdated: updateResult.rowCount,
+            videos: videos.rows
+        });
+    } catch (error) {
+        console.error('❌ [MIGRACIÓN] Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // 🧪 ENDPOINT DE TEST: Forzar modificación en un pedido
 app.post('/api/admin/force-modification/:submissionId', async (req, res) => {
     try {
