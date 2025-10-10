@@ -500,19 +500,26 @@
                 conversionValue = conversionValue * 12;
             }
             
-            console.log('🎯 Disparando evento de conversión de Google Ads', { 
+            console.log('🎯 Disparando eventos de conversión de Google Ads', { 
                 transactionId, 
                 plan, 
                 billingCycle, 
                 conversionValue 
             });
             
-            // Disparar evento de conversión con el valor real
+            // Evento 1: Conversión de Compra
             gtag('event', 'conversion', {
                 'send_to': 'AW-17641289817/qddYCJSY1KobENnwgtxB',
                 'value': conversionValue,
                 'currency': 'EUR',
                 'transaction_id': transactionId
+            });
+            
+            // Evento 2: Conversión de Suscripción
+            gtag('event', 'conversion', {
+                'send_to': 'AW-17641289817/BkePCO2_8aobENnwgtxB',
+                'value': conversionValue,
+                'currency': 'EUR'
             });
         }
 
