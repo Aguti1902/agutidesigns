@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejecutar Migración - display_order</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0046FE;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #0036C8;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #resultado {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        #resultado.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+        #resultado.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+        #resultado.loading {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            display: block;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Migración de Base de Datos</h1>
+        <p class="subtitle">Añadir columna <code>display_order</code> a la tabla videos</p>
+        
+        <button onclick="ejecutarMigracion()" id="btnMigrar">▶️ Ejecutar Migración</button>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+        
+        async function ejecutarMigracion() {
+            const btn = document.getElementById('btnMigrar');
+            const resultado = document.getElementById('resultado');
+            
+            btn.disabled = true;
+            resultado.className = 'loading';
+            resultado.innerHTML = '⏳ Ejecutando migración...';
+            
+            try {
+                console.log('🔧 Ejecutando migración...');
+                
+                const response = await fetch(`${API_URL}/api/admin/migrate-display-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('✅ Migración completada:', data);
+                
+                resultado.className = 'success';
+                resultado.innerHTML = `
+                    <h3>✅ ¡Migración Exitosa!</h3>
+                    <p><strong>Videos actualizados:</strong> ${data.videosUpdated}</p>
+                    <p><strong>Mensaje:</strong> ${data.message}</p>
+                    <pre>${JSON.stringify(data.videos, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                
+                resultado.className = 'error';
+                resultado.innerHTML = `
+                    <h3>❌ Error en la Migración</h3>
+                    <p>${error.message}</p>
+                    <p><strong>Posibles soluciones:</strong></p>
+                    <ul>
+                        <li>Verifica que Railway haya desplegado el código más reciente</li>
+                        <li>Espera 1-2 minutos y vuelve a intentar</li>
+                        <li>Revisa los logs de Railway</li>
+                    </ul>
+                `;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+
