@@ -1169,13 +1169,13 @@ async function deleteExpiredTokens() {
 // ========== FUNCIONES DE VIDEOS ==========
 
 async function createVideo(videoData) {
-    const { title, description, url, category, duration, thumbnail_url } = videoData;
+    const { title, description, url, category, duration, thumbnail_url, display_order } = videoData;
     
     const result = await pool.query(`
-        INSERT INTO videos (title, description, url, category, duration, thumbnail_url)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO videos (title, description, url, category, duration, thumbnail_url, display_order)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-    `, [title, description, url, category, duration, thumbnail_url]);
+    `, [title, description, url, category, duration, thumbnail_url, display_order || 999]);
     
     return result.rows[0];
 }
@@ -1203,15 +1203,15 @@ async function getVideoById(id) {
 }
 
 async function updateVideo(id, videoData) {
-    const { title, description, url, category, duration, thumbnail_url } = videoData;
+    const { title, description, url, category, duration, thumbnail_url, display_order } = videoData;
     
     const result = await pool.query(`
         UPDATE videos
         SET title = $1, description = $2, url = $3, category = $4, 
-            duration = $5, thumbnail_url = $6, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $7
+            duration = $5, thumbnail_url = $6, display_order = $7, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $8
         RETURNING *
-    `, [title, description, url, category, duration, thumbnail_url, id]);
+    `, [title, description, url, category, duration, thumbnail_url, display_order || 999, id]);
     
     return result.rows[0];
 }

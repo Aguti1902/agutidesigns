@@ -4879,7 +4879,7 @@ app.get('/api/videos/category/:category', async (req, res) => {
 // Crear un nuevo video
 app.post('/api/admin/videos', async (req, res) => {
     try {
-        const { title, description, url, category, duration, thumbnail_url } = req.body;
+        const { title, description, url, category, duration, thumbnail_url, display_order } = req.body;
         
         console.log('📹 [ADMIN] Creando nuevo video:', title);
         
@@ -4889,7 +4889,8 @@ app.post('/api/admin/videos', async (req, res) => {
             url,
             category,
             duration,
-            thumbnail_url
+            thumbnail_url,
+            display_order
         });
         
         console.log('✅ [ADMIN] Video creado exitosamente:', video.id);
@@ -4904,7 +4905,7 @@ app.post('/api/admin/videos', async (req, res) => {
 app.put('/api/admin/videos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, url, category, duration, thumbnail_url } = req.body;
+        const { title, description, url, category, duration, thumbnail_url, display_order } = req.body;
         
         console.log(`📹 [ADMIN] Actualizando video #${id}`);
         
@@ -4914,7 +4915,8 @@ app.put('/api/admin/videos/:id', async (req, res) => {
             url,
             category,
             duration,
-            thumbnail_url
+            thumbnail_url,
+            display_order
         });
         
         console.log('✅ [ADMIN] Video actualizado exitosamente');

@@ -2149,10 +2149,11 @@
     <div class="modal" id="videoModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>🎥 Añadir Video</h3>
+                <h3 id="videoModalTitle">🎥 Añadir Video</h3>
                 <button class="btn-close" onclick="closeVideoModal()">×</button>
             </div>
             <form id="videoForm">
+                <input type="hidden" id="videoId" value="">
                 <div class="form-group">
                     <label>Título del Video</label>
                     <input type="text" id="videoTitle" required>
@@ -3860,12 +3861,17 @@
         }
 
         // ===== VIDEOS =====
+        let allVideos = []; // Cache para edición
+        
         async function loadVideos() {
             const videosGrid = document.getElementById('videosGrid');
             
             try {
                 const response = await fetch(`${API_URL}/api/videos`);
                 let videos = await response.json();
+                
+                // Guardar en cache
+                allVideos = videos;
                 
                 // Ordenar videos por display_order
                 videos.sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
@@ -3902,6 +3908,7 @@
                             </div>
                             <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
                                 <button onclick="window.open('${video.url}', '_blank')" style="flex: 1; padding: 8px; background: #0046FE; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">Ver Video</button>
+                                <button onclick="editVideo(${video.id})" style="padding: 8px 12px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">✏️</button>
                                 <button onclick="deleteVideo(${video.id})" style="padding: 8px 12px; background: #ff4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">🗑️</button>
                             </div>
                         </div>
@@ -3952,17 +3959,48 @@
             }
         }
 
+        function editVideo(videoId) {
+            // Buscar el video en el cache
+            const video = allVideos.find(v => v.id === videoId);
+            if (!video) {
+                showNotification('Video no encontrado', 'error');
+                return;
+            }
+            
+            // Cambiar título del modal
+            document.getElementById('videoModalTitle').textContent = '✏️ Editar Video';
+            
+            // Rellenar el formulario con los datos del video
+            document.getElementById('videoId').value = video.id;
+            document.getElementById('videoTitle').value = video.title || '';
+            document.getElementById('videoDescription').value = video.description || '';
+            document.getElementById('videoUrl').value = video.url || '';
+            document.getElementById('videoCategory').value = video.category || 'tutorial_elementor';
+            document.getElementById('videoDuration').value = video.duration || '';
+            document.getElementById('videoOrder').value = video.display_order || 1;
+            
+            // Abrir modal
+            document.getElementById('videoModal').classList.add('active');
+        }
+
         function openNewVideoModal() {
+            // Resetear título
+            document.getElementById('videoModalTitle').textContent = '🎥 Añadir Video';
             document.getElementById('videoModal').classList.add('active');
         }
 
         function closeVideoModal() {
             document.getElementById('videoModal').classList.remove('active');
             document.getElementById('videoForm').reset();
+            document.getElementById('videoId').value = '';
+            document.getElementById('videoModalTitle').textContent = '🎥 Añadir Video';
         }
 
         document.getElementById('videoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const videoId = document.getElementById('videoId').value;
+            const isEditing = videoId !== '';
             
             const videoData = {
                 title: document.getElementById('videoTitle').value,
@@ -3975,14 +4013,20 @@
             };
             
             try {
-                const response = await fetch(`${API_URL}/api/admin/videos`, {
-                    method: 'POST',
+                const url = isEditing 
+                    ? `${API_URL}/api/admin/videos/${videoId}` 
+                    : `${API_URL}/api/admin/videos`;
+                const method = isEditing ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(videoData)
                 });
                 
                 if (response.ok) {
-                    showNotification('Video añadido correctamente', 'success');
+                    const message = isEditing ? 'Video actualizado correctamente' : 'Video añadido correctamente';
+                    showNotification(message, 'success');
                     closeVideoModal();
                     loadVideos(); // Recargar lista
                 } else {
