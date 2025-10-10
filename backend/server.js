@@ -2913,12 +2913,11 @@ app.get('/api/admin/fix-downgrades', async (req, res) => {
             const needsFix = (isDowngrade && !sub.is_downgrade) || (isUpgrade && !sub.has_upgrade);
             
             if (needsFix) {
-                // Actualizar submission (y resetear has_modifications porque es solo cambio de plan)
+                // Actualizar submission (mantener has_modifications si existe)
                 await db.pool.query(`
                     UPDATE submissions 
                     SET is_downgrade = $1, 
-                        has_upgrade = $2,
-                        has_modifications = false
+                        has_upgrade = $2
                     WHERE id = $3
                 `, [isDowngrade, isUpgrade, sub.id]);
                 
@@ -3534,7 +3533,6 @@ app.post('/api/client/change-plan', async (req, res) => {
                         previous_plan = $3,
                         has_upgrade = true,
                         is_downgrade = false,
-                        has_modifications = false,
                         last_modified_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = $4
@@ -3607,7 +3605,6 @@ app.post('/api/client/change-plan', async (req, res) => {
                         previous_plan = $3,
                         is_downgrade = true,
                         has_upgrade = false,
-                        has_modifications = false,
                         last_modified_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = $4
