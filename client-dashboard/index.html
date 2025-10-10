@@ -3157,7 +3157,20 @@
                     }
 
                     // SI LA WEB YA ESTÁ ACTIVA (ENTREGADA)
-                    if (websiteStatus === 'activo') {
+                    // PERO: Si hay un plan_change_at reciente (upgrade), mostrar temporizador
+                    const hasRecentUpgrade = data.client.plan_change_at && 
+                        ((new Date() - new Date(data.client.plan_change_at)) < (24 * 60 * 60 * 1000));
+                    
+                    console.log('🔍 Verificando estado de edición:', {
+                        websiteStatus,
+                        plan_change_at: data.client.plan_change_at,
+                        hasRecentUpgrade,
+                        timesinceUpgrade: data.client.plan_change_at ? 
+                            Math.floor((new Date() - new Date(data.client.plan_change_at)) / (1000 * 60 * 60)) + ' horas' : 
+                            'N/A'
+                    });
+                    
+                    if (websiteStatus === 'activo' && !hasRecentUpgrade) {
                         // Ocultar tiempo de entrega
                         document.getElementById('deliveryTimeCard').style.display = 'none';
                         // Ocultar temporizador de 24h
@@ -3165,7 +3178,7 @@
                         document.getElementById('editExpiredBanner').style.display = 'none';
                         // Permitir edición ilimitada
                         canEdit = true;
-                        console.log('✅ Web activa - edición ilimitada habilitada');
+                        console.log('✅ Web activa (sin upgrade reciente) - edición ilimitada habilitada');
                     } else if (hasPlan && data.client.payment_date) {
                         // Web en construcción - mostrar tiempo de entrega con cuenta atrás
                         const paymentDate = new Date(data.client.payment_date);
@@ -3597,8 +3610,10 @@
                         console.error('❌ No hay datos disponibles (ni submission ni client)');
                     }
                     
-                    // Iniciar temporizador de 24h SOLO si tiene plan Y web NO está activa
-                    if (websiteStatus !== 'activo' && hasPlan) {
+                    // Iniciar temporizador de 24h si:
+                    // 1. Web NO está activa Y tiene plan, O
+                    // 2. Web está activa PERO hay upgrade reciente
+                    if (hasPlan && (websiteStatus !== 'activo' || hasRecentUpgrade)) {
                         // Usar el más reciente entre payment_date y plan_change_at
                         let startDate = null;
                         
