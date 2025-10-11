@@ -3883,6 +3883,132 @@ app.get('/api/admin/invoices', async (req, res) => {
     }
 });
 
+// Sincronizar cliente con Stripe (Admin)
+app.post('/api/admin/sync-stripe-customer', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        console.log(`🔗 [ADMIN] Sincronizando cliente: ${email}`);
+        
+        if (!email) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Email requerido' 
+            });
+        }
+        
+        // 1. Buscar cliente en la base de datos
+        const client = await db.getClientByEmail(email);
+        
+        if (!client) {
+            return res.status(404).json({ 
+                success: false,
+                error: 'Cliente no encontrado en la base de datos',
+                details: `No existe un cliente con el email: ${email}`
+            });
+        }
+        
+        console.log(`✅ [ADMIN] Cliente encontrado en BD:`, {
+            id: client.id,
+            email: client.email,
+            plan: client.plan,
+            stripe_customer_id: client.stripe_customer_id || 'NO ASIGNADO'
+        });
+        
+        // 2. Buscar suscripciones de este cliente en Stripe
+        console.log(`🔍 [ADMIN] Buscando suscripciones en Stripe para: ${email}`);
+        
+        const subscriptions = await stripe.subscriptions.list({
+            limit: 10
+        });
+        
+        // Filtrar por customer email
+        let matchingSubscription = null;
+        
+        for (const sub of subscriptions.data) {
+            const customer = await stripe.customers.retrieve(sub.customer);
+            if (customer.email && customer.email.toLowerCase() === email.toLowerCase()) {
+                matchingSubscription = sub;
+                console.log(`✅ [ADMIN] Suscripción encontrada:`, {
+                    subscription_id: sub.id,
+                    customer_id: sub.customer,
+                    status: sub.status,
+                    plan: sub.items.data[0]?.price?.nickname || 'N/A'
+                });
+                break;
+            }
+        }
+        
+        if (!matchingSubscription) {
+            return res.status(404).json({ 
+                success: false,
+                error: 'No se encontró suscripción en Stripe',
+                details: `El email ${email} no tiene suscripciones activas en Stripe`,
+                debug: {
+                    totalSubscriptionsSearched: subscriptions.data.length
+                }
+            });
+        }
+        
+        // 3. Actualizar cliente en la base de datos
+        const stripeCustomerId = matchingSubscription.customer;
+        const stripeSubscriptionId = matchingSubscription.id;
+        
+        console.log(`💾 [ADMIN] Actualizando cliente #${client.id} con Stripe IDs`);
+        
+        await db.pool.query(
+            `UPDATE clients 
+             SET stripe_customer_id = ?, 
+                 stripe_subscription_id = ?,
+                 updated_at = NOW()
+             WHERE id = ?`,
+            [stripeCustomerId, stripeSubscriptionId, client.id]
+        );
+        
+        // 4. Verificar cuántas facturas tiene este cliente
+        const invoices = await stripe.invoices.list({
+            customer: stripeCustomerId,
+            limit: 100
+        });
+        
+        const paidInvoices = invoices.data.filter(inv => 
+            inv.status === 'paid' && 
+            (inv.amount_paid > 0 || inv.amount_due > 0)
+        );
+        
+        console.log(`✅ [ADMIN] Sincronización completada:`, {
+            client_id: client.id,
+            stripe_customer_id: stripeCustomerId,
+            stripe_subscription_id: stripeSubscriptionId,
+            invoices_found: paidInvoices.length
+        });
+        
+        res.json({
+            success: true,
+            message: 'Cliente sincronizado exitosamente con Stripe',
+            client: {
+                id: client.id,
+                email: client.email,
+                full_name: client.full_name,
+                plan: client.plan,
+                stripe_customer_id: stripeCustomerId,
+                stripe_subscription_id: stripeSubscriptionId
+            },
+            invoicesFound: paidInvoices.length
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error sincronizando:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message,
+            debug: {
+                stack: error.stack
+            }
+        });
+    }
+});
+
 // ========================================
 // PERFIL DE USUARIO
 // ========================================

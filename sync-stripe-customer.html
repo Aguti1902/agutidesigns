@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sincronizar Cliente con Stripe - agutidesigns</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0046FE;
+            margin-bottom: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8eaed;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #0046FE;
+        }
+        .btn {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+        }
+        .btn:hover {
+            background: #0036C8;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 Sincronizar Cliente con Stripe</h1>
+
+    <div class="card">
+        <div class="warning">
+            <strong>⚠️ Herramienta de Admin</strong>
+            <p>Esta herramienta vincula clientes existentes en la base de datos con sus suscripciones en Stripe.</p>
+            <p>Úsala solo si un cliente pagó pero no se le asignó su <code>stripe_customer_id</code>.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="emailInput">Email del Cliente:</label>
+            <input type="email" id="emailInput" placeholder="ejemplo@gmail.com" value="agutierrezgomez00@gmail.com">
+        </div>
+
+        <button class="btn" onclick="syncCustomer()">🔗 Buscar y Sincronizar</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+
+        async function syncCustomer() {
+            const email = document.getElementById('emailInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!email) {
+                resultsDiv.innerHTML = '<div class="result error">Por favor ingresa un email</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Buscando cliente en Stripe y base de datos...</p>
+                </div>
+            `;
+
+            try {
+                // Llamar al endpoint del backend
+                const response = await fetch(`${API_URL}/api/admin/sync-stripe-customer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultsDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Sincronización exitosa</h3>
+                            <p><strong>Cliente:</strong> ${data.client.full_name || data.client.email}</p>
+                            <p><strong>Email:</strong> ${data.client.email}</p>
+                            <p><strong>Plan:</strong> ${data.client.plan}</p>
+                            <p><strong>Stripe Customer ID:</strong> <code>${data.client.stripe_customer_id}</code></p>
+                            <p><strong>Stripe Subscription ID:</strong> <code>${data.client.stripe_subscription_id || 'N/A'}</code></p>
+                            ${data.invoicesFound ? `<p><strong>Facturas encontradas:</strong> ${data.invoicesFound}</p>` : ''}
+                        </div>
+                        <div class="result info">
+                            <p>💡 <strong>Próximos pasos:</strong></p>
+                            <ol>
+                                <li>Recarga el <strong>Admin Dashboard</strong></li>
+                                <li>Ve a la sección "Facturas"</li>
+                                <li>Deberías ver las facturas de este cliente ahora</li>
+                            </ol>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Error</h3>
+                            <p>${data.error || 'Error desconocido'}</p>
+                            ${data.details ? `<p><small>${data.details}</small></p>` : ''}
+                        </div>
+                        ${data.debug ? `<pre>${JSON.stringify(data.debug, null, 2)}</pre>` : ''}
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error de conexión</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Permitir presionar Enter en el input
+        document.getElementById('emailInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                syncCustomer();
+            }
+        });
+    </script>
+</body>
+</html>
+
