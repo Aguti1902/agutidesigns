@@ -2477,18 +2477,76 @@
                 document.getElementById('totalSubmissions').textContent = stats.total || 0;
                 document.getElementById('activeClients').textContent = stats.activeClients || 0;
                 document.getElementById('inactiveClients').textContent = stats.noPlan || 0;
-                document.getElementById('totalRevenueStats').textContent = (stats.revenue || 0) + '€';
+                
+                // 💰 Obtener ingresos reales desde facturas de Stripe
+                let realRevenue = 0;
+                try {
+                    console.log('💰 [ADMIN] Obteniendo facturas de Stripe para calcular ingresos reales...');
+                    const invoicesResponse = await fetch(`${API_URL}/api/admin/invoices`);
+                    const invoicesData = await invoicesResponse.json();
+                    
+                    // Filtrar facturas según el período seleccionado
+                    let filteredInvoices = invoicesData.invoices || [];
+                    
+                    if (startDate && endDate) {
+                        // Filtro personalizado
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        filteredInvoices = filteredInvoices.filter(inv => {
+                            const invDate = new Date(inv.created);
+                            return invDate >= start && invDate <= end;
+                        });
+                    } else if (currentStatsFilter !== 'all') {
+                        // Filtros predefinidos
+                        const now = new Date();
+                        let filterStartDate;
+                        
+                        switch(currentStatsFilter) {
+                            case 'today':
+                                filterStartDate = new Date(now.setHours(0, 0, 0, 0));
+                                break;
+                            case 'week':
+                                filterStartDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                                break;
+                            case 'month':
+                                filterStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                                break;
+                        }
+                        
+                        if (filterStartDate) {
+                            filteredInvoices = filteredInvoices.filter(inv => {
+                                const invDate = new Date(inv.created);
+                                return invDate >= filterStartDate;
+                            });
+                        }
+                    }
+                    
+                    // Calcular total de facturas pagadas
+                    realRevenue = filteredInvoices
+                        .filter(inv => inv.status === 'paid')
+                        .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
+                    
+                    console.log('💰 [ADMIN] Ingresos reales calculados desde Stripe:', {
+                        totalInvoices: filteredInvoices.length,
+                        paidInvoices: filteredInvoices.filter(inv => inv.status === 'paid').length,
+                        realRevenue: realRevenue.toFixed(2)
+                    });
+                } catch (invoiceError) {
+                    console.error('⚠️ [ADMIN] Error obteniendo facturas, usando revenue del backend:', invoiceError);
+                    realRevenue = stats.revenue || 0;
+                }
+                
+                document.getElementById('totalRevenueStats').textContent = realRevenue.toFixed(2) + '€';
                 
                 // 💸 Calcular comisión del diseñador
-                const revenue = stats.revenue || 0;
                 // Fórmula: Neto = Revenue - (Stripe 1.5% + 0.25€) - IVA (21%) - IRPF (15%)
-                // Simplificado: Neto ≈ Revenue * 0.632 (63.2% del ingreso bruto)
-                const netRevenue = revenue * 0.632;
+                // Simplificado: Neto ≈ Revenue * 0.632 (63.2% del neto después de impuestos)
+                const netRevenue = realRevenue * 0.632;
                 const designerCommission = netRevenue * 0.30; // 30% del neto
                 document.getElementById('designerCommission').textContent = designerCommission.toFixed(2) + '€';
                 
                 console.log('💸 [ADMIN] Comisión diseñador calculada:', {
-                    revenue: revenue,
+                    revenue: realRevenue.toFixed(2),
                     netRevenue: netRevenue.toFixed(2),
                     commission: designerCommission.toFixed(2)
                 });
