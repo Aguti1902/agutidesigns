@@ -656,6 +656,10 @@
             flex-direction: column;
         }
 
+        .chat-window.open {
+            display: flex;
+        }
+
         .chat-header {
             background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
             padding: 20px;
@@ -6953,14 +6957,14 @@
             const chatButtonIcon = document.getElementById('chatButtonIcon');
             
             if (chatOpen) {
-                chatWindow.style.display = 'flex';
+                chatWindow.classList.add('open');
                 chatButtonIcon.textContent = '×';
                 // Mensaje de bienvenida si es la primera vez
                 if (document.getElementById('chatMessages').children.length === 0) {
                     addChatMessage('bot', `¡Hola ${currentClient.full_name?.split(' ')[0] || 'Usuario'}! 👋\n\nSoy tu asistente virtual de agutidesigns. ¿En qué puedo ayudarte hoy?`);
                 }
             } else {
-                chatWindow.style.display = 'none';
+                chatWindow.classList.remove('open');
                 chatButtonIcon.textContent = '💬';
             }
         }
