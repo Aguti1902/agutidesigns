@@ -527,19 +527,19 @@
                     country: 'ES',
                     currency: 'eur',
                     total: {
-                        label: details.name,
+                        label: `${details.name} (Total con IVA)`,
                         amount: Math.round(total * 100), // Stripe usa centavos
                     },
                     requestPayerName: true,
                     requestPayerEmail: true,
                     displayItems: [
                         {
-                            label: details.name,
-                            amount: Math.round(total * 100),
+                            label: `${details.name} - ${billingCycle === 'annual' ? 'Anual' : 'Mensual'}`,
+                            amount: Math.round(subtotal * 100),
                         },
                         {
                             label: 'IVA (21%)',
-                            amount: Math.round(total * 0.21 * 100),
+                            amount: Math.round(iva * 100),
                         },
                     ],
                 });
