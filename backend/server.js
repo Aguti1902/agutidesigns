@@ -3862,12 +3862,17 @@ app.get('/api/admin/invoices', async (req, res) => {
                     limit: 100
                 });
                 
-                // Filtrar y formatear - SOLO facturas con pago real
+                // Filtrar y formatear - SOLO facturas válidas
                 const formattedInvoices = invoices.data
                     .filter(invoice => {
-                        const hasRealAmount = (invoice.amount_due > 0 || invoice.amount_paid > 0);
-                        const isNotFullyRefunded = invoice.amount_remaining !== invoice.total;
-                        return hasRealAmount && isNotFullyRefunded;
+                        // Incluir facturas con monto (pagadas o pendientes)
+                        const hasAmount = (invoice.total > 0);
+                        // Excluir facturas canceladas o con monto 0
+                        const isValid = invoice.status !== 'void' && invoice.total > 0;
+                        
+                        console.log(`📄 Factura ${invoice.id}: status=${invoice.status}, total=${invoice.total/100}, valid=${isValid}`);
+                        
+                        return isValid;
                     })
                     .map(invoice => {
                         // Stripe devuelve montos con IVA ya incluido cuando automatic_tax está habilitado
