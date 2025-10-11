@@ -588,7 +588,7 @@ function newClientAdminEmail(clientData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
+            <a href="https://admin.agutidesigns.es/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
         </div>
     `;
     
@@ -616,7 +616,7 @@ function newPaymentAdminEmail(clientData, amount) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
+            <a href="https://admin.agutidesigns.es/" class="button" style="color: #ffffff;">📊 Ver en Admin Dashboard</a>
         </div>
     `;
     
@@ -656,7 +656,7 @@ function newTicketAdminEmail(clientData, ticketData) {
         </div>
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/#tickets" class="button" style="color: #ffffff;">💬 Responder Ticket</a>
+            <a href="https://admin.agutidesigns.es/#tickets" class="button" style="color: #ffffff;">💬 Responder Ticket</a>
         </div>
     `;
     
@@ -689,7 +689,7 @@ function paymentFailedAdminEmail(clientData, attemptNumber) {
         ${attemptNumber === 3 ? '<p><strong>⚠️ ATENCIÓN:</strong> Si el cliente no actualiza su método de pago, el servicio será suspendido automáticamente.</p>' : ''}
         
         <div style="text-align: center;">
-            <a href="https://agutidesigns-admin.vercel.app/" class="button">📊 Ver Cliente en Admin</a>
+            <a href="https://admin.agutidesigns.es/" class="button">📊 Ver Cliente en Admin</a>
         </div>
         
         <p><em>Considera contactar al cliente para ofrecer asistencia.</em></p>
