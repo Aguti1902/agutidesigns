@@ -561,12 +561,6 @@
                         },
                     });
                     prButton.mount('#payment-request-button');
-                    
-                    // Mostrar mensaje de ayuda para Apple Pay
-                    const helpText = document.createElement('div');
-                    helpText.style.cssText = 'text-align: center; margin-top: 10px; font-size: 0.85rem; color: #666;';
-                    helpText.innerHTML = '💡 <strong>Apple Pay:</strong> Asegúrate de tener una tarjeta configurada en Apple Wallet';
-                    document.getElementById('payment-request-button').appendChild(helpText);
                 } else {
                     console.log('❌ Apple/Google Pay no disponible');
                     document.getElementById('payment-request-button').style.display = 'none';
