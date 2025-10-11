@@ -532,11 +532,24 @@
                     },
                     requestPayerName: true,
                     requestPayerEmail: true,
+                    displayItems: [
+                        {
+                            label: details.name,
+                            amount: Math.round(total * 100),
+                        },
+                        {
+                            label: 'IVA (21%)',
+                            amount: Math.round(total * 0.21 * 100),
+                        },
+                    ],
                 });
 
                 // Verificar disponibilidad de Google/Apple Pay
                 const canMakePayment = await paymentRequest.canMakePayment();
+                console.log('🍎 Apple Pay disponible:', canMakePayment);
+                
                 if (canMakePayment) {
+                    console.log('✅ Activando Apple/Google Pay');
                     const prButton = elements.create('paymentRequestButton', {
                         paymentRequest: paymentRequest,
                         style: {
@@ -548,7 +561,14 @@
                         },
                     });
                     prButton.mount('#payment-request-button');
+                    
+                    // Mostrar mensaje de ayuda para Apple Pay
+                    const helpText = document.createElement('div');
+                    helpText.style.cssText = 'text-align: center; margin-top: 10px; font-size: 0.85rem; color: #666;';
+                    helpText.innerHTML = '💡 <strong>Apple Pay:</strong> Asegúrate de tener una tarjeta configurada en Apple Wallet';
+                    document.getElementById('payment-request-button').appendChild(helpText);
                 } else {
+                    console.log('❌ Apple/Google Pay no disponible');
                     document.getElementById('payment-request-button').style.display = 'none';
                     const divider = document.querySelector('.payment-form > div:nth-of-type(2)');
                     if (divider) divider.style.display = 'none';
