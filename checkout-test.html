@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Checkout TEST - 0.50€ - agutidesigns</title>
+    <link rel="icon" type="image/png" href="images/favicon2.png">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff9800;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .checkout-container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-top: 50px;
+        }
+
+        .checkout-header {
+            background: #0046FE;
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .checkout-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .test-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .checkout-body {
+            padding: 40px;
+        }
+
+        .plan-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .plan-name {
+            font-size: 1.3rem;
+            color: #0046FE;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .price-row.total {
+            border-top: 2px solid #dee2e6;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0046FE;
+        }
+
+        .price-row strong {
+            font-weight: 700;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 18px;
+            background: #0046FE;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 70, 254, 0.3);
+        }
+
+        .btn-pay:hover {
+            background: #0039d4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 70, 254, 0.4);
+        }
+
+        .btn-pay:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .payment-methods img {
+            height: 30px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                margin-top: 60px;
+            }
+
+            .checkout-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .checkout-body {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-banner">
+        🧪 MODO PRUEBA - Este es un producto de test para validar el sistema de pagos
+    </div>
+
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h1>💳 Checkout de Prueba</h1>
+            <p>Valida el sistema de pagos con IVA</p>
+            <span class="test-badge">TEST PRODUCT - 0.50€</span>
+        </div>
+
+        <div class="checkout-body">
+            <div class="plan-info">
+                <div class="plan-name">🧪 Plan Test - Mensual</div>
+                
+                <div class="price-row">
+                    <span>Subtotal:</span>
+                    <span>0.50€</span>
+                </div>
+                
+                <div class="price-row">
+                    <span>IVA (21%):</span>
+                    <span>0.11€</span>
+                </div>
+                
+                <div class="price-row total">
+                    <strong>Total con IVA:</strong>
+                    <strong>0.61€</strong>
+                </div>
+            </div>
+
+            <button id="checkout-button" class="btn-pay">
+                💳 Proceder al Pago - 0.61€
+            </button>
+
+            <div id="loading" class="loading">
+                <p>⏳ Creando sesión de pago segura...</p>
+            </div>
+
+            <div class="info-text">
+                <p>✅ El IVA se aplicará automáticamente en Stripe</p>
+                <p>🔒 Pago 100% seguro con Stripe</p>
+                <p>📧 Recibirás confirmación por email</p>
+            </div>
+
+            <div class="payment-methods">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración
+        const BACKEND_URL = 'https://agutidesigns-production.up.railway.app';
+        const TEST_PRICE_ID = 'price_1SGs95FjBSJ299OpxWtTmVRw';
+        
+        let stripe;
+
+        // Inicializar Stripe
+        async function initStripe() {
+            try {
+                // Obtener clave pública
+                const configRes = await fetch(`${BACKEND_URL}/api/stripe-config`);
+                const { publishableKey } = await configRes.json();
+                
+                stripe = Stripe(publishableKey);
+                console.log('✅ Stripe inicializado');
+            } catch (error) {
+                console.error('❌ Error inicializando Stripe:', error);
+                alert('Error al cargar el sistema de pagos. Por favor recarga la página.');
+            }
+        }
+
+        // Crear sesión de checkout con Stripe
+        async function createCheckoutSession() {
+            const button = document.getElementById('checkout-button');
+            const loading = document.getElementById('loading');
+            
+            try {
+                button.disabled = true;
+                loading.classList.add('active');
+                
+                console.log('📝 Creando checkout session de prueba...');
+                
+                // Llamar al backend para crear la sesión
+                const response = await fetch(`${BACKEND_URL}/api/create-test-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al crear la sesión de pago');
+                }
+
+                const { sessionUrl } = await response.json();
+                
+                console.log('✅ Sesión creada, redirigiendo...');
+                
+                // Redirigir a Stripe Checkout
+                window.location.href = sessionUrl;
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error al crear la sesión de pago: ' + error.message);
+                button.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initStripe();
+            
+            document.getElementById('checkout-button').addEventListener('click', createCheckoutSession);
+        });
+    </script>
+</body>
+</html>
+
