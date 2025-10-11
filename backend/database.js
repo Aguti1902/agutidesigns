@@ -1090,6 +1090,7 @@ async function getAllClients() {
             c.cancelled_at,
             c.subscription_end_date,
             c.payment_date,
+            c.stripe_customer_id,
             c.stripe_subscription_id,
             c.submission_id,
             c.wordpress_url,
