@@ -3282,7 +3282,7 @@
                     }
                     
                     return `
-                    <tr style="${isNewPedido || hasUnviewedModifications ? 'background: #e3f2fd;' : ''}">`
+                    <tr style="${isNewPedido || hasUnviewedModifications ? 'background: #e3f2fd;' : ''}">
                         <td><strong>#${pedido.id}</strong></td>
                         <td>
                             ${pedido.business_name || 'N/A'}
@@ -4645,7 +4645,7 @@
                     const statusColor = isCancelled ? '#EF4444' : '#F59E0B';
                     
                     return `
-                        <tr style="${isNewCancellation ? 'background: #e3f2fd;' : ''}">`
+                        <tr style="${isNewCancellation ? 'background: #e3f2fd;' : ''}">
                             <td>${c.id}</td>
                             <td>
                                 <div style="font-weight: 600;">${c.full_name || c.business_name}</div>
