@@ -613,6 +613,75 @@
         }
 
         /* ==================================
+           CHAT WIDGET STYLES
+           ================================== */
+        
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 70, 254, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 70, 254, 0.5);
+        }
+
+        .chat-window {
+            display: none;
+            position: absolute;
+            bottom: 75px;
+            right: 0;
+            width: 380px;
+            height: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e8eaed;
+        }
+
+        /* ==================================
            ELEMENTOS SOLO MÓVIL (ocultos en desktop)
            ================================== */
         
@@ -1104,6 +1173,40 @@
 
             .analytics-metric {
                 padding: 15px 10px;
+            }
+
+            /* CHAT WIDGET MÓVIL */
+            .chat-widget {
+                bottom: 90px; /* Más arriba para evitar el botón hamburger */
+                right: 15px;
+            }
+
+            .chat-button {
+                width: 55px;
+                height: 55px;
+            }
+
+            .chat-window {
+                position: fixed;
+                bottom: 0 !important;
+                right: 0 !important;
+                left: 0;
+                width: 100% !important;
+                height: 100vh !important;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .chat-input-container {
+                padding: 12px;
             }
         }
 
@@ -2753,14 +2856,14 @@
     </div>
 
     <!-- Widget de Chat Flotante -->
-    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none;">
-        <div id="chatButton" onclick="toggleChat()" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 70, 254, 0.4); transition: all 0.3s ease;">
+    <div id="chatWidget" class="chat-widget">
+        <div id="chatButton" onclick="toggleChat()" class="chat-button">
             <span id="chatButtonIcon" style="font-size: 1.8rem;">💬</span>
         </div>
         
-        <div id="chatWindow" style="display: none; position: absolute; bottom: 75px; right: 0; width: 380px; height: 550px; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); overflow: hidden; flex-direction: column;">
+        <div id="chatWindow" class="chat-window">
             <!-- Chat Header -->
-            <div style="background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <div class="chat-header">
                 <div>
                     <h3 style="margin: 0; font-size: 1.2rem;">💬 Chat IA</h3>
                     <p style="margin: 5px 0 0; font-size: 0.85rem; opacity: 0.9;">Asistente virtual 24/7</p>
@@ -2769,12 +2872,12 @@
             </div>
             
             <!-- Chat Messages -->
-            <div id="chatMessages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #f8f9fa;">
+            <div id="chatMessages" class="chat-messages">
                 <!-- Los mensajes se añadirán aquí dinámicamente -->
             </div>
             
             <!-- Chat Input -->
-            <div style="padding: 15px; background: white; border-top: 1px solid #e8eaed;">
+            <div class="chat-input-container">
                 <form id="chatForm" style="display: flex; gap: 10px;">
                     <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." style="flex: 1; padding: 12px; border: 2px solid #e8eaed; border-radius: 25px; font-size: 0.95rem; outline: none;">
                     <button type="submit" style="background: #0046FE; border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">➤</button>

@@ -3255,6 +3255,9 @@
                 }
 
                 tbody.innerHTML = pedidos.map(pedido => {
+                    // Verificar si es un pedido NUEVO (nunca visto por el admin)
+                    const isNewPedido = !pedido.admin_viewed_at;
+                    
                     // Verificar si las modificaciones son NUEVAS (no vistas o vistas antes de la última modificación)
                     const hasUnviewedModifications = pedido.has_modifications && 
                         (!pedido.modifications_viewed_at || 
@@ -3279,7 +3282,7 @@
                     }
                     
                     return `
-                    <tr style="${hasUnviewedModifications ? 'background: #f0f9ff;' : ''}">
+                    <tr style="${isNewPedido || hasUnviewedModifications ? 'background: #e3f2fd;' : ''}">`
                         <td><strong>#${pedido.id}</strong></td>
                         <td>
                             ${pedido.business_name || 'N/A'}
@@ -4630,6 +4633,9 @@
                     const cancelDate = new Date(c.cancelled_at);
                     const endDate = c.subscription_end_date ? new Date(c.subscription_end_date) : null;
                     
+                    // Verificar si es una cancelación NUEVA (nunca vista por el admin)
+                    const isNewCancellation = !c.admin_viewed_cancellation_at;
+                    
                     // Determinar si está cancelada o pendiente de expirar
                     const isCancelled = c.subscription_status === 'canceled' || 
                                       c.subscription_status === 'cancelled' ||
@@ -4639,7 +4645,7 @@
                     const statusColor = isCancelled ? '#EF4444' : '#F59E0B';
                     
                     return `
-                        <tr>
+                        <tr style="${isNewCancellation ? 'background: #e3f2fd;' : ''}">`
                             <td>${c.id}</td>
                             <td>
                                 <div style="font-weight: 600;">${c.full_name || c.business_name}</div>
