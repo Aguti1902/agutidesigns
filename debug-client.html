@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cliente - agutidesigns</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0046FE;
+        }
+        .btn {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #0036C8;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Cliente</h1>
+
+    <div class="card">
+        <h2>1. Verificar datos del cliente en BD</h2>
+        <button class="btn" onclick="debugClient()">🔍 Debug Cliente</button>
+        <button class="btn" onclick="getAllClients()">📋 Ver Todos los Clientes</button>
+        <button class="btn" onclick="getInvoices()">🧾 Ver Facturas Admin</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+        const EMAIL = 'agutierrezgomez00@gmail.com';
+
+        async function debugClient() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Cargando...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/debug-client/${encodeURIComponent(EMAIL)}`);
+                const data = await response.json();
+                
+                let html = '<h3>Resultado:</h3>';
+                
+                if (!data.found) {
+                    html += '<div class="error">❌ Cliente no encontrado en la base de datos</div>';
+                } else {
+                    const client = data.client;
+                    
+                    if (client.stripe_customer_id) {
+                        html += '<div class="success">✅ Cliente tiene stripe_customer_id</div>';
+                    } else {
+                        html += '<div class="error">❌ Cliente NO tiene stripe_customer_id</div>';
+                    }
+                    
+                    html += `
+                        <h4>Datos del cliente:</h4>
+                        <ul>
+                            <li><strong>ID:</strong> ${client.id}</li>
+                            <li><strong>Email:</strong> ${client.email}</li>
+                            <li><strong>Nombre:</strong> ${client.full_name}</li>
+                            <li><strong>Plan:</strong> ${client.plan}</li>
+                            <li><strong>Stripe Customer ID:</strong> ${client.stripe_customer_id || 'NO ASIGNADO'}</li>
+                            <li><strong>Stripe Subscription ID:</strong> ${client.stripe_subscription_id || 'NO ASIGNADO'}</li>
+                        </ul>
+                    `;
+                    
+                    if (data.invoices_count > 0) {
+                        html += `<div class="success">✅ ${data.invoices_count} facturas encontradas en Stripe</div>`;
+                        html += '<h4>Facturas:</h4>';
+                        html += '<ul>';
+                        data.invoices.forEach(inv => {
+                            html += `<li>${inv.id} - ${inv.status} - ${inv.total}€ - ${inv.created}</li>`;
+                        });
+                        html += '</ul>';
+                    } else if (client.stripe_customer_id) {
+                        html += '<div class="error">❌ Cliente tiene stripe_customer_id pero NO tiene facturas</div>';
+                    }
+                }
+                
+                html += '<h4>JSON completo:</h4>';
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function getAllClients() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Cargando...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/clients`);
+                const clients = await response.json();
+                
+                const clientsWithStripe = clients.filter(c => c.stripe_customer_id);
+                
+                let html = `
+                    <h3>Resultado:</h3>
+                    <div class="info">
+                        <strong>Total clientes:</strong> ${clients.length}<br>
+                        <strong>Con Stripe Customer ID:</strong> ${clientsWithStripe.length}
+                    </div>
+                `;
+                
+                if (clientsWithStripe.length > 0) {
+                    html += '<h4>Clientes con Stripe:</h4><ul>';
+                    clientsWithStripe.forEach(c => {
+                        html += `<li>${c.email} - ${c.stripe_customer_id}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                html += '<h4>JSON completo (primeros 3):</h4>';
+                html += `<pre>${JSON.stringify(clients.slice(0, 3), null, 2)}</pre>`;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function getInvoices() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Cargando...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/invoices`);
+                const data = await response.json();
+                
+                let html = `
+                    <h3>Resultado:</h3>
+                    <div class="info">
+                        <strong>Total facturas:</strong> ${data.invoices.length}
+                    </div>
+                `;
+                
+                if (data.debug) {
+                    html += `
+                        <h4>Debug Info:</h4>
+                        <ul>
+                            <li><strong>Total clientes:</strong> ${data.debug.totalClients}</li>
+                            <li><strong>Clientes con Stripe:</strong> ${data.debug.clientsWithStripe}</li>
+                            <li><strong>Total facturas:</strong> ${data.debug.totalInvoices}</li>
+                        </ul>
+                    `;
+                }
+                
+                if (data.invoices.length > 0) {
+                    html += '<h4>Facturas:</h4><ul>';
+                    data.invoices.forEach(inv => {
+                        html += `<li>${inv.number} - ${inv.client_email} - ${inv.amount}€ - ${inv.status}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                html += '<h4>JSON completo:</h4>';
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
+

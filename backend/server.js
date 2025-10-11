@@ -3933,6 +3933,54 @@ app.get('/api/admin/invoices', async (req, res) => {
     }
 });
 
+// Debug: Verificar datos del cliente
+app.get('/api/admin/debug-client/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        
+        // Buscar cliente en BD
+        const result = await db.pool.query(
+            'SELECT id, email, full_name, plan, stripe_customer_id, stripe_subscription_id FROM clients WHERE email = $1',
+            [email]
+        );
+        
+        const client = result.rows[0];
+        
+        if (!client) {
+            return res.json({
+                found: false,
+                email: email
+            });
+        }
+        
+        // Si tiene stripe_customer_id, buscar facturas
+        let invoices = [];
+        if (client.stripe_customer_id) {
+            const stripeInvoices = await stripe.invoices.list({
+                customer: client.stripe_customer_id,
+                limit: 10
+            });
+            invoices = stripeInvoices.data.map(inv => ({
+                id: inv.id,
+                status: inv.status,
+                total: inv.total / 100,
+                created: new Date(inv.created * 1000).toISOString()
+            }));
+        }
+        
+        res.json({
+            found: true,
+            client: client,
+            invoices: invoices,
+            invoices_count: invoices.length
+        });
+        
+    } catch (error) {
+        console.error('Error en debug:', error);
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // Sincronizar cliente con Stripe (Admin)
 app.post('/api/admin/sync-stripe-customer', async (req, res) => {
     try {
