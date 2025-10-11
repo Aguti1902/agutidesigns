@@ -477,9 +477,20 @@
 
         // Función para disparar el evento de conversión de Google Ads
         function fireGoogleAdsConversion() {
-            // Obtener el subscriptionId como transaction_id
+            // Obtener transaction_id desde múltiples fuentes
             const urlParams = new URLSearchParams(window.location.search);
-            const transactionId = urlParams.get('session_id') || '';
+            let transactionId = urlParams.get('session_id') || 
+                               data?.stripe_subscription_id || 
+                               submissionData?.stripe_subscription_id || 
+                               data?.submission_id || 
+                               submissionData?.id ||
+                               '';
+            
+            // Si aún no hay transaction_id, generar uno único
+            if (!transactionId) {
+                transactionId = 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                console.warn('⚠️ No se encontró transaction_id, generando uno único:', transactionId);
+            }
             
             // Obtener el plan y billing_cycle del cliente
             const plan = data?.plan || submissionData?.plan || 'basico';
@@ -504,7 +515,8 @@
                 transactionId, 
                 plan, 
                 billingCycle, 
-                conversionValue 
+                conversionValue,
+                source: urlParams.get('session_id') ? 'session_id' : 'generated'
             });
             
             // Evento 1: Conversión de Compra
@@ -519,7 +531,8 @@
             gtag('event', 'conversion', {
                 'send_to': 'AW-17641289817/BkePCO2_8aobENnwgtxB',
                 'value': conversionValue,
-                'currency': 'EUR'
+                'currency': 'EUR',
+                'transaction_id': transactionId
             });
         }
 
