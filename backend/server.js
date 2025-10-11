@@ -2691,45 +2691,90 @@ app.patch('/api/tickets/:ticketId', async (req, res) => {
     }
 });
 
-// Chat con IA (versión básica - podrás integrar OpenAI más tarde)
+// Chat con IA usando OpenAI
 app.post('/api/chat-ai', async (req, res) => {
     try {
         const { message, client_id, context } = req.body;
         
         console.log('💬 Mensaje de chat recibido:', message, 'Cliente:', client_id);
         
-        // Por ahora, respuestas predefinidas basadas en keywords
-        // TODO: Integrar con OpenAI API para respuestas reales
-        let response = '';
-        
-        const messageLower = message.toLowerCase();
-        
-        if (messageLower.includes('editar') || messageLower.includes('cambiar') || messageLower.includes('modificar')) {
-            response = `Para editar tu sitio web:\n\n1️⃣ Ve a la sección "Mi Sitio Web" en el menú lateral\n2️⃣ Haz clic en "Editar Contenido"\n3️⃣ Modifica los textos, imágenes o cualquier elemento\n4️⃣ Guarda los cambios\n\n¿Necesitas ayuda con algo específico?`;
-        } else if (messageLower.includes('dominio') || messageLower.includes('url')) {
-            response = `Sobre tu dominio:\n\n✓ Tu dominio está incluido en tu plan ${context?.plan || ''}\n✓ Puedes ver los detalles en "Dominio & Hosting"\n✓ El dominio se activa en 24-48h después del pago\n\n¿Quieres cambiar tu dominio o necesitas más información?`;
-        } else if (messageLower.includes('precio') || messageLower.includes('plan') || messageLower.includes('pago')) {
-            response = `Información de planes:\n\n📦 Plan Básico: 35€/mes + IVA (5 páginas)\n📦 Plan Avanzado: 49€/mes + IVA (10 páginas)\n📦 Plan Premium: 65€/mes + IVA (20 páginas)\n\nTodos incluyen:\n✓ Dominio .com o .es\n✓ Hosting y SSL\n✓ Soporte técnico\n✓ Actualizaciones ilimitadas\n\nVe a "Facturación" para cambiar de plan.`;
-        } else if (messageLower.includes('tiempo') || messageLower.includes('cuando') || messageLower.includes('entrega')) {
-            response = `⏰ Tiempos de entrega:\n\n✓ Tu web estará lista en 5 días hábiles\n✓ Recibirás actualizaciones por email\n✓ Puedes ver el progreso en tu dashboard\n\nSi ya han pasado más de 5 días, por favor crea un ticket de soporte para que nuestro equipo lo revise.`;
-        } else if (messageLower.includes('soporte') || messageLower.includes('ayuda') || messageLower.includes('problema')) {
-            response = `🆘 Formas de obtener ayuda:\n\n1. Chat IA (estás aquí) - Respuestas rápidas 24/7\n2. Tickets de Soporte - Para consultas detalladas\n3. Tutoriales en Video - Guías paso a paso\n\n¿Quieres que te ayude con algo específico o prefieres crear un ticket de soporte?`;
-        } else if (messageLower.includes('seo') || messageLower.includes('google') || messageLower.includes('posicionamiento')) {
-            response = `🚀 Optimización SEO:\n\nTu plan incluye:\n✓ Configuración básica de SEO\n✓ Meta descripciones optimizadas\n✓ Estructura de URLs amigables\n✓ Sitemap automático\n\nEn la sección "SEO & Marketing" puedes:\n- Ver tus keywords\n- Conectar Google Analytics\n- Optimizar contenido\n\n¿Te ayudo con algo más específico de SEO?`;
-        } else if (messageLower.includes('imagen') || messageLower.includes('foto') || messageLower.includes('logo')) {
-            response = `🖼️ Gestión de imágenes:\n\nDesde "Mi Sitio Web" puedes:\n✓ Subir nuevas imágenes (máx 5MB)\n✓ Reemplazar imágenes existentes\n✓ Optimizar automáticamente para web\n\nTodas las imágenes se optimizan para carga rápida.\n\n¿Necesitas ayuda para subir imágenes?`;
-        } else {
-            response = `Estoy aquí para ayudarte con tu sitio web de agutidesigns.\n\nPuedo ayudarte con:\n\n📝 Edición de contenido\n🌐 Información de dominio\n💳 Planes y facturación\n🚀 SEO y marketing\n🖼️ Gestión de imágenes\n📊 Estadísticas\n⏰ Tiempos de entrega\n\n¿Qué necesitas saber? Pregúntame algo específico o crea un ticket si necesitas ayuda personalizada.`;
+        // Verificar si OpenAI está configurado
+        if (!process.env.OPENAI_API_KEY) {
+            console.warn('⚠️ OpenAI API Key no configurada, usando respuestas básicas');
+            return res.json({
+                success: true,
+                response: 'El asistente de IA no está disponible temporalmente. Por favor, crea un ticket de soporte para obtener ayuda personalizada.'
+            });
         }
+        
+        // Inicializar cliente OpenAI
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+        });
+        
+        // Prompt del sistema especializado en Dashboard de clientes de agutidesigns y Elementor
+        const systemPrompt = `Eres un asistente virtual especializado en ayudar a clientes de agutidesigns.es con:
+
+1. **Navegación del Dashboard del Cliente**: Explica cómo usar las diferentes secciones (Resumen, Mi Negocio, Mi Sitio Web, Estadísticas, Tutoriales, Dominio & Hosting, Facturación, Contactar, SEO & Marketing, Mi Perfil).
+
+2. **Incidencias y Soporte**: Ayuda a resolver problemas comunes como:
+   - Problemas con el dominio
+   - Errores en el sitio web
+   - Dudas sobre facturación
+   - Cambios de plan
+   - Tiempos de entrega
+   - Cómo crear tickets de soporte
+
+3. **Elementor ÚNICAMENTE**: Proporciona ayuda SOLO sobre Elementor (constructor de páginas de WordPress). Si preguntan sobre otros temas de WordPress que NO sean Elementor, indica que solo puedes ayudar con Elementor específicamente.
+
+Temas de Elementor que SÍ puedes ayudar:
+- Cómo editar con Elementor
+- Widgets de Elementor
+- Plantillas y secciones
+- Diseño responsivo en Elementor
+- Estilos y tipografía
+- Añadir botones, imágenes, textos
+- Copiar/pegar elementos
+- Historial de cambios
+
+**IMPORTANTE:**
+- Sé conciso y directo (máximo 4-5 líneas por respuesta)
+- Usa emojis para hacer las respuestas más amigables
+- Si no sabes algo con certeza, recomienda crear un ticket de soporte
+- NO inventes información
+- NO hables de otros temas de WordPress que no sean Elementor
+
+Plan del cliente: ${context?.plan || 'Básico'}
+Negocio: ${context?.business_name || 'Cliente'}`;
+
+        // Llamar a OpenAI
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: message }
+            ],
+            max_tokens: 300,
+            temperature: 0.7,
+        });
+        
+        const aiResponse = completion.choices[0].message.content;
+        
+        console.log('✅ Respuesta de OpenAI generada');
         
         res.json({
             success: true,
-            response: response
+            response: aiResponse
         });
         
     } catch (error) {
-        console.error('Error en chat IA:', error);
-        res.status(500).json({ error: error.message });
+        console.error('❌ Error en chat IA:', error);
+        
+        // Respuesta de fallback en caso de error
+        res.json({
+            success: true,
+            response: 'Lo siento, no puedo responder ahora. Por favor, crea un ticket de soporte para obtener ayuda personalizada. 🎫'
+        });
     }
 });
 
@@ -4945,6 +4990,32 @@ app.post('/api/admin/cancel-subscription/:clientId', async (req, res) => {
         
     } catch (error) {
         console.error('❌ [ADMIN] Error marcando como cancelado:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Marcar cancelación como vista por el admin
+app.post('/api/admin/mark-cancellation-viewed/:clientId', async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        console.log(`👁️ [ADMIN] Marcando cancelación del cliente #${clientId} como vista`);
+        
+        await db.pool.query(`
+            UPDATE clients
+            SET admin_viewed_cancellation_at = CURRENT_TIMESTAMP
+            WHERE id = $1
+        `, [clientId]);
+        
+        console.log(`✅ [ADMIN] Cancelación del cliente #${clientId} marcada como vista`);
+        
+        res.json({ 
+            success: true,
+            message: 'Cancelación marcada como vista'
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error marcando cancelación como vista:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -644,16 +644,19 @@
 
         .chat-window {
             display: none;
-            position: absolute;
-            bottom: 75px;
+            position: fixed;
+            top: 0;
+            left: 0;
             right: 0;
-            width: 380px;
-            height: 550px;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
             background: white;
-            border-radius: 20px;
+            border-radius: 0;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             flex-direction: column;
+            z-index: 9998;
         }
 
         .chat-header {
@@ -1184,29 +1187,6 @@
             .chat-button {
                 width: 55px;
                 height: 55px;
-            }
-
-            .chat-window {
-                position: fixed;
-                bottom: 0 !important;
-                right: 0 !important;
-                left: 0;
-                width: 100% !important;
-                height: 100vh !important;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-
-            .chat-header {
-                padding: 15px;
-            }
-
-            .chat-messages {
-                padding: 15px;
-            }
-
-            .chat-input-container {
-                padding: 12px;
             }
         }
 

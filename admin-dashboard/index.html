@@ -3670,9 +3670,15 @@
                 // Si estamos en la sección de cancelaciones, marcar como visto
                 const currentSection = document.querySelector('.section.active');
                 if (currentSection && currentSection.id === 'section-cancelaciones') {
-                    console.log('🚫 [ADMIN] Viendo cliente desde Cancelaciones, actualizando badge...');
-                    // Guardar en localStorage que se vio una cancelación
-                    localStorage.setItem('cancellationViewed', Date.now().toString());
+                    console.log('🚫 [ADMIN] Viendo cliente desde Cancelaciones, marcando como vista...');
+                    try {
+                        await fetch(`${API_URL}/api/admin/mark-cancellation-viewed/${id}`, {
+                            method: 'POST'
+                        });
+                        console.log('✅ [ADMIN] Cancelación marcada como vista');
+                    } catch (error) {
+                        console.error('❌ [ADMIN] Error marcando cancelación como vista:', error);
+                    }
                 }
                 
                 // Mostrar modal con loader
@@ -3841,11 +3847,18 @@
         // Función helper para cerrar modal de cliente y actualizar badges
         function closeClientModal() {
             document.getElementById('clientDetailModal')?.remove();
-            // Si se vio desde cancelaciones, actualizar badge
-            if (localStorage.getItem('cancellationViewed')) {
-                console.log('🔄 [ADMIN] Actualizando badges después de ver cliente...');
-                updateAdminBadges();
+            
+            // Si estamos en la sección de cancelaciones, recargar la tabla para quitar el fondo azul
+            const currentSection = document.querySelector('.section.active');
+            if (currentSection && currentSection.id === 'section-cancelaciones') {
+                console.log('🔄 [ADMIN] Recargando cancelaciones para actualizar vista...');
+                setTimeout(() => {
+                    loadCancellations();
+                }, 300); // Pequeño delay para dar tiempo a que el backend actualice
             }
+            
+            // Actualizar badges
+            updateAdminBadges();
         }
 
         // 🆕 Función para arreglar submissions de clientes existentes
