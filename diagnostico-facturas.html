@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Facturas - agutidesigns</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0046FE;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: #0046FE;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background: #0036C8;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .error {
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .warning {
+            background: #f59e0b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0046FE;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico de Facturas - agutidesigns</h1>
+
+    <div class="card">
+        <h2>Acciones de Diagnóstico</h2>
+        <button class="btn" onclick="checkClients()">1️⃣ Verificar Clientes en BD</button>
+        <button class="btn" onclick="checkInvoices()">2️⃣ Verificar Facturas en Stripe</button>
+        <button class="btn" onclick="checkLastPayment()">3️⃣ Ver Último Pago Recibido</button>
+        <button class="btn" onclick="runFullDiagnosis()">🔧 Diagnóstico Completo</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+
+        function showLoading() {
+            document.getElementById('results').innerHTML = `
+                <div class="card">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Ejecutando diagnóstico...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showResults(title, content, type = 'info') {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            if (type === 'success') {
+                card.innerHTML = `<div class="success">✅ ${title}</div>`;
+            } else if (type === 'error') {
+                card.innerHTML = `<div class="error">❌ ${title}</div>`;
+            } else if (type === 'warning') {
+                card.innerHTML = `<div class="warning">⚠️ ${title}</div>`;
+            } else {
+                card.innerHTML = `<h3>${title}</h3>`;
+            }
+            
+            card.innerHTML += content;
+            document.getElementById('results').appendChild(card);
+        }
+
+        async function checkClients() {
+            showLoading();
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/clients`);
+                const data = await response.json();
+                
+                const clientsWithStripe = data.filter(c => c.stripe_customer_id);
+                const clientsWithoutStripe = data.filter(c => !c.stripe_customer_id);
+                
+                let html = `
+                    <h3>📊 Resumen de Clientes</h3>
+                    <p><strong>Total clientes:</strong> ${data.length}</p>
+                    <p><strong>Con Stripe Customer ID:</strong> ${clientsWithStripe.length} ✅</p>
+                    <p><strong>Sin Stripe Customer ID:</strong> ${clientsWithoutStripe.length} ⚠️</p>
+                `;
+                
+                if (clientsWithStripe.length > 0) {
+                    html += `
+                        <h4>✅ Clientes con Stripe:</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Plan</th>
+                                    <th>Stripe Customer ID</th>
+                                    <th>Stripe Subscription ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    clientsWithStripe.forEach(c => {
+                        html += `
+                            <tr>
+                                <td>${c.id}</td>
+                                <td>${c.email}</td>
+                                <td>${c.plan || 'N/A'}</td>
+                                <td><code>${c.stripe_customer_id}</code></td>
+                                <td><code>${c.stripe_subscription_id || 'N/A'}</code></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                }
+                
+                if (clientsWithoutStripe.length > 0) {
+                    html += `
+                        <div class="warning" style="margin-top: 20px;">
+                            <strong>⚠️ Clientes sin Stripe Customer ID:</strong>
+                            <p>Estos clientes no se registraron correctamente al pagar:</p>
+                            <ul>
+                    `;
+                    
+                    clientsWithoutStripe.slice(0, 5).forEach(c => {
+                        html += `<li>${c.email} (ID: ${c.id})</li>`;
+                    });
+                    
+                    if (clientsWithoutStripe.length > 5) {
+                        html += `<li>... y ${clientsWithoutStripe.length - 5} más</li>`;
+                    }
+                    
+                    html += `
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                showResults('Diagnóstico de Clientes', html);
+                
+            } catch (error) {
+                showResults('Error', `<pre>${error.message}</pre>`, 'error');
+            }
+        }
+
+        async function checkInvoices() {
+            showLoading();
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/invoices`);
+                const data = await response.json();
+                
+                let html = `
+                    <h3>🧾 Resumen de Facturas</h3>
+                    <p><strong>Total facturas encontradas:</strong> ${data.invoices.length}</p>
+                `;
+                
+                if (data.debug) {
+                    html += `
+                        <h4>Debug Info:</h4>
+                        <pre>${JSON.stringify(data.debug, null, 2)}</pre>
+                    `;
+                }
+                
+                if (data.invoices.length > 0) {
+                    html += `
+                        <h4>📋 Facturas:</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Cliente</th>
+                                    <th>Email</th>
+                                    <th>Monto</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.invoices.forEach(inv => {
+                        const statusEmoji = inv.status === 'paid' ? '✅' : '⏳';
+                        const date = new Date(inv.created).toLocaleDateString('es-ES');
+                        html += `
+                            <tr>
+                                <td>${inv.number}</td>
+                                <td>${inv.client_name}</td>
+                                <td>${inv.client_email}</td>
+                                <td><strong>${inv.amount}€</strong></td>
+                                <td>${statusEmoji} ${inv.status}</td>
+                                <td>${date}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += `
+                        <div class="warning">
+                            <strong>⚠️ No se encontraron facturas</strong>
+                            <p>Esto puede deberse a:</p>
+                            <ul>
+                                <li>No hay clientes con Stripe Customer ID asignado</li>
+                                <li>Las suscripciones no generaron facturas aún</li>
+                                <li>Error al obtener facturas de Stripe API</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                showResults('Diagnóstico de Facturas', html);
+                
+            } catch (error) {
+                showResults('Error', `<pre>${error.message}</pre>`, 'error');
+            }
+        }
+
+        async function checkLastPayment() {
+            showLoading();
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/submissions`);
+                const data = await response.json();
+                
+                const paidSubmissions = data.filter(s => s.status === 'paid').sort((a, b) => 
+                    new Date(b.created_at) - new Date(a.created_at)
+                );
+                
+                let html = `
+                    <h3>💳 Últimos Pagos Recibidos</h3>
+                    <p><strong>Total pagos completados:</strong> ${paidSubmissions.length}</p>
+                `;
+                
+                if (paidSubmissions.length > 0) {
+                    html += `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Email</th>
+                                    <th>Plan</th>
+                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                    <th>Subscription ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    paidSubmissions.slice(0, 10).forEach(s => {
+                        const date = new Date(s.created_at).toLocaleString('es-ES');
+                        html += `
+                            <tr>
+                                <td>${s.id}</td>
+                                <td>${s.email}</td>
+                                <td>${s.plan}</td>
+                                <td><strong>${s.amount}€</strong></td>
+                                <td>${date}</td>
+                                <td><code>${s.stripe_subscription_id || 'N/A'}</code></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += `
+                        <div class="warning">
+                            <strong>⚠️ No hay pagos registrados</strong>
+                        </div>
+                    `;
+                }
+                
+                showResults('Últimos Pagos', html);
+                
+            } catch (error) {
+                showResults('Error', `<pre>${error.message}</pre>`, 'error');
+            }
+        }
+
+        async function runFullDiagnosis() {
+            document.getElementById('results').innerHTML = '';
+            await checkClients();
+            await checkInvoices();
+            await checkLastPayment();
+        }
+    </script>
+</body>
+</html>
+
