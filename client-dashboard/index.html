@@ -6952,6 +6952,16 @@
 
         // Toggle chat
         function toggleChat() {
+            // En móvil, abrir página nueva
+            if (window.innerWidth <= 768) {
+                // Guardar datos del cliente en localStorage para el chat
+                localStorage.setItem('currentClient', JSON.stringify(currentClient));
+                // Abrir chat en nueva pestaña
+                window.open('chat-ia.html', '_blank');
+                return;
+            }
+            
+            // En desktop, usar widget
             chatOpen = !chatOpen;
             const chatWindow = document.getElementById('chatWindow');
             const chatButtonIcon = document.getElementById('chatButtonIcon');

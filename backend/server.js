@@ -3943,12 +3943,12 @@ app.post('/api/admin/sync-stripe-customer', async (req, res) => {
         }
         
         // 1. Buscar cliente en la base de datos
-        const [clients] = await db.pool.query(
-            'SELECT * FROM clients WHERE email = ? LIMIT 1',
+        const result = await db.pool.query(
+            'SELECT * FROM clients WHERE email = $1 LIMIT 1',
             [email]
         );
         
-        const client = clients[0];
+        const client = result.rows[0];
         
         if (!client) {
             return res.status(404).json({ 
@@ -4019,10 +4019,10 @@ app.post('/api/admin/sync-stripe-customer', async (req, res) => {
         
         await db.pool.query(
             `UPDATE clients 
-             SET stripe_customer_id = ?, 
-                 stripe_subscription_id = ?,
+             SET stripe_customer_id = $1, 
+                 stripe_subscription_id = $2,
                  updated_at = NOW()
-             WHERE id = ?`,
+             WHERE id = $3`,
             [stripeCustomerId, stripeSubscriptionId, client.id]
         );
         
@@ -5020,7 +5020,7 @@ app.post('/api/admin/mark-cancellation-viewed/:clientId', async (req, res) => {
         await db.pool.query(`
             UPDATE clients
             SET admin_viewed_cancellation_at = CURRENT_TIMESTAMP
-            WHERE id = ?
+            WHERE id = $1
         `, [clientId]);
         
         console.log(`✅ [ADMIN] Cancelación del cliente #${clientId} marcada como vista`);

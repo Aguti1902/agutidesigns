@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat IA - agutidesigns</title>
+    <link rel="icon" type="image/png" href="https://agutidesigns.vercel.app/images/favicon2.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0046FE 0%, #0036C8 100%);
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chat-header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .chat-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin: 5px 0 0;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .message.bot {
+            background: white;
+            align-self: flex-start;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e8eaed;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #0046FE 0%, #0056FF 100%);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e8eaed;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #0046FE;
+        }
+
+        .send-btn {
+            background: #0046FE;
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .typing {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 80px;
+            align-self: flex-start;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e8eaed;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-header">
+        <div>
+            <h1>💬 Chat IA</h1>
+            <p>Asistente virtual 24/7</p>
+        </div>
+        <button class="close-btn" onclick="window.close()">×</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Los mensajes se añadirán aquí dinámicamente -->
+    </div>
+
+    <div class="chat-input-container">
+        <form class="chat-form" id="chatForm">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu pregunta..." autocomplete="off">
+            <button type="submit" class="send-btn">➤</button>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = 'https://agutidesigns-production.up.railway.app';
+        
+        // Obtener datos del cliente desde localStorage
+        const clientData = JSON.parse(localStorage.getItem('currentClient') || '{}');
+
+        // Añadir mensaje de bienvenida
+        window.addEventListener('DOMContentLoaded', () => {
+            const userName = clientData.full_name?.split(' ')[0] || 'Usuario';
+            addChatMessage('bot', `¡Hola ${userName}! 👋\n\nSoy tu asistente virtual de agutidesigns. ¿En qué puedo ayudarte hoy?`);
+        });
+
+        // Añadir mensaje al chat
+        function addChatMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.textContent = text;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Enviar mensaje
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const input = document.getElementById('chatInput');
+            const userMessage = input.value.trim();
+            
+            if (!userMessage) return;
+            
+            // Añadir mensaje del usuario
+            addChatMessage('user', userMessage);
+            input.value = '';
+            
+            // Simular "escribiendo..."
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing';
+            typingDiv.className = 'typing';
+            typingDiv.textContent = '...';
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            
+            try {
+                // Llamar a la IA
+                const response = await fetch(`${API_URL}/api/chat-ai`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        client_id: clientData.id,
+                        context: {
+                            plan: clientData.plan,
+                            business_name: clientData.business_name
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Eliminar "escribiendo..."
+                document.getElementById('typing')?.remove();
+                
+                if (response.ok && data.response) {
+                    addChatMessage('bot', data.response);
+                } else {
+                    addChatMessage('bot', 'Lo siento, ha ocurrido un error. Por favor, intenta de nuevo o crea un ticket de soporte.');
+                }
+            } catch (error) {
+                console.error('Error en chat IA:', error);
+                document.getElementById('typing')?.remove();
+                addChatMessage('bot', 'Lo siento, no puedo responder ahora. Por favor, intenta más tarde o crea un ticket de soporte.');
+            }
+        });
+    </script>
+</body>
+</html>
+
