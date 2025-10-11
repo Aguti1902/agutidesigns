@@ -3960,43 +3960,54 @@ app.post('/api/admin/sync-stripe-customer', async (req, res) => {
             stripe_customer_id: client.stripe_customer_id || 'NO ASIGNADO'
         });
         
-        // 2. Buscar suscripciones de este cliente en Stripe
-        console.log(`🔍 [ADMIN] Buscando suscripciones en Stripe para: ${email}`);
+        // 2. Buscar cliente en Stripe por email
+        console.log(`🔍 [ADMIN] Buscando cliente en Stripe por email: ${email}`);
         
-        const subscriptions = await stripe.subscriptions.list({
-            limit: 10
+        const customers = await stripe.customers.list({
+            email: email,
+            limit: 1
         });
         
-        // Filtrar por customer email
-        let matchingSubscription = null;
-        
-        for (const sub of subscriptions.data) {
-            const customer = await stripe.customers.retrieve(sub.customer);
-            if (customer.email && customer.email.toLowerCase() === email.toLowerCase()) {
-                matchingSubscription = sub;
-                console.log(`✅ [ADMIN] Suscripción encontrada:`, {
-                    subscription_id: sub.id,
-                    customer_id: sub.customer,
-                    status: sub.status,
-                    plan: sub.items.data[0]?.price?.nickname || 'N/A'
-                });
-                break;
-            }
+        if (customers.data.length === 0) {
+            return res.status(404).json({ 
+                success: false,
+                error: 'Cliente no encontrado en Stripe',
+                details: `No existe un cliente en Stripe con el email: ${email}`
+            });
         }
+        
+        const stripeCustomer = customers.data[0];
+        console.log(`✅ [ADMIN] Cliente encontrado en Stripe:`, {
+            customer_id: stripeCustomer.id,
+            email: stripeCustomer.email,
+            name: stripeCustomer.name
+        });
+        
+        // 3. Buscar suscripciones de este cliente
+        const subscriptions = await stripe.subscriptions.list({
+            customer: stripeCustomer.id,
+            limit: 1
+        });
+        
+        let matchingSubscription = subscriptions.data[0] || null;
         
         if (!matchingSubscription) {
             return res.status(404).json({ 
                 success: false,
-                error: 'No se encontró suscripción en Stripe',
-                details: `El email ${email} no tiene suscripciones activas en Stripe`,
-                debug: {
-                    totalSubscriptionsSearched: subscriptions.data.length
-                }
+                error: 'No se encontró suscripción activa',
+                details: `El cliente existe en Stripe pero no tiene suscripciones activas`,
+                stripeCustomerId: stripeCustomer.id
             });
         }
         
-        // 3. Actualizar cliente en la base de datos
-        const stripeCustomerId = matchingSubscription.customer;
+        console.log(`✅ [ADMIN] Suscripción encontrada:`, {
+            subscription_id: matchingSubscription.id,
+            status: matchingSubscription.status,
+            plan: matchingSubscription.items.data[0]?.price?.nickname || 'N/A'
+        });
+        
+        // 4. Actualizar cliente en la base de datos
+        const stripeCustomerId = stripeCustomer.id;
         const stripeSubscriptionId = matchingSubscription.id;
         
         console.log(`💾 [ADMIN] Actualizando cliente #${client.id} con Stripe IDs`);
@@ -4010,7 +4021,7 @@ app.post('/api/admin/sync-stripe-customer', async (req, res) => {
             [stripeCustomerId, stripeSubscriptionId, client.id]
         );
         
-        // 4. Verificar cuántas facturas tiene este cliente
+        // 5. Verificar cuántas facturas tiene este cliente
         const invoices = await stripe.invoices.list({
             customer: stripeCustomerId,
             limit: 100
