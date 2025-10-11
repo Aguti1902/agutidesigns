@@ -177,7 +177,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
             amount: plan === 'basico' ? 35 : plan === 'avanzado' ? 49 : 65
         });
 
-        // Crear sesión de Stripe Checkout
+        // Crear sesión de Stripe Checkout con impuestos automáticos
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
@@ -189,6 +189,9 @@ app.post('/api/create-checkout-session', async (req, res) => {
             ],
             customer_email: formData.email,
             client_reference_id: String(submissionId),
+            automatic_tax: {
+                enabled: true
+            },
             metadata: {
                 submission_id: String(submissionId),
                 plan: plan,
@@ -312,11 +315,14 @@ app.post('/api/create-subscription', async (req, res) => {
             }
         });
 
-        // Crear suscripción
+        // Crear suscripción con impuestos automáticos
         const subscription = await stripe.subscriptions.create({
             customer: customer.id,
             items: [{ price: priceId }],
             expand: ['latest_invoice.payment_intent'],
+            automatic_tax: {
+                enabled: true
+            },
             metadata: {
                 submission_id: String(finalSubmissionId),
                 plan: plan,
