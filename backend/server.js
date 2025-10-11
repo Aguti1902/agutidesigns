@@ -4975,7 +4975,8 @@ app.get('/api/admin/cancelaciones', async (req, res) => {
             const result = await db.pool.query(`
                 SELECT 
                     id, email, full_name, business_name, plan, 
-                    subscription_status, cancelled_at, cancellation_reason, subscription_end_date
+                    subscription_status, cancelled_at, cancellation_reason, subscription_end_date,
+                    admin_viewed_cancellation_at
                 FROM clients
                 WHERE subscription_status = 'cancelled'
                 ORDER BY cancelled_at DESC

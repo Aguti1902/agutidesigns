@@ -334,6 +334,17 @@ async function initializeTables() {
             console.log('⚠️ Migración de cancelación en clients ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo para tracking de visualización de cancelaciones
+        try {
+            await client.query(`
+                ALTER TABLE clients 
+                ADD COLUMN IF NOT EXISTS admin_viewed_cancellation_at TIMESTAMP
+            `);
+            console.log('✅ Migración: Campo admin_viewed_cancellation_at añadido a clients');
+        } catch (e) {
+            console.log('⚠️ Migración admin_viewed_cancellation_at en clients ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campos para Google OAuth
         try {
             await client.query(`
