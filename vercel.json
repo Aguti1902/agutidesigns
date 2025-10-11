@@ -20,5 +20,16 @@
       "source": "/crear-usuario-prueba",
       "destination": "/crear-usuario-prueba.html"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
   ]
 }
