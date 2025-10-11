@@ -1625,7 +1625,7 @@
                                 <span>💰</span>
                                 Ingresos Totales
                             </div>
-                    <div class="stat-value" id="totalRevenue">0€</div>
+                    <div class="stat-value" id="totalRevenueStats">0€</div>
                             <div class="stat-change">Revenue acumulado</div>
                         </div>
                         <div class="stat-card purple">
@@ -1943,7 +1943,7 @@
                                 Filtrar por Período
                             </h3>
                             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                <button class="btn-filter" data-period="week" onclick="filterInvoicesByPeriod('week')" style="padding: 12px 24px; border: 2px solid #0046FE; background: linear-gradient(135deg, #0046FE 0%, #0056FF 100%); color: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3); font-size: 0.95rem;">
+                                <button class="btn-filter" data-period="week" onclick="filterInvoicesByPeriod('week')" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; color: #4b5563; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;">
                                     📅 Última Semana
                                 </button>
                                 <button class="btn-filter" data-period="month" onclick="filterInvoicesByPeriod('month')" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; color: #4b5563; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;">
@@ -1955,7 +1955,7 @@
                                 <button class="btn-filter" data-period="year" onclick="filterInvoicesByPeriod('year')" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; color: #4b5563; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;">
                                     📈 Último Año
                                 </button>
-                                <button class="btn-filter" data-period="all" onclick="filterInvoicesByPeriod('all')" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; color: #4b5563; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;">
+                                <button class="btn-filter" data-period="all" onclick="filterInvoicesByPeriod('all')" style="padding: 12px 24px; border: 2px solid #0046FE; background: linear-gradient(135deg, #0046FE 0%, #0056FF 100%); color: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 70, 254, 0.3); font-size: 0.95rem;">
                                     🌐 Todas
                                 </button>
                             </div>
@@ -2477,7 +2477,7 @@
                 document.getElementById('totalSubmissions').textContent = stats.total || 0;
                 document.getElementById('activeClients').textContent = stats.activeClients || 0;
                 document.getElementById('inactiveClients').textContent = stats.noPlan || 0;
-                document.getElementById('totalRevenue').textContent = (stats.revenue || 0) + '€';
+                document.getElementById('totalRevenueStats').textContent = (stats.revenue || 0) + '€';
                 
                 // 💸 Calcular comisión del diseñador
                 const revenue = stats.revenue || 0;
@@ -4518,7 +4518,7 @@
         // ===== FACTURAS =====
         let allInvoicesData = [];
         let filteredInvoicesData = [];
-        let currentPeriod = 'week';
+        let currentPeriod = 'all'; // Por defecto mostrar todas las facturas
 
         async function loadAllInvoices() {
             try {
@@ -4823,10 +4823,22 @@
                 .filter(inv => inv.status === 'paid')
                 .reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
             
+            console.log('💰 [ADMIN] Actualizando estadísticas de facturas:', {
+                totalInvoices,
+                paidInvoices,
+                pendingInvoices,
+                totalRevenue: totalRevenue.toFixed(2)
+            });
+            
             document.getElementById('totalInvoices').textContent = totalInvoices;
             document.getElementById('paidInvoices').textContent = paidInvoices;
             document.getElementById('pendingInvoices').textContent = pendingInvoices;
-            document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)}€`;
+            
+            // Actualizar el elemento de ingresos totales (en la sección de facturas)
+            const totalRevenueElement = document.getElementById('totalRevenue');
+            if (totalRevenueElement) {
+                totalRevenueElement.textContent = `${totalRevenue.toFixed(2)}€`;
+            }
         }
 
         function exportInvoices() {
