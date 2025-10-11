@@ -74,6 +74,7 @@
         <button class="btn" onclick="debugClient()">🔍 Debug Cliente</button>
         <button class="btn" onclick="getAllClients()">📋 Ver Todos los Clientes</button>
         <button class="btn" onclick="getInvoices()">🧾 Ver Facturas Admin</button>
+        <button class="btn" onclick="checkDuplicates()" style="background: #F59E0B;">🧹 Buscar Duplicados</button>
         <div id="results"></div>
     </div>
 
@@ -205,6 +206,47 @@
                         html += `<li>${inv.number} - ${inv.client_email} - ${inv.amount}€ - ${inv.status}</li>`;
                     });
                     html += '</ul>';
+                }
+                
+                html += '<h4>JSON completo:</h4>';
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        async function checkDuplicates() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Buscando duplicados...</p>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/clean-duplicate-customers`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                let html = `
+                    <h3>Resultado:</h3>
+                    <div class="info">
+                        <strong>Total clientes con Stripe:</strong> ${data.totalClients}<br>
+                        <strong>Stripe Customer IDs únicos:</strong> ${data.uniqueCustomerIds}<br>
+                        <strong>Clientes duplicados:</strong> ${data.duplicates.length}
+                    </div>
+                `;
+                
+                if (data.duplicates.length > 0) {
+                    html += '<div class="error">⚠️ Se encontraron clientes duplicados (mismo stripe_customer_id):</div>';
+                    html += '<h4>Duplicados (estos se ignoran al generar facturas):</h4><ul>';
+                    data.duplicates.forEach(dup => {
+                        html += `<li>ID: ${dup.id} - Email: ${dup.email} - Customer ID: ${dup.stripe_customer_id}</li>`;
+                    });
+                    html += '</ul>';
+                    html += '<div class="info">💡 Las facturas ahora solo se obtienen una vez por cada stripe_customer_id único, eliminando duplicados.</div>';
+                } else {
+                    html += '<div class="success">✅ No se encontraron duplicados. Cada stripe_customer_id es único.</div>';
                 }
                 
                 html += '<h4>JSON completo:</h4>';

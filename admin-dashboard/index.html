@@ -2651,34 +2651,18 @@
                         return;
                     }
                     
-                    // Contar cancelaciones de hoy (últimas 24 horas)
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
+                    // Contar solo cancelaciones que NO han sido vistas por el admin
                     const newCancellations = cancelaciones.filter(c => {
-                        const cancelDate = new Date(c.cancelled_at);
-                        return cancelDate >= today;
+                        const isUnviewed = !c.admin_viewed_cancellation_at;
+                        
+                        if (isUnviewed) {
+                            console.log(`🔔 [BADGE] Cancelación sin ver: Cliente #${c.id} - ${c.full_name}`);
+                        }
+                        
+                        return isUnviewed;
                     }).length;
                     
-                    // Verificar si el admin ya vio las cancelaciones
-                    const cancellationViewed = localStorage.getItem('cancellationViewed');
                     let shouldShowBadge = newCancellations > 0;
-                    
-                    if (cancellationViewed && newCancellations > 0) {
-                        const viewedTime = parseInt(cancellationViewed);
-                        // Si la última cancelación es anterior a cuando se vio, no mostrar badge
-                        const latestCancellation = cancelaciones
-                            .filter(c => new Date(c.cancelled_at) >= today)
-                            .sort((a, b) => new Date(b.cancelled_at) - new Date(a.cancelled_at))[0];
-                        
-                        if (latestCancellation) {
-                            const cancelTime = new Date(latestCancellation.cancelled_at).getTime();
-                            if (cancelTime < viewedTime) {
-                                shouldShowBadge = false;
-                                console.log('🚫 [ADMIN] Cancelaciones ya vistas, ocultando badge');
-                            }
-                        }
-                    }
                     
                     const cancelBadge = document.getElementById('newCancellationsBadge');
                     if (cancelBadge) {

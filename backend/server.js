@@ -3852,13 +3852,25 @@ app.get('/api/admin/invoices', async (req, res) => {
         
         console.log(`📊 [ADMIN] ${clientsWithStripe.length} clientes con Stripe Customer ID`);
         
+        // 🆕 Agrupar clientes por stripe_customer_id para evitar duplicados
+        const customerIdMap = new Map();
+        clientsWithStripe.forEach(client => {
+            if (!customerIdMap.has(client.stripe_customer_id)) {
+                customerIdMap.set(client.stripe_customer_id, client);
+            } else {
+                console.warn(`⚠️ [ADMIN] Cliente duplicado detectado: ID ${client.id} tiene el mismo stripe_customer_id que otro cliente`);
+            }
+        });
+        
+        console.log(`📊 [ADMIN] ${customerIdMap.size} stripe_customer_id únicos (de ${clientsWithStripe.length} clientes)`);
+        
         let allInvoices = [];
         
-        // Obtener facturas de cada cliente
-        for (const client of clientsWithStripe) {
+        // Obtener facturas de cada stripe_customer_id único
+        for (const [stripeCustomerId, client] of customerIdMap) {
             try {
                 const invoices = await stripe.invoices.list({
-                    customer: client.stripe_customer_id,
+                    customer: stripeCustomerId,
                     limit: 100
                 });
                 
@@ -3978,6 +3990,52 @@ app.get('/api/admin/debug-client/:email', async (req, res) => {
     } catch (error) {
         console.error('Error en debug:', error);
         res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
+// Limpiar clientes duplicados (Admin)
+app.post('/api/admin/clean-duplicate-customers', async (req, res) => {
+    try {
+        console.log('🧹 [ADMIN] Limpiando clientes duplicados...');
+        
+        // Obtener todos los clientes con stripe_customer_id
+        const result = await db.pool.query(
+            'SELECT id, email, stripe_customer_id, created_at FROM clients WHERE stripe_customer_id IS NOT NULL ORDER BY created_at ASC'
+        );
+        
+        const clients = result.rows;
+        const seenCustomerIds = new Map();
+        const duplicates = [];
+        
+        // Identificar duplicados (mantener el más antiguo)
+        clients.forEach(client => {
+            if (seenCustomerIds.has(client.stripe_customer_id)) {
+                duplicates.push(client);
+            } else {
+                seenCustomerIds.set(client.stripe_customer_id, client);
+            }
+        });
+        
+        console.log(`🔍 [ADMIN] Encontrados ${duplicates.length} clientes duplicados`);
+        
+        // Opcional: eliminar los duplicados
+        // Por ahora solo reportamos, no eliminamos automáticamente
+        
+        res.json({
+            success: true,
+            totalClients: clients.length,
+            uniqueCustomerIds: seenCustomerIds.size,
+            duplicates: duplicates.map(d => ({
+                id: d.id,
+                email: d.email,
+                stripe_customer_id: d.stripe_customer_id,
+                created_at: d.created_at
+            }))
+        });
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Error limpiando duplicados:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
