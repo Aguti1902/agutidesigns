@@ -158,44 +158,7 @@ app.get('/api/config', (req, res) => {
     });
 });
 
-// 2. CREAR SESIÓN DE CHECKOUT DE PRUEBA (0.50€)
-app.post('/api/create-test-checkout', async (req, res) => {
-    try {
-        const testPriceId = process.env.STRIPE_PRICE_TEST_BASICO || 'price_1SGs95FjBSJ299OpxWtTmVRw';
-        
-        console.log('🧪 Creando checkout de prueba con Price ID:', testPriceId);
-        
-        // Crear sesión de Stripe Checkout con impuestos automáticos
-        const session = await stripe.checkout.sessions.create({
-            mode: 'subscription',
-            payment_method_types: ['card'],
-            line_items: [
-                {
-                    price: testPriceId,
-                    quantity: 1,
-                },
-            ],
-            customer_email: 'test@agutidesigns.com',
-            automatic_tax: {
-                enabled: true
-            },
-            metadata: {
-                test_mode: 'true',
-                plan: 'test'
-            },
-            success_url: `${process.env.SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}&test=true`,
-            cancel_url: `${process.env.FRONTEND_URL || 'https://formulario.agutidesigns.es'}/checkout-test.html`,
-            billing_address_collection: 'required',
-        });
-
-        res.json({ sessionId: session.id, sessionUrl: session.url });
-    } catch (error) {
-        console.error('❌ Error creando sesión de test:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// 3. CREAR SESIÓN DE CHECKOUT DE STRIPE
+// 2. CREAR SESIÓN DE CHECKOUT DE STRIPE
 app.post('/api/create-checkout-session', async (req, res) => {
     try {
         const { plan, formData } = req.body;
@@ -3862,18 +3825,18 @@ app.get('/api/admin/invoices', async (req, res) => {
                         return hasRealAmount && isNotFullyRefunded;
                     })
                     .map(invoice => {
-                        // Obtener el monto base (sin IVA)
-                        const baseAmount = invoice.amount_paid > 0 ? invoice.amount_paid / 100 : invoice.amount_due / 100;
-                        
-                        // Calcular IVA (21%)
-                        const amountWithVAT = baseAmount * 1.21;
+                        // Stripe devuelve montos con IVA ya incluido cuando automatic_tax está habilitado
+                        // total = incluye IVA, subtotal = sin IVA, tax = monto del IVA
+                        const totalAmount = invoice.total / 100; // Monto total con IVA
+                        const subtotalAmount = invoice.subtotal / 100; // Monto sin IVA
+                        const taxAmount = invoice.tax ? invoice.tax / 100 : 0; // Monto del IVA
                         
                         return {
                             id: invoice.id,
                             number: invoice.number || `INV-${invoice.id.slice(-8)}`,
-                            amount: amountWithVAT.toFixed(2),
-                            amount_without_vat: baseAmount.toFixed(2),
-                            vat_amount: (amountWithVAT - baseAmount).toFixed(2),
+                            amount: totalAmount.toFixed(2), // Total con IVA
+                            amount_without_vat: subtotalAmount.toFixed(2),
+                            vat_amount: taxAmount.toFixed(2),
                             currency: invoice.currency.toUpperCase(),
                             status: invoice.status,
                             created: new Date(invoice.created * 1000).toISOString(),
