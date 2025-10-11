@@ -703,6 +703,63 @@ function paymentFailedAdminEmail(clientData, attemptNumber) {
     };
 }
 
+// Checkout abandonado - Email de recordatorio
+function checkoutAbandonedEmail(submissionData) {
+    const planInfo = {
+        'basico': { name: 'Plan Básico', price: '35€', pages: '5 páginas' },
+        'avanzado': { name: 'Plan Avanzado', price: '49€', pages: '10 páginas' },
+        'premium': { name: 'Plan Premium', price: '65€', pages: '20 páginas' }
+    };
+    
+    const plan = planInfo[submissionData.plan] || planInfo.basico;
+    
+    const content = `
+        <h1>⏰ ¿Te quedaste a medias?</h1>
+        <p>Hola <strong>${submissionData.full_name}</strong>,</p>
+        <p>Notamos que comenzaste el proceso para crear tu sitio web profesional pero no lo completaste.</p>
+        
+        <div class="warning-box">
+            <p style="margin: 0;"><strong>🎯 Tu plan seleccionado:</strong> ${plan.name} - ${plan.price}/mes</p>
+            <p style="margin: 5px 0 0 0;">Incluye ${plan.pages} + dominio + hosting + soporte</p>
+        </div>
+        
+        <h3>💡 ¿Por qué completar tu pedido?</h3>
+        <ul style="color: #666; line-height: 1.8;">
+            <li><strong>✅ Diseño profesional</strong> - Tu web se verá increíble desde el primer día</li>
+            <li><strong>✅ Optimizada para móviles</strong> - Funcionará perfecto en todos los dispositivos</li>
+            <li><strong>✅ SEO incluido</strong> - Aparecerás en Google desde el inicio</li>
+            <li><strong>✅ Soporte continuo</strong> - Te ayudamos siempre que lo necesites</li>
+            <li><strong>✅ Sin sorpresas</strong> - Precio fijo, sin costes ocultos</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://formulario.agutidesigns.es/checkout.html?plan=${submissionData.plan}&email=${encodeURIComponent(submissionData.email)}" class="button" style="color: #ffffff;">🚀 Completar Mi Pedido</a>
+        </div>
+        
+        <div class="info-box">
+            <p style="margin: 0;"><strong>⏱️ Proceso rápido:</strong> Solo te tomará 2 minutos completar tu pedido y en 5 días tendrás tu web lista.</p>
+        </div>
+        
+        <h3>❓ ¿Tienes dudas?</h3>
+        <p>Si tienes alguna pregunta sobre el proceso o necesitas ayuda, no dudes en contactarnos:</p>
+        <p>📧 <a href="mailto:info@agutidesigns.es" style="color: #0046FE;">info@agutidesigns.es</a> | 📞 Respondemos en menos de 2 horas</p>
+        
+        <div class="divider"></div>
+        
+        <p style="color: #999; font-size: 0.9rem; text-align: center;">
+            <strong>💌 Oferta especial:</strong> Si completas tu pedido en las próximas 24 horas, 
+            te incluimos <strong>gratis</strong> la optimización SEO avanzada (valor: 150€).
+        </p>
+    `;
+    
+    return {
+        to: submissionData.email,
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: `⏰ ¿Completamos tu sitio web de ${submissionData.business_name}? - agutidesigns`,
+        html: createEmailLayout(content, `Completa tu pedido y obtén tu sitio web profesional en 5 días`)
+    };
+}
+
 /**
  * 🚀 FUNCIONES DE ENVÍO
  */
@@ -739,6 +796,9 @@ async function sendEmail(type, data) {
                 break;
             case 'subscription-cancelled':
                 emailData = subscriptionCancelledEmail(data);
+                break;
+            case 'checkout-abandoned':
+                emailData = checkoutAbandonedEmail(data);
                 break;
             
             // Emails al admin

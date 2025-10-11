@@ -582,6 +582,35 @@ app.post('/webhook', async (req, res) => {
             console.log(`Pago completado para submission ${submissionId}`);
             break;
 
+        case 'checkout.session.expired':
+            const expiredSession = event.data.object;
+            const expiredSubmissionId = expiredSession.client_reference_id;
+            
+            console.log(`⏰ [WEBHOOK] Checkout expirado para submission ${expiredSubmissionId}`);
+            
+            try {
+                // Obtener datos del submission
+                const expiredSubmission = await db.getSubmission(expiredSubmissionId);
+                
+                if (expiredSubmission && expiredSubmission.status === 'pending') {
+                    console.log(`📧 [WEBHOOK ABANDON] Enviando email de recordatorio a: ${expiredSubmission.email}`);
+                    
+                    // Enviar email de checkout abandonado
+                    const emailResult = await emailService.sendEmail('checkout-abandoned', expiredSubmission);
+                    
+                    if (emailResult.success) {
+                        console.log(`✅ [WEBHOOK ABANDON] Email enviado exitosamente a ${expiredSubmission.email}`);
+                    } else {
+                        console.error(`❌ [WEBHOOK ABANDON] Error enviando email:`, emailResult.error);
+                    }
+                } else {
+                    console.log(`⚠️ [WEBHOOK ABANDON] Submission ${expiredSubmissionId} no encontrado o ya procesado`);
+                }
+            } catch (error) {
+                console.error('❌ [WEBHOOK ABANDON] Error procesando checkout expirado:', error);
+            }
+            break;
+
         case 'customer.subscription.updated':
             const updatedSubscription = event.data.object;
             console.log(`\n🔄 [WEBHOOK] ========== SUBSCRIPTION UPDATED ==========`);
