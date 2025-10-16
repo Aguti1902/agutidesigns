@@ -3827,6 +3827,16 @@
                                     <p style="color: #666; margin-top: 5px;">${client.submission.business_description}</p>
                                 </div>
                             ` : ''}
+                            
+                            ${client.submission.additional_info ? `
+                                <div style="margin-top: 15px; background: #FFF9E6; padding: 15px; border-radius: 8px; border-left: 4px solid #FFB800;">
+                                    <strong style="color: #B8860B; display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 1.2rem;">💡</span>
+                                        <span>Información adicional importante:</span>
+                                    </strong>
+                                    <p style="color: #666; margin-top: 8px; white-space: pre-wrap;">${client.submission.additional_info}</p>
+                                </div>
+                            ` : ''}
                         </div>
                         
                         <!-- Redes Sociales -->

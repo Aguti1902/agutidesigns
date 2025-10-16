@@ -240,6 +240,17 @@ async function initializeTables() {
             console.log('⚠️ Migración admin_viewed_at en submissions ya aplicada');
         }
 
+        // 🆕 MIGRACIÓN: Agregar campo additional_info para información adicional del cliente
+        try {
+            await client.query(`
+                ALTER TABLE submissions 
+                ADD COLUMN IF NOT EXISTS additional_info TEXT
+            `);
+            console.log('✅ Migración: Campo additional_info añadido a submissions');
+        } catch (e) {
+            console.log('⚠️ Migración additional_info en submissions ya aplicada');
+        }
+
         // 🆕 MIGRACIÓN: Agregar campos para integración con Mailchimp
         try {
             await client.query(`
